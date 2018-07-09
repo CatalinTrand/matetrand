@@ -48,6 +48,14 @@
                 <!-- Right Side Of Navbar -->
                 <ul class="navbar-nav ml-auto">
                     <!-- Authentication Links -->
+                    <form action="language" method="post" style="padding-right: 10px;padding-top: 8px">
+                        <select name="locale" onchange="this.form.submit()">
+                            <option>{{trans('strings.language')}}</option>
+                            <option value="en">English</option>
+                            <option value="ro">Romana</option>
+                        </select>
+                        {{ csrf_field() }}
+                    </form>
                     @guest
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>

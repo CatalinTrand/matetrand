@@ -15,6 +15,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::post('/language',array(
+        'Middleware'=>'LanguageSwitcher',
+        'uses'=>'LanguageController@index'
+));
+
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');

@@ -3,7 +3,6 @@
 @section('content')
     @php
         if(isset($_GET['del'])){
-            echo "heh";
             $id_del = $_GET['del'];
             $user = App\User::all()->find($id_del);
             $user->delete();
@@ -13,7 +12,7 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">Dashboard</div>
+                    <div class="card-header">{{trans('strings.dashboard')}}</div>
 
                     <div class="card-body">
                         @if (session('status'))
@@ -23,13 +22,13 @@
                         @endif
 
                         @if (Auth::user() && Auth::user()->name == 'Super Admin')
-                            <a href="{{ route('register') }}">+ Create a new user +</a>
+                            <a href="{{ route('register') }}">+ {{trans('strings.create_user')}} +</a>
                             <table style="width:100%">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Role</th>
+                                    <th>{{trans('strings.role')}}</th>
                                     <th>Email</th>
-                                    <th>Action</th>
+                                    <th>{{trans('strings.action')}}</th>
                                 </tr>
                                 @php
                                     $users = App\User::all();
@@ -39,14 +38,14 @@
                                         $id = $user->id;
                                         $email = $user->email;
                                         $name = $user->name;
-                                        $table .= "<tr><td>$id</td><td>$name</td><td>$email</td><td><a href='/home?del=$id'>Delete</a></td></tr>";
+                                        $table .= "<tr><td>$id</td><td>$name</td><td>$email</td><td><a href='/home?del=$id'>".trans('strings.delete')."</a></td></tr>";
                                     }
 
                                     echo $table;
                                 @endphp
                             </table>
                         @else
-                            You are logged in!
+                            {{trans('strings.welcome_msg')}}
                         @endif
                     </div>
                 </div>

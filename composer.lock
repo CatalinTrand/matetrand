@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c9ce1bf6d082410a88e94600739b2816",
+    "content-hash": "b0157a3028dd289096c191da32b51623",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1095,6 +1095,46 @@
                 "storage"
             ],
             "time": "2018-05-07T08:44:23+00:00"
+        },
+        {
+            "name": "mikehins/language-switcher",
+            "version": "2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mikehins/language-switcher.git",
+                "reference": "ecde52f2d2d74d56b61adc48598e4f5dffab2b84"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mikehins/language-switcher/zipball/ecde52f2d2d74d56b61adc48598e4f5dffab2b84",
+                "reference": "ecde52f2d2d74d56b61adc48598e4f5dffab2b84",
+                "shasum": ""
+            },
+            "type": "plugin",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "mikehins\\languageswitcher\\LanguageSwitcherServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "mikehins\\languageswitcher\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mike Hins",
+                    "email": "me@mikehins.com"
+                }
+            ],
+            "description": "Create a language switcher for your Laravel 5.5 app, straight from the command line",
+            "time": "2018-02-24T16:02:49+00:00"
         },
         {
             "name": "monolog/monolog",
