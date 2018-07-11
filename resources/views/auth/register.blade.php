@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (Auth::user() && Auth::user()->name == 'Super Admin')
+    @if (Auth::user() && Auth::user()->role == 'Super Admin')
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8">
@@ -13,16 +13,25 @@
                                 @csrf
 
                                 <div class="form-group row">
-                                    <label for="name"
+                                    <label for="role"
                                            class="col-md-4 col-form-label text-md-right">{{ __('User Type') }}</label>
 
                                     <div class="col-md-6">
-                                        <select id="name" type="text" class="form-control" name="name" required
+                                        <select id="role" type="text" class="form-control" name="role" required
                                                 autofocus>
                                             <option>Super Admin</option>
                                             <option>Admin</option>
                                             <option>User</option>
                                         </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="username"
+                                           class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input id="username" type="text" name="username" required>
                                     </div>
                                 </div>
 
