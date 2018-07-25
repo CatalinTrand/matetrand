@@ -36,8 +36,6 @@
         @endif
         <h4>Subject: <b>{{$message->subject}}</b></h4>
         <div class="col-md-6">
-            <label class="control-label">From: {{App\User::where('id','=',$message->user_id)->get()[0]->username." at ($message->created_at)"}}</label>
-            <br><br>
             <!-- Message -->
             <label class="control-label"><p>{{$message->body}}</p></label>
         </div>

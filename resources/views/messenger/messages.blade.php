@@ -27,11 +27,7 @@
                                 {{ session('status') }}
                             </div>
                         @endif
-
-                        <a href="/messages/create">+ Create New Message +</a>
                         <br><br>
-                            <b>Inbox</b><b><a style="padding-left: 10px" href="/messages/sentMessages">Outbox</a></b>
-                            <br><br>
                         @php
                                 function cmp($a, $b){
                                     return strcmp($b->created_at, $a->created_at);
@@ -49,7 +45,6 @@
                                 if(count($messages) > 0){
                                     echo"<table style='width:100%'><tr>
                                             <th>Subject</th>
-                                            <th>From</th>
                                             <th>Date</th>
                                             <th>Action</th>
                                         </tr>";
@@ -61,9 +56,9 @@
                                         $id = $message->id;
 
                                         if($message->opened == 1)
-                                            $table .= "<tr><td><a href='/messages/viewMsg?from=messages&id=$id'>$subject</a></td><td>$from</td><td>$date</td><td><a href='/messages?del=$id'>".trans('strings.delete')."</a></td></tr>";
+                                            $table .= "<tr><td><a href='/messages/viewMsg?from=messages&id=$id'>$subject</a></td><td>$date</td><td><a href='/messages?del=$id'>".trans('strings.delete')."</a></td></tr>";
                                         else
-                                            $table .= "<tr><td><a href='/messages/viewMsg?from=messages&id=$id'><b>$subject</b></a></td><td>$from</td><td>$date</td><td><a href='/messages?del=$id'>".trans('strings.delete')."</a></td></tr>";
+                                            $table .= "<tr><td><a href='/messages/viewMsg?from=messages&id=$id'><b>$subject</b></a></td><td>$date</td><td><a href='/messages?del=$id'>".trans('strings.delete')."</a></td></tr>";
                                     }
                                     echo $table;
                                     echo "</table>";

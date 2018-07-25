@@ -8,6 +8,7 @@ return[
     'action'=>'Actiune',
     'role'=>'Rol',
     'username'=>'Nume user',
+    'messages'=>'Mesagerie',
     'language'=>'Limba',
-    'dashboard'=>'Panou de comanda'
+    'dashboard'=>'Useri'
 ];

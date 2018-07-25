@@ -90,5 +90,8 @@
         @yield('content')
     </main>
 </div>
+<div align="center" style="position:absolute;bottom:0;width:100%">
+    Copyright 2018&copy; Materom
+</div>
 </body>
 </html>

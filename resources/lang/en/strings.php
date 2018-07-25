@@ -8,6 +8,7 @@ return[
     'action'=>'Action',
     'role'=>'Role',
     'username'=>'Username',
+    'messages'=>'Messages',
     'language'=>'Language',
-    'dashboard'=>'Dashboard'
+    'dashboard'=>'Users'
 ];
