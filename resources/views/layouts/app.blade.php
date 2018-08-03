@@ -19,18 +19,35 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <style>
+        .filterForm{
+            padding-left: 20px;
+        }
+        .basicTable a{
+            text-decoration:none;
+            color: black;
+        }
+        .basicTable a:hover{
+            text-decoration:none;
+            color: red;
+        }
+        img.logo{
+            width: 60%;
+            height: 60%;
+        }
+    </style>
 </head>
-<body>
+<body style="font-family: Georgia;font-size: 72%">
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
         <div class="container">
             @guest
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    Materom SRM
+                    <img src="images/logo.png" class="logo">
                 </a>
             @else
                 <a class="navbar-brand" href="{{ url('/home') }}">
-                    Materom SRM
+                    <img src="images/logo.png" class="logo">
                 </a>
             @endguest
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
