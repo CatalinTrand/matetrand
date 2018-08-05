@@ -10,5 +10,7 @@ class WebserviceController extends Controller
     {
         if(Webservice::isValid($token))
             return Webservice::show($id);
+        else
+            return null;
     }
 }

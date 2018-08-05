@@ -13,7 +13,7 @@ class Webservice{
     }
 
     static function isTokenValid($token){
-        $result = DB::select("select value from Tokens where value = '$token'");
+        $result = DB::select("select value from tokens where value = '$token'");
         if(count($result) == 1)
             return true;
 
@@ -23,12 +23,13 @@ class Webservice{
     static function generateToken(){
         $token = substr(base64_encode(md5( mt_rand() )), 0, 99);
         $user = Auth::user()->username;
-        DB::insert("insert into Tokens (value, user) values ('$token','$user')");
+        DB::insert("insert into tokens (value, user) values ('$token','$user')");
         return $token;
     }
 
     static function deleteOldTokens(){
-        
+        $daysOfTokenValidity = -3; //must be negative, ex for 3 days must be -3
+        DB::delete("delete from tokens where created_at < DATEADD(day, $daysOfTokenValidity, GETDATE())");
     }
 
 }
