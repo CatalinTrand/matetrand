@@ -13,12 +13,16 @@
             DB::delete("delete from messages where id = '$id_del'");
         }
     @endphp
-    <div class="container">
+    <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header"><a style="padding-right: 20px"
-                                                href="/home">{{trans('strings.dashboard')}}</a>Messages
+                    <div class="card-header">
+                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Super Admin" ) == 0)
+                            <p class="card-line first"><a href="/roles">Roles</a></p><p class="card-line"><a href="/home">Users</a></p><p class="card-line selector">Messages</p><p class="card-line"><a href="/orders">Comenzi</a></p>
+                        @else
+                            <p class="card-line first selector">Messages</p><p class="card-line"><a href="/orders">Comenzi</a></p>
+                        @endif
                     </div>
 
                     <div class="card-body">
