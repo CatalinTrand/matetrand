@@ -11,6 +11,29 @@
                     <form method="POST" action="{{ route('login') }}" aria-label="{{ __('Login') }}">
                         @csrf
 
+
+                        <div class="form-group row">
+                            <label for="wstest" class="col-sm-4 col-form-label text-md-right">WsTest</label>
+
+                            <div class="col-md-6">
+                                <table><tr><td>
+                                    <input id="wstest" type="input" class="form-control" name="wstest" value="Tasha" required autofocus>
+                                    </td><td><button id="wsbutton">##</button>
+                                </td></tr></table>
+                                <script>
+                                    $(document).ready(function() {
+                                        $("#wstest").focusin(function () {
+                                            $("#wsbutton").show();
+                                        });
+                                        $("#wstest").focusout(function () {
+                                                $("#wsbutton").hide();
+                                            });
+                                    });
+                                </script>
+                            </div>
+                        </div>
+
+
                         <div class="form-group row">
                             <label for="email" class="col-sm-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
 
