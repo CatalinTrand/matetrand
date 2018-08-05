@@ -29,7 +29,7 @@ class Webservice{
 
     static function deleteOldTokens(){
         $daysOfTokenValidity = -3; //must be negative, ex for 3 days must be -3
-        DB::delete("delete from tokens where created_at < DATEADD(day, $daysOfTokenValidity, GETDATE())");
+        DB::delete("delete from tokens where created_at <= DATE_ADD(day, $daysOfTokenValidity, GETDATE())");
     }
 
 }
