@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Materom\webservice;
+namespace Materom\Webservice;
 
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Auth;
@@ -12,8 +12,8 @@ class Webservice{
         return User::where('id', '=', $id)->get();
     }
 
-    static function isTokenValid($token){
-        $result = DB::select("select value from tokens where value = '$token'");
+    static function isTokenValid($wstoken){
+        $result = DB::select("select value from tokens where value = '$wstoken'");
         if(count($result) == 1)
             return true;
 
@@ -29,7 +29,7 @@ class Webservice{
 
     static function deleteOldTokens(){
         $daysOfTokenValidity = -3; //must be negative, ex for 3 days must be -3
-        DB::delete("delete from tokens where created_at <= DATE_ADD(day, $daysOfTokenValidity, GETDATE())");
+        DB::delete("delete from tokens where created_at <= DATE_ADD(NOW(), INTERVAL $daysOfTokenValidity day)");
     }
 
 }

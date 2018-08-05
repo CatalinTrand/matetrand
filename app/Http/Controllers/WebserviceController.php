@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Materom\webservice\Webservice;
+use Materom\Webservice\Webservice;
 
 class WebserviceController extends Controller
 {
-    public function show($id ,$token)
+    public function show($id ,$wstoken)
     {
-        if(Webservice::isValid($token))
+        if(Webservice::isTokenValid($wstoken))
             return Webservice::show($id);
         else
             return null;
