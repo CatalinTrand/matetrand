@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="matetrand">
+  <component name="PublishConfigData">
     <serverData>
-      <paths name="matetrand">
+      <paths name="Local Apache matetrand">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="matetrand" />
+            <mapping deploy="matetrand" local="$PROJECT_DIR$" web="/matetrand" />
           </mappings>
         </serverdata>
       </paths>
