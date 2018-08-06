@@ -18,7 +18,7 @@
                             <p class="card-line"><a href="/messages">Messages</a></p>
                             <p class="card-line selector">Comenzi</p>
                         @else
-                            <p class="card-line first"><a href="/Messages">Messages</a></p>
+                            <p class="card-line first"><a href="/messages">Messages</a></p>
                             <p class="card-line selector">Comenzi</p>
                         @endif
                     </div>
