@@ -19,9 +19,10 @@
                                     <div class="col-md-6">
                                         <select id="role" type="text" class="form-control" name="role" required
                                                 autofocus>
-                                            <option>Super Admin</option>
-                                            <option>Admin</option>
-                                            <option>User</option>
+                                            <option>Administrator</option>
+                                            <option>Furnizor</option>
+                                            <option>Referent</option>
+                                            <option>CTV</option>
                                         </select>
                                     </div>
                                 </div>

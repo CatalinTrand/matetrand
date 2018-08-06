@@ -26,6 +26,32 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
+        html, body{
+            overflow-x: hidden;
+        }
+        .first{
+            margin-left:-20px;
+        }
+        .selector{
+            background-color: white;
+        }
+        .card-line {
+            font-size: 150%;
+            margin-bottom: -12px;
+            margin-top: -12px;
+            line-height: 50px;
+            display: inline-block;
+            border-right: solid #000;
+            border-width: 0 1px;
+            padding-left: 30px;
+            padding-right: 30px
+        }
+        a:link{
+            text-decoration: none;
+        }
+        .card-line:hover{
+            background-color: #eee;
+        }
         .filterForm{
             padding-left: 20px;
         }
@@ -46,7 +72,7 @@
 <body style="font-family: Georgia;font-size: 72%">
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
-        <div class="container">
+        <div class="container-fluid">
             @guest
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="images/logo.png" class="logo">
@@ -109,7 +135,7 @@
         </div>
     </nav>
 
-    <main class="py-4">
+    <main class="py-4" style="width:150%;margin-left:-25%">
         @yield('content')
     </main>
 </div>

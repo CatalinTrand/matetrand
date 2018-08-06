@@ -25,6 +25,8 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::post('webservice/show','WebserviceController@show');
+Route::get('/roles', 'HomeController@roles')->name('roles');
+Route::get('/orders', 'HomeController@orders')->name('orders');
 
 Route::group(['prefix' => 'messages'], function () {
     Route::get('/', ['as' => 'messages', 'uses' => 'MessagesController@index']);
