@@ -27,7 +27,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/orders';
 
     /**
      * Create a new controller instance.
@@ -43,5 +43,10 @@ class LoginController extends Controller
     {
 //        $_SESSION['wstoken'] = Webservice::generateToken();
 //        Webservice::deleteOldTokens();
+    }
+
+    public function username()
+    {
+        return 'id';
     }
 }

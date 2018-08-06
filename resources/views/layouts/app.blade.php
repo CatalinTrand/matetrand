@@ -85,7 +85,7 @@
                     <img src="images/logo.png" class="logo">
                 </a>
             @else
-                <a class="navbar-brand" href="{{ url('/home') }}">
+                <a class="navbar-brand" href="{{ url('/orders') }}">
                     <img src="images/logo.png" class="logo">
                 </a>
             @endguest
