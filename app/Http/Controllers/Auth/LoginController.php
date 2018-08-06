@@ -41,7 +41,7 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
-        $_SESSION['wstoken'] = Webservice::generateToken();
-        Webservice::deleteOldTokens();
+//        $_SESSION['wstoken'] = Webservice::generateToken();
+//        Webservice::deleteOldTokens();
     }
 }
