@@ -21,4 +21,23 @@ class RFCData {
         $this->rfc_passwd = "";
     }
 
+    public function ping() {
+        $parameters = [
+            'ashost' => '/H/91.239.173.2/H/192.168.3.42',
+            'sysnr'  => '00',
+            'client' => '200',
+            'user' => 'cont-test',
+            'passwd' => 'PusulaC'
+        ];
+
+        try {
+            $connection = new \SAPNWRFC\Connection($parameters);
+            $remoteFunction = $connection->getFunction('RFC_PING');
+            $returnValue = $remoteFunction->invoke([]);
+            $connection->close();
+            return "Success " . \SAPNWRFC\Connection::rfcVersion();
+        } catch (\SAPNWRFC\Exception $e) {
+            return $e->getErrorInfo();
+        }
+    }
 }
