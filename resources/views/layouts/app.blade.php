@@ -74,6 +74,10 @@
             padding-right: 10px;
             border-right: 1px solid #000;
         }
+        .edit{
+            padding-right: 15px;
+            margin-left: -25px;
+        }
     </style>
 </head>
 <body style="font-size: 12px">

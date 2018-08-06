@@ -156,7 +156,7 @@
                                         $email = $user->email;
                                         $role = $user->role;
                                         $name = $user->username;
-                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td><a href='/home?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td><img src='images/edit.png' class='edit' onclick='editUser($id);'><a href='/home?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
                                     }
 
                                     echo $table;
