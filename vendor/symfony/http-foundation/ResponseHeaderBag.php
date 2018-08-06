@@ -263,7 +263,7 @@ class ResponseHeaderBag extends HeaderBag
      *
      * @throws \InvalidArgumentException
      *
-     * @see RFC 6266
+     * @see RFCData 6266
      */
     public function makeDisposition($disposition, $filename, $filenameFallback = '')
     {

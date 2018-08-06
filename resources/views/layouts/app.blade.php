@@ -28,6 +28,7 @@
     <style>
         html, body{
             overflow-x: hidden;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
         .first{
             margin-left:-20px;
@@ -75,7 +76,7 @@
         }
     </style>
 </head>
-<body style="font-family: Georgia;font-size: 72%">
+<body style="font-size: 12px">
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
         <div class="container-fluid">

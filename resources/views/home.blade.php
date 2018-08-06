@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (!(Auth::user() && Auth::user()->role == 'Super Admin'))
+    @if (!(Auth::user() && Auth::user()->role == 'Administrator'))
         @php
             header("/");
             exit();
@@ -70,7 +70,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Super Admin" ) == 0)
+                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
                             <p class="card-line first"><a href="/roles">Roles</a></p>
                             <p class="card-line selector">Users</p>
                             <p class="card-line"><a href="/messages">Messages</a></p>
@@ -88,7 +88,7 @@
                             </div>
                         @endif
 
-                        @if (Auth::user() && Auth::user()->role == 'Super Admin')
+                        @if (Auth::user() && Auth::user()->role == 'Administrator')
                             <a href="{{ route('register') }}">+ {{trans('strings.create_user')}} +</a>
                             <br><br>
                             <form method="{{Request::url()}}" method="get" class="filterForm">
@@ -162,7 +162,7 @@
                                     echo $table;
                                 @endphp
                             </table>
-                        @elseif (Auth::user() && Auth::user()->role == 'Admin')
+                        @elseif (Auth::user() && Auth::user()->role == 'Administrator')
                             {{trans('strings.welcome_msg')}}<br>
                             <a href="/messages">Messages</a>
                         @else

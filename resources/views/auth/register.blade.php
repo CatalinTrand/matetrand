@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (Auth::user() && Auth::user()->role == 'Super Admin')
+    @if (Auth::user() && Auth::user()->role == 'Admininistrator')
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8">

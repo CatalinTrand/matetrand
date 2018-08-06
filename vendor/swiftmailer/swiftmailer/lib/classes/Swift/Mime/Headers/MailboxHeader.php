@@ -308,7 +308,7 @@ class Swift_Mime_Headers_MailboxHeader extends Swift_Mime_Headers_AbstractHeader
      *
      * All "specials" must be encoded as the full header value will not be quoted
      *
-     * @see RFC 2822 3.2.1
+     * @see RFCData 2822 3.2.1
      *
      * @param string $token
      *

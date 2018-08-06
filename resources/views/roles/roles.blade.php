@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (!(Auth::user() && Auth::user()->role == 'Super Admin'))
+    @if (!(Auth::user() && Auth::user()->role == 'Administrator'))
         @php
             header("/");
             exit();
         @endphp
     @endif
     @php
-        use App\Materom\Webservice\RFC;
+        use App\Materom\Webservice\RFCData;
         use Illuminate\Support\Facades\DB;
 
         //modify if necessary
@@ -30,25 +30,25 @@
         if($adminData)
             $adminData = $adminData[0];
         else
-            $adminData = new RFC();
+            $adminData = new RFCData();
 
         $referentData = DB::select("select * from roles where rfc_role = 'referent'");
         if($referentData)
             $referentData = $referentData[0];
         else
-            $referentData = new RFC();
+            $referentData = new RFCData();
 
         $furnizorData = DB::select("select * from roles where rfc_role = 'furnizor'");
         if($furnizorData)
             $furnizorData = $furnizorData[0];
         else
-            $furnizorData = new RFC();
+            $furnizorData = new RFCData();
 
         $ctvData = DB::select("select * from roles where rfc_role = 'ctv'");
         if($ctvData)
             $ctvData = $ctvData[0];
         else
-            $ctvData = new RFC();
+            $ctvData = new RFCData();
 
     @endphp
     <div class="container-fluid">
@@ -64,7 +64,7 @@
 
                     <div class="card-body">
                         <div class="row">
-                            <div class="role-card">
+                            <div style="width: 25%;" class="role-card">
                                 <div class="card-header">
                                     Administrator
                                 </div>
@@ -133,7 +133,7 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="role-card">
+                            <div style="width: 25%;" class="role-card">
                                 <div class="card-header">
                                     Furnizor
                                 </div>
@@ -202,7 +202,7 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="role-card">
+                            <div style="width: 25%;" class="role-card">
                                 <div class="card-header">
                                     Referent
                                 </div>
@@ -271,7 +271,7 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="role-card">
+                            <div style="width: 25%;" class="role-card">
                                 <div class="card-header">
                                     CTV
                                 </div>
@@ -343,6 +343,43 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="form-group row">
+            <label for="wstest" class="col-sm-4 col-form-label text-md-right">WsTest</label>
+
+            <div class="col-md-6">
+                <table><tr><td>
+                            <input id="wstest" type="input" class="form-control" name="wstest" value="Tasha" required autofocus>
+                        </td><td><button id="wsbutton" style="display:none;">##</button>
+                        </td></tr></table>
+                <script>
+                    $(document).ready(function() {
+                        $("#wstest").focusin(function () {
+                            $("#wsbutton").show();
+                        });
+                        $("#wstest").focusout(function () {
+                            /* $("#wsbutton").hide(); */
+                        });
+                        $("#wsbutton").click(function() {
+                            $.ajaxSetup({
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                }
+                            });
+                            $.post("webservice/show",
+                                {
+                                    userid: "radu",
+                                    wstoken: "mytoken"
+                                },
+                                function(data, status){
+                                    alert("Data: " + data + "\nStatus: " + status);
+                                });
+                        });
+                    });
+                </script>
             </div>
         </div>
     </div>

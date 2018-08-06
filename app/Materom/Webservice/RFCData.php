@@ -2,7 +2,7 @@
 
 namespace App\Materom\Webservice;
 
-class RFC{
+class RFCData {
 
     public $rfc_role;
     public $rfc_router;
