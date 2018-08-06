@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 class Webservice {
 
     static public function show($id){
+        return "Username: " . Auth::user()->username;
         return User::where('id', '=', $id)->get();
     }
 
@@ -22,10 +23,11 @@ class Webservice {
     }
 
     static public function generateToken(){
-        $token = substr(base64_encode(md5( mt_rand() )), 0, 99);
+//      $token = substr(base64_encode(md5( mt_rand() )), 0, 99);
+        $wstoken = csrf_token();
         $user = Auth::user()->username;
-        DB::insert("insert into tokens (value, user) values ('{$token}','{$user}')");
-        return $token;
+        DB::insert("insert into tokens (value, user, created_at) values ('{$wstoken}','{$user}'), '{{ now() }}'");
+        return $wstoken;
     }
 
     static public function deleteOldTokens(){

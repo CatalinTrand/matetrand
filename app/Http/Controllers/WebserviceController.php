@@ -9,7 +9,8 @@ class WebserviceController extends Controller
 {
     public function show()
     {
-        if(Webservice::isTokenValid(Input::get("token")))
+        return Auth::user()->username;
+        if(Webservice::isTokenValid(Input::get("wstoken")))
             return Webservice::show(Input::get("userid"));
         else
             return null;

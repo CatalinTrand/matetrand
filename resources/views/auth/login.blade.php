@@ -28,17 +28,16 @@
                                         $("#wstest").focusout(function () {
                                                 /* $("#wsbutton").hide(); */
                                             });
-                                        $.ajaxSetup({
-                                            headers: {
-                                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                                            }
-                                        });
                                         $("#wsbutton").click(function() {
-                                            alert("Calling webservice");
+                                            $.ajaxSetup({
+                                                headers: {
+                                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                                }
+                                            });
                                             $.post("webservice/show",
                                                 {
                                                     userid: "radu",
-                                                    token: "tokenradu"
+                                                    wstoken: "mytoken"
                                                 },
                                                 function(data, status){
                                                     alert("Data: " + data + "\nStatus: " + status);
