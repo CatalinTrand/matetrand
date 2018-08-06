@@ -18,7 +18,7 @@
                             <div class="col-md-6">
                                 <table><tr><td>
                                     <input id="wstest" type="input" class="form-control" name="wstest" value="Tasha" required autofocus>
-                                    </td><td><button id="wsbutton">##</button>
+                                    </td><td><button id="wsbutton" style="display:none;">##</button>
                                 </td></tr></table>
                                 <script>
                                     $(document).ready(function() {
@@ -26,8 +26,24 @@
                                             $("#wsbutton").show();
                                         });
                                         $("#wstest").focusout(function () {
-                                                $("#wsbutton").hide();
+                                                /* $("#wsbutton").hide(); */
                                             });
+                                        $.ajaxSetup({
+                                            headers: {
+                                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                            }
+                                        });
+                                        $("#wsbutton").click(function() {
+                                            alert("Calling webservice");
+                                            $.post("webservice/show",
+                                                {
+                                                    userid: "radu",
+                                                    token: "tokenradu"
+                                                },
+                                                function(data, status){
+                                                    alert("Data: " + data + "\nStatus: " + status);
+                                                });
+                                        });
                                     });
                                 </script>
                             </div>

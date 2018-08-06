@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Materom\Webservice\Webservice;
+use Illuminate\Support\Facades\Input;
+use App\Materom\Webservice\Webservice;
 
 class WebserviceController extends Controller
 {
-    public function show($id ,$wstoken)
+    public function show()
     {
-        if(Webservice::isTokenValid($wstoken))
-            return Webservice::show($id);
+        if(Webservice::isTokenValid(Input::get("token")))
+            return Webservice::show(Input::get("userid"));
         else
             return null;
     }
