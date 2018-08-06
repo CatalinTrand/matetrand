@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Materom\Webservice;
+namespace App\Materom;
 
 class RFCData {
 
