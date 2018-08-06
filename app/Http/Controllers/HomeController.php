@@ -35,4 +35,9 @@ class HomeController extends Controller
     {
         return view('roles.roles');
     }
+
+    public function save_roles()
+    {
+        return view('roles.roles');
+    }
 }

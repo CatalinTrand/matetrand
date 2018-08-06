@@ -67,6 +67,12 @@
             width: 60%;
             height: 60%;
         }
+        .role-card{
+            width: 17%;
+            padding-left: 10px;
+            padding-right: 10px;
+            border-right: 1px solid #000;
+        }
     </style>
 </head>
 <body style="font-family: Georgia;font-size: 72%">
