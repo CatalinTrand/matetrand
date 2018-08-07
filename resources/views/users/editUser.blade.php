@@ -98,7 +98,7 @@
                                        class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
 
                                 <div class="col-md-6">
-                                    <input id="username" type="text" name="username" required value="{{$user->username}}">
+                                    <input id="username" type="text" name="username" class="form-control" required value="{{$user->username}}">
                                 </div>
                             </div>
 
