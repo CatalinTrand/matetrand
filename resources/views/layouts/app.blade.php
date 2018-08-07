@@ -5,19 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    @if(false && isset($_SESSION['wstoken']))
-        <input type="hidden" value="{{$_SESSION['wstoken']}}">
-    @endif
-
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Materom SRM</title>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/jquery-3.3.1.min.js') }}"></script>
-    <script src="{{ asset('js/jquery-ui.js') }}"></script>
-    <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/jquery-ui.1.12.1.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('css/jquery-ui.1.12.1.min.css') }}" />
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
@@ -151,7 +147,7 @@
     </main>
 </div>
 <div align="center" style="position:absolute;bottom:0;width:100%">
-    Copyright 2018&copy; Materom
+    Copyright &copy; 2018 by Materom. All rights reserved.
 </div>
 </body>
 </html>

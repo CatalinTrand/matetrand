@@ -8,8 +8,14 @@ use App\Materom\Webservice;
 
 class WebserviceController extends Controller
 {
-    public function show()
+    public function rfcPing()
     {
-        return Webservice::show();
+        return Webservice::rfcPing(Input::get("rfc_router"),
+                                   Input::get("rfc_server"),
+                                   Input::get("rfc_sysnr"),
+                                   Input::get("rfc_client"),
+                                   Input::get("rfc_user"),
+                                   Input::get("rfc_password")
+            );
     }
 }

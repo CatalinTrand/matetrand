@@ -126,7 +126,7 @@
                                             </div>
                                         </div>
                                         <button id="Administrator_test"
-                                                onclick="rfc_ping('administrator');"
+                                                onclick="rfc_ping('a');"
                                                 style="border-top: 4px black;width: 100%;margin-bottom: 10px">Test
                                         </button>
                                         <input type="hidden" name="role" value="administrator">
@@ -347,4 +347,26 @@
             </div>
         </div>
     </div>
+    <script>
+        function rfc_ping(prefix) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.post("webservice/rfcping",
+                {
+                    rfc_router: $("#" + prefix + "rfc_router").val(),
+                    rfc_server: $("#" + prefix + "_rfc_server").val(),
+                    rfc_sysnr: $("#" + prefix + "_rfc_sysnr").val(),
+                    rfc_client: $("#" + prefix + "_rfc_client").val(),
+                    rfc_user: $("#" + prefix + "_rfc_user").val(),
+                    rfc_password: $("#" + prefix + "_rfc_password").val()
+                },
+                function(data, status){
+                    alert("Data: " + data + "\nStatus: " + status);
+                });
+
+        }
+    </script>
 @endsection

@@ -24,7 +24,7 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::post('webservice/show','WebserviceController@show');
+Route::post('webservice/rfcping','WebserviceController@rfcPing');
 
 Route::get('/roles', 'HomeController@roles')->name('roles');
 Route::post('/roles', 'HomeController@save_roles')->name('save_roles');

@@ -18,6 +18,7 @@ class RFCData {
         $this->rfc_server = "";
         $this->rfc_sysnr = "";
         $this->rfc_client = "";
+        $this->rfc_user = "";
         $this->rfc_passwd = "";
     }
 
@@ -35,7 +36,7 @@ class RFCData {
             $remoteFunction = $connection->getFunction('RFC_PING');
             $returnValue = $remoteFunction->invoke([]);
             $connection->close();
-            return "Success " . \SAPNWRFC\Connection::rfcVersion();
+            return "Successfully connected to server using RFC version " . \SAPNWRFC\Connection::rfcVersion();
         } catch (\SAPNWRFC\Exception $e) {
             return $e->getErrorInfo();
         }

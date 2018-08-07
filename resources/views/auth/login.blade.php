@@ -60,4 +60,47 @@
         </div>
     </div>
 </div>
+
+<div id="editform">
+    <form>
+        <fieldset>
+            <label for="name">Name</label>
+            <input type="text" name="myname" id="myname" value="Jane Smith">
+            <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+    </form>
+</div>
+<div class="container">
+    <button id="triggereditform">Display modal form</button>
+    <script>
+        $( function() {
+            var dialog, form;
+            let editform = $("#editform");
+            dialog = editform.dialog({
+                autoOpen: false,
+                height: 400,
+                width: 350,
+                modal: true,
+                buttons: {
+                    "Create an account": function() {},
+                    Cancel: function() {
+                        dialog.dialog( "close" );
+                    }
+                },
+                close: function() {
+                    form[ 0 ].reset();
+                }
+            });
+
+            form = dialog.find( "form" ).on( "submit", function( event ) {
+                event.preventDefault();
+            });
+
+            $( "#triggereditform" ).button().on( "click", function() {
+                dialog.dialog( "open" );
+            });
+        } );
+    </script>
+</div>
+
 @endsection
