@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (Auth::user() && Auth::user()->role == 'Administrator')
+    @if (true) //(Auth::user() && Auth::user()->role == 'Administrator')
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8">
@@ -24,6 +24,15 @@
                                             <option>Referent</option>
                                             <option>CTV</option>
                                         </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="username"
+                                           class="col-md-4 col-form-label text-md-right">User ID</label>
+
+                                    <div class="col-md-6">
+                                        <input id="id" type="text" name="id" required>
                                     </div>
                                 </div>
 
