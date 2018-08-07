@@ -22,7 +22,10 @@ Route::post('/language',array(
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/users', 'HomeController@index')->name('users');
+
+Route::get('/editUser', 'HomeController@editUser')->name('editUser');
+Route::post('/editUser', 'HomeController@save_edit')->name('save_edit');
 
 Route::post('webservice/show','WebserviceController@show');
 
