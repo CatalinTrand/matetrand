@@ -213,24 +213,25 @@
                             <form method="POST" action="/editUser" aria-label="Edit Workflow Follow-up">
                                 @csrf
                                 <font color='green'>{{$msg_wf}}</font>
+                                <div class="row">
+                                    <div class="form-group row" style="width: 80%">
+                                        <label for="username"
+                                               class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
 
-                                <div class="form-group row">
-                                    <label for="username"
-                                           class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
-
-                                    <div class="col-md-6">
-                                        <input id="id_wf" type="text" name="id_wf" class="form-control" required
-                                               value="">
+                                        <div class="col-md-6">
+                                            <input id="id_wf" type="text" name="id_wf" class="form-control" required
+                                                   value="">
+                                        </div>
                                     </div>
-                                </div>
 
-                                <input type="hidden" name="id" value="{{$id}}">
+                                    <input type="hidden" name="id" value="{{$id}}">
 
-                                <div class="form-group row mb-0">
-                                    <div class="col-md-6 offset-md-4">
-                                        <button type="submit" class="btn btn-primary">
-                                            Apply
-                                        </button>
+                                    <div class="form-group row mb-0">
+                                        <div class="col-md-6 offset-md-4">
+                                            <button type="submit" class="btn btn-primary">
+                                                Apply
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -266,7 +267,7 @@
     </div>
     <br>
     <br>
-    <div class="container">
+    <div class="container" style="margin-right: 21.5vw">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
@@ -277,24 +278,25 @@
                         <form method="POST" action="/editUser" aria-label="Edit Refferals">
                             @csrf
                             <font color='green'>{{$msg_ref}}</font>
+                            <div class="row">
+                                <div class="form-group row" style="width: 80%">
+                                    <label for="username"
+                                           class="col-md-4 col-form-label text-md-right">New Refferal ID</label>
 
-                            <div class="form-group row">
-                                <label for="username"
-                                       class="col-md-4 col-form-label text-md-right">New Refferal ID</label>
-
-                                <div class="col-md-6">
-                                    <input id="id_ref" type="text" name="id_ref" class="form-control" required
-                                           value="">
+                                    <div class="col-md-6">
+                                        <input id="id_ref" type="text" name="id_ref" class="form-control" required
+                                               value="">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <input type="hidden" name="id" value="{{$id}}">
+                                <input type="hidden" name="id" value="{{$id}}">
 
-                            <div class="form-group row mb-0">
-                                <div class="col-md-6 offset-md-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        Apply
-                                    </button>
+                                <div class="form-group row mb-0">
+                                    <div class="col-md-6 offset-md-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            Apply
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </form>
