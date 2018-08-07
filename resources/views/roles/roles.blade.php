@@ -57,7 +57,7 @@
                 <div class="card">
                     <div class="card-header">
                         <p class="card-line first selector">Roles</p>
-                        <p class="card-line"><a href="/home">Users</a></p>
+                        <p class="card-line"><a href="/users">Users</a></p>
                         <p class="card-line"><a href="/messages">Messages</a></p>
                         <p class="card-line"><a href="/orders">Comenzi</a></p>
                     </div>

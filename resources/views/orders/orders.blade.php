@@ -14,7 +14,7 @@
                     <div class="card-header">
                         @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
                             <p class="card-line first"><a href="/roles">Roles</a></p>
-                            <p class="card-line"><a href="/home">Users</a></p>
+                            <p class="card-line"><a href="/users">Users</a></p>
                             <p class="card-line"><a href="/messages">Messages</a></p>
                             <p class="card-line selector">Comenzi</p>
                         @else

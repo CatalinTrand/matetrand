@@ -114,19 +114,19 @@
                                     <input type="submit"
                                            style="position: absolute; left: -9999px; width: 1px; height: 1px;"
                                            tabindex="-1"/>
-                                    <a href="/home" style="padding-left: 30px;padding-top: 3px">Reset</a>
+                                    <a href="/users" style="padding-left: 30px;padding-top: 3px">Reset</a>
                                 </div>
                             </form>
                             <table class="basicTable table table-striped" style="width:100%;clear:left;">
                                 <tr>
-                                    <th><a href="/home?sort=ID&val=desc">&#x25BC;</a>ID<a href="/home?sort=ID&val=asc">&#x25B2;</a>
+                                    <th><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a href="/users?sort=ID&val=asc">&#x25B2;</a>
                                     </th>
-                                    <th><a href="/home?sort=role&val=desc">&#x25BC;</a>{{trans('strings.role')}}<a
-                                                href="/home?sort=role&val=asc">&#x25B2;</a></th>
-                                    <th><a href="/home?sort=user&val=desc">&#x25BC;</a>{{trans('strings.username')}}<a
-                                                href="/home?sort=user&val=asc">&#x25B2;</a></th>
-                                    <th><a href="/home?sort=email&val=desc">&#x25BC;</a>Email<a
-                                                href="/home?sort=email&val=asc">&#x25B2;</a></th>
+                                    <th><a href="/users?sort=role&val=desc">&#x25BC;</a>{{trans('strings.role')}}<a
+                                                href="/users?sort=role&val=asc">&#x25B2;</a></th>
+                                    <th><a href="/users?sort=user&val=desc">&#x25BC;</a>{{trans('strings.username')}}<a
+                                                href="/users?sort=user&val=asc">&#x25B2;</a></th>
+                                    <th><a href="/users?sort=email&val=desc">&#x25BC;</a>Email<a
+                                                href="/users?sort=email&val=asc">&#x25B2;</a></th>
                                     <th>{{trans('strings.action')}}</th>
                                 </tr>
                                 @php
@@ -156,7 +156,7 @@
                                         $email = $user->email;
                                         $role = $user->role;
                                         $name = $user->username;
-                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td><img src='images/edit.png' class='edit' onclick='editUser($id);'><a href='/home?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
                                     }
 
                                     echo $table;

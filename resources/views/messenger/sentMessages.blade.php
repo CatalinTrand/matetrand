@@ -18,7 +18,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header"><a style="padding-right: 20px"
-                                                href="/home">{{trans('strings.dashboard')}}</a>Messages
+                                                href="/users">{{trans('strings.dashboard')}}</a>Messages
                     </div>
 
                     <div class="card-body">

@@ -23,7 +23,17 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        return view('users.users');
+    }
+
+    public function editUser()
+    {
+        return view('users.editUser');
+    }
+
+    public function save_edit()
+    {
+        return view('users.editUser');
     }
 
     public function orders()
