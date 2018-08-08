@@ -391,6 +391,7 @@
                 },
                 close: function() {
                     newFollowupForm[ 0 ].reset();
+                    location.replace(location.pathname + "?id=" + followupForUser);
                 },
                 position: {
                     my: 'top',
