@@ -58,36 +58,37 @@
                         <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Comenzi</p></a>
                     </div>
 
-                    <div style="width: 33%;border: 4px black;padding: 10px 10px 10px 10px">
-                        <form method="POST" action="/roles/globalUpdate">
-                            {{ csrf_field() }}
-                            <div class="card-header">
-                                Global RFC Settings
-                            </div>
-                            <div class="row" style="margin-top: 10px">
-                                <div class="form-group row">
-                                    <label for="router"
-                                           class="col-md-6 col-form-label text-md-right">RFC Router</label>
-
-                                    <div class="col-md-6">
-                                        <input id="rfc_router" type="text" name="rfc_router" required
-                                               value="{{$global->rfc_router}}">
-                                    </div>
-                                </div>
-                                <div class="form-group row" style="margin-left: 10px">
-                                    <label for="server"
-                                           class="col-md-6 col-form-label text-md-right">RFC Server</label>
-
-                                    <div class="col-md-6">
-                                        <input id="rfc_server" type="text" name="rfc_server" required
-                                               value="{{$global->rfc_server}}">
-                                    </div>
-                                </div>
-                                <input type="submit" value="Save" style="border-top: 4px black;margin-left: 74px;height: 24px">
-                            </div>
-                        </form>
-                    </div>
                     <div class="card-body">
+                        <div style="width:33%;">
+                            <form method="POST" action="/roles/globalUpdate">
+                                {{ csrf_field() }}
+                                <div class="card-header">
+                                    Global RFC Settings
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group row">
+                                        <label for="router"
+                                               class="col-md-6 col-form-label text-md-right">RFC Router</label>
+
+                                        <div class="col-md-6">
+                                            <input id="rfc_router" type="text" name="rfc_router" required
+                                                   value="{{$global->rfc_router}}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="server"
+                                               class="col-md-6 col-form-label text-md-right">RFC Server</label>
+
+                                        <div class="col-md-6">
+                                            <input id="rfc_server" type="text" name="rfc_server" required
+                                                   value="{{$global->rfc_server}}">
+                                        </div>
+                                    </div>
+                                    <input type="submit" value="Save" style="border-top: 4px black;margin-left: 74px;height: 24px">
+                                </div>
+                            </form>
+                        </div>
+
                         <div class="row">
                             <div style="width: 25%;" class="role-card">
                                 <div class="card-header">
