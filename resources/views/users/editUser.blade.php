@@ -13,6 +13,7 @@
 
         $msg = "";
         $msg_wf = "";
+        $msg_ref = "";
 
         if(isset($_POST['id']))
             $id = $_POST['id'];
@@ -68,7 +69,7 @@
             break;
         }
 
-        //add if needed
+        //followup::add
         if(isset($_POST['id_wf'])){
             $id_wf = $_POST['id_wf'];
 
@@ -84,13 +85,35 @@
             } else $msg_wf = "No such user or user with specified ID is not a verified follow-up!";
         }
 
-        //delete if needed
+        //followup::delete
         if(isset($_GET['delWF'])){
             $delWF = $_GET['delWF'];
             DB::delete("delete from users_wf where id = '$id' and follow_up_id = '$delWF'");
             $msg_wf = "Follow-up deleted!";
         }
 
+        //refferal::add
+        if(isset($_POST['id_ref'])){
+            $id_ref = $_POST['id_ref'];
+
+            $result = DB::select("select * from users where id = '$id_ref'");
+
+            if($result){
+                $find = DB::select("select * from users_ref where id = '$id' and refferal_id = '$id_ref'");
+
+                if(count($find) == 0){
+                    DB::insert("insert into users_ref (id,refferal_id) values ('$id','$id_ref')");
+                    $msg_ref = "Refferal set!";
+                } else $msg_ref = "Entry already exists!";
+            } else $msg_ref = "No such user or user with specified ID is not a verified refferal!";
+        }
+
+        //refferal::delete
+        if(isset($_GET['delREF'])){
+            $delREF = $_GET['delREF'];
+            DB::delete("delete from users_ref where id = '$id' and refferal_id = '$delREF'");
+            $msg_ref = "Refferal deleted!";
+        }
     @endphp
     <div class="row container-fluid">
         <div class="container" style="width: 40%;margin-right: -30vw">
@@ -193,24 +216,25 @@
                             <form method="POST" action="/editUser" aria-label="Edit Workflow Follow-up">
                                 @csrf
                                 <font color='green'>{{$msg_wf}}</font>
+                                <div class="row">
+                                    <div class="form-group row" style="width: 80%">
+                                        <label for="id_wf"
+                                               class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
 
-                                <div class="form-group row">
-                                    <label for="id_wf"
-                                           class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
-
-                                    <div class="col-md-6">
-                                        <input id="id_wf" type="text" name="id_wf" class="form-control" required
-                                               value="">
+                                        <div class="col-md-6">
+                                            <input id="id_wf" type="text" name="id_wf" class="form-control" required
+                                                   value="">
+                                        </div>
                                     </div>
-                                </div>
 
-                                <input type="hidden" name="id" value="{{$id}}">
+                                    <input type="hidden" name="id" value="{{$id}}">
 
-                                <div class="form-group row mb-0">
-                                    <div class="col-md-6 offset-md-4">
-                                        <button type="submit" class="btn btn-primary">
-                                            Apply
-                                        </button>
+                                    <div class="form-group row mb-0">
+                                        <div class="col-md-6 offset-md-4">
+                                            <button type="submit" class="btn btn-primary">
+                                                Apply
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -239,6 +263,70 @@
                                 @endphp
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div class="container" style="margin-right: 21.5vw">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        Edit Refferals
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="/editUser" aria-label="Edit Refferals">
+                            @csrf
+                            <font color='green'>{{$msg_ref}}</font>
+                            <div class="row">
+                                <div class="form-group row" style="width: 80%">
+                                    <label for="username"
+                                           class="col-md-4 col-form-label text-md-right">New Refferal ID</label>
+
+                                    <div class="col-md-6">
+                                        <input id="id_ref" type="text" name="id_ref" class="form-control" required
+                                               value="">
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="id" value="{{$id}}">
+
+                                <div class="form-group row mb-0">
+                                    <div class="col-md-6 offset-md-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            Apply
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <br>
+                        <table class="basicTable table table-striped">
+                            <tr>
+                                <th>
+                                    Refferal ID
+                                </th>
+                                <th>
+                                    Username
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                            @php
+                                $myREFs = DB::select("select * from users_ref where id='$id'");
+                                $table = "";
+                                foreach ($myREFs as $aREF){
+                                    $aUser = App\User::all()->find($aREF->refferal_id);
+                                    if($aUser)
+                                        $table .= "<tr style='line-height: 35px'><td>$aREF->refferal_id</td><td>$aUser->username</td><td><a href='/editUser?delREF=$aREF->refferal_id&id=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                }
+                                echo $table;
+                            @endphp
+                        </table>
                     </div>
                 </div>
             </div>
@@ -294,4 +382,3 @@
     </script>
 
 @endsection
-
