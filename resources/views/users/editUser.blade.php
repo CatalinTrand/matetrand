@@ -337,8 +337,9 @@
     <div id="new-followup-dialog" title="Define new follower">
         <form>
             <fieldset>
-                <label for="new_wf_id" class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
+                <label for="new_wf_id" class="col-md-4 col-form-label text-md-left">New Follow-up ID</label>
                 <input id="new_wf_id" type="text" name="new_wf_id" size="20" style="width: 200px;" class="form-control" required value="">
+                <i id="new_wf_msg" color="red"></i>
             </fieldset>
         </form>
     </div>
@@ -354,7 +355,7 @@
                 width: 400,
                 modal: true,
                 buttons: {
-                    "Create followup ID": function () {
+                    Add: function () {
                         newFollowupDialog.dialog( "close" );
                     },
                     Cancel: function() {
@@ -370,13 +371,16 @@
                     of: $('#followup-workflow-ids-card-body')
                 }
             });
-
+            $("#new_wf_id").on('input', function() {
+                if ($("#new_wf_msg").text() != "") $("#new_wf_msg").text("")
+            });
             newFollowupForm = newFollowupDialog.find( "form" ).on( "submit", function( event ) {
                 event.preventDefault();
             });
         });
 
         function new_workflow_followup_id(userid) {
+            $("#new_wf_msg").text("");
             newFollowupDialog.dialog( "open" );
         }
     </script>
