@@ -24,7 +24,6 @@ class Roles
     {
         DB::delete("delete from roles where rfc_role = '$rfc_role'");
         DB::insert("insert into roles (rfc_role,rfc_user,rfc_passwd) values ('$rfc_role','$rfc_user','$rfc_passwd')");
-        return view('roles.roles');
         return redirect()->to('/roles');
     }
 }
