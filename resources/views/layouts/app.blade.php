@@ -30,7 +30,14 @@
             margin-left:-20px;
         }
         .selector{
-            background-color: white;
+            background-color: rgb(248, 248, 255);
+        }
+
+        .card-header {
+            background-color: rgba(0,0,0,.05);
+        }
+        .card-body{
+            background-color: rgb(248, 248, 255);
         }
         .card-line {
             font-size: 150%;
@@ -47,7 +54,7 @@
             text-decoration: none;
         }
         .card-line:hover{
-            background-color: #eee;
+            background-color: rgb(240,240,255);
         }
         .filterForm{
             padding-left: 20px;
@@ -74,6 +81,24 @@
             padding-right: 15px;
             margin-left: -25px;
         }
+        .ajaxloadermodal {
+            display:    none;
+            position:   fixed;
+            z-index:    1000;
+            top:        0;
+            left:       0;
+            height:     100%;
+            width:      100%;
+            background: rgba( 255, 255, 255, .8 )
+            url("/images/ajax-loader.gif")
+            50% 50%
+            no-repeat;
+        }
+        body.ajaxloading .ajaxloadermodal {
+            overflow: hidden;
+            display: block;
+        }
+
 
         .header-fixed {
             width: 100%
@@ -182,5 +207,16 @@
 <div align="center" style="position:absolute;bottom:0;width:100%">
     Copyright &copy; 2018 by Materom. All rights reserved.
 </div>
+
+<div class="ajaxloadermodal"><!-- ajaxload.info  --></div>
+<script>
+    $(function() {
+        $body = $("body");
+        $(document).on({
+            ajaxStart: function() {$body.addClass("ajaxloading");},
+            ajaxStop: function() {$body.removeClass("ajaxloading"); }
+        });
+    });
+</script>
 </body>
 </html>

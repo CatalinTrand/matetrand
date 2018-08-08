@@ -51,11 +51,11 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">
-                        <p class="card-line first selector">Roles</p>
-                        <p class="card-line"><a href="/users">Users</a></p>
-                        <p class="card-line"><a href="/messages">Messages</a></p>
-                        <p class="card-line"><a href="/orders">Comenzi</a></p>
+                    <div class="card-header" style="border-bottom-width: 0px;">
+                        <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first selector">Roles</p>
+                        <a href="/users"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Users</p></a>
+                        <a href="/messages"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Messages</p></a>
+                        <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Comenzi</p></a>
                     </div>
 
                     <div style="width: 33%;border: 4px black;padding: 10px 10px 10px 10px">
@@ -317,7 +317,8 @@
                     rfc_user: $("#" + prefix + "_rfc_user").val(),
                     rfc_password: $("#" + prefix + "_rfc_password").val()
                 },
-                function (data, status) {
+                function(data, status){
+                    $("body").removeClass("ajaxloading");
                     alert("Data: " + data + "\nStatus: " + status);
                 });
             jQuery.ajaxSetup({async: true});
