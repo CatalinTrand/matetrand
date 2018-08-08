@@ -215,28 +215,6 @@
                         <div id="followup-workflow-ids-card-body" class="card-body">
                             <form method="POST" action="/editUser" aria-label="Edit Workflow Follow-up">
                                 @csrf
-                                <font color='green'>{{$msg_wf}}</font>
-                                <div class="row">
-                                    <div class="form-group row" style="width: 80%">
-                                        <label for="id_wf"
-                                               class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
-
-                                        <div class="col-md-6">
-                                            <input id="id_wf" type="text" name="id_wf" class="form-control" required
-                                                   value="">
-                                        </div>
-                                    </div>
-
-                                    <input type="hidden" name="id" value="{{$id}}">
-
-                                    <div class="form-group row mb-0">
-                                        <div class="col-md-6 offset-md-4">
-                                            <button type="submit" class="btn btn-primary">
-                                                Apply
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
                             </form>
                             <br>
                             <table id="followup-workflow-ids-table" class="basicTable table table-striped">
@@ -280,28 +258,6 @@
                     <div class="card-body">
                         <form method="POST" action="/editUser" aria-label="Edit Refferals">
                             @csrf
-                            <font color='green'>{{$msg_ref}}</font>
-                            <div class="row">
-                                <div class="form-group row" style="width: 80%">
-                                    <label for="username"
-                                           class="col-md-4 col-form-label text-md-right">New Refferal ID</label>
-
-                                    <div class="col-md-6">
-                                        <input id="id_ref" type="text" name="id_ref" class="form-control" required
-                                               value="">
-                                    </div>
-                                </div>
-
-                                <input type="hidden" name="id" value="{{$id}}">
-
-                                <div class="form-group row mb-0">
-                                    <div class="col-md-6 offset-md-4">
-                                        <button type="submit" class="btn btn-primary">
-                                            Apply
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
                         </form>
                         <br>
                         <table class="basicTable table table-striped">
