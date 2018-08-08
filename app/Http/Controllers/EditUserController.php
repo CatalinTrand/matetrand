@@ -13,8 +13,7 @@ class EditUserController
             Input::get("id"),
             Input::get("role"),
             Input::get("username"),
-            Input::get("email"),
-            Input::get("passwd")
+            Input::get("email")
         );
     }
 }
