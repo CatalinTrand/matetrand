@@ -184,15 +184,18 @@
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-header">
-                            Edit Workflow Follow-up
+                            <table width="100%"><tr>
+                                    <td width="90%">Edit Workflow Follow-up</td>
+                                    <td align="right"><button id="new-followup-button" type="button" onclick="new_workflow_followup_id('{{$id}}');return false;">New</button></td>
+                            </tr></table>
                         </div>
-                        <div class="card-body">
+                        <div id="followup-workflow-ids-card-body" class="card-body">
                             <form method="POST" action="/editUser" aria-label="Edit Workflow Follow-up">
                                 @csrf
                                 <font color='green'>{{$msg_wf}}</font>
 
                                 <div class="form-group row">
-                                    <label for="username"
+                                    <label for="id_wf"
                                            class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
 
                                     <div class="col-md-6">
@@ -212,7 +215,7 @@
                                 </div>
                             </form>
                             <br>
-                            <table class="basicTable table table-striped">
+                            <table id="followup-workflow-ids-table" class="basicTable table table-striped">
                                 <tr>
                                     <th>
                                         Follow-up ID
@@ -241,4 +244,54 @@
             </div>
         </div>
     </div>
+
+//  Adding a new follow-up ID
+    <div id="new-followup-dialog" title="Define new follower">
+        <form>
+            <fieldset>
+                <label for="new_wf_id" class="col-md-4 col-form-label text-md-right">New Follow-up ID</label>
+                <input id="new_wf_id" type="text" name="new_wf_id" size="20" style="width: 200px;" class="form-control" required value="">
+            </fieldset>
+        </form>
+    </div>
+
+
+    <script>
+
+        var newFollowupDialog, newFollowupForm;
+        $( function() {
+            newFollowupDialog = $( "#new-followup-dialog" ).dialog({
+                autoOpen: false,
+                height: 200,
+                width: 400,
+                modal: true,
+                buttons: {
+                    "Create followup ID": function () {
+                        newFollowupDialog.dialog( "close" );
+                    },
+                    Cancel: function() {
+                        newFollowupDialog.dialog( "close" );
+                    }
+                },
+                close: function() {
+                    newFollowupForm[ 0 ].reset();
+                },
+                position: {
+                    my: 'top',
+                    at: 'middle',
+                    of: $('#followup-workflow-ids-card-body')
+                }
+            });
+
+            newFollowupForm = newFollowupDialog.find( "form" ).on( "submit", function( event ) {
+                event.preventDefault();
+            });
+        });
+
+        function new_workflow_followup_id(userid) {
+            newFollowupDialog.dialog( "open" );
+        }
+    </script>
+
 @endsection
+

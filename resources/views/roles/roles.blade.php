@@ -125,8 +125,8 @@
                                                        value="{{$adminData->rfc_passwd}}">
                                             </div>
                                         </div>
-                                        <button id="Administrator_test"
-                                                onclick="rfc_ping('a');"
+                                        <button type="button" id="Administrator_test"
+                                                onclick="rfc_ping('a');return false;"
                                                 style="border-top: 4px black;width: 100%;margin-bottom: 10px">Test
                                         </button>
                                         <input type="hidden" name="role" value="administrator">
@@ -354,6 +354,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
+            jQuery.ajaxSetup({async:true});
             $.post("webservice/rfcping",
                 {
                     rfc_router: $("#" + prefix + "rfc_router").val(),
@@ -366,7 +367,7 @@
                 function(data, status){
                     alert("Data: " + data + "\nStatus: " + status);
                 });
-
+            jQuery.ajaxSetup({async:true});
         }
     </script>
 @endsection
