@@ -26,6 +26,7 @@ Route::get('/users', 'HomeController@index')->name('users');
 
 Route::get('/editUser', 'HomeController@editUser')->name('editUser');
 Route::post('/editUser', 'HomeController@save_edit')->name('save_edit');
+Route::post('/editUser/edit','EditUserController@editUsers');
 
 Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertfollowupuser','WebserviceController@insertFollowupID');
