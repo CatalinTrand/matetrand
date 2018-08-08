@@ -20,24 +20,6 @@
         else
             $id = $_GET['id'];
 
-        //modify if needed
-        if(isset($_POST['role'])){
-            $role = $_POST['role'];
-            $user = $_POST['username'];
-            $email = $_POST['email'];
-
-            DB::update("update users set role = '$role', username = '$user', email = '$email' where id = '$id'");
-
-            if(isset($_POST['password'])){
-                $passwd = $_POST['password'];
-                $hash = \Illuminate\Support\Facades\Hash::make($passwd);
-
-                DB::update("update users set password = '$hash' where id = '$id'");
-            }
-
-            $msg = "Changes saved!";
-        }
-
         //load user data
         $users = DB::select("select * from users where id='$id'");
 
@@ -125,7 +107,7 @@
                         </div>
 
                         <div class="card-body">
-                            <form method="POST" action="/editUser" aria-label="Edit User">
+                            <form method="POST" action="/editUser/edit" aria-label="Edit User">
                                 @csrf
                                 <font color='green'>{{$msg}}</font>
                                 <div class="form-group row">
@@ -241,7 +223,7 @@
                                     foreach ($myIDs as $anID){
                                         $aUser = App\User::all()->find($anID->follow_up_id);
                                         if($aUser)
-                                            $table .= "<tr style='line-height: 35px'><td>$anID->follow_up_id</td><td>$aUser->username</td><td><a href='/editUser?delWF=$anID->follow_up_id&id=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                            $table .= "<tr style='line-height: 35px'><td>$anID->follow_up_id</td><td>$aUser->username</td><td><a href='/editUser?delWF=$anID->follow_up_id&id=$id'><img src='/images/delete.png' class='delete'></a></td></tr>";
                                     }
                                     echo $table;
                                 @endphp
@@ -293,7 +275,7 @@
                                 foreach ($myREFs as $aREF){
                                     $aUser = App\User::all()->find($aREF->refferal_id);
                                     if($aUser)
-                                        $table .= "<tr style='line-height: 35px'><td>$aREF->refferal_id</td><td>$aUser->username</td><td><a href='/editUser?delREF=$aREF->refferal_id&id=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                        $table .= "<tr style='line-height: 35px'><td>$aREF->refferal_id</td><td>$aUser->username</td><td><a href='/editUser?delREF=$aREF->refferal_id&id=$id'><img src='/images/delete.png' class='delete'></a></td></tr>";
                                 }
                                 echo $table;
                             @endphp
