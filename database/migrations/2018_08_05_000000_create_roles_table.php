@@ -14,11 +14,9 @@ class CreateRolesTable extends Migration
     public function up()
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->string('rfc_role');
-            $table->string('rfc_sysnr');
-            $table->string('rfc_client');
-            $table->string('rfc_user');
-            $table->string('rfc_passwd');
+            $table->string('rfc_role', 20)->unique();
+            $table->string('rfc_user', 12);
+            $table->string('rfc_passwd', 12);
         });
     }
 

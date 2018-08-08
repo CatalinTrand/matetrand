@@ -4,21 +4,15 @@ namespace App\Materom;
 
 class RFCData {
 
-    public $rfc_role;
-    public $rfc_sysnr;
-    public $rfc_client;
     public $rfc_user;
     public $rfc_passwd;
 
     public function __construct() {
-        $this->rfc_role = "";
-        $this->rfc_sysnr = "";
-        $this->rfc_client = "";
         $this->rfc_user = "";
         $this->rfc_passwd = "";
     }
 
-    public function ping() {
+    public function ping($rfc_router, $rfc_server, $rfc_sysnr, $rfc_client) {
         $parameters = [
             'ashost' => '/H/91.239.173.2/H/192.168.3.42',
             'sysnr'  => '00',

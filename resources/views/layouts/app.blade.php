@@ -22,10 +22,12 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
-        html, body{
+        html, body {
             overflow-x: hidden;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            line-height: 1;
         }
+
         .first{
             margin-left:-20px;
         }
@@ -99,7 +101,12 @@
             display: block;
         }
 
-
+        .background-image-save {
+            background-image:url('/images/icons8-save-64.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center left;
+        }
         .header-fixed {
             width: 100%
         }
@@ -130,6 +137,16 @@
         .header-fixed > thead > tr > th {
             width: 33%;
             float: left;
+        }
+
+        .spaced-input {
+            height: 1.2rem;
+            padding-left: 0.2rem;
+        }
+        .spaced-label {
+            padding-left: 1.2rem;
+            padding-top: 0.2rem;
+            margin-bottom: 0rem;
         }
 
     </style>
