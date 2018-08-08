@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRolesTable extends Migration
+class CreateGlobalRfcConfigTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,9 @@ class CreateRolesTable extends Migration
      */
     public function up()
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->string('rfc_role');
-            $table->string('rfc_sysnr');
-            $table->string('rfc_client');
-            $table->string('rfc_user');
-            $table->string('rfc_passwd');
+        Schema::create('global_rfc_config', function (Blueprint $table) {
+            $table->string('rfc_router');
+            $table->string('rfc_server');
         });
     }
 
@@ -29,6 +26,6 @@ class CreateRolesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('global_rfc_config');
     }
 }

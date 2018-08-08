@@ -9,21 +9,8 @@
     @endif
     @php
         use App\Materom\RFCData;
+        use App\Materom\globalRFCData;
         use Illuminate\Support\Facades\DB;
-
-        //modify if necessary
-        if(isset($_POST['role'])){
-            $role = $_POST['role'];
-            $router = $_POST['rfc_router'];
-            $server = $_POST['rfc_server'];
-            $sysnr = $_POST['rfc_sysnr'];
-            $client = $_POST['rfc_client'];
-            $user = $_POST['rfc_user'];
-            $passwd = $_POST['rfc_passwd'];
-
-            DB::delete("delete from roles where rfc_role = '$role'");
-            DB::insert("insert into roles (rfc_role,rfc_router,rfc_server,rfc_sysnr,rfc_client,rfc_user,rfc_passwd) values ('$role','$router','$server','$sysnr','$client','$user','$passwd')");
-        }
 
         //load configuration from the database
         $adminData = DB::select("select * from roles where rfc_role = 'administrator'");
@@ -50,6 +37,15 @@
         else
             $ctvData = new RFCData();
 
+        $global = DB::select("select * from global_rfc_config");
+        if($global)
+            $global = $global[0];
+        else{
+            $global = new globalRFCData();
+        }
+
+
+
     @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -62,6 +58,35 @@
                         <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Comenzi</p></a>
                     </div>
 
+                    <div style="width: 33%;border: 4px black;padding: 10px 10px 10px 10px">
+                        <form method="POST" action="/roles/globalUpdate">
+                            {{ csrf_field() }}
+                            <div class="card-header">
+                                Global RFC Settings
+                            </div>
+                            <div class="row" style="margin-top: 10px">
+                                <div class="form-group row">
+                                    <label for="router"
+                                           class="col-md-6 col-form-label text-md-right">RFC Router</label>
+
+                                    <div class="col-md-6">
+                                        <input id="rfc_router" type="text" name="rfc_router" required
+                                               value="{{$global->rfc_router}}">
+                                    </div>
+                                </div>
+                                <div class="form-group row" style="margin-left: 10px">
+                                    <label for="server"
+                                           class="col-md-6 col-form-label text-md-right">RFC Server</label>
+
+                                    <div class="col-md-6">
+                                        <input id="rfc_server" type="text" name="rfc_server" required
+                                               value="{{$global->rfc_server}}">
+                                    </div>
+                                </div>
+                                <input type="submit" value="Save" style="border-top: 4px black;margin-left: 74px;height: 24px">
+                            </div>
+                        </form>
+                    </div>
                     <div class="card-body">
                         <div class="row">
                             <div style="width: 25%;" class="role-card">
@@ -69,26 +94,8 @@
                                     Administrator
                                 </div>
                                 <div class="card-body">
-                                    <form method="POST" action="/roles">
+                                    <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
-                                        <div class="form-group row">
-                                            <label for="router"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Router</label>
-
-                                            <div class="col-md-6">
-                                                <input id="a_rfc_router" type="text" name="rfc_router" required
-                                                       value="{{$adminData->rfc_router}}">
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label for="server"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Server</label>
-
-                                            <div class="col-md-6">
-                                                <input id="a_rfc_server" type="text" name="rfc_server" required
-                                                       value="{{$adminData->rfc_server}}">
-                                            </div>
-                                        </div>
                                         <div class="form-group row">
                                             <label for="sysnr"
                                                    class="col-md-4 col-form-label text-md-right">RFC Sysnr</label>
@@ -139,26 +146,8 @@
                                     Furnizor
                                 </div>
                                 <div class="card-body">
-                                    <form method="POST" action="/roles">
+                                    <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
-                                        <div class="form-group row">
-                                            <label for="router"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Router</label>
-
-                                            <div class="col-md-6">
-                                                <input id="f_rfc_router" type="text" name="rfc_router" required
-                                                       value="{{$furnizorData->rfc_router}}">
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label for="server"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Server</label>
-
-                                            <div class="col-md-6">
-                                                <input id="f_rfc_server" type="text" name="rfc_server" required
-                                                       value="{{$furnizorData->rfc_server}}">
-                                            </div>
-                                        </div>
                                         <div class="form-group row">
                                             <label for="sysnr"
                                                    class="col-md-4 col-form-label text-md-right">RFC Sysnr</label>
@@ -208,26 +197,8 @@
                                     Referent
                                 </div>
                                 <div class="card-body">
-                                    <form method="POST" action="/roles">
+                                    <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
-                                        <div class="form-group row">
-                                            <label for="router"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Router</label>
-
-                                            <div class="col-md-6">
-                                                <input id="r_rfc_router" type="text" name="rfc_router" required
-                                                       value="{{$referentData->rfc_router}}">
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label for="server"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Server</label>
-
-                                            <div class="col-md-6">
-                                                <input id="r_rfc_server" type="text" name="rfc_server" required
-                                                       value="{{$referentData->rfc_server}}">
-                                            </div>
-                                        </div>
                                         <div class="form-group row">
                                             <label for="sysnr"
                                                    class="col-md-4 col-form-label text-md-right">RFC Sysnr</label>
@@ -277,26 +248,8 @@
                                     CTV
                                 </div>
                                 <div class="card-body">
-                                    <form method="POST" action="/roles">
+                                    <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
-                                        <div class="form-group row">
-                                            <label for="router"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Router</label>
-
-                                            <div class="col-md-6">
-                                                <input id="c_rfc_router" type="text" name="rfc_router" required
-                                                       value="{{$ctvData->rfc_router}}">
-                                            </div>
-                                        </div>
-                                        <div class="form-group row">
-                                            <label for="server"
-                                                   class="col-md-4 col-form-label text-md-right">RFC Server</label>
-
-                                            <div class="col-md-6">
-                                                <input id="c_rfc_server" type="text" name="rfc_server" required
-                                                       value="{{$ctvData->rfc_server}}">
-                                            </div>
-                                        </div>
                                         <div class="form-group row">
                                             <label for="sysnr"
                                                    class="col-md-4 col-form-label text-md-right">RFC Sysnr</label>
@@ -354,7 +307,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            jQuery.ajaxSetup({async:false});
+            jQuery.ajaxSetup({async: false});
             $.post("webservice/rfcping",
                 {
                     rfc_router: $("#" + prefix + "rfc_router").val(),
@@ -368,7 +321,7 @@
                     $("body").removeClass("ajaxloading");
                     alert("Data: " + data + "\nStatus: " + status);
                 });
-            jQuery.ajaxSetup({async:true});
+            jQuery.ajaxSetup({async: true});
         }
     </script>
 @endsection
