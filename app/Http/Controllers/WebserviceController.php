@@ -27,4 +27,12 @@ class WebserviceController extends Controller
         );
     }
 
+    public function insertRefferalID()
+    {
+        return Webservice::insertRefferalID(
+            Input::get("user_id"),
+            Input::get("refferal_id")
+        );
+    }
+
 }

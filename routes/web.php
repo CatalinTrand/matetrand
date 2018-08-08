@@ -29,6 +29,10 @@ Route::post('/editUser', 'HomeController@save_edit')->name('save_edit');
 
 Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertfollowupuser','WebserviceController@insertFollowupID');
+Route::post('webservice/insertrefferaluser','WebserviceController@insertRefferalID');
+
+Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
+Route::post('/roles/roleUpdate','RolesController@insertRoleData');
 
 Route::get('/roles', 'HomeController@roles')->name('roles');
 Route::post('/roles', 'HomeController@save_roles')->name('save_roles');

@@ -205,19 +205,25 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="card">
+                    <div class="card" style="height: 250px">
                         <div class="card-header">
-                            <table width="100%"><tr>
+                            <table width="100%">
+                                <tr>
                                     <td width="90%">Edit Workflow Follow-up</td>
-                                    <td align="right"><button id="new-followup-button" type="button" onclick="new_workflow_followup_id('{{$id}}');return false;">New</button></td>
-                            </tr></table>
+                                    <td align="right">
+                                        <button id="new-followup-button" type="button"
+                                                onclick="new_workflow_followup_id('{{$id}}');return false;">New
+                                        </button>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
-                        <div id="followup-workflow-ids-card-body" class="card-body">
+                        <div id="followup-workflow-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
                             <form method="POST" action="/editUser" aria-label="Edit Workflow Follow-up">
                                 @csrf
                             </form>
                             <br>
-                            <table id="followup-workflow-ids-table" class="basicTable table table-striped">
+                            <table id="followup-workflow-ids-table" class="basicTable table table-striped" style="margin-top: -20px">
                                 <tr>
                                     <th>
                                         Follow-up ID
@@ -248,15 +254,24 @@
     </div>
     <br>
     <br>
-    <div class="container" style="margin-right: 21.5vw">
+    <div class="container" style="margin-right: 21.5vw;margin-top: -6vw">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
+                <div class="card" style="height: 250px">
                     <div class="card-header">
-                        Edit Refferals
+                        <table width="100%">
+                            <tr>
+                                <td width="90%">Edit Refferals</td>
+                                <td align="right">
+                                    <button id="new-refferal-button" type="button"
+                                            onclick="new_refferal_id('{{$id}}');return false;">New
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
-                    <div class="card-body">
-                        <form method="POST" action="/editUser" aria-label="Edit Refferals">
+                    <div id="refferal-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                        <form method="POST" action="/editUser" aria-label="Edit Refferals" style="margin-top: -20px">
                             @csrf
                         </form>
                         <br>
@@ -291,7 +306,7 @@
 
     <script>
         // Register ENTER as popup default button
-        $( function() {
+        $(function () {
             $('body').on('keypress', '.ui-dialog', function (event) {
                 if (event.keyCode === $.ui.keyCode.ENTER) {
                     $('.ui-dialog-buttonpane button:first', $(this)).click();
@@ -307,7 +322,8 @@
             <br>
             <div class="form-group row" style="width: 80%">
                 <label for="new_wf_id" class="col-md-4 col-form-label text-md-left">Follower ID</label>
-                <input id="new_wf_id" type="text" name="new_wf_id" size="20" style="width: 200px;" class="form-control col-md-6" required value="">
+                <input id="new_wf_id" type="text" name="new_wf_id" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
             </div>
             <i id="new_wf_msg" style="color: red"></i>
         </form>
@@ -318,7 +334,7 @@
 
         var followupForUser, newFollowupDialog, newFollowupForm;
         var followUpData, followUpStatus;
-        $( function() {
+        $(function () {
             newFollowupDialog = $("#new-followup-dialog").dialog({
                 autoOpen: false,
                 height: 200,
@@ -331,34 +347,32 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             }
                         });
-                        jQuery.ajaxSetup({async:false});
+                        jQuery.ajaxSetup({async: false});
                         $.post("webservice/insertfollowupuser",
                             {
                                 user_id: followupForUser,
                                 followup_user_id: $("#new_wf_id").val()
                             },
-                            function(data, status){
-                              followUpData = data;
-                              followUpStatus = status;
+                            function (data, status) {
+                                followUpData = data;
+                                followUpStatus = status;
                             });
-                        jQuery.ajaxSetup({async:true});
-
-                        // alert("followUpStatus = " + followUpStatus + ", followUpData = " + followUpData)
+                        jQuery.ajaxSetup({async: true});
 
                         if (followUpStatus == "success" && followUpData == "")
-                            newFollowupDialog.dialog( "close" );
+                            newFollowupDialog.dialog("close");
                         else {
                             if (followUpData != "")
                                 $("#new_wf_msg").text(followUpData);
                             else $("#new_wf_msg").text("An error occured checking/creating the follower");
                         }
                     },
-                    Cancel: function() {
-                        newFollowupDialog.dialog( "close" );
+                    Cancel: function () {
+                        newFollowupDialog.dialog("close");
                     }
                 },
-                close: function() {
-                    newFollowupForm[ 0 ].reset();
+                close: function () {
+                    newFollowupForm[0].reset();
                     location.replace(location.pathname + "?id=" + followupForUser);
                 },
                 position: {
@@ -367,10 +381,10 @@
                     of: $('#followup-workflow-ids-card-body')
                 }
             });
-            $("#new_wf_id").on('input', function() {
+            $("#new_wf_id").on('input', function () {
                 if ($("#new_wf_msg").text() != "") $("#new_wf_msg").text("")
             });
-            newFollowupForm = newFollowupDialog.find( "form" ).on( "submit", function( event ) {
+            newFollowupForm = newFollowupDialog.find("form").on("submit", function (event) {
                 event.preventDefault();
             });
         });
@@ -379,7 +393,88 @@
             $("#new_wf_msg").text("");
             $("#new-followup-dialog").dialog('option', 'title', 'Define new follower for ' + userid);
             followupForUser = userid;
-            newFollowupDialog.dialog( "open" );
+            newFollowupDialog.dialog("open");
+        }
+    </script>
+
+    //  Adding a new refferal ID
+    <div id="new-refferal-dialog" title="Define new refferal">
+        <form>
+            <br>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_ref_id" class="col-md-4 col-form-label text-md-left">Refferal ID</label>
+                <input id="new_ref_id" type="text" name="new_ref_id" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <i id="new_ref_msg" style="color: red"></i>
+        </form>
+    </div>
+
+
+    <script>
+
+        var refferalForUser, newRefferalDialog, newRefferalForm;
+        var refferalData, refferalStatus;
+        $(function () {
+            newRefferalDialog = $("#new-refferal-dialog").dialog({
+                autoOpen: false,
+                height: 200,
+                width: 400,
+                modal: true,
+                buttons: {
+                    Add: function () {
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        $.post("webservice/insertrefferaluser",
+                            {
+                                user_id: refferalForUser,
+                                refferal_id: $("#new_ref_id").val()
+                            },
+                            function (data, status) {
+                                refferalData = data;
+                                refferalStatus = status;
+                            });
+                        jQuery.ajaxSetup({async: true});
+
+                        if (refferalStatus == "success" && refferalData == "")
+                            newRefferalDialog.dialog("close");
+                        else {
+                            if (refferalData != "")
+                                $("#new_ref_msg").text(refferalData);
+                            else $("#new_ref_msg").text("An error occured checking/creating the refferal");
+                        }
+                    },
+                    Cancel: function () {
+                        newRefferalDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    newRefferalForm[0].reset();
+                    location.replace(location.pathname + "?id=" + refferalForUser);
+                },
+                position: {
+                    my: 'top',
+                    at: 'middle',
+                    of: $('#refferal-ids-card-body')
+                }
+            });
+            $("#new_ref_id").on('input', function () {
+                if ($("#new_ref_msg").text() != "") $("#new_ref_msg").text("")
+            });
+            newRefferalForm = newRefferalDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
+        function new_refferal_id(userid) {
+            $("#new_ref_msg").text("");
+            $("#new-refferal-dialog").dialog('option', 'title', 'Define new refferal for ' + userid);
+            refferalForUser = userid;
+            newRefferalDialog.dialog("open");
         }
     </script>
 

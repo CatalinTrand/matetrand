@@ -24,4 +24,15 @@ class Webservice {
             } else return "Follower already defined for this user";
         } else return "This user ID does not exist";
     }
+
+    static public function insertRefferalID($userid, $refferalid) {
+        $result = DB::select("select * from users where id = '" . $refferalid . "'");
+        if ($result){
+            $find = DB::select("select * from users_ref where id = '" . $userid ."' and refferal_id = '" . $refferalid . "'");
+            if (count($find) == 0){
+                DB::insert("insert into users_ref (id, refferal_id) values ('" . $userid . "','" . $refferalid . "')");
+                return "";
+            } else return "Refferal already defined for this user";
+        } else return "This user ID does not exist";
+    }
 }
