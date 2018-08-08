@@ -333,7 +333,19 @@
         </div>
     </div>
 
-//  Adding a new follow-up ID
+    <script>
+        // Register ENTER as popup default button
+        $( function() {
+            $('body').on('keypress', '.ui-dialog', function (event) {
+                if (event.keyCode === $.ui.keyCode.ENTER) {
+                    $('.ui-dialog-buttonpane button:first', $(this)).click();
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    //  Adding a new follow-up ID
     <div id="new-followup-dialog" title="Define new follower">
         <form>
             <br>
@@ -341,7 +353,7 @@
                 <label for="new_wf_id" class="col-md-4 col-form-label text-md-left">Follower ID</label>
                 <input id="new_wf_id" type="text" name="new_wf_id" size="20" style="width: 200px;" class="form-control col-md-6" required value="">
             </div>
-            <i id="new_wf_msg" color="red"></i>
+            <i id="new_wf_msg" style="color: red"></i>
         </form>
     </div>
 
