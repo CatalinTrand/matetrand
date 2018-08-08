@@ -9,11 +9,11 @@
     @endif
 
     @php
-        use Illuminate\Support\Facades\DB;
-
         $msg = "";
         $msg_wf = "";
         $msg_ref = "";
+
+        use Illuminate\Support\Facades\DB;
 
         if(isset($_POST['id']))
             $id = $_POST['id'];
@@ -51,43 +51,11 @@
             break;
         }
 
-        //followup::add
-        if(isset($_POST['id_wf'])){
-            $id_wf = $_POST['id_wf'];
-
-            $result = DB::select("select * from users where id = '$id_wf'");
-
-            if($result){
-                $find = DB::select("select * from users_wf where id = '$id' and follow_up_id = '$id_wf'");
-
-                if(count($find) == 0){
-                    DB::insert("insert into users_wf (id,follow_up_id) values ('$id','$id_wf')");
-                    $msg_wf = "Follow-up set!";
-                } else $msg_wf = "Entry already exists!";
-            } else $msg_wf = "No such user or user with specified ID is not a verified follow-up!";
-        }
-
         //followup::delete
         if(isset($_GET['delWF'])){
             $delWF = $_GET['delWF'];
             DB::delete("delete from users_wf where id = '$id' and follow_up_id = '$delWF'");
             $msg_wf = "Follow-up deleted!";
-        }
-
-        //refferal::add
-        if(isset($_POST['id_ref'])){
-            $id_ref = $_POST['id_ref'];
-
-            $result = DB::select("select * from users where id = '$id_ref'");
-
-            if($result){
-                $find = DB::select("select * from users_ref where id = '$id' and refferal_id = '$id_ref'");
-
-                if(count($find) == 0){
-                    DB::insert("insert into users_ref (id,refferal_id) values ('$id','$id_ref')");
-                    $msg_ref = "Refferal set!";
-                } else $msg_ref = "Entry already exists!";
-            } else $msg_ref = "No such user or user with specified ID is not a verified refferal!";
         }
 
         //refferal::delete
@@ -147,23 +115,6 @@
                                         @if ($errors->has('email'))
                                             <span class="invalid-feedback" role="alert">
                                         <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label for="password"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
-
-                                    <div class="col-md-6">
-                                        <input id="password" type="password"
-                                               class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}"
-                                               name="password">
-
-                                        @if ($errors->has('password'))
-                                            <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $errors->first('password') }}</strong>
                                     </span>
                                         @endif
                                     </div>
@@ -236,7 +187,7 @@
     </div>
     <br>
     <br>
-    <div class="container" style="margin-right: 21.5vw;margin-top: -6vw">
+    <div class="container" style="margin-right: 21.2vw;margin-top: -2vw">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card" style="height: 250px">
