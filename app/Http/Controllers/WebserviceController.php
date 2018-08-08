@@ -18,4 +18,13 @@ class WebserviceController extends Controller
                                    Input::get("rfc_password")
             );
     }
+
+    public function insertFollowupID()
+    {
+        return Webservice::insertFollowupID(
+            Input::get("user_id"),
+            Input::get("followup_user_id")
+        );
+    }
+
 }

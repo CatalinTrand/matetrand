@@ -13,4 +13,15 @@ class Webservice {
         return (new RFCData())->ping($rfc_router, $rfc_server, $rfc_sysnr,
                                      $rfc_client, $rfc_user, $rfc_password);
     }
+
+    static public function insertFollowupID($userid, $followupid) {
+        $result = DB::select("select * from users where id = '" . $followupid . "'");
+        if ($result){
+            $find = DB::select("select * from users_wf where id = '" . $userid ."' and follow_up_id = '" . $followupid . "'");
+            if (count($find) == 0){
+                DB::insert("insert into users_wf (id, follow_up_id) values ('" . $userid . "','" . $followupid . "')");
+                return "";
+            } else return "Follower already defined for this user";
+        } else return "This user ID does not exist";
+    }
 }

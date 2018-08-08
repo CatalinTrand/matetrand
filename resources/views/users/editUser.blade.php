@@ -336,27 +336,54 @@
 //  Adding a new follow-up ID
     <div id="new-followup-dialog" title="Define new follower">
         <form>
-            <fieldset>
-                <label for="new_wf_id" class="col-md-4 col-form-label text-md-left">New Follow-up ID</label>
-                <input id="new_wf_id" type="text" name="new_wf_id" size="20" style="width: 200px;" class="form-control" required value="">
-                <i id="new_wf_msg" color="red"></i>
-            </fieldset>
+            <br>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_wf_id" class="col-md-4 col-form-label text-md-left">Follower ID</label>
+                <input id="new_wf_id" type="text" name="new_wf_id" size="20" style="width: 200px;" class="form-control col-md-6" required value="">
+            </div>
+            <i id="new_wf_msg" color="red"></i>
         </form>
     </div>
 
 
     <script>
 
-        var newFollowupDialog, newFollowupForm;
+        var followupForUser, newFollowupDialog, newFollowupForm;
+        var followUpData, followUpStatus;
         $( function() {
-            newFollowupDialog = $( "#new-followup-dialog" ).dialog({
+            newFollowupDialog = $("#new-followup-dialog").dialog({
                 autoOpen: false,
                 height: 200,
                 width: 400,
                 modal: true,
                 buttons: {
                     Add: function () {
-                        newFollowupDialog.dialog( "close" );
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async:false});
+                        $.post("webservice/insertfollowupuser",
+                            {
+                                user_id: followupForUser,
+                                followup_user_id: $("#new_wf_id").val()
+                            },
+                            function(data, status){
+                              followUpData = data;
+                              followUpStatus = status;
+                            });
+                        jQuery.ajaxSetup({async:true});
+
+                        // alert("followUpStatus = " + followUpStatus + ", followUpData = " + followUpData)
+
+                        if (followUpStatus == "success" && followUpData == "")
+                            newFollowupDialog.dialog( "close" );
+                        else {
+                            if (followUpData != "")
+                                $("#new_wf_msg").text(followUpData);
+                            else $("#new_wf_msg").text("An error occured checking/creating the follower");
+                        }
                     },
                     Cancel: function() {
                         newFollowupDialog.dialog( "close" );
@@ -381,6 +408,8 @@
 
         function new_workflow_followup_id(userid) {
             $("#new_wf_msg").text("");
+            $("#new-followup-dialog").dialog('option', 'title', 'Define new follower for ' + userid);
+            followupForUser = userid;
             newFollowupDialog.dialog( "open" );
         }
     </script>

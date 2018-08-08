@@ -354,7 +354,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            jQuery.ajaxSetup({async:true});
+            jQuery.ajaxSetup({async:false});
             $.post("webservice/rfcping",
                 {
                     rfc_router: $("#" + prefix + "rfc_router").val(),
