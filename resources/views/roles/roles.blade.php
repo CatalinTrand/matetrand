@@ -55,11 +55,11 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">
-                        <p class="card-line first selector">Roles</p>
-                        <p class="card-line"><a href="/users">Users</a></p>
-                        <p class="card-line"><a href="/messages">Messages</a></p>
-                        <p class="card-line"><a href="/orders">Comenzi</a></p>
+                    <div class="card-header" style="border-bottom-width: 0px;">
+                        <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first selector">Roles</p>
+                        <a href="/users"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Users</p></a>
+                        <a href="/messages"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Messages</p></a>
+                        <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Comenzi</p></a>
                     </div>
 
                     <div class="card-body">
@@ -365,6 +365,7 @@
                     rfc_password: $("#" + prefix + "_rfc_password").val()
                 },
                 function(data, status){
+                    $("body").removeClass("ajaxloading");
                     alert("Data: " + data + "\nStatus: " + status);
                 });
             jQuery.ajaxSetup({async:true});

@@ -69,15 +69,15 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header" style="border-bottom-width: 0px;">
                         @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
-                            <p class="card-line first"><a href="/roles">Roles</a></p>
-                            <p class="card-line selector">Users</p>
-                            <p class="card-line"><a href="/messages">Messages</a></p>
-                            <p class="card-line"><a href="/orders">Comenzi</a></p>
+                            <a href="/roles"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">Roles</p></a>
+                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line selector">Users</p>
+                            <a href="/messages"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Messages</p></a>
+                            <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Comenzi</p></a>
                         @else
-                            <p class="card-line first">Messages</p>
-                            <p class="card-line"><a href="/orders">Comenzi</a></p>
+                            <p style="display: inline-block;" class="card-line first">Messages</p>
+                            <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Comenzi</p></a>
                         @endif
                     </div>
 
