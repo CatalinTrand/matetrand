@@ -52,6 +52,30 @@
             break;
         }
 
+        $selectedEN = "";
+        $selectedRO = "";
+
+        switch ($user->lang){
+            case 'EN':
+                $selectedEN = "selected";
+            break;
+            case 'RO':
+                $selectedRO = "selected";
+            break;
+        }
+
+        $selectedON = "";
+        $selectedOFF = "";
+
+        switch ($user->active){
+            case 1:
+                $selectedON = "selected";
+            break;
+            case 0:
+                $selectedOFF = "selected";
+            break;
+        }
+
         //followup::delete
         if(isset($_GET['delWF'])){
             $delWF = $_GET['delWF'];
@@ -127,6 +151,45 @@
                                         <strong>{{ $errors->first('email') }}</strong>
                                     </span>
                                         @endif
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="lang"
+                                           class="col-md-4 col-form-label text-md-right">Language</label>
+
+                                    <div class="col-md-6">
+                                        <select id="lang" type="text" class="form-control" name="lang" required
+                                                autofocus>
+                                            <option {{$selectedEN}}>EN</option>
+                                            <option {{$selectedRO}}>RO</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="lang"
+                                           class="col-md-4 col-form-label text-md-right">Language</label>
+
+                                    <div class="col-md-6">
+                                        <select id="lang" type="text" class="form-control" name="lang" required
+                                                autofocus>
+                                            <option {{$selectedEN}}>EN</option>
+                                            <option {{$selectedRO}}>RO</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="active"
+                                           class="col-md-4 col-form-label text-md-right">Language</label>
+
+                                    <div class="col-md-6">
+                                        <select id="active" type="text" class="form-control" name="active" required
+                                                autofocus>
+                                            <option {{$selectedON}}>Active</option>
+                                            <option {{$selectedOFF}}>Inactive</option>
+                                        </select>
                                     </div>
                                 </div>
 

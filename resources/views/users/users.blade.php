@@ -97,7 +97,7 @@
                                         <input type="text" class="form-control input-sm" name="id" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black">
                                     </div>
-                                    <div class="form-group col-sm-2 input-group-sm">
+                                    <div class="form-group col-xs-2 input-group-sm">
                                         <input type="text" class="form-control input-sm" name="role" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black;margin-left: 10px">
                                     </div>
@@ -127,6 +127,9 @@
                                                 href="/users?sort=user&val=asc">&#x25B2;</a></th>
                                     <th><a href="/users?sort=email&val=desc">&#x25BC;</a>Email<a
                                                 href="/users?sort=email&val=asc">&#x25B2;</a></th>
+                                    <th>
+                                        Language
+                                    </th>
                                     <th>{{trans('strings.action')}}</th>
                                 </tr>
                                 @php
@@ -156,7 +159,8 @@
                                         $email = $user->email;
                                         $role = $user->role;
                                         $name = $user->username;
-                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td><button style='margin-right:40px;margin-left:-80px' id='new-password-button' type='button' onclick='change_user_password(\"$id\");return false;'>Change Password</button><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                        $lang = $user->lang;
+                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td><button style='margin-right:40px;margin-left:-80px' id='new-password-button' type='button' onclick='change_user_password(\"$id\");return false;'>Change Password</button><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
                                     }
 
                                     echo $table;
@@ -217,7 +221,7 @@
                 width: 550,
                 modal: true,
                 buttons: {
-                    Add: function () {
+                    Change: function () {
                         $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')

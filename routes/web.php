@@ -20,6 +20,8 @@ Route::post('/language',array(
         'uses'=>'LanguageController@index'
 ));
 
+Route::post('/users/{lang}', 'HomeController@setDefault($lang)');
+
 Auth::routes();
 
 Route::get('/users', 'HomeController@index')->name('users');
