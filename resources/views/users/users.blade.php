@@ -130,6 +130,9 @@
                                     <th>
                                         Language
                                     </th>
+                                    <th>
+                                        Status
+                                    </th>
                                     <th>{{trans('strings.action')}}</th>
                                 </tr>
                                 @php
@@ -160,7 +163,12 @@
                                         $role = $user->role;
                                         $name = $user->username;
                                         $lang = $user->lang;
-                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td><button style='margin-right:40px;margin-left:-80px' id='new-password-button' type='button' onclick='change_user_password(\"$id\");return false;'>Change Password</button><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+
+                                        $active = "Active";
+                                        if($user->active == 0)
+                                            $active = "Inactive";
+
+                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td><td><button style='margin-right:40px;margin-left:-80px' id='new-password-button' type='button' onclick='change_user_password(\"$id\");return false;'>Change Password</button><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
                                     }
 
                                     echo $table;
