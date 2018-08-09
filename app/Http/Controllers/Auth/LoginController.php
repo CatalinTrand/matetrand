@@ -55,7 +55,9 @@ class LoginController extends Controller
 
     public function getIfActive($id){
         $user = DB::select("select * from users where id = '".$id['id']."'");
-        return $user[0]->active;
+        if (!$user) return 0;
+        if (strcmp($user[0]->active,'0') == 0) return 0;
+        return 1;
     }
 
     public function sendFailedLoginResponse()
