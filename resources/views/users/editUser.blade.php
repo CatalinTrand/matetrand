@@ -168,21 +168,8 @@
                                 </div>
 
                                 <div class="form-group row">
-                                    <label for="lang"
-                                           class="col-md-4 col-form-label text-md-right">Language</label>
-
-                                    <div class="col-md-6">
-                                        <select id="lang" type="text" class="form-control" name="lang" required
-                                                autofocus>
-                                            <option {{$selectedEN}}>EN</option>
-                                            <option {{$selectedRO}}>RO</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
                                     <label for="active"
-                                           class="col-md-4 col-form-label text-md-right">Language</label>
+                                           class="col-md-4 col-form-label text-md-right">Status</label>
 
                                     <div class="col-md-6">
                                         <select id="active" type="text" class="form-control" name="active" required
