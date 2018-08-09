@@ -10,7 +10,11 @@ class EditUsers{
             $active = 1;
         else
             $active = 0;
-        DB::update("update users set role = '$role', username = '$user', email = '$email', lang = '$lang', active = '$active' where id = '$id'");
+
+        if($active == 1)
+            DB::update("update users set role = '$role', username = '$user', email = '$email', lang = '$lang', active = '$active', deleted_at = null where id = '$id'");
+        else
+            DB::update("update users set role = '$role', username = '$user', email = '$email', lang = '$lang', active = '$active', deleted_at = NOW() where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");
         return redirect()->back();
