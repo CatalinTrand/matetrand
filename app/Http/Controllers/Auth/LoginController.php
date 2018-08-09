@@ -58,6 +58,12 @@ class LoginController extends Controller
         return $user[0]->active;
     }
 
+    public function sendFailedLoginResponse()
+    {
+        \Session::put("alert-danger", "User or password is incorrect. Please correct and retry.");
+        return redirect()->back();
+    }
+
     public function username()
     {
         return 'id';

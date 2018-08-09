@@ -12,7 +12,8 @@ class EditUsers{
             $active = 0;
         DB::update("update users set role = '$role', username = '$user', email = '$email', lang = '$lang', active = '$active' where id = '$id'");
 
-        return view('users.editUser');
+        \Session::put("alert-success", "User data was successfully saved");
+        return redirect()->back();
 
     }
 }
