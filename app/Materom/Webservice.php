@@ -35,4 +35,12 @@ class Webservice {
             } else return "Refferal already defined for this user";
         } else return "This user ID does not exist";
     }
+
+    static public function insertVendorID($userid, $lifnr, $matkl, $mfrnr) {
+        $find = DB::select("select * from users_sel where id = '$userid' and lifnr = '$lifnr' and matkl = '$matkl' and mfrnr = '$mfrnr'");
+        if (count($find) == 0){
+            DB::insert("insert into users_sel (id, lifnr, matkl, mfrnr) values ('$userid','$lifnr','$matkl','$mfrnr')");
+            return "";
+        } else return "Vendor already defined for this user";
+    }
 }

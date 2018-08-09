@@ -31,6 +31,7 @@ Route::post('/editUser/edit','EditUserController@editUsers');
 Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertfollowupuser','WebserviceController@insertFollowupID');
 Route::post('webservice/insertrefferaluser','WebserviceController@insertRefferalID');
+Route::post('webservice/insertvendoruser','WebserviceController@insertVendorID');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');

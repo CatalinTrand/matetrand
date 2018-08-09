@@ -35,4 +35,14 @@ class WebserviceController extends Controller
         );
     }
 
+    public function insertVendorID()
+    {
+        return Webservice::insertVendorID(
+            Input::get("user_id"),
+            Input::get("lifnr"),
+            Input::get("matkl"),
+            Input::get("mfrnr")
+        );
+    }
+
 }
