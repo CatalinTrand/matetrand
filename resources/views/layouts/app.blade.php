@@ -156,11 +156,11 @@
     <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
         <div class="container-fluid">
             @guest
-                <a class="navbar-brand" href="{{ url('/') }}">
+                <a class="navbar-brand" href="{{ url('http://www.materom.ro') }}">
                     <img src="images/logo.png" class="logo">
                 </a>
             @else
-                <a class="navbar-brand" href="{{ url('/orders') }}">
+                <a class="navbar-brand" href="{{ url('http://www.materom.ro') }}">
                     <img src="images/logo.png" class="logo">
                 </a>
             @endguest
@@ -216,6 +216,20 @@
             </div>
         </div>
     </nav>
+    @foreach (['danger', 'info', 'warning', 'success'] as $msg)
+        @if (\Session::has('alert-' . $msg))
+            <div class="alert alert-{{ $msg }}"><b class="blinking-text">{!! \Session::pull('alert-'.$msg) !!}</b></div>
+        @endif
+    @endforeach
+    <script>
+        $(function(){
+            $('div.alert').not('.alert-danger').delay(3000).fadeOut(500);
+            $('div.alert').on('click', function () {$(this).fadeOut(100);});
+            (function blink_alert_text() {
+                $('.blinking-text').fadeOut(500).fadeIn(500, blink_alert_text);
+            })();
+        });
+    </script>
 
     <main class="py-4" style="width:150%;margin-left:-25%">
         @yield('content')

@@ -43,6 +43,12 @@ class LoginController extends Controller
     {
     }
 
+    public function sendFailedLoginResponse()
+    {
+        \Session::put("alert-danger", "User or password is incorrect. Please correct and retry.");
+        return redirect()->back();
+    }
+
     public function username()
     {
         return 'id';
