@@ -3,11 +3,17 @@
 namespace App\Materom;
 use Illuminate\Support\Facades\DB;
 
-class EditUsers {
-    static function editUser($id,$role,$user,$email){
+class EditUsers{
+    static function editUser($id,$role,$user,$lang,$active,$email){
 
-        DB::update("update users set role = '$role', username = '$user', email = '$email' where id = '$id'");
+        if(strcmp($active,"Active") == 0)
+            $active = 1;
+        else
+            $active = 0;
+        DB::update("update users set role = '$role', username = '$user', email = '$email', lang = '$lang', active = '$active' where id = '$id'");
+
         \Session::put("alert-success", "User data was successfully saved");
         return redirect()->back();
+
     }
 }

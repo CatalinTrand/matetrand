@@ -12,6 +12,7 @@
         $msg = "";
         $msg_wf = "";
         $msg_ref = "";
+        $msg_sel = "";
 
         use Illuminate\Support\Facades\DB;
 
@@ -51,6 +52,30 @@
             break;
         }
 
+        $selectedEN = "";
+        $selectedRO = "";
+
+        switch ($user->lang){
+            case 'EN':
+                $selectedEN = "selected";
+            break;
+            case 'RO':
+                $selectedRO = "selected";
+            break;
+        }
+
+        $selectedON = "";
+        $selectedOFF = "";
+
+        switch ($user->active){
+            case 1:
+                $selectedON = "selected";
+            break;
+            case 0:
+                $selectedOFF = "selected";
+            break;
+        }
+
         //followup::delete
         if(isset($_GET['delWF'])){
             $delWF = $_GET['delWF'];
@@ -63,6 +88,15 @@
             $delREF = $_GET['delREF'];
             DB::delete("delete from users_ref where id = '$id' and refferal_id = '$delREF'");
             $msg_ref = "Refferal deleted!";
+        }
+
+        //vendor::delete
+        if(isset($_GET['lifnrDEL'])){
+            $lifnr = $_GET['lifnrDEL'];
+            $matkl = $_GET['matklDEL'];
+            $mfrnr = $_GET['mfrnrDEL'];
+            DB::delete("delete from users_sel where id = '$id' and lifnr = '$lifnr' and matkl = '$matkl' and mfrnr = '$mfrnr'");
+            $msg_sel = "Refferal deleted!";
         }
     @endphp
     <div class="row container-fluid">
@@ -117,6 +151,45 @@
                                         <strong>{{ $errors->first('email') }}</strong>
                                     </span>
                                         @endif
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="lang"
+                                           class="col-md-4 col-form-label text-md-right">Language</label>
+
+                                    <div class="col-md-6">
+                                        <select id="lang" type="text" class="form-control" name="lang" required
+                                                autofocus>
+                                            <option {{$selectedEN}}>EN</option>
+                                            <option {{$selectedRO}}>RO</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="lang"
+                                           class="col-md-4 col-form-label text-md-right">Language</label>
+
+                                    <div class="col-md-6">
+                                        <select id="lang" type="text" class="form-control" name="lang" required
+                                                autofocus>
+                                            <option {{$selectedEN}}>EN</option>
+                                            <option {{$selectedRO}}>RO</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="active"
+                                           class="col-md-4 col-form-label text-md-right">Language</label>
+
+                                    <div class="col-md-6">
+                                        <select id="active" type="text" class="form-control" name="active" required
+                                                autofocus>
+                                            <option {{$selectedON}}>Active</option>
+                                            <option {{$selectedOFF}}>Inactive</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -227,6 +300,57 @@
                                     $aUser = App\User::all()->find($aREF->refferal_id);
                                     if($aUser)
                                         $table .= "<tr style='line-height: 35px'><td>$aREF->refferal_id</td><td>$aUser->username</td><td><a href='/editUser?delREF=$aREF->refferal_id&id=$id'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                }
+                                echo $table;
+                            @endphp
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin-right: 21.2vw;margin-top: 0.6vw">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card" style="height: 250px">
+                    <div class="card-header">
+                        <table width="100%">
+                            <tr>
+                                <td width="90%">Edit Vendors</td>
+                                <td align="right">
+                                    <button id="new-vendor-button" type="button"
+                                            onclick="new_vendor_id('{{$id}}');return false;">New
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="vendor-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                        <form method="POST" action="/editUser" aria-label="Edit Vendors" style="margin-top: -20px">
+                            @csrf
+                        </form>
+                        <br>
+                        <table class="basicTable table table-striped">
+                            <tr>
+                                <th>
+                                    Vendor
+                                </th>
+                                <th>
+                                    Mat. group
+                                </th>
+                                <th>
+                                    Producer
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                            @php
+                                $mySELs = DB::select("select * from users_sel where id='$id'");
+                                $table = "";
+                                foreach ($mySELs as $aSEL){
+                                        $table .= "<tr style='line-height: 35px'><td>$aSEL->lifnr</td><td>$aSEL->matkl</td><td>$aSEL->mfrnr</td><td><a href='/editUser?id=$id&lifnrDEL=$aSEL->lifnr&matklDEL=$aSEL->matkl&mfrnrDEL=$aSEL->mfrnr'><img src='/images/delete.png' class='delete'></a></td></tr>";
                                 }
                                 echo $table;
                             @endphp
@@ -408,6 +532,99 @@
             $("#new-refferal-dialog").dialog('option', 'title', 'Define new refferal for ' + userid);
             refferalForUser = userid;
             newRefferalDialog.dialog("open");
+        }
+    </script>
+
+    //  Adding a new vendor ID
+    <div id="new-vendor-dialog" title="Define new vendor">
+        <form>
+            <br>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_sel_id" class="col-md-4 col-form-label text-md-left">Vendor ID</label>
+                <input id="new_sel_id" type="text" name="new_sel_id" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_matkl" class="col-md-4 col-form-label text-md-left">Mat. Group</label>
+                <input id="new_matkl" type="text" name="new_matkl" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_mfrnr" class="col-md-4 col-form-label text-md-left">Producer</label>
+                <input id="new_mfrnr" type="text" name="new_mfrnr" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <i id="new_sel_msg" style="color: red"></i>
+        </form>
+    </div>
+
+
+    <script>
+
+        var vendorForUser, newVendorDialog, newVendorForm;
+        var vendorData, vendorStatus;
+        $(function () {
+            newVendorDialog = $("#new-vendor-dialog").dialog({
+                autoOpen: false,
+                height: 260,
+                width: 400,
+                modal: true,
+                buttons: {
+                    Add: function () {
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        $.post("webservice/insertvendoruser",
+                            {
+                                user_id: vendorForUser,
+                                lifnr: $("#new_sel_id").val(),
+                                matkl: $("#new_matkl").val(),
+                                mfrnr: $("#new_mfrnr").val()
+                            },
+                            function (data, status) {
+                                vendorData = data;
+                                vendorStatus = status;
+                            });
+                        jQuery.ajaxSetup({async: true});
+
+                        if (vendorStatus == "success" && vendorData == "")
+                            newVendorDialog.dialog("close");
+                        else {
+                            if (vendorData != "")
+                                $("#new_sel_msg").text(followUpData);
+                            else $("#new_sel_msg").text("An error occured checking/creating the follower");
+                        }
+                    },
+                    Cancel: function () {
+                        newVendorDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    newVendorForm[0].reset();
+                    location.replace(location.pathname + "?id=" + vendorForUser);
+                },
+                position: {
+                    my: 'top',
+                    at: 'middle',
+                    of: $('#vendor-ids-card-body')
+                }
+            });
+            $("#new_sel_id").on('input', function () {
+                if ($("#new_sel_msg").text() != "") $("#new_sel_msg").text("")
+            });
+            newVendorForm = newVendorDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
+        function new_vendor_id(userid) {
+            $("#new_sel_msg").text("");
+            $("#new-vendor-dialog").dialog('option', 'title', 'Define new vendor for ' + userid);
+            vendorForUser = userid;
+            newVendorDialog.dialog("open");
         }
     </script>
 

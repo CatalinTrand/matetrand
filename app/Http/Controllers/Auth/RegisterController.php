@@ -55,6 +55,7 @@ class RegisterController extends Controller
             'username' => 'required|string|max:20',
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|min:6|confirmed',
+            'lang' => 'required|string|max:2|min:2',
         ]);
     }
 
@@ -70,6 +71,8 @@ class RegisterController extends Controller
             'id' => $data['id'],
             'role' => $data['role'],
             'username' => $data['username'],
+            'lang' => $data['lang'],
+            'active' => $data['active'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'created_at' => Carbon::now()->getTimestamp()

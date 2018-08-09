@@ -35,4 +35,21 @@ class WebserviceController extends Controller
         );
     }
 
+    public function insertVendorID()
+    {
+        return Webservice::insertVendorID(
+            Input::get("user_id"),
+            Input::get("lifnr"),
+            Input::get("matkl"),
+            Input::get("mfrnr")
+        );
+    }
+
+    public function changePassword(){
+        return Webservice::changePassword(
+            Input::get("user_id"),
+            Input::get("new_password")
+        );
+    }
+
 }

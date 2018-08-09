@@ -97,11 +97,11 @@
                                         <input type="text" class="form-control input-sm" name="id" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black">
                                     </div>
-                                    <div class="form-group col-sm-2 input-group-sm">
+                                    <div class="form-group col-xs-2 input-group-sm">
                                         <input type="text" class="form-control input-sm" name="role" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black;margin-left: 10px">
                                     </div>
-                                    <div class="form-group col-sm-3 input-group-sm">
+                                    <div class="form-group col-sm-2 input-group-sm">
                                         <input type="text" class="form-control input-sm" name="user" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black; margin-left: 20px">
                                     </div>
@@ -127,6 +127,9 @@
                                                 href="/users?sort=user&val=asc">&#x25B2;</a></th>
                                     <th><a href="/users?sort=email&val=desc">&#x25BC;</a>Email<a
                                                 href="/users?sort=email&val=asc">&#x25B2;</a></th>
+                                    <th>
+                                        Language
+                                    </th>
                                     <th>{{trans('strings.action')}}</th>
                                 </tr>
                                 @php
@@ -156,7 +159,8 @@
                                         $email = $user->email;
                                         $role = $user->role;
                                         $name = $user->username;
-                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                        $lang = $user->lang;
+                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td><button style='margin-right:40px;margin-left:-80px' id='new-password-button' type='button' onclick='change_user_password(\"$id\");return false;'>Change Password</button><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
                                     }
 
                                     echo $table;
@@ -174,4 +178,102 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Register ENTER as popup default button
+        $(function () {
+            $('body').on('keypress', '.ui-dialog', function (event) {
+                if (event.keyCode === $.ui.keyCode.ENTER) {
+                    $('.ui-dialog-buttonpane button:first', $(this)).click();
+                    return false;
+                }
+            });
+        });
+    </script>
+
+    //  Adding a new password
+    <div id="new-password-dialog" title="Change user password">
+        <form>
+            <br>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_password" class="col-md-4 col-form-label text-md-left">New Password</label>
+                <input id="new_password" type="password" name="new_password" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <div class="form-group row" style="width: 80%">
+                <label for="conf_password" class="col-md-4 col-form-label text-md-left">Confirm Password</label>
+                <input id="conf_password" type="password" name="conf_password" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <i id="new_password_msg" style="color: red"></i>
+        </form>
+    </div>
+
+
+    <script>
+
+        var idForUser, newPasswordDialog, newPasswordForm;
+        var passwordData, passwordStatus;
+        $(function () {
+            newPasswordDialog = $("#new-password-dialog").dialog({
+                autoOpen: false,
+                height: 200,
+                width: 550,
+                modal: true,
+                buttons: {
+                    Change: function () {
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        $.post("webservice/changepassword",
+                            {
+                                user_id: idForUser,
+                                new_password: $("#new_password").val()
+                            },
+                            function (data, status) {
+                                passwordData = data;
+                                passwordStatus = status;
+                            });
+                        jQuery.ajaxSetup({async: true});
+
+                        if (passwordStatus == "success" && passwordData == "")
+                            newPasswordDialog.dialog("close");
+                        else {
+                            if (passwordData != "")
+                                $("#new_password_msg").text(passwordData);
+                            else $("#new_password_msg").text("An error occured updating the password");
+                        }
+                    },
+                    Cancel: function () {
+                        newPasswordDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    newPasswordForm[0].reset();
+                    location.replace(location.pathname + "?id=" + passwordUser);
+                },
+                position: {
+                    my:'center',
+                    of:'center',
+                    collison:'fit'
+                }
+            });
+            $("#new_password").on('input', function () {
+                if ($("#new_password_msg").text() != "") $("#new_password_msg").text("")
+            });
+            newPasswordForm = newPasswordDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
+        function change_user_password(userid) {
+            $("#new_password_msg").text("");
+            $("#new-password-dialog").dialog('option', 'title', 'Change password for ' + userid);
+            idForUser = userid;
+            newPasswordDialog.dialog("open");
+        }
+    </script>
 @endsection

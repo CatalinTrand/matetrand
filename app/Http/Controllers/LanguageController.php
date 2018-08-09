@@ -22,4 +22,9 @@ class LanguageController extends Controller
         } return
             Redirect::back();
     }
+
+    public function setDefault($locale){
+        Session::put('locale', $locale);
+        return Redirect::to('/orders');
+    }
 }
