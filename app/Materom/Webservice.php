@@ -5,6 +5,7 @@ namespace App\Materom;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class Webservice {
 
@@ -42,5 +43,11 @@ class Webservice {
             DB::insert("insert into users_sel (id, lifnr, matkl, mfrnr) values ('$userid','$lifnr','$matkl','$mfrnr')");
             return "";
         } else return "Vendor already defined for this user";
+    }
+
+    static public function changePassword($userid, $newPass){
+        $hash = Hash::make($newPass);
+        DB::update("update users set password = '$hash' where id = '$userid'");
+        return "";
     }
 }

@@ -45,4 +45,11 @@ class WebserviceController extends Controller
         );
     }
 
+    public function changePassword(){
+        return Webservice::changePassword(
+            Input::get("user_id"),
+            Input::get("new_password")
+        );
+    }
+
 }
