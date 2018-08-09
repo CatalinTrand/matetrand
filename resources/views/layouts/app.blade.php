@@ -157,11 +157,11 @@
         <div class="container-fluid">
             @guest
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="images/logo.png" class="logo">
+                    <img src="/images/logo.png" class="logo">
                 </a>
             @else
                 <a class="navbar-brand" href="{{ url('/orders') }}">
-                    <img src="images/logo.png" class="logo">
+                    <img src="/images/logo.png" class="logo">
                 </a>
             @endguest
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

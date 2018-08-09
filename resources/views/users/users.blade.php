@@ -101,7 +101,7 @@
                                         <input type="text" class="form-control input-sm" name="role" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black;margin-left: 10px">
                                     </div>
-                                    <div class="form-group col-sm-3 input-group-sm">
+                                    <div class="form-group col-sm-2 input-group-sm">
                                         <input type="text" class="form-control input-sm" name="user" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black; margin-left: 20px">
                                     </div>
