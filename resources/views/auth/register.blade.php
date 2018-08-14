@@ -5,7 +5,7 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="card">
+                    <div class="card input-group input-group-lg">
                         <div class="card-header"><a style="padding-right: 20px" href="/users">&larr; Back</a>{{ __('Register Panel') }}</div>
 
                         <div class="card-body">
@@ -32,7 +32,7 @@
                                            class="col-md-4 col-form-label text-md-right">User ID</label>
 
                                     <div class="col-md-6">
-                                        <input id="id" type="text" name="id" required>
+                                        <input class="form-control" id="id" type="text" name="id" required>
                                     </div>
                                 </div>
 
@@ -41,7 +41,25 @@
                                            class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
 
                                     <div class="col-md-6">
-                                        <input id="username" type="text" name="username" required>
+                                        <input class="form-control" id="username" type="text" name="username" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="lifnr"
+                                           class="col-md-4 col-form-label text-md-right">Vendor</label>
+
+                                    <div class="col-md-6">
+                                        <input class="form-control" id="lifnr" type="text" name="lifnr" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="ekgrp"
+                                           class="col-md-4 col-form-label text-md-right">Purchasing group</label>
+
+                                    <div class="col-md-6">
+                                        <input class="form-control" id="ekgrp" type="text" name="ekgrp" required>
                                     </div>
                                 </div>
 
