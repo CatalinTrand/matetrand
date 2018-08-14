@@ -215,7 +215,7 @@
                         <div class="card-header">
                             <table width="100%">
                                 <tr>
-                                    <td width="90%">Edit Vendors</td>
+                                    <td width="90%">Branduri</td>
                                     <td align="right">
                                         <button id="new-vendor-button" type="button"
                                                 onclick="new_vendor_id('{{$id}}');return false;">New
