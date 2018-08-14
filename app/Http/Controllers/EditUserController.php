@@ -14,6 +14,8 @@ class EditUserController
             Input::get("role"),
             Input::get("username"),
             Input::get("lang"),
+            Input::get("lifnr"),
+            Input::get("ekgrp"),
             Input::get("active"),
             Input::get("email")
         );

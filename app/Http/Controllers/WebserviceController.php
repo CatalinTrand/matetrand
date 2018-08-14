@@ -39,8 +39,7 @@ class WebserviceController extends Controller
     {
         return Webservice::insertVendorID(
             Input::get("user_id"),
-            Input::get("lifnr"),
-            Input::get("matkl"),
+            Input::get("wglif"),
             Input::get("mfrnr")
         );
     }
