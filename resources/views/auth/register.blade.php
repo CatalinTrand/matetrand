@@ -18,7 +18,7 @@
 
                                     <div class="col-md-6">
                                         <select id="role" type="text" class="form-control" name="role" required
-                                                autofocus>
+                                                autofocus onchange="selectCheck(this);">
                                             <option>Administrator</option>
                                             <option>Furnizor</option>
                                             <option>Referent</option>
@@ -45,21 +45,21 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row">
+                                <div class="form-group row" id="lifnr_div" style="display: none;">
                                     <label for="lifnr"
                                            class="col-md-4 col-form-label text-md-right">Vendor</label>
 
                                     <div class="col-md-6">
-                                        <input class="form-control" id="lifnr" type="text" name="lifnr" required>
+                                        <input class="form-control" id="lifnr" type="text" name="lifnr">
                                     </div>
                                 </div>
 
-                                <div class="form-group row">
+                                <div class="form-group row" id="ekgrp_div" style="display: none;">
                                     <label for="ekgrp"
                                            class="col-md-4 col-form-label text-md-right">Purchasing group</label>
 
                                     <div class="col-md-6">
-                                        <input class="form-control" id="ekgrp" type="text" name="ekgrp" required>
+                                        <input class="form-control" id="ekgrp" type="text" name="ekgrp">
                                     </div>
                                 </div>
 
@@ -144,4 +144,31 @@
             </div>
         </div>
     @endif
+    <script>
+        function selectCheck(nameSelect)
+        {
+            var lifnr_div = document.getElementById("lifnr_div");
+            var ekgrp_div = document.getElementById("ekgrp_div");
+
+            if(nameSelect){
+                if(nameSelect.value == "Referent" || nameSelect.value == "Furnizor"){
+                    if(nameSelect.value == "Referent") {
+                        ekgrp_div.style.display = "";
+                        lifnr_div.style.display = "none";
+                    } else {
+                        ekgrp_div.style.display = "none";
+                        lifnr_div.style.display = "";
+                    }
+                }
+                else{
+                    lifnr_div.style.display = "none";
+                    ekgrp_div.style.display = "none";
+                }
+            }
+            else{
+                lifnr_div.style.display = "none";
+                ekgrp_div.style.display = "none";
+            }
+        }
+    </script>
 @endsection

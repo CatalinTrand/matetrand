@@ -89,8 +89,8 @@
             $msg_sel = "Vendor deleted!";
         }
     @endphp
-    <div class="row container-fluid">
-        <div class="container" style="width: 40%;margin-right: -30vw">
+    <div class="container-fluid">
+        <div class="container" style="width: 40%;">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card">
@@ -108,7 +108,7 @@
 
                                     <div class="col-md-6">
                                         <select id="role" type="text" class="form-control" name="role" required
-                                                autofocus>
+                                                autofocus onchange="selectCheck(this);">
                                             <option {{$selectedAdmin}}>Administrator</option>
                                             <option {{$selectedFurnizor}}>Furnizor</option>
                                             <option {{$selectedReferent}}>Referent</option>
@@ -127,7 +127,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row">
+                                <div class="form-group row" id="lifnr_div" style="display: none;">
                                     <label for="lifnr"
                                            class="col-md-4 col-form-label text-md-right">Vendor</label>
 
@@ -137,7 +137,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row">
+                                <div class="form-group row" id="ekgrp_div" style="display: none;">
                                     <label for="ekgrp"
                                            class="col-md-4 col-form-label text-md-right">Purchasing group</label>
 
@@ -208,7 +208,7 @@
         <br>
         <br>
 
-        <div class="container" style="">
+        <div class="container" id="vendor_div" style="display: none;">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card" style="height: 250px">
@@ -256,6 +256,38 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function selectCheck(nameSelect)
+        {
+            var lifnr_div = document.getElementById("lifnr_div");
+            var ekgrp_div = document.getElementById("ekgrp_div");
+            var vendor_div = document.getElementById("vendor_div");
+            if(nameSelect){
+                if(nameSelect.value == "Referent" || nameSelect.value == "Furnizor"){
+                    if(nameSelect.value == "Referent") {
+                        ekgrp_div.style.display = "";
+                        lifnr_div.style.display = "none";
+                        vendor_div.style.display = "none";
+                    } else {
+                        ekgrp_div.style.display = "none";
+                        lifnr_div.style.display = "";
+                        vendor_div.style.display = "";
+                    }
+                }
+                else{
+                    lifnr_div.style.display = "none";
+                    ekgrp_div.style.display = "none";
+                    vendor_div.style.display = "none";
+                }
+            }
+            else{
+                lifnr_div.style.display = "none";
+                ekgrp_div.style.display = "none";
+                vendor_div.style.display = "none";
+            }
+        }
+    </script>
 
     <script>
         // Register ENTER as popup default button
