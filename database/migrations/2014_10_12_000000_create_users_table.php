@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('role', 20);
             $table->string('email', 100);
             $table->string('password');
+            $table->string('api_token');
             $table->string('lifnr', 10)->default('');
             $table->string('ekgrp', 3)->default('');;
             $table->string('lang',2)->default('en');

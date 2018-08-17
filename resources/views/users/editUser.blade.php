@@ -127,6 +127,20 @@
                                     </div>
                                 </div>
 
+                                <div class="row" id="token_div" style="margin-left: 7.45vw" style="display: none;">
+                                    <div class="form-group row">
+                                        <label for="api_token"
+                                               class="col-md-4 col-form-label text-md-right">API Token</label>
+
+                                        <div class="col-md-6">
+                                            <input id="api_token" type="text" name="api_token" class="form-control"
+                                                   required
+                                                   value="{{$user->api_token}}">
+                                        </div>
+                                    </div>
+                                    <button type="button" style="height: 30px" onclick="generateNew(); return false;">Generate new</button>
+                                </div>
+
                                 <div class="form-group row" id="lifnr_div" style="display: none;">
                                     <label for="lifnr"
                                            class="col-md-4 col-form-label text-md-right">Vendor</label>
@@ -258,14 +272,22 @@
     </div>
 
     <script>
-        function selectCheck(nameSelect)
-        {
+        function generateNew() {
+            var api_token = document.getElementById("api_token");
+            api_token.value = Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30);
+        }
+    </script>
+
+    <script>
+        function selectCheck(nameSelect) {
             var lifnr_div = document.getElementById("lifnr_div");
             var ekgrp_div = document.getElementById("ekgrp_div");
             var vendor_div = document.getElementById("vendor_div");
-            if(nameSelect){
-                if(nameSelect.value == "Referent" || nameSelect.value == "Furnizor"){
-                    if(nameSelect.value == "Referent") {
+            var token_div = document.getElementById("token_div");
+
+            if (nameSelect) {
+                if (nameSelect.value == "Referent" || nameSelect.value == "Furnizor") {
+                    if (nameSelect.value == "Referent") {
                         ekgrp_div.style.display = "";
                         lifnr_div.style.display = "none";
                         vendor_div.style.display = "none";
@@ -274,17 +296,25 @@
                         lifnr_div.style.display = "";
                         vendor_div.style.display = "";
                     }
+                    token_div.style.display = "none";
                 }
-                else{
+                else {
                     lifnr_div.style.display = "none";
                     ekgrp_div.style.display = "none";
                     vendor_div.style.display = "none";
+
+                    if (nameSelect.value == "Administrator") {
+                        token_div.style.display = "";
+                    } else {
+                        token_div.style.display = "none";
+                    }
                 }
             }
-            else{
+            else {
                 lifnr_div.style.display = "none";
                 ekgrp_div.style.display = "none";
                 vendor_div.style.display = "none";
+                token_div.style.display = "none";
             }
         }
     </script>
@@ -298,6 +328,7 @@
                     return false;
                 }
             });
+            selectCheck(document.getElementById("role"));
         });
     </script>
 
