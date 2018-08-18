@@ -28,6 +28,10 @@
             line-height: 1;
         }
 
+        .form-group {
+            margin-bottom: 0.3rem;
+        }
+
         .first{
             margin-left:-20px;
         }

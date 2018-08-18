@@ -17,18 +17,18 @@ class CreatePitemsTable extends Migration
             $table->string('ebeln',10);
             $table->string('ebelp',5);
             $table->string('posnr',6);
-            $table->string('idnlf',35);
-            $table->string('mfrnr',10);
-            $table->string('mfrnr_name',35);
-            $table->string('mfrpn',40);
-            $table->string('mfrpn_name',35);
-            $table->string('purch_price',15);
-            $table->string('purch_curr',3);
-            $table->string('sales_price',15);
-            $table->string('sales_curr',3);
-            $table->string('qty',10);
-            $table->string('qty_uom',3);
-            $table->dateTime('lfdat');
+            $table->string('idnlf',35)->default('');
+            $table->string('mfrnr',10)->default('');
+            $table->string('mfrnr_name',35)->default('');
+            $table->string('mfrpn',40)->default('');
+            $table->string('mfrpn_name',35)->default('');
+            $table->string('purch_price',15)->default('');
+            $table->string('purch_curr',3)->default('');
+            $table->string('sales_price',15)->default('');
+            $table->string('sales_curr',3)->default('');
+            $table->string('qty',10)->default('');
+            $table->string('qty_uom',3)->default('');
+            $table->dateTime('lfdat')->default(now());
         });
     }
 

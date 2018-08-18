@@ -57,15 +57,20 @@
             break;
         }
 
-        $selectedEN = "";
         $selectedRO = "";
+        $selectedHU = "";
+        $selectedDE = "";
+        $selectedEN = "";
 
         switch ($user->lang){
-            case 'EN':
-                $selectedEN = "selected";
-            break;
             case 'RO':
-                $selectedRO = "selected";
+                $selectedRO = "selected"; break;
+            case 'HU':
+                $selectedHU = "selected"; break;
+            case 'DE':
+                $selectedDE = "selected"; break;
+            case 'EN':
+                $selectedEN = "selected"; break;
             break;
         }
 
@@ -104,7 +109,7 @@
                                 <font color='green'>{{$msg}}</font>
                                 <div class="form-group row">
                                     <label for="role"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('User Type') }}</label>
+                                           class="col-md-4 col-form-label text-md-left">{{ __('User Type') }}</label>
 
                                     <div class="col-md-6">
                                         <select id="role" type="text" class="form-control" name="role" required
@@ -119,7 +124,7 @@
 
                                 <div class="form-group row">
                                     <label for="username"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
+                                           class="col-md-3 col-form-label text-md-left">{{ __('Username') }}</label>
 
                                     <div class="col-md-6">
                                         <input id="username" type="text" name="username" class="form-control" required
@@ -143,7 +148,7 @@
 
                                 <div class="form-group row" id="lifnr_div" style="display: none;">
                                     <label for="lifnr"
-                                           class="col-md-4 col-form-label text-md-right">Vendor</label>
+                                           class="col-md-3 col-form-label text-md-left">Vendor</label>
 
                                     <div class="col-md-6">
                                         <input id="lifnr" type="text" name="lifnr" class="form-control" required
@@ -153,7 +158,7 @@
 
                                 <div class="form-group row" id="ekgrp_div" style="display: none;">
                                     <label for="ekgrp"
-                                           class="col-md-4 col-form-label text-md-right">Purchasing group</label>
+                                           class="col-md-3 col-form-label text-md-left">Purchasing group</label>
 
                                     <div class="col-md-6">
                                         <input id="ekgrp" type="text" name="ekgrp" class="form-control" required
@@ -163,7 +168,7 @@
 
                                 <div class="form-group row">
                                     <label for="email"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
+                                           class="col-md-3 col-form-label text-md-left">{{ __('E-Mail Address') }}</label>
 
                                     <div class="col-md-6">
                                         <input id="email" type="email"
@@ -180,20 +185,22 @@
 
                                 <div class="form-group row">
                                     <label for="lang"
-                                           class="col-md-4 col-form-label text-md-right">Language</label>
+                                           class="col-md-3 col-form-label text-md-left">Language</label>
 
                                     <div class="col-md-6">
                                         <select id="lang" type="text" class="form-control" name="lang" required
                                                 autofocus>
-                                            <option {{$selectedEN}}>EN</option>
                                             <option {{$selectedRO}}>RO</option>
+                                            <option {{$selectedHU}}>HU</option>
+                                            <option {{$selectedDE}}>DE</option>
+                                            <option {{$selectedEN}}>EN</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <label for="active"
-                                           class="col-md-4 col-form-label text-md-right">Status</label>
+                                           class="col-md-3 col-form-label text-md-left">Status</label>
 
                                     <div class="col-md-6">
                                         <select id="active" type="text" class="form-control" name="active" required
