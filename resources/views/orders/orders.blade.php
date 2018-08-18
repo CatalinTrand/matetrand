@@ -65,7 +65,7 @@
 
 
 
-                                    $comanda = $order->vbeln;
+                                    $comanda = "<button type='button' id='$order->vbeln'>+</button> $order->vbeln";
 
                                     echo "<tr><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
                                 }
