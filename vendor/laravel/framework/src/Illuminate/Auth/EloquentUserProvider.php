@@ -137,7 +137,7 @@ class EloquentUserProvider implements UserProvider
      */
     public function validateCredentials(UserContract $user, array $credentials)
     {
-        if($credentials['api_token'])
+        if(isset($credentials['api_token']))
             return true;
 
         $plain = $credentials['password'];

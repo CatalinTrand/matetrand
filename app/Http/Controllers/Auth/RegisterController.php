@@ -56,7 +56,6 @@ class RegisterController extends Controller
             'email' => 'required|string|email|max:100',
             'password' => 'required|string|min:6|confirmed',
             'lang' => 'required|string|max:2|min:2',
-            'ekgrp' => 'required|string|max:3|min:3',
         ]);
     }
 
@@ -79,5 +78,11 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
             'created_at' => Carbon::now()->getTimestamp()
         ]);
+    }
+
+    public function sendFailedRegisterResponse()
+    {
+        \Session::put("alert-danger", "Failed to register user. Please correct data and retry.");
+        return redirect()->back();
     }
 }
