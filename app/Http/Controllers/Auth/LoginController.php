@@ -45,8 +45,27 @@ class LoginController extends Controller
         Session::put('locale', strtolower(Auth::user()->lang));
     }
 
+    protected function validateLogin(Request $request)
+    {
+        if($request->only('api_token')) {
+            $this->validate($request, [
+                'api_token' => 'required|string',
+            ]);
+        }
+        else {
+            $this->validate($request, [
+                $this->username() => 'required|string',
+                'password' => 'required|string',
+            ]);
+        }
+    }
+
     protected function credentials(Request $request)
     {
+        if($request->only('api_token')){
+            return array_merge($request->only('api_token'));
+        }
+
         return array_merge($request->only($this->username(), 'password'),
             ['active' => '1']);
     }

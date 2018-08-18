@@ -13,6 +13,7 @@ class EditUserController
             Input::get("id"),
             Input::get("role"),
             Input::get("username"),
+            Input::get("api_token"),
             Input::get("lang"),
             Input::get("lifnr"),
             Input::get("ekgrp"),
