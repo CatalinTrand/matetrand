@@ -153,6 +153,12 @@
             margin-bottom: 0rem;
         }
 
+        .orders-table{
+            margin-top: 1vw;
+            width: 100%;
+            border: 1px solid black;
+        }
+
     </style>
 </head>
 <body style="font-size: 12px">
