@@ -14,7 +14,7 @@ class CreatePordersTable extends Migration
     public function up()
     {
         Schema::create('POrders', function (Blueprint $table) {
-            $table->string('id');
+            $table->string('id', 20);
             $table->boolean('nof');
             $table->dateTime('wtime');
             $table->dateTime('ctime');
@@ -23,17 +23,17 @@ class CreatePordersTable extends Migration
             $table->string('lifnr',10);
             $table->string('lifnr_name',35);
             $table->string('ekgrp',3);
-            $table->string('ekgrp_name',35);
-            $table->dateTime('erdat');
-            $table->string('ernam',30);
-            $table->string('curr',3);
-            $table->string('fxrate',10);
-            $table->string('kunnr',10);
-            $table->string('kunnr_name',35);
-            $table->string('shipto',10);
-            $table->string('shipto_name',35);
-            $table->string('ctv');
-            $table->string('ctv_name');
+            $table->string('ekgrp_name',35)->default('');
+            $table->dateTime('erdat')->default(now());
+            $table->string('ernam',30)->default('');
+            $table->string('curr',3)->default('');
+            $table->string('fxrate',10)->default('');
+            $table->string('kunnr',10)->default('');
+            $table->string('kunnr_name',35)->default('');
+            $table->string('shipto',10)->default('');
+            $table->string('shipto_name',35)->default('');
+            $table->string('ctv', 20)->default('');
+            $table->string('ctv_name')->default('');
         });
     }
 
