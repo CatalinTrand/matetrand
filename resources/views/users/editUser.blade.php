@@ -139,7 +139,6 @@
 
                                         <div class="col-md-6" style="padding-left: 5.9vw;">
                                             <input id="api_token" type="text" name="api_token" class="form-control"
-                                                   required
                                                    value="{{$user->api_token}}">
                                         </div>
                                     </div>
@@ -151,7 +150,7 @@
                                            class="col-md-3 col-form-label text-md-left">Vendor</label>
 
                                     <div class="col-md-6">
-                                        <input id="lifnr" type="text" name="lifnr" class="form-control" required
+                                        <input id="lifnr" type="text" name="lifnr" class="form-control"
                                                value="{{$user->lifnr}}">
                                     </div>
                                 </div>
@@ -161,7 +160,7 @@
                                            class="col-md-3 col-form-label text-md-left">Purchasing group</label>
 
                                     <div class="col-md-6">
-                                        <input id="ekgrp" type="text" name="ekgrp" class="form-control" required
+                                        <input id="ekgrp" type="text" name="ekgrp" class="form-control"
                                                value="{{$user->ekgrp}}">
                                     </div>
                                 </div>

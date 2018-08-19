@@ -87,8 +87,10 @@
                                     <div class="col-md-6">
                                         <select id="lang" type="text" class="form-control" name="lang" required
                                                 autofocus>
-                                            <option>EN</option>
                                             <option>RO</option>
+                                            <option>HU</option>
+                                            <option>DE</option>
+                                            <option>EN</option>
                                         </select>
                                     </div>
                                 </div>
