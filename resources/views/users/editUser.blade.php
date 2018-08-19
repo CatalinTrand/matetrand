@@ -111,7 +111,7 @@
                                     <label for="role"
                                            class="col-md-4 col-form-label text-md-left">{{ __('User Type') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-6" style="margin-left: -3vw;">
                                         <select id="role" type="text" class="form-control" name="role" required
                                                 autofocus onchange="selectCheck(this);">
                                             <option {{$selectedAdmin}}>Administrator</option>
@@ -132,12 +132,12 @@
                                     </div>
                                 </div>
 
-                                <div class="row" id="token_div" style="margin-left: 7.45vw" style="display: none;">
+                                <div class="row" id="token_div" style="margin-left: -2.5vw; display: none;">
                                     <div class="form-group row">
                                         <label for="api_token"
                                                class="col-md-4 col-form-label text-md-right">API Token</label>
 
-                                        <div class="col-md-6">
+                                        <div class="col-md-6" style="padding-left: 5.9vw;">
                                             <input id="api_token" type="text" name="api_token" class="form-control"
                                                    required
                                                    value="{{$user->api_token}}">

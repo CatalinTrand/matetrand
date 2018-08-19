@@ -24,7 +24,7 @@
                     </div>
 
                     <div class="card-body">
-                        <table class="orders-table">
+                        <table class="orders-table basicTable table table-striped">
                             <tr>
                                 <th>NOF</th>
                                 <th>Prioritate</th>
@@ -47,38 +47,25 @@
                                     else
                                         $nof = "";
 
-                                    $now = date('Y-m-d H:i:s');
+                                    $now = strtotime(date('Y-m-d H:i:s'));
                                     $wtime = strtotime($order->wtime);
                                     $ctime = strtotime($order->ctime);
 
-                                    $interval_wtime = abs($now - $wtime);
+                                    $interval_wtime = $now - $wtime;
                                     if($interval_wtime > 0){
-                                        $interval_ctime = abs($now - $ctime);
+                                        $interval_ctime = $now - $ctime;
                                         if($interval_ctime > 0){
                                             $prio = "<image src='/images/critical.png'>";
                                         } else {
                                             $prio = "<image src='/images/warning.png'>";
                                         }
-                                    } else $prio = "";
+                                    } else $prio = "None";
 
                                     $status = "<image src='/images/status.png'>"; //TODO
 
-                                    $purchase_orders = array();
-                                    $links = DB::select("select ebeln from porders where id = '$id' and vbeln = '$order->vbeln'");
-                                    foreach ($links as $link){
-                                        $purchase_order = DB::select("select * from pitems where ebeln = '$link->ebeln'");
-                                        array_push($purchase_orders,$purchase_order);
-                                    }
-                                    /*
-                                    purchase-orders -> purchase-order-1 -> item-1
-                                                                        -> item-2
-                                                    -> purchase-order-2 -> item-1
-                                                                        -> item-2
-                                    */
 
-                                    $comanda = "<div id='$$order->vbeln'>";
-                                    
-                                    $comanda.= "</div>";
+
+                                    $comanda = "<button type='button' id='$order->vbeln'>+</button> $order->vbeln";
 
                                     echo "<tr><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
                                 }
