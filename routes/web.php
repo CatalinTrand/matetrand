@@ -35,6 +35,7 @@ Route::post('webservice/insertfollowupuser','WebserviceController@insertFollowup
 Route::post('webservice/insertrefferaluser','WebserviceController@insertRefferalID');
 Route::post('webservice/insertvendoruser','WebserviceController@insertVendorID');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
+Route::post('webservice/getOrderInfo','WebserviceController@getOrderInfo');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');

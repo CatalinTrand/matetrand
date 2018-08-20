@@ -13,18 +13,28 @@
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
                         @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
-                            <a href="/roles"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">Roles</p></a>
-                            <a href="/users"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Users</p></a>
-                            <a href="/messages"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Messages</p></a>
-                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line selector">Comenzi</p>
+                            <a href="/roles"><p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line first">Roles</p></a>
+                            <a href="/users"><p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line">Users</p></a>
+                            <a href="/messages"><p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line">Messages</p></a>
+                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                               class="card-line selector">Comenzi</p>
                         @else
-                            <a href="/messages"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">Messages</p></a>
-                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line selector">Comenzi</p>
+                            <a href="/messages"><p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line first">Messages</p></a>
+                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                               class="card-line selector">Comenzi</p>
                         @endif
                     </div>
 
                     <div class="card-body">
-                        <table class="orders-table basicTable table table-striped">
+                        <table class="orders-table basicTable table table-striped" id="orders_table">
                             <tr>
                                 <th>NOF</th>
                                 <th>Prioritate</th>
@@ -63,11 +73,9 @@
 
                                     $status = "<image src='/images/status.png'>"; //TODO
 
+                                    $comanda = "<button type='button' id='$order->vbeln' onclick='loadSub($order->vbeln,sell-order,this); return false;'>+</button> $order->vbeln";
 
-
-                                    $comanda = "<button type='button' id='$order->vbeln'>+</button> $order->vbeln";
-
-                                    echo "<tr><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
+                                    echo "<tr id='$order->vbeln'><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
                                 }
                             @endphp
                         </table>
@@ -76,4 +84,54 @@
             </div>
         </div>
     </div>
+    <script>
+        function loadSub(item, type, _this) {
+            var _data, _status;
+            alert('alert');
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.post("webservice/getOrderInfo",
+                {
+                    order: item,
+                    typ: type
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_status == "success") {
+                var split = _data.split('=');
+                split.forEach(function (ord) {
+                    switch (type) {
+                        case 'sell-order':
+                            var newRow = $("<tr>");
+                            var cols = "";
+                            cols += '<td></td>';
+                            cols += '<td></td>';
+                            cols += "<td><button type='button' id='$order->vbeln' onclick='loadSub(ord,provider-order,this); return false;'>+</button>  ord</td>";
+                            cols += "<td><image src='/images/status.png'></td>";
+                            newRow.append(cols);
+                            newRow.insertAfter($(_this).closest("tr"));
+                            break;
+                        case 'provider-order':
+                            var newRow = $("<tr>");
+                            var cols = "";
+                            cols += '<td></td>';
+                            cols += '<td></td>';
+                            cols += "<td>       ord</td>";
+                            cols += "<td><image src='/images/status.png'></td>";
+                            newRow.append(cols);
+                            newRow.insertAfter($(_this).closest("tr"));
+                            break;
+                    }
+                });
+            }
+        }
+    </script>
 @endsection

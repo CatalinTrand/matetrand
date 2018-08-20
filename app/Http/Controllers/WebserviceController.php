@@ -51,4 +51,11 @@ class WebserviceController extends Controller
         );
     }
 
+    public function getOrderInfo(){
+        return Webservice::getOrderInfo(
+            Input::get("order"),
+            Input::get("typ")
+        );
+    }
+
 }

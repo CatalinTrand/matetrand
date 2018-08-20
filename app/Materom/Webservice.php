@@ -28,4 +28,28 @@ class Webservice {
         DB::update("update users set password = '$hash' where id = '$userid'");
         return "";
     }
+
+    static public function getOrderInfo($order,$typ){
+        $str = "";
+        if(strcmp($typ,'sell-order') == 0){
+            $links = DB::select("select * from porders where vbeln = '$order'");
+            foreach ($links as $link){
+                if(strcmp($typ,'') == 0)
+                    $str .= $link->ebeln;
+                else {
+                    $str .= '=' . $link->ebeln;
+                }
+            }
+        } else {
+            $links = DB::select("select * from pitems where ebeln = '$order'");
+            foreach ($links as $link){
+                if(strcmp($typ,'') == 0)
+                    $str .= $link->ebelp;
+                else {
+                    $str .= '=' . $link->ebelp;
+                }
+            }
+        }
+        return $str;
+    }
 }
