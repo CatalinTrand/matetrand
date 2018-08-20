@@ -253,10 +253,13 @@
 <script>
     $(function() {
         $body = $("body");
+
+        /*
         $(document).on({
             ajaxStart: function() {$body.addClass("ajaxloading");},
             ajaxStop: function() {$body.removeClass("ajaxloading"); }
         });
+        */
     });
 </script>
 </body>

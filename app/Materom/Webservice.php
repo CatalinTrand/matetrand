@@ -29,24 +29,24 @@ class Webservice {
         return "";
     }
 
-    static public function getOrderInfo($order,$typ){
+    static public function getOrderInfo($order,$type){
         $str = "";
-        if(strcmp($typ,'sell-order') == 0){
+        if(strcmp($type,'sales-order') == 0){
             $links = DB::select("select * from porders where vbeln = '$order'");
             foreach ($links as $link){
-                if(strcmp($typ,'') == 0)
-                    $str .= $link->ebeln;
+                if(strcmp($str,'') == 0)
+                    $str = $link->ebeln;
                 else {
-                    $str .= '=' . $link->ebeln;
+                    $str = $link->ebeln . '=' . $str;
                 }
             }
         } else {
             $links = DB::select("select * from pitems where ebeln = '$order'");
             foreach ($links as $link){
-                if(strcmp($typ,'') == 0)
-                    $str .= $link->ebelp;
+                if(strcmp($str,'') == 0)
+                    $str = $link->ebelp;
                 else {
-                    $str .= '=' . $link->ebelp;
+                    $str = $link->ebelp . "=" . $str;
                 }
             }
         }

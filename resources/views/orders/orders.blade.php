@@ -73,9 +73,9 @@
 
                                     $status = "<image src='/images/status.png'>"; //TODO
 
-                                    $comanda = "<button type='button' id='$order->vbeln' onclick='loadSub($order->vbeln,sell-order,this); return false;'>+</button> $order->vbeln";
+                                    $comanda = "<button type='button' id='btn_$order->vbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this); return false;'>+</button> $order->vbeln";
 
-                                    echo "<tr id='$order->vbeln'><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
+                                    echo "<tr id='tr_$order->vbeln'><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
                                 }
                             @endphp
                         </table>
@@ -85,9 +85,9 @@
         </div>
     </div>
     <script>
-        function loadSub(item, type, _this) {
+        function loadSub(item, type, _btn) {
             var _data, _status;
-            alert('alert');
+            var _this = document.getElementById("tr_"+item);
 
             $.ajaxSetup({
                 headers: {
@@ -95,43 +95,65 @@
                 }
             });
             jQuery.ajaxSetup({async: false});
+
             $.post("webservice/getOrderInfo",
                 {
                     order: item,
-                    typ: type
+                    type: type
                 },
                 function (data, status) {
                     _data = data;
                     _status = status;
                 });
             jQuery.ajaxSetup({async: true});
-            if (_status == "success") {
+            if (_status == "success" ) {
                 var split = _data.split('=');
-                split.forEach(function (ord) {
+                split.forEach(function (_ord) {
                     switch (type) {
-                        case 'sell-order':
+                        case 'sales-order':
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td></td>';
                             cols += '<td></td>';
-                            cols += "<td><button type='button' id='$order->vbeln' onclick='loadSub(ord,provider-order,this); return false;'>+</button>  ord</td>";
+                            cols += "<td id='tr_"+_ord+"' ><button style='margin-left:50px;' type='button' id='btn_" + _ord + "' onclick=\"loadSub(\'"+ _ord +"',\'purch-order\',this);\">+</button> "+ _ord+"</td>";
                             cols += "<td><image src='/images/status.png'></td>";
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
+                            newRow.attr('id', "tr_"+_ord);
                             break;
-                        case 'provider-order':
+                        case 'purch-order':
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td></td>';
                             cols += '<td></td>';
-                            cols += "<td>       ord</td>";
+                            cols += "<td><div style='margin-left: 100px'>"+_ord+"</div></td>";
                             cols += "<td><image src='/images/status.png'></td>";
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
                             break;
                     }
                 });
+                _btn.innerHTML = '-';
+                _btn.onclick = function(){ hideSub(item,type,_btn); return false;};
+            } else {
+                alert('Error processing operation!');
             }
+        }
+        function hideSub(item,type,_btn){
+            var table = document.getElementById('orders_table');
+            var started = false;
+            for (i = 0; i < table.rows.length; i++) {
+                if(started){
+                    if(table.rows[i].innerHTML.includes(type) || table.rows[i].innerHTML.includes('sales-order'))
+                        break;
+                    table.deleteRow(i);
+                    i--;
+                }
+                if(table.rows[i].id == 'tr_'+item )
+                    started = true;
+            }
+            _btn.innerHTML = '+';
+            _btn.onclick = function(){ loadSub(item,type,_btn); return false;};
         }
     </script>
 @endsection
