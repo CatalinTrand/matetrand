@@ -17,25 +17,25 @@
         if($adminData)
             $adminData = $adminData[0];
         else
-            $adminData = new RFCData();
+            $adminData = new RFCData('', '', '', '', '', '');
 
         $referentData = DB::select("select * from roles where rfc_role = 'referent'");
         if($referentData)
             $referentData = $referentData[0];
         else
-            $referentData = new RFCData();
+            $referentData = new RFCData('', '', '', '', '', '');
 
         $furnizorData = DB::select("select * from roles where rfc_role = 'furnizor'");
         if($furnizorData)
             $furnizorData = $furnizorData[0];
         else
-            $furnizorData = new RFCData();
+            $furnizorData = new RFCData('', '', '', '', '', '');
 
         $ctvData = DB::select("select * from roles where rfc_role = 'ctv'");
         if($ctvData)
             $ctvData = $ctvData[0];
         else
-            $ctvData = new RFCData();
+            $ctvData = new RFCData('', '', '', '', '', '');
 
         $global = DB::select("select * from global_rfc_config");
         if($global)
@@ -294,7 +294,7 @@
                     rfc_sysnr: $("#rfc_sysnr").val(),
                     rfc_client: $("#rfc_client").val(),
                     rfc_user: $("#" + prefix + "_rfc_user").val(),
-                    rfc_password: $("#" + prefix + "_rfc_password").val()
+                    rfc_passwd: $("#" + prefix + "_rfc_passwd").val()
                 },
                 function(data, status){
                     $("body").removeClass("ajaxloading");

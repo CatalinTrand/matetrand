@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use App\Materom\Webservice;
+use App\Materom\SAP;
 
 class WebserviceController extends Controller
 {
@@ -15,7 +16,7 @@ class WebserviceController extends Controller
                                    Input::get("rfc_sysnr"),
                                    Input::get("rfc_client"),
                                    Input::get("rfc_user"),
-                                   Input::get("rfc_password")
+                                   Input::get("rfc_passwd")
             );
     }
 

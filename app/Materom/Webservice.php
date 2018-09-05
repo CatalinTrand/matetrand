@@ -11,8 +11,8 @@ class Webservice {
 
     static public function rfcPing($rfc_router, $rfc_server, $rfc_sysnr,
                                    $rfc_client, $rfc_user, $rfc_password) {
-        return (new RFCData())->ping($rfc_router, $rfc_server, $rfc_sysnr,
-                                     $rfc_client, $rfc_user, $rfc_password);
+        return (new RFCData($rfc_router, $rfc_server, $rfc_sysnr,
+            $rfc_client, $rfc_user, $rfc_password))->ping();
     }
 
     static public function insertVendorID($userid, $wglif, $mfrnr) {

@@ -17,6 +17,7 @@ class EditUsers{
             DB::update("update users set role = '$role', username = '$user', api_token = '$token', email = '$email', lang = '$lang', active = '$active', deleted_at = NOW() where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");
+        SAP::rfcUpdateUser($id);
         return redirect()->back();
 
     }
