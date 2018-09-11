@@ -44,14 +44,33 @@
                             @php
                                 use Illuminate\Support\Facades\DB;
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
-                                $orders = DB::select("select * from porders where id = '$id'");
+
+                                if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
+                                    $orders = DB::select("select * from porders where id = '$id'");
+                                    $furnizor = true;
+                                } else {
+                                    $orders = DB::select("select * from porders");
+                                    $furnizor = false;
+                                }
+
                                 $seen = "";
                                 foreach($orders as $order){
-                                    if(strchr($seen,$order->vbeln) == null)
-                                        $seen.= " $order->vbeln";
-                                    else
-                                        continue;
 
+                                    if($furnizor){
+                                        if(strchr($seen,$order->ebeln) == null)
+                                            $seen.= " $order->ebeln";
+                                        else
+                                            continue;
+
+                                        $comanda = "<button type='button' id='btn_$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this); return false;'>+</button> $order->ebeln";
+                                    } else {
+                                        if(strchr($seen,$order->vbeln) == null)
+                                            $seen.= " $order->vbeln";
+                                        else
+                                            continue;
+
+                                        $comanda = "<button type='button' id='btn_$order->vbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this); return false;'>+</button> $order->vbeln";
+                                    }
                                     if($order->nof)
                                         $nof = "<image src='/images/nof.png'>";
                                     else
@@ -73,9 +92,12 @@
 
                                     $status = "<image src='/images/status.png'>"; //TODO
 
-                                    $comanda = "<button type='button' id='btn_$order->vbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this); return false;'>+</button> $order->vbeln";
+                                    if($furnizor)
+                                        $oid = $order->ebeln;
+                                    else
+                                        $oid = $order->vbeln;
 
-                                    echo "<tr id='tr_$order->vbeln'><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
+                                    echo "<tr id='tr_$oid'><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
                                 }
                             @endphp
                         </table>
@@ -109,19 +131,17 @@
             if (_status == "success" ) {
                 var split = _data.split('=');
                 split.forEach(function (_ord) {
-                    switch (type) {
-                        case 'sales-order':
-                            var newRow = $("<tr>");
-                            var cols = "";
-                            cols += '<td></td>';
-                            cols += '<td></td>';
-                            cols += "<td id='tr_"+_ord+"' ><button style='margin-left:50px;' type='button' id='btn_" + _ord + "' onclick=\"loadSub(\'"+ _ord +"',\'purch-order\',this);\">+</button> "+ _ord+"</td>";
-                            cols += "<td><image src='/images/status.png'></td>";
-                            newRow.append(cols);
-                            newRow.insertAfter($(_this).closest("tr"));
-                            newRow.attr('id', "tr_"+_ord);
-                            break;
-                        case 'purch-order':
+                    if( type == 'sales-order') {
+                        var newRow = $("<tr>");
+                        var cols = "";
+                        cols += '<td></td>';
+                        cols += '<td></td>';
+                        cols += "<td id='tr_" + _ord + "' ><button style='margin-left:50px;' type='button' id='btn_" + _ord + "' onclick=\"loadSub(\'" + _ord + "',\'purch-order\',this);\">+</button> " + _ord + "</td>";
+                        cols += "<td><image src='/images/status.png'></td>";
+                        newRow.append(cols);
+                        newRow.insertAfter($(_this).closest("tr"));
+                        newRow.attr('id', "tr_" + _ord);
+                    } else {
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td></td>';
@@ -130,7 +150,6 @@
                             cols += "<td><image src='/images/status.png'></td>";
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
-                            break;
                     }
                 });
                 _btn.innerHTML = '-';
