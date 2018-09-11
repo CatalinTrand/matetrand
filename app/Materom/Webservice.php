@@ -52,4 +52,9 @@ class Webservice {
         }
         return $str;
     }
+
+    static public function getVendorUsers($lifnr) {
+        return "1234";
+    }
+
 }
