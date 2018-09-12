@@ -174,9 +174,4 @@ abstract class Output implements OutputInterface
      * @param bool   $newline Whether to add a newline or not
      */
     abstract protected function doWrite($message, $newline);
-
-    public static function __callStatic($name, $arguments)
-    {
-        // TODO: Implement __callStatic() method.
-    }
 }
