@@ -70,4 +70,10 @@ class WebserviceController extends Controller
         );
     }
 
+    public function getVendorUsers(){
+        return Webservice::getVendorUsers(
+            Input::get("lifnr")
+        );
+    }
+
 }
