@@ -3,16 +3,29 @@
 @section('content')
     @guest
         @php
-            header("/");
-            exit();
+            if(isset($_GET['api_token'])){
+            $token = $_GET['api_token'];
+                if(App\Materom\Webservice::verifyAPIToken($token))
+                    $user = \Illuminate\Support\Facades\DB::select("select * from users where api_token = '$token'")[0];
+                    else{
+                        return \Illuminate\Support\Facades\Redirect::route('base');
+                    }
+
+            } else {
+                return \Illuminate\Support\Facades\Redirect::to("/");
+            }
         @endphp
     @endguest
+    @php
+        if(!isset($user))
+            $user = \Illuminate\Support\Facades\Auth::user();
+    @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
-                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
+                        @if(strcmp( ($user->role), "Administrator" ) == 0)
                             <a href="/roles"><p
                                         style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                         class="card-line first">Roles</p></a>
@@ -43,9 +56,9 @@
                             </tr>
                             @php
                                 use Illuminate\Support\Facades\DB;
-                                $id = \Illuminate\Support\Facades\Auth::user()->id;
+                                $id = $user->id;
 
-                                if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
+                                if(strcmp( ($user->role), "Furnizor" ) == 0){
                                     $orders = DB::select("select * from porders where id = '$id'");
                                     $furnizor = true;
                                 } else {

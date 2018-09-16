@@ -13,7 +13,7 @@
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('base');
 
 Route::post('/language',array(
         'Middleware'=>'LanguageSwitcher',

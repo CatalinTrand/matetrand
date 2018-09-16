@@ -11,6 +11,9 @@ class WebserviceController extends Controller
 {
     public function rfcPing()
     {
+        if(Auth::user() == null)
+            return null;
+
         return Webservice::rfcPing(Input::get("rfc_router"),
                                    Input::get("rfc_server"),
                                    Input::get("rfc_sysnr"),
@@ -22,6 +25,9 @@ class WebserviceController extends Controller
 
     public function insertFollowupID()
     {
+        if(Auth::user() == null)
+            return null;
+
         return Webservice::insertFollowupID(
             Input::get("user_id"),
             Input::get("followup_user_id")
@@ -30,6 +36,9 @@ class WebserviceController extends Controller
 
     public function insertRefferalID()
     {
+        if(Auth::user() == null)
+            return null;
+
         return Webservice::insertRefferalID(
             Input::get("user_id"),
             Input::get("refferal_id")
@@ -46,6 +55,7 @@ class WebserviceController extends Controller
     }
 
     public function changePassword(){
+
         return Webservice::changePassword(
             Input::get("user_id"),
             Input::get("new_password")
@@ -53,6 +63,7 @@ class WebserviceController extends Controller
     }
 
     public function getOrderInfo(){
+
         return Webservice::getOrderInfo(
             Input::get("order"),
             Input::get("type")

@@ -29,6 +29,16 @@ class Webservice {
         return "";
     }
 
+    static public function verifyAPIToken($token){
+
+        $user = DB::select("select * from users where api_token = '$token'");
+
+        if($user)
+            return true;
+
+        return false;
+    }
+
     static public function getOrderInfo($order,$type){
         $str = "";
         if(strcmp($type,'sales-order') == 0){
