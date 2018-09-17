@@ -9,8 +9,18 @@ use App\Materom\SAP;
 
 class WebserviceController extends Controller
 {
+    public function tryAuthAPIToken(){
+        if(Auth::user() == null){
+            if(Input::get("api_token") != null ){
+                $token = Input::get("api_token");
+                Auth::attempt(['api_token' => $token]);
+            }
+        }
+    }
+
     public function rfcPing()
     {
+        $this->tryAuthAPIToken();
         if(Auth::user() == null)
             return null;
 
@@ -25,6 +35,7 @@ class WebserviceController extends Controller
 
     public function insertFollowupID()
     {
+        $this->tryAuthAPIToken();
         if(Auth::user() == null)
             return null;
 
@@ -36,6 +47,7 @@ class WebserviceController extends Controller
 
     public function insertRefferalID()
     {
+        $this->tryAuthAPIToken();
         if(Auth::user() == null)
             return null;
 
@@ -47,6 +59,10 @@ class WebserviceController extends Controller
 
     public function insertVendorID()
     {
+        $this->tryAuthAPIToken();
+        if(Auth::user() == null)
+            return null;
+
         return Webservice::insertVendorID(
             Input::get("user_id"),
             Input::get("wglif"),
@@ -55,6 +71,9 @@ class WebserviceController extends Controller
     }
 
     public function changePassword(){
+        $this->tryAuthAPIToken();
+        if(Auth::user() == null)
+            return null;
 
         return Webservice::changePassword(
             Input::get("user_id"),
@@ -63,6 +82,9 @@ class WebserviceController extends Controller
     }
 
     public function getOrderInfo(){
+        $this->tryAuthAPIToken();
+        if(Auth::user() == null)
+            return null;
 
         return Webservice::getOrderInfo(
             Input::get("order"),
@@ -71,6 +93,10 @@ class WebserviceController extends Controller
     }
 
     public function getVendorUsers(){
+        $this->tryAuthAPIToken();
+        if(Auth::user() == null)
+            return null;
+
         return Webservice::getVendorUsers(
             Input::get("lifnr")
         );

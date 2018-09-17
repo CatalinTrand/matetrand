@@ -30,14 +30,13 @@ Route::get('/editUser', 'HomeController@editUser')->name('editUser');
 Route::post('/editUser', 'HomeController@save_edit')->name('save_edit');
 Route::post('/editUser/edit','EditUserController@editUsers');
 
-Route::post('webservice/rfcping','WebserviceController@rfcPing');
-Route::post('webservice/insertfollowupuser','WebserviceController@insertFollowupID');
-Route::post('webservice/insertrefferaluser','WebserviceController@insertRefferalID');
-Route::post('webservice/insertvendoruser','WebserviceController@insertVendorID');
-Route::post('webservice/changepassword','WebserviceController@changePassword');
-Route::post('webservice/getOrderInfo','WebserviceController@getOrderInfo');
-
-Route::post('webservice/get_vendor_users','WebserviceController@getVendorUsers');
+Route::any('webservice/rfcping','WebserviceController@rfcPing');
+Route::any('webservice/insertfollowupuser','WebserviceController@insertFollowupID');
+Route::any('webservice/insertrefferaluser','WebserviceController@insertRefferalID');
+Route::any('webservice/insertvendoruser','WebserviceController@insertVendorID');
+Route::any('webservice/changepassword','WebserviceController@changePassword');
+Route::any('webservice/getOrderInfo','WebserviceController@getOrderInfo');
+Route::any('webservice/get_vendor_users','WebserviceController@getVendorUsers');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');

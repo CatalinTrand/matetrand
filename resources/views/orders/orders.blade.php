@@ -3,22 +3,14 @@
 @section('content')
     @guest
         @php
-            if(isset($_GET['api_token'])){
-            $token = $_GET['api_token'];
-                if(App\Materom\Webservice::verifyAPIToken($token))
-                    $user = \Illuminate\Support\Facades\DB::select("select * from users where api_token = '$token'")[0];
-                    else{
-                        return \Illuminate\Support\Facades\Redirect::route('base');
-                    }
-
-            } else {
-                return \Illuminate\Support\Facades\Redirect::to("/");
+            if(!\Illuminate\Support\Facades\Auth::attempt($_GET['api_token'])){
+                header("/");
+                exit();
             }
         @endphp
     @endguest
     @php
-        if(!isset($user))
-            $user = \Illuminate\Support\Facades\Auth::user();
+        $user = \Illuminate\Support\Facades\Auth::user();
     @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
