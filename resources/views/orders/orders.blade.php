@@ -3,8 +3,8 @@
 @section('content')
     @guest
         @php
-            header("/");
-            exit();
+                header("/");
+                exit();
         @endphp
     @endguest
     <div class="container-fluid">
