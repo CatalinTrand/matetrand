@@ -13,7 +13,7 @@ class CreatePordersTable extends Migration
      */
     public function up()
     {
-        Schema::create('POrders', function (Blueprint $table) {
+        Schema::create('porders', function (Blueprint $table) {
             $table->string('id', 20);
             $table->boolean('nof');
             $table->dateTime('wtime');
@@ -44,6 +44,6 @@ class CreatePordersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('POrders');
+        Schema::dropIfExists('porders');
     }
 }

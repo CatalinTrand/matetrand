@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth/login');
 });
 
 Route::post('/language',array(
@@ -37,7 +37,9 @@ Route::post('webservice/insertvendoruser','WebserviceController@insertVendorID')
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/getOrderInfo','WebserviceController@getOrderInfo');
 
-Route::post('webservice/get_vendor_users','WebserviceController@getVendorUsers');
+Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');
+Route::get('webservice/sap_activate_user','WebserviceController@sapActivateUser');
+Route::get('webservice/sap_deactivate_user','WebserviceController@sapDeactivateUser');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');

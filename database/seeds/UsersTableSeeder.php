@@ -23,5 +23,14 @@ class UsersTableSeeder extends Seeder
             'password' => Hash::make('materom'),
             'created_at' => Carbon::now()->getTimestamp()
         ]);
+        User::create([
+            'id'       => "f20786",
+            'username' => "AUTO HELP LTD",
+            'role'     => 'Furnizor',
+            'lifnr'    => '0000020786',
+            'email'    => "oe@autohelp.bg",
+            'password' => Hash::make('materom'),
+            'created_at' => Carbon::now()->getTimestamp()
+        ]);
     }
 }

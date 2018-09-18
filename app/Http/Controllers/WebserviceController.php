@@ -65,4 +65,16 @@ class WebserviceController extends Controller
         );
     }
 
+    public function sapActivateUser(){
+        return Webservice::sapActivateUser(
+            Input::get("id")
+        );
+    }
+
+    public function sapDeactivateUser(){
+        return Webservice::sapDeactivateUser(
+            Input::get("id")
+        );
+    }
+
 }

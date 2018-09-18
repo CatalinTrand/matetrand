@@ -13,7 +13,7 @@ class CreatePitemchgTable extends Migration
      */
     public function up()
     {
-        Schema::create('PItemchg', function (Blueprint $table) {
+        Schema::create('pitemchg', function (Blueprint $table) {
             $table->string('ebeln',10);
             $table->string('ebelp',5);
             $table->string('ctype',1);
@@ -33,6 +33,6 @@ class CreatePitemchgTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('PItemchg');
+        Schema::dropIfExists('pitemchg');
     }
 }

@@ -13,7 +13,7 @@ class CreatePitemsTable extends Migration
      */
     public function up()
     {
-        Schema::create('PItems', function (Blueprint $table) {
+        Schema::create('pitems', function (Blueprint $table) {
             $table->string('ebeln',10);
             $table->string('ebelp',5);
             $table->string('posnr',6);
@@ -39,6 +39,6 @@ class CreatePitemsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('PItems');
+        Schema::dropIfExists('pitems');
     }
 }

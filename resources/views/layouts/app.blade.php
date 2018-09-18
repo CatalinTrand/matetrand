@@ -192,8 +192,10 @@
                     <form action="language" method="post" style="padding-right: 10px;padding-top: 8px">
                         <select name="locale" onchange="this.form.submit()">
                             <option>{{trans('strings.language')}}</option>
+                            <option value="ro">Română</option>
+                            <option value="hu">Magyar</option>
+                            <option value="de">Deutsch</option>
                             <option value="en">English</option>
-                            <option value="ro">Romana</option>
                         </select>
                         {{ csrf_field() }}
                     </form>

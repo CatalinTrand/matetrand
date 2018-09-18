@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class OrdersTableSeeder extends Seeder
 {
@@ -11,18 +12,17 @@ class OrdersTableSeeder extends Seeder
      */
     public function run()
     {
-        //
         DB::delete("delete from pitems");
         DB::delete("delete from porders");
         DB::insert("insert into porders (id, nof, wtime, ctime, vbeln, ebeln, ekgrp, lifnr, lifnr_name)" .
-            " values ('f1', FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
-            "         'S000000001', 'P000000001', 'A01', 'L000000001', 'Furnizor 1')");
+            " values ('f20786', FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
+            "         'S000000001', 'P000000001', 'A01', 'L000000001', 'Furnizor 20786')");
         DB::insert("insert into porders (id, nof, wtime, ctime, vbeln, ebeln, ekgrp, lifnr, lifnr_name)" .
-            " values ('f1', FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
-            "         'S000000001', 'P000000002', 'A01', 'L000000002', 'Furnizor 2')");
+            " values ('f20786', FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
+            "         'S000000001', 'P000000002', 'A01', 'L000000002', 'Furnizor 20786')");
         DB::insert("insert into porders (id, nof, wtime, ctime, vbeln, ebeln, ekgrp, lifnr, lifnr_name)" .
-            " values ('f1', FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
-            "         'S000000002', 'P000000003', 'A01', 'L000000002', 'Furnizor 2')");
+            " values ('f20786', FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
+            "         'S000000002', 'P000000003', 'A01', 'L000000002', 'Furnizor 20786')");
 
         DB::insert("insert into pitems (ebeln, ebelp, posnr, idnlf)" .
             " values ('P000000001', '00010', '00010', 'IDNLF1')");
