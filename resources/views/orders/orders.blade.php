@@ -3,21 +3,16 @@
 @section('content')
     @guest
         @php
-            if(!\Illuminate\Support\Facades\Auth::attempt($_GET['api_token'])){
                 header("/");
                 exit();
-            }
         @endphp
     @endguest
-    @php
-        $user = \Illuminate\Support\Facades\Auth::user();
-    @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
-                        @if(strcmp( ($user->role), "Administrator" ) == 0)
+                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
                             <a href="/roles"><p
                                         style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                         class="card-line first">Roles</p></a>
@@ -48,9 +43,9 @@
                             </tr>
                             @php
                                 use Illuminate\Support\Facades\DB;
-                                $id = $user->id;
+                                $id = \Illuminate\Support\Facades\Auth::user()->id;
 
-                                if(strcmp( ($user->role), "Furnizor" ) == 0){
+                                if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
                                     $orders = DB::select("select * from porders where id = '$id'");
                                     $furnizor = true;
                                 } else {
