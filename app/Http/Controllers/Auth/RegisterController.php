@@ -72,6 +72,7 @@ class RegisterController extends Controller
             'role' => $data['role'],
             'username' => $data['username'],
             'lang' => $data['lang'],
+            'sapuser' => $data['sapuser'],
             'ekgrp' => '\'' . $data["ekgrp"] . '\'',
             'lifnr' => '\'' . $data["lifnr"] . '\'',
             'email' => $data['email'],

@@ -165,6 +165,16 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group row" id="sapuser_div" style="display: none;">
+                                    <label for="sapuser"
+                                           class="col-md-3 col-form-label text-md-left">SAP User</label>
+
+                                    <div class="col-md-6">
+                                        <input id="sapuser" type="text" name="sapuser" class="form-control"
+                                               value="{{$user->sapuser}}">
+                                    </div>
+                                </div>
+
                                 <div class="form-group row">
                                     <label for="email"
                                            class="col-md-3 col-form-label text-md-left">{{ __('E-Mail Address') }}</label>
@@ -290,6 +300,7 @@
             var ekgrp_div = document.getElementById("ekgrp_div");
             var vendor_div = document.getElementById("vendor_div");
             var token_div = document.getElementById("token_div");
+            var sapuser_div = document.getElementById("sapuser_div");
 
             if (nameSelect) {
                 if (nameSelect.value == "Referent" || nameSelect.value == "Furnizor") {
@@ -297,10 +308,12 @@
                         ekgrp_div.style.display = "";
                         lifnr_div.style.display = "none";
                         vendor_div.style.display = "none";
+                        sapuser_div.style.display = "none";
                     } else {
                         ekgrp_div.style.display = "none";
                         lifnr_div.style.display = "";
                         vendor_div.style.display = "";
+                        sapuser_div.style.display = "none";
                     }
                     token_div.style.display = "none";
                 }
@@ -313,6 +326,12 @@
                         token_div.style.display = "";
                     } else {
                         token_div.style.display = "none";
+                    }
+
+                    if (nameSelect.value == "CTV") {
+                        sapuser_div.style.display = "";
+                    } else {
+                        sapuser_div.style.display = "none";
                     }
                 }
             }

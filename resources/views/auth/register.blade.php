@@ -63,6 +63,15 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group row" id="sapuser_div" style="display: none;">
+                                    <label for="sapuser"
+                                           class="col-md-4 col-form-label text-md-right">SAP User</label>
+
+                                    <div class="col-md-6">
+                                        <input class="form-control" id="sapuser" type="text" name="sapuser">
+                                    </div>
+                                </div>
+
                                 <div class="form-group row">
                                     <label for="email"
                                            class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
@@ -151,9 +160,11 @@
         {
             var lifnr_div = document.getElementById("lifnr_div");
             var ekgrp_div = document.getElementById("ekgrp_div");
+            var sapuser_div = document.getElementById("sapuser_div");
 
             if(nameSelect){
                 if(nameSelect.value == "Referent" || nameSelect.value == "Furnizor"){
+                    sapuser_div.style.display = "none";
                     if(nameSelect.value == "Referent") {
                         ekgrp_div.style.display = "";
                         lifnr_div.style.display = "none";
@@ -163,6 +174,11 @@
                     }
                 }
                 else{
+                    if(nameSelect.value == "CTV"){
+                        sapuser_div.style.display = "";
+                    } else {
+                        sapuser_div.style.display = "none";
+                    }
                     lifnr_div.style.display = "none";
                     ekgrp_div.style.display = "none";
                 }
