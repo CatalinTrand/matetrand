@@ -9,6 +9,6 @@ return[
     'role'=>'Rol',
     'username'=>'Nume user',
     'messages'=>'Mesagerie',
-    'language'=>'Limba',
+    'language'=>'Sprache',
     'dashboard'=>'Useri'
 ];

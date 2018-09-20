@@ -75,7 +75,7 @@
                                                        class="col-md-6 text-md-left spaced-label">RFC Router</label>
 
                                                 <div class="col-md-6">
-                                                    <input id="rfc_router" type="text" name="rfc_router" class="spaced-input" required
+                                                    <input id="rfc_router" type="text" name="rfc_router" class="spaced-input"
                                                            value="{{$global->rfc_router}}">
                                                 </div>
                                             </div>
@@ -266,7 +266,6 @@
                     (old_rfc_server == $("#rfc_server").val()) &&
                     (old_rfc_sysnr == $("#rfc_sysnr").val()) &&
                     (old_rfc_client == $("#rfc_client").val())) &&
-                    old_rfc_router != "" &&
                     old_rfc_server != "" &&
                     old_rfc_sysnr != "" &&
                     old_rfc_client != ""
@@ -297,7 +296,7 @@
                     rfc_passwd: $("#" + prefix + "_rfc_passwd").val()
                 },
                 function(data, status){
-                    $("body").removeClass("ajaxloading");
+                    // $("body").removeClass("ajaxloading");
                     alert("Data: " + data + "\nStatus: " + status);
                 });
             $.ajaxSetup({async: true});

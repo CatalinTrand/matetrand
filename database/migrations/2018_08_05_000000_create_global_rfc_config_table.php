@@ -14,7 +14,7 @@ class CreateGlobalRfcConfigTable extends Migration
     public function up()
     {
         Schema::create('global_rfc_config', function (Blueprint $table) {
-            $table->string('rfc_router');
+            $table->string('rfc_router')->default('');
             $table->string('rfc_server');
             $table->string('rfc_sysnr', 2);
             $table->string('rfc_client', 3);

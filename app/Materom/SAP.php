@@ -13,11 +13,12 @@ use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class SAP
 {
 
-    static public function rfcUpdateUser($userid)
+    static public function rfcUpdateAPIToken($api_token)
     {
         $globalRFCData = DB::select("select * from global_rfc_config");
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
@@ -29,12 +30,12 @@ class SAP
                                $roleData->rfc_user, $roleData->rfc_passwd);
         try {
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_USER_UPDATE');
-            $returnValue = $sapfm->invoke(['USERID' => $userid]);
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_SET_API_TOKEN');
+            $returnValue = $sapfm->invoke(['API_TOKEN' => $api_token]);
             $sapconn->close();
-            return "User successfully updated";
+            Log::info("SAPRFC: Updated API token");
         } catch (\SAPNWRFC\Exception $e) {
-            return $e->getErrorInfo();
+            Log::error("SAPRFC:" . $e->getErrorInfo());
         }
 
     }

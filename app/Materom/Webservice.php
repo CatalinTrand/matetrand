@@ -2,10 +2,12 @@
 
 namespace App\Materom;
 
-use Illuminate\Foundation\Auth\User;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+
 
 class Webservice {
 
@@ -17,13 +19,13 @@ class Webservice {
 
     static public function insertVendorID($userid, $wglif, $mfrnr) {
         $find = DB::select("select * from users_sel where id = '$userid' and wglif = '$wglif' and mfrnr = '$mfrnr'");
-        if (count($find) == 0){
+        if (count($find) == 0) {
             DB::insert("insert into users_sel (id, wglif, mfrnr) values ('$userid','$wglif','$mfrnr')");
             return "";
         } else return "Vendor already defined for this user";
     }
 
-    static public function changePassword($userid, $newPass){
+    static public function changePassword($userid, $newPass) {
         $hash = Hash::make($newPass);
         DB::update("update users set password = '$hash' where id = '$userid'");
         return "";
@@ -39,12 +41,12 @@ class Webservice {
         return false;
     }
 
-    static public function getOrderInfo($order,$type){
+    static public function getOrderInfo($order, $type) {
         $str = "";
-        if(strcmp($type,'sales-order') == 0){
+        if (strcmp($type, 'sales-order') == 0) {
             $links = DB::select("select * from porders where vbeln = '$order'");
-            foreach ($links as $link){
-                if(strcmp($str,'') == 0)
+            foreach ($links as $link) {
+                if (strcmp($str, '') == 0)
                     $str = $link->ebeln;
                 else {
                     $str = $link->ebeln . '=' . $str;
@@ -52,8 +54,8 @@ class Webservice {
             }
         } else {
             $links = DB::select("select * from pitems where ebeln = '$order'");
-            foreach ($links as $link){
-                if(strcmp($str,'') == 0)
+            foreach ($links as $link) {
+                if (strcmp($str, '') == 0)
                     $str = $link->ebelp;
                 else {
                     $str = $link->ebelp . "=" . $str;
@@ -63,8 +65,61 @@ class Webservice {
         return $str;
     }
 
-    static public function getVendorUsers($lifnr) {
-        return "1234";
+    static public function getVendorUsers($lifnr)
+    {
+        $users = DB::select("select * from users where role = 'Furnizor' and lifnr ='$lifnr'");
+        $result = '[ ';
+        foreach ($users AS $user) {
+            if ($user->active == 1) $user_active = 'X'; else $user_active = '';
+            $str = '"USERID":"' . $user->id . '", ' .
+                '"ACTIVE":"' . $user_active . '", ' .
+                '"USERNAME":"' . $user->username . '", ' .
+                '"EMAIL":"' . $user->email . '", ' .
+                '"LANG":"' . $user->lang . '"';
+            if (strlen($result) > 2) $result = $result . ", ";
+            $result = $result . "{ " . $str . " }";
+        }
+        $result = $result . " ]";
+        return $result;
     }
+
+    static public function sapActivateUser($id) {
+        $users = DB::select("select * from users where id ='$id'");
+        if (count($users) == 0) return "User does not exist";
+        $user = $users[0];
+        if ($user->active == 1) return "User is already active";
+        DB::update("update users set active = 1 where id ='$id'");
+        return "OK";
+    }
+
+    static public function sapDeactivateUser($id) {
+        $users = DB::select("select * from users where id ='$id'");
+        if (count($users) == 0) return "User does not exist";
+        $user = $users[0];
+        if ($user->active == 0) return "User is not active";
+        DB::update("update users set active = 0 where id ='$id'");
+        return "OK";
+    }
+
+    static public function sapCreateUser($id, $username, $role, $email, $language, $lifnr, $password) {
+        $users = DB::select("select * from users where id ='$id'");
+        if (count($users) != 0) return "User already exists";
+        User::create([
+            'id'       => $id,
+            'username' => $username,
+            'role'     => $role,
+            'email'    => $email,
+            'lang'     => $language,
+            'lifnr'    => $lifnr,
+            'password' => Hash::make($password),
+            'created_at' => Carbon::now()->getTimestamp()
+        ]);
+        return "OK";
+    }
+
+    static public function sapDeleteUser($id) {
+        return "Not yet implemented";
+    }
+
 
 }

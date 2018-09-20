@@ -67,10 +67,10 @@
                 $selectedRO = "selected"; break;
             case 'HU':
                 $selectedHU = "selected"; break;
-            case 'DE':
-                $selectedDE = "selected"; break;
             case 'EN':
                 $selectedEN = "selected"; break;
+            case 'DE':
+                $selectedDE = "selected"; break;
             break;
         }
 

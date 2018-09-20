@@ -10,7 +10,7 @@ use App\Materom\SAP;
 class WebserviceController extends Controller
 {
     public function tryAuthAPIToken(){
-        if(Auth::user() == null){
+        if (Auth::user() == null){
             if(Input::get("api_token") != null ){
                 $token = Input::get("api_token");
                 Auth::attempt(['api_token' => $token]);
@@ -20,10 +20,6 @@ class WebserviceController extends Controller
 
     public function rfcPing()
     {
-        $this->tryAuthAPIToken();
-        if(Auth::user() == null)
-            return null;
-
         return Webservice::rfcPing(Input::get("rfc_router"),
                                    Input::get("rfc_server"),
                                    Input::get("rfc_sysnr"),
@@ -33,36 +29,9 @@ class WebserviceController extends Controller
             );
     }
 
-    public function insertFollowupID()
-    {
-        $this->tryAuthAPIToken();
-        if(Auth::user() == null)
-            return null;
-
-        return Webservice::insertFollowupID(
-            Input::get("user_id"),
-            Input::get("followup_user_id")
-        );
-    }
-
-    public function insertRefferalID()
-    {
-        $this->tryAuthAPIToken();
-        if(Auth::user() == null)
-            return null;
-
-        return Webservice::insertRefferalID(
-            Input::get("user_id"),
-            Input::get("refferal_id")
-        );
-    }
-
     public function insertVendorID()
     {
-        $this->tryAuthAPIToken();
-        if(Auth::user() == null)
-            return null;
-
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::insertVendorID(
             Input::get("user_id"),
             Input::get("wglif"),
@@ -70,36 +39,52 @@ class WebserviceController extends Controller
         );
     }
 
-    public function changePassword(){
-        $this->tryAuthAPIToken();
-        if(Auth::user() == null)
-            return null;
-
-        return Webservice::changePassword(
-            Input::get("user_id"),
-            Input::get("new_password")
-        );
+    public function changePassword() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));
     }
 
-    public function getOrderInfo(){
-        $this->tryAuthAPIToken();
-        if(Auth::user() == null)
-            return null;
-
-        return Webservice::getOrderInfo(
-            Input::get("order"),
-            Input::get("type")
-        );
+    public function getOrderInfo() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::getOrderInfo(Input::get("order"), Input::get("type"));
     }
 
     public function getVendorUsers(){
-        $this->tryAuthAPIToken();
-        if(Auth::user() == null)
-            return null;
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::getVendorUsers(Input::get("lifnr"));
+    }
 
-        return Webservice::getVendorUsers(
-            Input::get("lifnr")
+    public function sapActivateUser(){
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::sapActivateUser(Input::get("id"));
+    }
+
+    public function sapDeactivateUser() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::sapDeactivateUser(Input::get("id"));
+    }
+
+    public function sapCreateUser() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::sapCreateUser(
+            Input::get("id"),
+            Input::get("username"),
+            'Furnizor',
+            Input::get("email"),
+            Input::get("language"),
+            Input::get("lifnr"),
+            Input::get("password")
         );
+    }
+
+    public function sapDeleteUser() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::sapDeleteUser(Input::get("id"));
+    }
+
+    public function sapResetPassword() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return null;
+        return Webservice::changePassword(Input::get("id"), Input::get("password"));
     }
 
 }
