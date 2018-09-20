@@ -47,18 +47,18 @@ class Webservice {
             $links = DB::select("select * from porders where vbeln = '$order'");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
-                    $str = $link->ebeln;
+                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp";
                 else {
-                    $str = $link->ebeln . '=' . $str;
+                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp" . '=' . $str;
                 }
             }
         } else {
             $links = DB::select("select * from pitems where ebeln = '$order'");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
-                    $str = $link->ebelp;
+                    $str = "$link->ebelp#$link->posnr#$link->idnlf";
                 else {
-                    $str = $link->ebelp . "=" . $str;
+                    $str = "$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
                 }
             }
         }

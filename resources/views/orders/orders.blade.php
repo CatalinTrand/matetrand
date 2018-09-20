@@ -33,12 +33,15 @@
                         @endif
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body orders-table-div">
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <tr>
                                 <th>NOF</th>
                                 <th>Prioritate</th>
-                                <th>Comanda</th>
+                                <th>ID Comanda</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
                                 <th>Status</th>
                             </tr>
                             @php
@@ -97,7 +100,7 @@
                                     else
                                         $oid = $order->vbeln;
 
-                                    echo "<tr id='tr_$oid'><td>$nof</td><td>$prio</td><td>$comanda</td><td>$status</td></tr>";
+                                    echo "<tr id='tr_$oid'><td>$nof</td><td>$prio</td><td>$comanda</td><td></td><td></td><td></td><td>$status</td></tr>";
                                 }
                             @endphp
                         </table>
@@ -132,32 +135,73 @@
                 var split = _data.split('=');
                 split.forEach(function (_ord) {
                     if( type == 'sales-order') {
+                        var id = _ord.split('#')[0];
+                        var lifnr = _ord.split('#')[1];
+                        var lifnr_name = _ord.split('#')[2];
+                        var ekgrp = _ord.split('#')[3];
                         var newRow = $("<tr>");
                         var cols = "";
                         cols += '<td></td>';
                         cols += '<td></td>';
-                        cols += "<td id='tr_" + _ord + "' ><button style='margin-left:50px;' type='button' id='btn_" + _ord + "' onclick=\"loadSub(\'" + _ord + "',\'purch-order\',this);\">+</button> " + _ord + "</td>";
+                        cols += "<td id='tr_" + id + "' ><button style='margin-left:50px;' type='button' id='btn_" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this);\">+</button> " + id + "</td>";
+                        cols += '<td>'+lifnr+'</td>';
+                        cols += '<td>'+lifnr_name+'</td>';
+                        cols += '<td>'+ekgrp+'</td>';
                         cols += "<td><image src='/images/status.png'></td>";
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('id', "tr_" + _ord);
+                        newRow.attr('id', "tr_" + id);
                     } else {
+                            var id = _ord.split('#')[0];
+                            var posnr = _ord.split('#')[1];
+                            var idnlf = _ord.split('#')[2];
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td></td>';
                             cols += '<td></td>';
-                            cols += "<td><div style='margin-left: 100px'>"+_ord+"</div></td>";
-                            cols += "<td><image src='/images/status.png'></td>";
+                            cols += "<td><div style='margin-left: 100px'>"+id+"</div></td>";
+                            cols += '<td>'+posnr+'</td>';
+                            cols += '<td>'+idnlf+'</td>';
+                            cols += '<td></td>';
+                            cols += "<td></td>";
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
+                            newRow.attr('id', "tr_" + id);
                     }
                 });
+                if( type == 'sales-order') {
+                    var newRow = $("<tr>");
+                    var cols = "";
+                    cols += '<td></td>';
+                    cols += '<td></td>';
+                    cols += '<td><b style="margin-left: 50px">ID Comanda Vanzare</b></td>';
+                    cols += '<td><b>ID Furnizor</b></td>';
+                    cols += '<td><b>Nume Furnizor</b></td>';
+                    cols += '<td><b>Grup Material</b></td>';
+                    cols += '<td><b></b></td>';
+                    newRow.append(cols);
+                    newRow.insertAfter($(_this).closest("tr"));
+                }
+                if(type == 'purch-order'){
+                    var newRow = $("<tr>");
+                    var cols = "";
+                    cols += '<td></td>';
+                    cols += '<td></td>';
+                    cols += '<td><b style="margin-left: 100px">ID Item</b></td>';
+                    cols += '<td><b>Posnr</b></td>';
+                    cols += '<td><b>IDNLF</b></td>';
+                    cols += '<td><b></b></td>';
+                    cols += '<td><b></b></td>';
+                    newRow.append(cols);
+                    newRow.insertAfter($(_this).closest("tr"));
+                }
                 _btn.innerHTML = '-';
                 _btn.onclick = function(){ hideSub(item,type,_btn); return false;};
             } else {
                 alert('Error processing operation!');
             }
         }
+
         function hideSub(item,type,_btn){
             var table = document.getElementById('orders_table');
             var started = false;
