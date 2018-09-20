@@ -2,10 +2,12 @@
 
 namespace App\Materom;
 
-use Illuminate\Foundation\Auth\User;
+use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+
 
 class Webservice {
 
@@ -23,8 +25,7 @@ class Webservice {
         } else return "Vendor already defined for this user";
     }
 
-    static public function changePassword($userid, $newPass)
-    {
+    static public function changePassword($userid, $newPass) {
         $hash = Hash::make($newPass);
         DB::update("update users set password = '$hash' where id = '$userid'");
         return "";
@@ -40,8 +41,7 @@ class Webservice {
         return false;
     }
 
-    static public function getOrderInfo($order, $type)
-    {
+    static public function getOrderInfo($order, $type) {
         $str = "";
         if (strcmp($type, 'sales-order') == 0) {
             $links = DB::select("select * from porders where vbeln = '$order'");
@@ -100,4 +100,26 @@ class Webservice {
         DB::update("update users set active = 0 where id ='$id'");
         return "OK";
     }
+
+    static public function sapCreateUser($id, $username, $role, $email, $language, $lifnr, $password) {
+        $users = DB::select("select * from users where id ='$id'");
+        if (count($users) != 0) return "User already exists";
+        User::create([
+            'id'       => $id,
+            'username' => $username,
+            'role'     => $role,
+            'email'    => $email,
+            'lang'     => $language,
+            'lifnr'    => $lifnr,
+            'password' => Hash::make($password),
+            'created_at' => Carbon::now()->getTimestamp()
+        ]);
+        return "OK";
+    }
+
+    static public function sapDeleteUser($id) {
+        return "Not yet implemented";
+    }
+
+
 }
