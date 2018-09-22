@@ -17,13 +17,13 @@ class OrdersTableSeeder extends Seeder
         DB::delete("delete from porders");
         DB::insert("insert into porders (nof, wtime, ctime, vbeln, ebeln, ekgrp, lifnr, lifnr_name)" .
             " values (FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
-            "         'S000000001', 'P000000001', 'A01', '000020786', 'Furnizor 20786')");
+            "         'S000000001', 'P000000001', 'A01', '0000020786', 'Furnizor 20786')");
         DB::insert("insert into porders (nof, wtime, ctime, vbeln, ebeln, ekgrp, lifnr, lifnr_name)" .
             " values (FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
-            "         'S000000001', 'P000000002', 'A01', '000020786', 'Furnizor 20786')");
+            "         'S000000001', 'P000000002', 'A01', '0000020786', 'Furnizor 20786')");
         DB::insert("insert into porders (nof, wtime, ctime, vbeln, ebeln, ekgrp, lifnr, lifnr_name)" .
             " values (FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
-            "         'S000000002', 'P000000003', 'A02', '000020786', 'Furnizor 20786')");
+            "         'S000000002', 'P000000003', 'A02', '0000020786', 'Furnizor 20786')");
 
         DB::insert("insert into pitems (ebeln, ebelp, posnr, idnlf)" .
             " values ('P000000001', '00010', '00010', 'IDNLF1')");
