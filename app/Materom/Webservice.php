@@ -52,13 +52,22 @@ class Webservice {
                     $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp" . '=' . $str;
                 }
             }
-        } else {
+        } else if (strcmp($type, 'purch-order') == 0){
             $links = DB::select("select * from pitems where ebeln = '$order'");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
                     $str = "$link->ebelp#$link->posnr#$link->idnlf";
                 else {
                     $str = "$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+                }
+            }
+        } else {
+            $links = DB::select("select * from pitemchg where ebelp = '$order'");
+            foreach ($links as $link) {
+                if (strcmp($str, '') == 0)
+                    $str = "$link->ctype#$link->oldval#$link->newval#$link->cuser_name";
+                else {
+                    $str = "$link->ctype#$link->oldval#$link->newval#$link->cuser_name" . '=' . $str;
                 }
             }
         }

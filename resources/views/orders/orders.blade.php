@@ -151,7 +151,7 @@
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
                         newRow.attr('id', "tr_" + id);
-                    } else {
+                    } else if(type == 'purch-order'){
                             var id = _ord.split('#')[0];
                             var posnr = _ord.split('#')[1];
                             var idnlf = _ord.split('#')[2];
@@ -159,7 +159,7 @@
                             var cols = "";
                             cols += '<td></td>';
                             cols += '<td></td>';
-                            cols += "<td><div style='margin-left: 100px'>"+id+"</div></td>";
+                            cols += "<td><button style='margin-left:100px;' type='button' id='btn_" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-item\',this);\">+</button> "+id+"</td>";
                             cols += '<td>'+posnr+'</td>';
                             cols += '<td>'+idnlf+'</td>';
                             cols += '<td></td>';
@@ -167,6 +167,23 @@
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
                             newRow.attr('id', "tr_" + id);
+                    } else {
+                        var col = _ord.split('#')[0];
+                        var oldVal = _ord.split('#')[1];
+                        var newVal = _ord.split('#')[2];
+                        var modBy = _ord.split('#')[3];
+                        var newRow = $("<tr>");
+                        var cols = "";
+                        cols += '<td></td>';
+                        cols += '<td></td>';
+                        cols += "<td><div style='margin-left:150px;'>"+col+"</div></td>";
+                        cols += '<td>'+oldVal+'</td>';
+                        cols += '<td>'+newVal+'</td>';
+                        cols += '<td>'+modBy+'</td>';
+                        cols += "<td></td>";
+                        newRow.append(cols);
+                        newRow.insertAfter($(_this).closest("tr"));
+                        newRow.attr('id', "tr_" + col + "-" + oldVal + "-" + newVal);
                     }
                 });
                 if( type == 'sales-order') {
@@ -191,6 +208,19 @@
                     cols += '<td><b>Posnr</b></td>';
                     cols += '<td><b>IDNLF</b></td>';
                     cols += '<td><b></b></td>';
+                    cols += '<td><b></b></td>';
+                    newRow.append(cols);
+                    newRow.insertAfter($(_this).closest("tr"));
+                }
+                if(type == 'purch-item'){
+                    var newRow = $("<tr>");
+                    var cols = "";
+                    cols += '<td></td>';
+                    cols += '<td></td>';
+                    cols += '<td><b style="margin-left: 150px">CType</b></td>';
+                    cols += '<td><b>Old Value</b></td>';
+                    cols += '<td><b>New Value</b></td>';
+                    cols += '<td><b>Modfied by</b></td>';
                     cols += '<td><b></b></td>';
                     newRow.append(cols);
                     newRow.insertAfter($(_this).closest("tr"));
