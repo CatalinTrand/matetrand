@@ -28,7 +28,7 @@ class Webservice {
     static public function changePassword($userid, $newPass) {
         $hash = Hash::make($newPass);
         DB::update("update users set password = '$hash' where id = '$userid'");
-        return "";
+        return "OK";
     }
 
     static public function verifyAPIToken($token){
@@ -118,8 +118,22 @@ class Webservice {
     }
 
     static public function sapDeleteUser($id) {
+        $users = DB::select("select * from users where id ='$id'");
+        if (count($users) == 0) return "User does not exist";
+        $user = $users[0];
+        DB::delete("delete from users where id ='$id'");
+        $users = DB::select("select * from users where id ='$id'");
+        if (count($users) != 0) return "User deletion failed";
+        DB::delete("delete from porders where id ='$id'\"");
+        return "OK";
+    }
+
+    static public function sapGetUserMakers($userid) {
         return "Not yet implemented";
     }
 
+    static public function sapGetInvolvedUsers($lifnr, $ekgrp, $sapuser) {
+        return "Not yet implemented";
+    }
 
 }

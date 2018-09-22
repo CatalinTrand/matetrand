@@ -117,7 +117,7 @@
                                     <a href="/users" style="padding-left: 30px;padding-top: 3px">Reset</a>
                                 </div>
                             </form>
-                            <table class="basicTable table table-striped" style="width:100%;clear:left;">
+                            <table id="user-list-table" class="basicTable table table-striped" style="width:100%;clear:left;">
                                 <tr>
                                     <th><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a href="/users?sort=ID&val=asc">&#x25B2;</a>
                                     </th>
@@ -247,10 +247,12 @@
                             });
                         jQuery.ajaxSetup({async: true});
 
-                        if (passwordStatus == "success" && passwordData == "")
+                        if (passwordStatus == "success" && passwordData == "OK") {
                             newPasswordDialog.dialog("close");
+                            // $("#app").prepend("<div class='alert alert-success'><b class='blinking-text'>Password successfully changed</b></div>");
+                        }
                         else {
-                            if (passwordData != "")
+                            if (passwordData != "OK")
                                 $("#new_password_msg").text(passwordData);
                             else $("#new_password_msg").text("An error occured updating the password");
                         }
@@ -264,9 +266,9 @@
                     location.replace(location.pathname + "?id=" + passwordUser);
                 },
                 position: {
-                    my:'center',
-                    of:'center',
-                    collison:'fit'
+                    my: 'top',
+                    at: 'middle',
+                    of: $('#user-list-table')
                 }
             });
             $("#new_password").on('input', function () {

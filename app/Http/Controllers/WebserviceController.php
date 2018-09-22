@@ -82,9 +82,13 @@ class WebserviceController extends Controller
         return Webservice::sapDeleteUser(Input::get("id"));
     }
 
-    public function sapResetPassword() {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return null;
-        return Webservice::changePassword(Input::get("id"), Input::get("password"));
+    public function sapGetInvolvedUsers() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::sapGetInvolvedUsers(
+            Input::get("lifnr"),
+            Input::get("ekgrp"),
+            Input::get("sapuser")
+        );
     }
 
 }

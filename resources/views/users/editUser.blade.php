@@ -410,7 +410,7 @@
                         } else {
                             if (vendorData != "")
                                 $("#new_sel_msg").text(followUpData);
-                            else $("#new_sel_msg").text("An error occured checking/creating the follower");
+                            else $("#new_sel_msg").text("An error occured checking/creating the maker selections");
                         }
                     },
                     Cancel: function () {
@@ -437,7 +437,7 @@
 
         function new_vendor_id(userid) {
             $("#new_sel_msg").text("");
-            $("#new-vendor-dialog").dialog('option', 'title', 'Define new vendor for ' + userid);
+            $("#new-vendor-dialog").dialog('option', 'title', 'Define new maker selection for ' + userid);
             vendorForUser = userid;
             newVendorDialog.dialog("open");
         }

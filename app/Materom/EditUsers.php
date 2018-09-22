@@ -3,7 +3,7 @@
 namespace App\Materom;
 use Illuminate\Support\Facades\DB;
 
-class EditUsers{
+class EditUsers {
 
     static function editUser($id, $role, $user, $token, $lang, $sapuser, $lifnr, $ekgrp, $active, $email){
 
