@@ -36,8 +36,8 @@
                     <div class="card-body orders-table-div">
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <tr>
-                                <th>NOF</th>
-                                <th>Prioritate</th>
+                                <th style="width: 1.2rem">NOF</th>
+                                <th style="width: 1.2rem">Prio</th>
                                 <th>ID Comanda</th>
                                 <th></th>
                                 <th></th>
@@ -48,11 +48,10 @@
                                 use Illuminate\Support\Facades\DB;
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
 
+                                $orders = \App\User::getOrders($id);
                                 if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
-                                    $orders = DB::select("select * from porders where id = '$id'");
                                     $furnizor = true;
                                 } else {
-                                    $orders = DB::select("select * from porders");
                                     $furnizor = false;
                                 }
 
@@ -65,17 +64,17 @@
                                         else
                                             continue;
 
-                                        $comanda = "<button type='button' id='btn_$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this); return false;'>+</button> $order->ebeln";
+                                        $comanda = "<button type='button' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"\"); return false;'>+</button> $order->ebeln";
                                     } else {
                                         if(strchr($seen,$order->vbeln) == null)
                                             $seen.= " $order->vbeln";
                                         else
                                             continue;
 
-                                        $comanda = "<button type='button' id='btn_$order->vbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this); return false;'>+</button> $order->vbeln";
+                                        $comanda = "<button type='button' id='btn_S$order->vbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $order->vbeln";
                                     }
                                     if($order->nof)
-                                        $nof = "<image src='/images/nof.png'>";
+                                        $nof = "<image style='height: 1rem;' src='/images/nof.png'>";
                                     else
                                         $nof = "";
 
@@ -87,18 +86,18 @@
                                     if($interval_wtime > 0){
                                         $interval_ctime = $now - $ctime;
                                         if($interval_ctime > 0){
-                                            $prio = "<image src='/images/critical.png'>";
+                                            $prio = "<image style='height: 1rem;' src='/images/critical.png'>";
                                         } else {
-                                            $prio = "<image src='/images/warning.png'>";
+                                            $prio = "<image style='height: 1rem;' src='/images/warning.png'>";
                                         }
                                     } else $prio = "None";
 
-                                    $status = "<image src='/images/status.png'>"; //TODO
+                                    $status = "<image style='height: 1rem;' src='/images/status.png'>"; //TODO
 
                                     if($furnizor)
-                                        $oid = $order->ebeln;
+                                        $oid = "P" . $order->ebeln;
                                     else
-                                        $oid = $order->vbeln;
+                                        $oid = "S" . $order->vbeln;
 
                                     echo "<tr id='tr_$oid'><td>$nof</td><td>$prio</td><td>$comanda</td><td></td><td></td><td></td><td>$status</td></tr>";
                                 }
@@ -110,9 +109,12 @@
         </div>
     </div>
     <script>
-        function loadSub(item, type, _btn) {
+        function loadSub(item, type, _btn, ebelp) {
             var _data, _status;
-            var _this = document.getElementById("tr_"+item);
+            var _this;
+            if (type == "sales-order") _this = document.getElementById("tr_S" + item);
+            if (type == "purch-order") _this = document.getElementById("tr_P" + item);
+            if (type == "purch-item")  _this = document.getElementById("tr_I" + item + "_" + ebelp);
 
             $.ajaxSetup({
                 headers: {
@@ -124,7 +126,8 @@
             $.post("webservice/getOrderInfo",
                 {
                     order: item,
-                    type: type
+                    type: type,
+                    item: ebelp
                 },
                 function (data, status) {
                     _data = data;
@@ -143,35 +146,38 @@
                         var cols = "";
                         cols += '<td></td>';
                         cols += '<td></td>';
-                        cols += "<td id='tr_" + id + "' ><button style='margin-left:50px;' type='button' id='btn_" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this);\">+</button> " + id + "</td>";
+                        cols += "<td><button style='margin-left:50px;' type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
                         cols += '<td>'+lifnr+'</td>';
                         cols += '<td>'+lifnr_name+'</td>';
                         cols += '<td>'+ekgrp+'</td>';
-                        cols += "<td><image src='/images/status.png'></td>";
+                        cols += "<td><image style='height: 1rem;' src='/images/status.png'></td>";
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('id', "tr_" + id);
+                        newRow.attr('id', "tr_P" + id);
                     } else if(type == 'purch-order'){
-                            var id = _ord.split('#')[0];
-                            var posnr = _ord.split('#')[1];
-                            var idnlf = _ord.split('#')[2];
+                            var ebeln2 = _ord.split('#')[0];
+                            var id = _ord.split('#')[1];
+                            var posnr = _ord.split('#')[2];
+                            var idnlf = _ord.split('#')[3];
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td></td>';
                             cols += '<td></td>';
-                            cols += "<td><button style='margin-left:100px;' type='button' id='btn_" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-item\',this);\">+</button> "+id+"</td>";
+                            cols += "<td><button style='margin-left:100px;' type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> "+id+"</td>";
                             cols += '<td>'+posnr+'</td>';
                             cols += '<td>'+idnlf+'</td>';
                             cols += '<td></td>';
                             cols += "<td></td>";
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
-                            newRow.attr('id', "tr_" + id);
-                    } else {
-                        var col = _ord.split('#')[0];
-                        var oldVal = _ord.split('#')[1];
-                        var newVal = _ord.split('#')[2];
-                        var modBy = _ord.split('#')[3];
+                            newRow.attr('id', "tr_I" + ebeln2 + "_" + id);
+                    } else if (type == 'purch-item') {
+                        var ebeln3 = _ord.split('#')[0];
+                        var ebelp3 = _ord.split('#')[1];
+                        var col = _ord.split('#')[2];
+                        var oldVal = _ord.split('#')[3];
+                        var newVal = _ord.split('#')[4];
+                        var modBy = _ord.split('#')[5];
                         var newRow = $("<tr>");
                         var cols = "";
                         cols += '<td></td>';
@@ -183,7 +189,7 @@
                         cols += "<td></td>";
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('id', "tr_" + col + "-" + oldVal + "-" + newVal);
+                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" + col + "-" + oldVal + "-" + newVal);
                     }
                 });
                 if( type == 'sales-order') {
@@ -226,27 +232,34 @@
                     newRow.insertAfter($(_this).closest("tr"));
                 }
                 _btn.innerHTML = '-';
-                _btn.onclick = function(){ hideSub(item,type,_btn); return false;};
+                _btn.onclick = function(){ hideSub(item,type,_btn,ebelp); return false;};
             } else {
                 alert('Error processing operation!');
             }
         }
 
-        function hideSub(item,type,_btn){
+        function hideSub(item,type,_btn,ebelp){
             var table = document.getElementById('orders_table');
+            var tr_id = "";
+            if (type == "sales-order") tr_id = "tr_S" + item;
+            if (type == "purch-order") tr_id = "tr_P" + item;
+            if (type == "purch-item")  tr_id = "tr_I" + item + "_" + ebelp;
+
             var started = false;
             for (i = 0; i < table.rows.length; i++) {
                 if(started){
                     if(table.rows[i].innerHTML.includes(type) || table.rows[i].innerHTML.includes('sales-order'))
                         break;
+                    if (type == "purch-item")
+                        if(table.rows[i].innerHTML.includes(type) || table.rows[i].innerHTML.includes('purch-order'))
+                            break;
                     table.deleteRow(i);
                     i--;
                 }
-                if(table.rows[i].id == 'tr_'+item )
-                    started = true;
+                if(table.rows[i].id == tr_id ) started = true;
             }
             _btn.innerHTML = '+';
-            _btn.onclick = function(){ loadSub(item,type,_btn); return false;};
+            _btn.onclick = function(){ loadSub(item,type,_btn, ebelp); return false;};
         }
     </script>
 @endsection

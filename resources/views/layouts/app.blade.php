@@ -158,10 +158,14 @@
             margin-bottom: 0rem;
         }
 
-        .orders-table{
+        .orders-table {
             margin-top: 1vw;
             width: 100%;
             border: 1px solid black;
+            line-height: 1rem;
+        }
+        .orders-table td, .orders-table th {
+            padding: 0.2rem;
         }
 
     </style>

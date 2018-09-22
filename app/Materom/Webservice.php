@@ -41,10 +41,10 @@ class Webservice {
         return false;
     }
 
-    static public function getOrderInfo($order, $type) {
+    static public function getOrderInfo($order, $type, $item) {
         $str = "";
         if (strcmp($type, 'sales-order') == 0) {
-            $links = DB::select("select * from porders where vbeln = '$order'");
+            $links = DB::select("select * from porders where vbeln = '$order' order by ebeln");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
                     $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp";
@@ -53,21 +53,21 @@ class Webservice {
                 }
             }
         } else if (strcmp($type, 'purch-order') == 0){
-            $links = DB::select("select * from pitems where ebeln = '$order'");
+            $links = DB::select("select * from pitems where ebeln = '$order' order by ebelp");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
-                    $str = "$link->ebelp#$link->posnr#$link->idnlf";
+                    $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
                 else {
-                    $str = "$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+                    $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
                 }
             }
         } else {
-            $links = DB::select("select * from pitemchg where ebelp = '$order'");
+            $links = DB::select("select * from pitemchg where ebeln = '$order' and ebelp = '$item' order by cdate desc");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
-                    $str = "$link->ctype#$link->oldval#$link->newval#$link->cuser_name";
+                    $str = "$link->ebeln#$link->ebelp#$link->ctype#$link->oldval#$link->newval#$link->cuser_name";
                 else {
-                    $str = "$link->ctype#$link->oldval#$link->newval#$link->cuser_name" . '=' . $str;
+                    $str = "$link->ebeln#$link->ebelp#$link->ctype#$link->oldval#$link->newval#$link->cuser_name" . '=' . $str;
                 }
             }
         }
@@ -133,7 +133,6 @@ class Webservice {
         DB::delete("delete from users where id ='$id'");
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) != 0) return "User deletion failed";
-        DB::delete("delete from porders where id ='$id'\"");
         return "OK";
     }
 

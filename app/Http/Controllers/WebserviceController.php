@@ -46,7 +46,7 @@ class WebserviceController extends Controller
 
     public function getOrderInfo() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
-        return Webservice::getOrderInfo(Input::get("order"), Input::get("type"));
+        return Webservice::getOrderInfo(Input::get("order"), Input::get("type"), Input::get("item"));
     }
 
     public function getVendorUsers(){
