@@ -82,13 +82,9 @@ class WebserviceController extends Controller
         return Webservice::sapDeleteUser(Input::get("id"));
     }
 
-    public function sapGetInvolvedUsers() {
+    public function sapProcessPO() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
-        return Webservice::sapGetInvolvedUsers(
-            Input::get("lifnr"),
-            Input::get("ekgrp"),
-            Input::get("sapuser")
-        );
+        return Webservice::sapProcessPO(Input::get("ebeln"));
     }
 
 }

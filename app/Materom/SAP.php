@@ -33,10 +33,35 @@ class SAP
             $sapfm = $sapconn->getFunction('ZSRM_RFC_SET_API_TOKEN');
             $returnValue = $sapfm->invoke(['API_TOKEN' => $api_token]);
             $sapconn->close();
-            Log::info("SAPRFC: Updated API token");
+            Log::info("SAPRFC (UpdateAPIToken): Successfully updated API token");
         } catch (\SAPNWRFC\Exception $e) {
-            Log::error("SAPRFC:" . $e->getErrorInfo());
+            Log::error("SAPRFC (UpdateAPIToken):" . $e->getErrorInfo());
         }
-
     }
+
+    static public function rfcGetPOData($ebeln) {
+
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            \SAPNWRFC\Connection::setTraceLevel(3);
+            \SAPNWRFC\Connection::setTraceDir("/home/srm.materom.ro/public/storage/logs");
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_PO_DATA');
+            $returnValue = $sapfm->invoke(['P_EBELN' => $ebeln,
+                                           'RESULT2' => '']);
+            $sapconn->close();
+            return $returnValue;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+    }
+
 };

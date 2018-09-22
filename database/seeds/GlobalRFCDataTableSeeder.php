@@ -14,8 +14,10 @@ class GlobalRFCDataTableSeeder extends Seeder
     {
         //
         DB::delete("delete from global_rfc_config");
-        DB::insert("insert into global_rfc_config (rfc_router,rfc_server,rfc_sysnr,rfc_client)" .
-            " values ('/H/91.239.173.2/H/','192.168.3.42','00','200')");
+//        DB::insert("insert into global_rfc_config (rfc_router, rfc_server, rfc_sysnr, rfc_client)" .
+//            " values ('/H/91.239.173.2/H/','192.168.3.42','00','200')");
+        DB::insert("insert into global_rfc_config (rfc_router, rfc_server, rfc_sysnr, rfc_client)" .
+            " values ('','192.168.3.42','00','200')");
 
     }
 }

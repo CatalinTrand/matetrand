@@ -140,8 +140,9 @@ class Webservice {
         return "Not yet implemented";
     }
 
-    static public function sapGetInvolvedUsers($lifnr, $ekgrp, $sapuser) {
-        return "Not yet implemented";
+    static public function sapProcessPO($ebeln) {
+        $data = SAP::rfcGetPOData($ebeln);
+        return $data;
     }
 
 }
