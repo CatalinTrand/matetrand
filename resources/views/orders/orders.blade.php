@@ -174,7 +174,7 @@
                     } else if (type == 'purch-item') {
                         var ebeln3 = _ord.split('#')[0];
                         var ebelp3 = _ord.split('#')[1];
-                        var col = _ord.split('#')[2];
+                        var chdate = _ord.split('#')[2];
                         var oldVal = _ord.split('#')[3];
                         var newVal = _ord.split('#')[4];
                         var modBy = _ord.split('#')[5];
@@ -182,14 +182,15 @@
                         var cols = "";
                         cols += '<td></td>';
                         cols += '<td></td>';
-                        cols += "<td><div style='margin-left:150px;'>"+col+"</div></td>";
+                        cols += "<td><div style='margin-left:150px;'>"+chdate+"</div></td>";
                         cols += '<td>'+oldVal+'</td>';
                         cols += '<td>'+newVal+'</td>';
                         cols += '<td>'+modBy+'</td>';
                         cols += "<td></td>";
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" + col + "-" + oldVal + "-" + newVal);
+                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
+                            chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
                     }
                 });
                 if( type == 'sales-order') {
@@ -197,7 +198,7 @@
                     var cols = "";
                     cols += '<td></td>';
                     cols += '<td></td>';
-                    cols += '<td><b style="margin-left: 50px">ID Comanda Vanzare</b></td>';
+                    cols += '<td><b style="margin-left: 50px">Comanda aprovizionare</b></td>';
                     cols += '<td><b>ID Furnizor</b></td>';
                     cols += '<td><b>Nume Furnizor</b></td>';
                     cols += '<td><b>Grup Material</b></td>';
@@ -210,7 +211,7 @@
                     var cols = "";
                     cols += '<td></td>';
                     cols += '<td></td>';
-                    cols += '<td><b style="margin-left: 100px">ID Item</b></td>';
+                    cols += '<td><b style="margin-left: 100px">Pozitie</b></td>';
                     cols += '<td><b>Posnr</b></td>';
                     cols += '<td><b>IDNLF</b></td>';
                     cols += '<td><b></b></td>';
@@ -223,7 +224,7 @@
                     var cols = "";
                     cols += '<td></td>';
                     cols += '<td></td>';
-                    cols += '<td><b style="margin-left: 150px">CType</b></td>';
+                    cols += '<td><b style="margin-left: 150px">Change date</b></td>';
                     cols += '<td><b>Old Value</b></td>';
                     cols += '<td><b>New Value</b></td>';
                     cols += '<td><b>Modfied by</b></td>';

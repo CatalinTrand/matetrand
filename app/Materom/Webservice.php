@@ -65,9 +65,9 @@ class Webservice {
             $links = DB::select("select * from pitemchg where ebeln = '$order' and ebelp = '$item' order by cdate desc");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
-                    $str = "$link->ebeln#$link->ebelp#$link->ctype#$link->oldval#$link->newval#$link->cuser_name";
+                    $str = "$link->ebeln#$link->ebelp#$link->cdate#$link->oldval#$link->newval#$link->cuser_name";
                 else {
-                    $str = "$link->ebeln#$link->ebelp#$link->ctype#$link->oldval#$link->newval#$link->cuser_name" . '=' . $str;
+                    $str = "$link->ebeln#$link->ebelp#$link->cdate#$link->oldval#$link->newval#$link->cuser_name" . '=' . $str;
                 }
             }
         }
