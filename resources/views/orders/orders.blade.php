@@ -94,12 +94,15 @@
 
                                     $status = "<image style='height: 1rem;' src='/images/status.png'>"; //TODO
 
-                                    if($furnizor)
+                                    if($furnizor){
                                         $oid = "P" . $order->ebeln;
-                                    else
+                                        $style = "background-color:LightYellow";
+                                    }else{
                                         $oid = "S" . $order->vbeln;
+                                        $style = "background-color:white";
+                                    }
 
-                                    echo "<tr id='tr_$oid'><td>$nof</td><td>$prio</td><td>$comanda</td><td></td><td></td><td></td><td>$status</td></tr>";
+                                    echo "<tr id='tr_$oid' style='$style'><td>$nof</td><td>$prio</td><td>$comanda</td><td></td><td></td><td></td><td>$status</td></tr>";
                                 }
                             @endphp
                         </table>
@@ -135,26 +138,28 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success" ) {
-                var split = _data.split('=');
-                split.forEach(function (_ord) {
-                    if( type == 'sales-order') {
-                        var id = _ord.split('#')[0];
-                        var lifnr = _ord.split('#')[1];
-                        var lifnr_name = _ord.split('#')[2];
-                        var ekgrp = _ord.split('#')[3];
-                        var newRow = $("<tr>");
-                        var cols = "";
-                        cols += '<td></td>';
-                        cols += '<td></td>';
-                        cols += "<td><button style='margin-left:50px;' type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
-                        cols += '<td>'+lifnr+'</td>';
-                        cols += '<td>'+lifnr_name+'</td>';
-                        cols += '<td>'+ekgrp+'</td>';
-                        cols += "<td><image style='height: 1rem;' src='/images/status.png'></td>";
-                        newRow.append(cols);
-                        newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('id', "tr_P" + id);
-                    } else if(type == 'purch-order'){
+                if(_data.length > 0) {
+                    var split = _data.split('=');
+                    split.forEach(function (_ord) {
+                        if (type == 'sales-order') {
+                            var id = _ord.split('#')[0];
+                            var lifnr = _ord.split('#')[1];
+                            var lifnr_name = _ord.split('#')[2];
+                            var ekgrp = _ord.split('#')[3];
+                            var newRow = $("<tr>");
+                            var cols = "";
+                            cols += '<td></td>';
+                            cols += '<td></td>';
+                            cols += "<td><button style='margin-left:50px;' type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
+                            cols += '<td>' + lifnr + '</td>';
+                            cols += '<td>' + lifnr_name + '</td>';
+                            cols += '<td>' + ekgrp + '</td>';
+                            cols += "<td><image style='height: 1rem;' src='/images/status.png'></td>";
+                            newRow.append(cols);
+                            newRow.insertAfter($(_this).closest("tr"));
+                            newRow.attr('style', "background-color:LightYellow");
+                            newRow.attr('id', "tr_P" + id);
+                        } else if (type == 'purch-order') {
                             var ebeln2 = _ord.split('#')[0];
                             var id = _ord.split('#')[1];
                             var posnr = _ord.split('#')[2];
@@ -163,77 +168,89 @@
                             var cols = "";
                             cols += '<td></td>';
                             cols += '<td></td>';
-                            cols += "<td><button style='margin-left:100px;' type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> "+id+"</td>";
-                            cols += '<td>'+posnr+'</td>';
-                            cols += '<td>'+idnlf+'</td>';
+                            cols += "<td><button style='margin-left:100px;' type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
+                            cols += '<td>' + posnr + '</td>';
+                            cols += '<td>' + idnlf + '</td>';
                             cols += '<td></td>';
                             cols += "<td></td>";
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
+                            newRow.attr('style', "background-color:PaleGreen");
                             newRow.attr('id', "tr_I" + ebeln2 + "_" + id);
-                    } else if (type == 'purch-item') {
-                        var ebeln3 = _ord.split('#')[0];
-                        var ebelp3 = _ord.split('#')[1];
-                        var chdate = _ord.split('#')[2];
-                        var oldVal = _ord.split('#')[3];
-                        var newVal = _ord.split('#')[4];
-                        var modBy = _ord.split('#')[5];
+                        } else if (type == 'purch-item') {
+                            var ebeln3 = _ord.split('#')[0];
+                            var ebelp3 = _ord.split('#')[1];
+                            var chdate = _ord.split('#')[2];
+                            var oldVal = _ord.split('#')[3];
+                            var newVal = _ord.split('#')[4];
+                            var modBy = _ord.split('#')[5];
+                            if (chdate != null && modBy != null) {
+                                var newRow = $("<tr>");
+                                var cols = "";
+                                cols += '<td></td>';
+                                cols += '<td></td>';
+                                cols += "<td><div style='margin-left:150px;'>" + chdate + "</div></td>";
+                                cols += '<td>' + oldVal + '</td>';
+                                cols += '<td>' + newVal + '</td>';
+                                cols += '<td>' + modBy + '</td>';
+                                cols += "<td></td>";
+                                newRow.append(cols);
+                                newRow.insertAfter($(_this).closest("tr"));
+                                newRow.attr('style', "background-color:LightBlue");
+                                newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
+                                    chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
+                            }
+                        }
+                    });
+                    if (type == 'sales-order') {
                         var newRow = $("<tr>");
                         var cols = "";
                         cols += '<td></td>';
                         cols += '<td></td>';
-                        cols += "<td><div style='margin-left:150px;'>"+chdate+"</div></td>";
-                        cols += '<td>'+oldVal+'</td>';
-                        cols += '<td>'+newVal+'</td>';
-                        cols += '<td>'+modBy+'</td>';
-                        cols += "<td></td>";
+                        cols += '<td><b style="margin-left: 50px">Comanda aprovizionare</b></td>';
+                        cols += '<td><b>ID Furnizor</b></td>';
+                        cols += '<td><b>Nume Furnizor</b></td>';
+                        cols += '<td><b>Grup Material</b></td>';
+                        cols += '<td><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
-                            chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
+                        newRow.attr('style', "background-color:LightYellow");
                     }
-                });
-                if( type == 'sales-order') {
-                    var newRow = $("<tr>");
-                    var cols = "";
-                    cols += '<td></td>';
-                    cols += '<td></td>';
-                    cols += '<td><b style="margin-left: 50px">Comanda aprovizionare</b></td>';
-                    cols += '<td><b>ID Furnizor</b></td>';
-                    cols += '<td><b>Nume Furnizor</b></td>';
-                    cols += '<td><b>Grup Material</b></td>';
-                    cols += '<td><b></b></td>';
-                    newRow.append(cols);
-                    newRow.insertAfter($(_this).closest("tr"));
+                    if (type == 'purch-order') {
+                        var newRow = $("<tr>");
+                        var cols = "";
+                        cols += '<td></td>';
+                        cols += '<td></td>';
+                        cols += '<td><b style="margin-left: 100px">Pozitie</b></td>';
+                        cols += '<td><b>Posnr</b></td>';
+                        cols += '<td><b>IDNLF</b></td>';
+                        cols += '<td><b></b></td>';
+                        cols += '<td><b></b></td>';
+                        newRow.append(cols);
+                        newRow.insertAfter($(_this).closest("tr"));
+                        newRow.attr('style', "background-color:PaleGreen");
+                    }
+                    if (type == 'purch-item') {
+                        var newRow = $("<tr>");
+                        var cols = "";
+                        cols += '<td></td>';
+                        cols += '<td></td>';
+                        cols += '<td><b style="margin-left: 150px">Change date</b></td>';
+                        cols += '<td><b>Old Value</b></td>';
+                        cols += '<td><b>New Value</b></td>';
+                        cols += '<td><b>Modfied by</b></td>';
+                        cols += '<td><b></b></td>';
+                        newRow.append(cols);
+                        newRow.insertAfter($(_this).closest("tr"));
+                        newRow.attr('style', "background-color:LightBlue");
+                    }
                 }
-                if(type == 'purch-order'){
-                    var newRow = $("<tr>");
-                    var cols = "";
-                    cols += '<td></td>';
-                    cols += '<td></td>';
-                    cols += '<td><b style="margin-left: 100px">Pozitie</b></td>';
-                    cols += '<td><b>Posnr</b></td>';
-                    cols += '<td><b>IDNLF</b></td>';
-                    cols += '<td><b></b></td>';
-                    cols += '<td><b></b></td>';
-                    newRow.append(cols);
-                    newRow.insertAfter($(_this).closest("tr"));
-                }
-                if(type == 'purch-item'){
-                    var newRow = $("<tr>");
-                    var cols = "";
-                    cols += '<td></td>';
-                    cols += '<td></td>';
-                    cols += '<td><b style="margin-left: 150px">Change date</b></td>';
-                    cols += '<td><b>Old Value</b></td>';
-                    cols += '<td><b>New Value</b></td>';
-                    cols += '<td><b>Modfied by</b></td>';
-                    cols += '<td><b></b></td>';
-                    newRow.append(cols);
-                    newRow.insertAfter($(_this).closest("tr"));
-                }
-                _btn.innerHTML = '-';
-                _btn.onclick = function(){ hideSub(item,type,_btn,ebelp); return false;};
+                    _btn.innerHTML = '-';
+                    _btn.onclick = function () {
+                        hideSub(item, type, _btn, ebelp);
+                        return false;
+                    };
+
             } else {
                 alert('Error processing operation!');
             }
