@@ -138,7 +138,7 @@
                                             $style = "background-color:WhiteSmoke;";
                                     }
 
-                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td colspan='1'>$nof</td><td>$prio</td><td colspan='4'>$comanda</td><td colspan='22'></td><td></td><td></td><td></td><td></td><td></td><td>$status</td></tr>";
+                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td colspan='1'>$nof</td><td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='22'></td><td></td><td></td><td></td><td></td><td></td><td>$status</td></tr>";
                                 }
                             @endphp
                         </table>
@@ -188,9 +188,7 @@
                             var newRow = $("<tr>");
                             var cols = "";
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                            cols += '<td style="' + so_style + '" colspan="1"></td>';
-                            cols += '<td style="' + so_style + '" colspan="1"></td>';
-                            cols += '<td style="' + so_style + '" colspan="1"></td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="3"></td>';
                             cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
                             cols += '<td colspan="1"></td>';
                             cols += '<td colspan="2">' + lifnr + '</td>';
@@ -213,10 +211,10 @@
                             var newRow = $("<tr>");
                             var cols = "";
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
-                            cols += '<td style="background-color:white"></td>';
-                            cols += '<td style="background-color:white"></td>';
-                            cols += '<td style="background-color:white"></td>';
-                            cols += '<td style="' + po_style + '"></td>';
+                            var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                            var first_style = "background-color:" + first_color;
+                            cols += '<td class="first_color" colspan="3" style="'+first_style+'"></td>';
+                            cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td>' + posnr + '</td>';
                             cols += '<td>' + idnlf + '</td>';
@@ -240,11 +238,14 @@
                             if (chdate != null && modBy != null) {
                                 var newRow = $("<tr>");
                                 var cols = "";
-                                cols += '<td style="background-color:white"></td>';
-                                cols += '<td style="background-color:white"></td>';
-                                cols += '<td style="background-color:white"></td>';
-                                cols += '<td style="background-color:LightYellow;"></td>';
-                                cols += '<td style="background-color:MediumAquaMarine;"></td>';
+                                var pi_style = "background-color:" + $(_this).css("background-color") + ";";
+                                var color = $(_this).closest("tr").find(".coloured").css("background-color");
+                                var last_style = "background-color:" + color;
+                                var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                                var first_style = "background-color:" + first_color;
+                                cols += '<td class="first_color" colspan="3" style="'+first_style+'"></td>';
+                                cols += '<td class="coloured" style="' + last_style + '"></td>';
+                                cols += '<td style="' + pi_style + '"></td>';
                                 cols += "<td colspan='4'>" + chdate + "</td>";
                                 cols += '<td colspan="2">' + oldVal + '</td>';
                                 cols += '<td colspan="2">' + newVal + '</td>';
@@ -265,9 +266,7 @@
                         var newRow = $("<tr>");
                         var cols = "";
                         var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                        cols += '<td style="' + so_style + '" colspan="1"></td>';
-                        cols += '<td style="' + so_style + '" colspan="1"></td>';
-                        cols += '<td style="' + so_style + '" colspan="1"></td>';
+                        cols += '<td class="first_color" style="' + so_style + '" colspan="3"></td>';
                         cols += '<td colspan="4"><b>Comanda aprovizionare</b></td>';
                         cols += '<td colspan="1"></td>';
                         cols += '<td colspan="2"><b>ID Furnizor</b></td>';
@@ -276,15 +275,15 @@
                         cols += '<td colspan="21"><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:LightYellow");
+                        newRow.attr('style', "background-color:#FAEFCA");
                     }
                     if (type == 'purch-order') {
                         var newRow = $("<tr>");
                         var cols = "";
                         var po_style = "background-color:" + $(_this).css("background-color") + ";";
-                        cols += '<td style="background-color:white"></td>';
-                        cols += '<td style="background-color:white"></td>';
-                        cols += '<td style="background-color:white"></td>';
+                        var color = $(_this).closest("tr").find(".first_color").css("background-color");
+                        var last_style = "background-color:" + color;
+                        cols += '<td class="first_color" colspan="3" style="'+last_style+'"></td>';
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="2"><b>Pozitie</b></td>';
                         cols += '<td><b>Posnr</b></td>';
@@ -294,24 +293,27 @@
                         cols += '<td><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:MediumAquaMarine");
+                        newRow.attr('style', "background-color:#57D7BB");
                     }
                     if (type == 'purch-item') {
                         var newRow = $("<tr>");
                         var cols = "";
-                        cols += '<td style="background-color:white"></td>';
-                        cols += '<td style="background-color:white"></td>';
-                        cols += '<td style="background-color:white"></td>';
-                        cols += '<td style="background-color:LightYellow"></td>';
-                        cols += '<td style="background-color:MediumAquaMarine"></td>';
+                        var po_style = "background-color:" + $(_this).css("background-color") + ";";
+                        var color = $(_this).closest("tr").find(".coloured").css("background-color");
+                        var last_style = "background-color:" + color;
+                        var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                        var first_style = "background-color:" + first_color;
+                        cols += '<td class="first_color" colspan="3" style="'+first_style+'"></td>';
+                        cols += '<td class="coloured" style="' + last_style +'"></td>';
+                        cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="4"><b>Change date</b></td>';
                         cols += '<td colspan="2"><b>Old Value</b></td>';
-                        cols += '<td colspan="2"><b>New Value</b></td>';
+                        cols += '<td colspan="2"><b>New Value</b></td>';;
                         cols += '<td colspan="2"><b>Modfied by</b></td>';
                         cols += '<td colspan="20"><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:LightBlue");
+                        newRow.attr('style', "background-color:#CFECF3");
                     }
                 }
                     _btn.innerHTML = '-';
