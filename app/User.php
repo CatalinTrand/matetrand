@@ -48,6 +48,8 @@ class User extends Authenticatable
             return DB::select("select * from porders where ekgrp = '$user->ekgrp' order by vbeln, ebeln");
 
         // Furnizor
+        $sql = "select * from porders where id ='$id'";
+        /*
         $sql = "select * from porders where lifnr = '$user->lifnr'";
         $brands = DB::select("select * from users_sel where id ='$id'");
         $xsql = "";
@@ -66,6 +68,7 @@ class User extends Authenticatable
         }
         if (!empty($xsql)) $sql .= " and (" . $xsql . ")";
         $sql .= " order by ebeln";
+        */
         return DB::select($sql);
     }
 }

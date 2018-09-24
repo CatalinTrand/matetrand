@@ -49,7 +49,7 @@ Route::post('/roles/roleUpdate','RolesController@insertRoleData');
 Route::get('/roles', 'HomeController@roles')->name('roles');
 Route::post('/roles', 'HomeController@save_roles')->name('save_roles');
 
-Route::get('/orders', 'HomeController@orders')->name('orders');
+Route::any('/orders', 'HomeController@orders')->name('orders');
 
 Route::group(['prefix' => 'messages'], function () {
     Route::get('/', ['as' => 'messages', 'uses' => 'MessagesController@index']);

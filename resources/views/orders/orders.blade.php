@@ -34,6 +34,18 @@
                     </div>
 
                     <div class="card-body orders-table-div">
+
+                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
+                            <form action="orders" method="post">
+                                <select name="all" onchange="this.form.submit()">
+                                    <option>Afisare dupa</option>
+                                    <option value="true">Comenzi de vanzare</option>
+                                    <option value="false">Comenzi de aprovizionare</option>
+                                </select>
+                                {{csrf_field()}}
+                            </form>
+                        @endif
+
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="3%"><col width="3%">
@@ -77,8 +89,15 @@
                                 if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
                                     $furnizor = true;
                                 } else {
-                                    $furnizor = false;
+                                    if(isset($_POST['all']) && strcmp($_POST['all'],"true") == 0)
+                                        $furnizor = false;
+                                    else if (isset($_POST['all']))
+                                            $furnizor = true;
+                                    else
+                                        $furnizor = false;
                                 }
+
+                                echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$furnizor\">";
 
                                 $seen = "";
                                 $line_counter = 1;
@@ -211,9 +230,13 @@
                             var newRow = $("<tr>");
                             var cols = "";
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
-                            var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                            var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
-                            cols += '<td class="first_color" colspan="3" style="'+first_style+'"></td>';
+                            if($("#set-furnizor").val() == "") {
+                                cols += '<td class="first_color" colspan="3" style="' + first_style + '"></td>';
+                            } else {
+                                cols += '<td class="first_color" colspan="3" style="' + po_style + '"></td>';
+                            }
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td>' + posnr + '</td>';
@@ -281,9 +304,13 @@
                         var newRow = $("<tr>");
                         var cols = "";
                         var po_style = "background-color:" + $(_this).css("background-color") + ";";
-                        var color = $(_this).closest("tr").find(".first_color").css("background-color");
-                        var last_style = "background-color:" + color;
-                        cols += '<td class="first_color" colspan="3" style="'+last_style+'"></td>';
+                        var first_color = $(_this).find(".first_color").css("background-color");
+                        var first_style = "background-color:" + first_color;
+                        if($("#set-furnizor").val() == "") {
+                            cols += '<td class="first_color" colspan="3" style="' + first_style + '"></td>';
+                        } else {
+                            cols += '<td class="first_color" colspan="3" style="' + po_style + '"></td>';
+                        }
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="2"><b>Pozitie</b></td>';
                         cols += '<td><b>Posnr</b></td>';
