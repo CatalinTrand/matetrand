@@ -48,7 +48,7 @@
 
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
-                                <col width="3%"><col width="3%">
+                                <col width="1%"><col width="3%">
                                 <col width="3%"><col width="3%">
                                 <col width="3%"><col width="3%">
                                 <col width="3%"><col width="3%">
@@ -324,7 +324,6 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="14" style="'+first_style+'"></td>';
-                        cols += '<td class="first_color" colspan="3" style="' + first_style + '"></td>';
                         cols += '<td class="coloured" style="' + last_style +'"></td>';
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="4"><b>Change date</b></td>';
@@ -334,7 +333,7 @@
                         cols += '<td colspan="18"><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:YellowGreen");
+                        newRow.attr('style', "background-color:#ADD8E6");
                     }
                 }
                     _btn.innerHTML = '-';
