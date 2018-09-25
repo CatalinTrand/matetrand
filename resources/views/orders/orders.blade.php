@@ -7,6 +7,26 @@
             exit();
         @endphp
     @endguest
+    @php
+        if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
+            $furnizor = true;
+        } else {
+            if(isset($_POST['all']) && strcmp($_POST['all'],"true") == 0)
+                $furnizor = false;
+            else if (isset($_POST['all']))
+                $furnizor = true;
+            else
+                $furnizor = false;
+        }
+
+        if($furnizor){
+            $selF = " selected";
+            $selAll = "";
+        } else {
+            $selF = "";
+            $selAll = " selected";
+        }
+    @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -37,10 +57,10 @@
 
                         @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
                             <form action="orders" method="post">
+                                Sortare dupa: 
                                 <select name="all" onchange="this.form.submit()">
-                                    <option>Afisare dupa</option>
-                                    <option value="true">Comenzi de vanzare</option>
-                                    <option value="false">Comenzi de aprovizionare</option>
+                                    <option value="true"{{$selAll}}>comenzi de vanzare</option>
+                                    <option value="false"{{$selF}}>comenzi de aprovizionare</option>
                                 </select>
                                 {{csrf_field()}}
                             </form>
@@ -102,16 +122,6 @@
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
 
                                 $orders = \App\User::getOrders($id);
-                                if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
-                                    $furnizor = true;
-                                } else {
-                                    if(isset($_POST['all']) && strcmp($_POST['all'],"true") == 0)
-                                        $furnizor = false;
-                                    else if (isset($_POST['all']))
-                                            $furnizor = true;
-                                    else
-                                        $furnizor = false;
-                                }
 
                                 echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$furnizor\">";
 
@@ -190,7 +200,7 @@
         function parent(id) {
             if (id.startsWith('I')) {
                 let res = id.substring(1);
-                return $("input[name*='_"+res.split("_")[0]+"']")[0].name;
+                return $("input[name*='_" + res.split("_")[0] + "']")[0].name;
             } else {
                 let res = id.substring(1);
                 return "S" + res.split("_")[0];
@@ -236,7 +246,7 @@
 
         function refreshCheck() {
             let inputs = $("input[id|='input_chk']");
-            for(let i = 0; i < inputs.length; i++){
+            for (let i = 0; i < inputs.length; i++) {
                 inputs[i].checked = isChecked(inputs[i].name);
             }
         }
