@@ -57,7 +57,7 @@
 
                         @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
                             <form action="orders" method="post">
-                                Sortare dupa: 
+                                Sortare dupa:
                                 <select name="all" onchange="this.form.submit()">
                                     <option value="true"{{$selAll}}>comenzi de vanzare</option>
                                     <option value="false"{{$selF}}>comenzi de aprovizionare</option>
@@ -200,7 +200,10 @@
         function parent(id) {
             if (id.startsWith('I')) {
                 let res = id.substring(1);
-                return $("input[name*='_" + res.split("_")[0] + "']")[0].name;
+                if(($("#set-furnizor").val() == ""))
+                    return $("input[name*='_" + res.split("_")[0] + "']")[0].name;
+                else
+                    return $("input[name*='" + res.split("_")[0] + "']")[0].name;
             } else {
                 let res = id.substring(1);
                 return "S" + res.split("_")[0];
@@ -214,8 +217,9 @@
             if ($.inArray(id, unCheckedList) > -1)
                 return false;
 
-            if (id.startsWith('S') || (($("#set-furnizor").val() != "") && id.startsWith('P')))
+            if (id.startsWith('S') || (($("#set-furnizor").val() != "") && id.startsWith('P'))) {
                 return false;
+            }
 
             return isChecked(parent(id));
         }
