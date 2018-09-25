@@ -242,9 +242,9 @@
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
                             if (line_counter == 0)
-                                newRow.attr('style', "background-color:MediumAquaMarine;");
+                                newRow.attr('style', "background-color:#A0C0A0;");
                             else
-                                newRow.attr('style', "background-color:MediumTurquoise;");
+                                newRow.attr('style', "background-color:#90D090;");
                             newRow.attr('id', "tr_I" + ebeln2 + "_" + id);
                         } else if (type == 'purch-item') {
                             var ebeln3 = _ord.split('#')[0];
@@ -313,7 +313,7 @@
                         cols += '<td colspan="18"></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:#57D7BB");
+                        newRow.attr('style', "background-color:YellowGreen");
                     }
                     if (type == 'purch-item') {
                         var newRow = $("<tr>");
@@ -324,6 +324,7 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="14" style="'+first_style+'"></td>';
+                        cols += '<td class="first_color" colspan="3" style="' + first_style + '"></td>';
                         cols += '<td class="coloured" style="' + last_style +'"></td>';
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="4"><b>Change date</b></td>';
@@ -333,7 +334,7 @@
                         cols += '<td colspan="18"><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:#CFECF3");
+                        newRow.attr('style', "background-color:YellowGreen");
                     }
                 }
                     _btn.innerHTML = '-';
