@@ -47,9 +47,9 @@ class Webservice {
             $links = DB::select("select * from porders where vbeln = '$order' order by ebeln");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
-                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp";
+                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order";
                 else {
-                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp" . '=' . $str;
+                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order" . '=' . $str;
                 }
             }
         } else if (strcmp($type, 'purch-order') == 0){

@@ -3,8 +3,8 @@
 @section('content')
     @guest
         @php
-                header("/");
-                exit();
+            header("/");
+            exit();
         @endphp
     @endguest
     <div class="container-fluid">
@@ -48,26 +48,46 @@
 
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
-                                <col width="1%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
-                                <col width="3%"><col width="3%">
+                                <col width="1%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
+                                <col width="3%">
                             </colgroup>
                             <tr>
                                 <th colspan="1">Sel</th>
@@ -153,7 +173,7 @@
                                             $style = "background-color:WhiteSmoke;";
                                     }
 
-                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td><input type=\"checkbox\" name=\"$oid\" value=\"$oid\"></td><td colspan='10'></td><td colspan='1'>$nof</td><td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='18'></td></tr>";
+                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td colspan='10'></td><td colspan='1'>$nof</td><td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='18'></td></tr>";
                                 }
                             @endphp
                         </table>
@@ -163,12 +183,70 @@
         </div>
     </div>
     <script>
+
+        var checkedList = [];
+        var unCheckedList = [];
+
+        function parent(id) {
+            if (id.startsWith('I')) {
+                let res = id.substring(1);
+                return $("input[name*='_"+res.split("_")[0]+"']")[0].name;
+            } else {
+                let res = id.substring(1);
+                return "S" + res.split("_")[0];
+            }
+        }
+
+        function isChecked(id) {
+
+            if ($.inArray(id, checkedList) > -1)
+                return true;
+            if ($.inArray(id, unCheckedList) > -1)
+                return false;
+
+            if (id.startsWith('S') || (($("#set-furnizor").val() != "") && id.startsWith('P')))
+                return false;
+
+            return isChecked(parent(id));
+        }
+
+        function addToChecked(id) {
+            if ($.inArray(id, checkedList) <= -1) {
+                checkedList.push(id);
+            }
+            if ($.inArray(id, unCheckedList) > -1)
+                unCheckedList.splice($.inArray(id, unCheckedList), 1);
+        }
+
+        function removeFromChecked(id) {
+            if ($.inArray(id, checkedList) > -1)
+                checkedList.splice($.inArray(id, checkedList), 1);
+            else if ($.inArray(id, unCheckedList) <= -1)
+                unCheckedList.push(id);
+        }
+
+        function boxCheck(_this) {
+            if (_this.checked) {
+                addToChecked(_this.name);
+            } else {
+                removeFromChecked(_this.name);
+            }
+            refreshCheck();
+        }
+
+        function refreshCheck() {
+            let inputs = $("input[id|='input_chk']");
+            for(let i = 0; i < inputs.length; i++){
+                inputs[i].checked = isChecked(inputs[i].name);
+            }
+        }
+
         function loadSub(item, type, _btn, ebelp) {
             var _data, _status;
             var _this;
             if (type == "sales-order") _this = document.getElementById("tr_S" + item);
             if (type == "purch-order") _this = document.getElementById("tr_P" + item);
-            if (type == "purch-item")  _this = document.getElementById("tr_I" + item + "_" + ebelp);
+            if (type == "purch-item") _this = document.getElementById("tr_I" + item + "_" + ebelp);
 
             $.ajaxSetup({
                 headers: {
@@ -188,8 +266,8 @@
                     _status = status;
                 });
             jQuery.ajaxSetup({async: true});
-            if (_status == "success" ) {
-                if(_data.length > 0) {
+            if (_status == "success") {
+                if (_data.length > 0) {
                     var split = _data.split('=');
                     var line_counter = 1;
                     split.forEach(function (_ord) {
@@ -200,9 +278,10 @@
                             var lifnr = _ord.split('#')[1];
                             var lifnr_name = _ord.split('#')[2];
                             var ekgrp = _ord.split('#')[3];
+                            var vbeln = _ord.split('#')[4];
                             var newRow = $("<tr>");
                             var cols = "";
-                            cols += '<td colspan="1"><input type="checkbox" name="P'+id+'" value="P'+id+'"></td>';
+                            cols += '<td colspan="1"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
                             cols += '<td class="first_color" style="' + so_style + '" colspan="13"></td>';
                             cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
@@ -225,11 +304,11 @@
                             var idnlf = _ord.split('#')[3];
                             var newRow = $("<tr>");
                             var cols = "";
-                            cols += '<td colspan="1"><input type="checkbox" name="I'+ebeln2+"_"+id+'" value="I'+ebeln2+"_"+id+'"></td>';
+                            cols += '<td colspan="1"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + ebeln2 + "_" + id + '" value="I' + ebeln2 + "_" + id + '"></td>';
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
-                            if($("#set-furnizor").val() == "") {
+                            if ($("#set-furnizor").val() == "") {
                                 cols += '<td class="first_color" colspan="13" style="' + first_style + '"></td>';
                             } else {
                                 cols += '<td class="first_color" colspan="13" style="' + po_style + '"></td>';
@@ -261,7 +340,7 @@
                                 var last_style = "background-color:" + color;
                                 var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                                 var first_style = "background-color:" + first_color;
-                                cols += '<td class="first_color" colspan="14" style="'+first_style+'"></td>';
+                                cols += '<td class="first_color" colspan="14" style="' + first_style + '"></td>';
                                 cols += '<td class="coloured" style="' + last_style + '"></td>';
                                 cols += '<td style="' + pi_style + '"></td>';
                                 cols += "<td colspan='4'>" + chdate + "</td>";
@@ -301,7 +380,7 @@
                         var po_style = "background-color:" + $(_this).css("background-color") + ";";
                         var first_color = $(_this).find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
-                        if($("#set-furnizor").val() == "") {
+                        if ($("#set-furnizor").val() == "") {
                             cols += '<td class="first_color" colspan="14" style="' + first_style + '"></td>';
                         } else {
                             cols += '<td class="first_color" colspan="14" style="' + po_style + '"></td>';
@@ -323,12 +402,13 @@
                         var last_style = "background-color:" + color;
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
-                        cols += '<td class="first_color" colspan="14" style="'+first_style+'"></td>';
-                        cols += '<td class="coloured" style="' + last_style +'"></td>';
+                        cols += '<td class="first_color" colspan="14" style="' + first_style + '"></td>';
+                        cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="4"><b>Change date</b></td>';
                         cols += '<td colspan="2"><b>Old Value</b></td>';
-                        cols += '<td colspan="2"><b>New Value</b></td>';;
+                        cols += '<td colspan="2"><b>New Value</b></td>';
+                        ;
                         cols += '<td colspan="2"><b>Modfied by</b></td>';
                         cols += '<td colspan="18"><b></b></td>';
                         newRow.append(cols);
@@ -336,39 +416,42 @@
                         newRow.attr('style', "background-color:#ADD8E6");
                     }
                 }
-                    _btn.innerHTML = '-';
-                    _btn.onclick = function () {
-                        hideSub(item, type, _btn, ebelp);
-                        return false;
-                    };
-
+                _btn.innerHTML = '-';
+                _btn.onclick = function () {
+                    hideSub(item, type, _btn, ebelp);
+                    return false;
+                };
+                refreshCheck();
             } else {
                 alert('Error processing operation!');
             }
         }
 
-        function hideSub(item,type,_btn,ebelp){
+        function hideSub(item, type, _btn, ebelp) {
             var table = document.getElementById('orders_table');
             var tr_id = "";
             if (type == "sales-order") tr_id = "tr_S" + item;
             if (type == "purch-order") tr_id = "tr_P" + item;
-            if (type == "purch-item")  tr_id = "tr_I" + item + "_" + ebelp;
+            if (type == "purch-item") tr_id = "tr_I" + item + "_" + ebelp;
 
             var started = false;
             for (i = 0; i < table.rows.length; i++) {
-                if(started){
-                    if(table.rows[i].innerHTML.includes(type) || table.rows[i].innerHTML.includes('sales-order'))
+                if (started) {
+                    if (table.rows[i].innerHTML.includes(type) || table.rows[i].innerHTML.includes('sales-order'))
                         break;
                     if (type == "purch-item")
-                        if(table.rows[i].innerHTML.includes(type) || table.rows[i].innerHTML.includes('purch-order'))
+                        if (table.rows[i].innerHTML.includes(type) || table.rows[i].innerHTML.includes('purch-order'))
                             break;
                     table.deleteRow(i);
                     i--;
                 }
-                if(table.rows[i].id == tr_id ) started = true;
+                if (table.rows[i].id == tr_id) started = true;
             }
             _btn.innerHTML = '+';
-            _btn.onclick = function(){ loadSub(item,type,_btn, ebelp); return false;};
+            _btn.onclick = function () {
+                loadSub(item, type, _btn, ebelp);
+                return false;
+            };
         }
     </script>
 @endsection
