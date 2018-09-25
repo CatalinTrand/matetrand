@@ -70,16 +70,12 @@
                                 <col width="3%"><col width="3%">
                             </colgroup>
                             <tr>
+                                <th colspan="1">Sel</th>
+                                <th colspan="10"></th>
                                 <th style="width: 1.2rem" colspan="1">NOF</th>
                                 <th style="width: 1.2rem" colspan="1">Prio</th>
                                 <th colspan="4">ID Comanda</th>
-                                <th colspan="22"></th>
-                                <th colspan="1"></th>
-                                <th colspan="1"></th>
-                                <th colspan="1"></th>
-                                <th colspan="1"></th>
-                                <th colspan="1"></th>
-                                <th colspan="1">Status</th>
+                                <th colspan="18"></th>
                             </tr>
                             @php
                                 use Illuminate\Support\Facades\DB;
@@ -157,7 +153,7 @@
                                             $style = "background-color:WhiteSmoke;";
                                     }
 
-                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td colspan='1'>$nof</td><td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='22'></td><td></td><td></td><td></td><td></td><td></td><td>$status</td></tr>";
+                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td><input type=\"checkbox\" name=\"$oid\" value=\"$oid\"></td><td colspan='10'></td><td colspan='1'>$nof</td><td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='18'></td></tr>";
                                 }
                             @endphp
                         </table>
@@ -206,15 +202,15 @@
                             var ekgrp = _ord.split('#')[3];
                             var newRow = $("<tr>");
                             var cols = "";
+                            cols += '<td colspan="1"><input type="checkbox" name="P'+id+'" value="P'+id+'"></td>';
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="3"></td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="13"></td>';
                             cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
                             cols += '<td colspan="1"></td>';
                             cols += '<td colspan="2">' + lifnr + '</td>';
                             cols += '<td colspan="2">' + lifnr_name + '</td>';
                             cols += '<td colspan="1">' + ekgrp + '</td>';
-                            cols += '<td colspan="20"></td>';
-                            cols += "<td colspan='1'><image style='height: 1rem;' src='/images/status.png'></td>";
+                            cols += '<td colspan="18"></td>';
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr")).fadeIn(500);
                             if (line_counter == 0)
@@ -229,21 +225,20 @@
                             var idnlf = _ord.split('#')[3];
                             var newRow = $("<tr>");
                             var cols = "";
+                            cols += '<td colspan="1"><input type="checkbox" name="I'+ebeln2+"_"+id+'" value="I'+ebeln2+"_"+id+'"></td>';
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
                             if($("#set-furnizor").val() == "") {
-                                cols += '<td class="first_color" colspan="3" style="' + first_style + '"></td>';
+                                cols += '<td class="first_color" colspan="13" style="' + first_style + '"></td>';
                             } else {
-                                cols += '<td class="first_color" colspan="3" style="' + po_style + '"></td>';
+                                cols += '<td class="first_color" colspan="13" style="' + po_style + '"></td>';
                             }
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td>' + posnr + '</td>';
                             cols += '<td>' + idnlf + '</td>';
-                            cols += '<td></td>';
-                            cols += '<td colspan="24"></td>';
-                            cols += "<td></td>";
+                            cols += '<td colspan="18"></td>';
                             newRow.append(cols);
                             newRow.insertAfter($(_this).closest("tr"));
                             if (line_counter == 0)
@@ -266,14 +261,14 @@
                                 var last_style = "background-color:" + color;
                                 var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                                 var first_style = "background-color:" + first_color;
-                                cols += '<td class="first_color" colspan="3" style="'+first_style+'"></td>';
+                                cols += '<td class="first_color" colspan="14" style="'+first_style+'"></td>';
                                 cols += '<td class="coloured" style="' + last_style + '"></td>';
                                 cols += '<td style="' + pi_style + '"></td>';
                                 cols += "<td colspan='4'>" + chdate + "</td>";
                                 cols += '<td colspan="2">' + oldVal + '</td>';
                                 cols += '<td colspan="2">' + newVal + '</td>';
                                 cols += '<td colspan="2">' + modBy + '</td>';
-                                cols += "<td colspan='20'></td>";
+                                cols += "<td colspan='18'></td>";
                                 newRow.append(cols);
                                 newRow.insertAfter($(_this).closest("tr"));
                                 if (line_counter == 0)
@@ -289,13 +284,13 @@
                         var newRow = $("<tr>");
                         var cols = "";
                         var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                        cols += '<td class="first_color" style="' + so_style + '" colspan="3"></td>';
+                        cols += '<td class="first_color" style="' + so_style + '" colspan="14"></td>';
                         cols += '<td colspan="4"><b>Comanda aprovizionare</b></td>';
                         cols += '<td colspan="1"></td>';
                         cols += '<td colspan="2"><b>ID Furnizor</b></td>';
                         cols += '<td colspan="2"><b>Nume Furnizor</b></td>';
                         cols += '<td colspan="1"><b>Grup Material</b></td>';
-                        cols += '<td colspan="21"><b></b></td>';
+                        cols += '<td colspan="18"><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
                         newRow.attr('style', "background-color:#FAEFCA");
@@ -307,17 +302,15 @@
                         var first_color = $(_this).find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         if($("#set-furnizor").val() == "") {
-                            cols += '<td class="first_color" colspan="3" style="' + first_style + '"></td>';
+                            cols += '<td class="first_color" colspan="14" style="' + first_style + '"></td>';
                         } else {
-                            cols += '<td class="first_color" colspan="3" style="' + po_style + '"></td>';
+                            cols += '<td class="first_color" colspan="14" style="' + po_style + '"></td>';
                         }
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="2"><b>Pozitie</b></td>';
                         cols += '<td><b>Posnr</b></td>';
                         cols += '<td><b>IDNLF</b></td>';
-                        cols += '<td colspan="24"></td>';
-                        cols += '<td><b></b></td>';
-                        cols += '<td><b></b></td>';
+                        cols += '<td colspan="18"></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
                         newRow.attr('style', "background-color:#57D7BB");
@@ -330,14 +323,14 @@
                         var last_style = "background-color:" + color;
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
-                        cols += '<td class="first_color" colspan="3" style="'+first_style+'"></td>';
+                        cols += '<td class="first_color" colspan="14" style="'+first_style+'"></td>';
                         cols += '<td class="coloured" style="' + last_style +'"></td>';
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="4"><b>Change date</b></td>';
                         cols += '<td colspan="2"><b>Old Value</b></td>';
                         cols += '<td colspan="2"><b>New Value</b></td>';;
                         cols += '<td colspan="2"><b>Modfied by</b></td>';
-                        cols += '<td colspan="20"><b></b></td>';
+                        cols += '<td colspan="18"><b></b></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
                         newRow.attr('style', "background-color:#CFECF3");
