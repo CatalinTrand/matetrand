@@ -20,8 +20,9 @@ class CreatePitemchgTable extends Migration
             $table->dateTime('cdate');
             $table->string('cuser');
             $table->string('cuser_name',35);
-            $table->string('oldval',40);
-            $table->string('newval',40);
+            $table->string('text',80);
+            $table->string('oebeln',16);
+            $table->string('oebelp',5);
             $table->string('reason',100);
         });
     }

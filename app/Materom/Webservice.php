@@ -50,9 +50,9 @@ class Webservice {
                 $links = DB::select("select * from porders where ebeln = '$porder->ebeln'");
                 foreach ($links as $link) {
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order";
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate";
                     else {
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order" . '=' . $str;
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate" . '=' . $str;
                     }
                 }
             }

@@ -14,6 +14,8 @@ class CreatePitemsTable extends Migration
     public function up()
     {
         Schema::create('pitems', function (Blueprint $table) {
+            $table->boolean('changed');
+            $table->string('stage',1);
             $table->string('ebeln',10);
             $table->string('ebelp',5);
             $table->string('vbeln',10)->default('');
