@@ -57,7 +57,7 @@
 
                         @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
                             <form action="orders" method="post">
-                                Sortare dupa:
+                                Afisare dupa:
                                 <select name="all" onchange="this.form.submit()">
                                     <option value="true"{{$selAll}}>comenzi de vanzare</option>
                                     <option value="false"{{$selF}}>comenzi de aprovizionare</option>
@@ -182,8 +182,8 @@
                                         else
                                             $style = "background-color:WhiteSmoke;";
                                     }
-
-                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td colspan='10'></td><td colspan='1'>$nof</td><td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='18'></td></tr>";
+                                    $style .= " vertical-align: middle;";
+                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td colspan='10'></td><td colspan='1'>$nof</td><td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='18'></td></tr>";
                                 }
                             @endphp
                         </table>
@@ -295,7 +295,7 @@
                             var vbeln = _ord.split('#')[4];
                             var newRow = $("<tr>");
                             var cols = "";
-                            cols += '<td colspan="1"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
+                            cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
                             cols += '<td class="first_color" style="' + so_style + '" colspan="13"></td>';
                             cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
@@ -304,12 +304,12 @@
                             cols += '<td colspan="2">' + lifnr_name + '</td>';
                             cols += '<td colspan="1">' + ekgrp + '</td>';
                             cols += '<td colspan="18"></td>';
-                            newRow.append(cols);
-                            newRow.insertAfter($(_this).closest("tr")).fadeIn(500);
+                            newRow.append(cols).hide();
+                            newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                             if (line_counter == 0)
-                                newRow.attr('style', "background-color:LightYellow;");
+                                newRow.attr('style', "background-color:LightYellow; vertical-align: middle;");
                             else
-                                newRow.attr('style', "background-color:Wheat;");
+                                newRow.attr('style', "background-color:Wheat; vertical-align: middle;");
                             newRow.attr('id', "tr_P" + id);
                         } else if (type == 'purch-order') {
                             var ebeln2 = _ord.split('#')[0];
@@ -318,7 +318,7 @@
                             var idnlf = _ord.split('#')[3];
                             var newRow = $("<tr>");
                             var cols = "";
-                            cols += '<td colspan="1"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + ebeln2 + "_" + id + '" value="I' + ebeln2 + "_" + id + '"></td>';
+                            cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + ebeln2 + "_" + id + '" value="I' + ebeln2 + "_" + id + '"></td>';
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
@@ -332,12 +332,12 @@
                             cols += '<td>' + posnr + '</td>';
                             cols += '<td>' + idnlf + '</td>';
                             cols += '<td colspan="18"></td>';
-                            newRow.append(cols);
-                            newRow.insertAfter($(_this).closest("tr"));
+                            newRow.append(cols).hide();
+                            newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                             if (line_counter == 0)
-                                newRow.attr('style', "background-color:#A0C0A0;");
+                                newRow.attr('style', "background-color:#A0C0A0; vertical-align: middle;");
                             else
-                                newRow.attr('style', "background-color:#90D090;");
+                                newRow.attr('style', "background-color:#90D090; vertical-align: middle;");
                             newRow.attr('id', "tr_I" + ebeln2 + "_" + id);
                         } else if (type == 'purch-item') {
                             var ebeln3 = _ord.split('#')[0];
@@ -365,9 +365,9 @@
                                 newRow.append(cols);
                                 newRow.insertAfter($(_this).closest("tr"));
                                 if (line_counter == 0)
-                                    newRow.attr('style', "background-color:Azure");
+                                    newRow.attr('style', "background-color:Azure; vertical-align: middle;");
                                 else
-                                    newRow.attr('style', "background-color:LightCyan");
+                                    newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
                                 newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
                                     chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
                             }
@@ -384,9 +384,9 @@
                         cols += '<td colspan="2"><b>Nume Furnizor</b></td>';
                         cols += '<td colspan="1"><b>Grup Material</b></td>';
                         cols += '<td colspan="18"><b></b></td>';
-                        newRow.append(cols);
-                        newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:#FAEFCA");
+                        newRow.append(cols).hide();
+                        newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
+                        newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
                     }
                     if (type == 'purch-order') {
                         var newRow = $("<tr>");
@@ -404,9 +404,9 @@
                         cols += '<td><b>Posnr</b></td>';
                         cols += '<td><b>IDNLF</b></td>';
                         cols += '<td colspan="18"></td>';
-                        newRow.append(cols);
-                        newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:YellowGreen");
+                        newRow.append(cols).hide();
+                        newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
+                        newRow.attr('style', "background-color:YellowGreen; vertical-align: middle;");
                     }
                     if (type == 'purch-item') {
                         var newRow = $("<tr>");
@@ -425,9 +425,9 @@
                         ;
                         cols += '<td colspan="2"><b>Modfied by</b></td>';
                         cols += '<td colspan="18"><b></b></td>';
-                        newRow.append(cols);
-                        newRow.insertAfter($(_this).closest("tr"));
-                        newRow.attr('style', "background-color:#ADD8E6");
+                        newRow.append(cols).hide();
+                        newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
+                        newRow.attr('style', "background-color:#ADD8E6; vertical-align: middle;");
                     }
                 }
                 _btn.innerHTML = '-';
