@@ -364,13 +364,15 @@
                             if ($("#set-furnizor").val() == "") {
                                 cols += '<td class="first_color" colspan="13" style="' + first_style + '"></td>';
                             } else {
-                                cols += '<td class="first_color" colspan="13" style="' + po_style + '"></td>';
+                                cols += '<td class="first_color" colspan="12" style="' + po_style + '"></td>';
                             }
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td>' + posnr + '</td>';
                             cols += '<td>' + idnlf + '</td>';
                             cols += '<td colspan="18"></td>';
+                            if($("#set-furnizor").val() != "")
+                                cols += '<td colspan="1"></td>';
                             newRow.append(cols).hide();
                             newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                             if (line_counter == 0)
@@ -393,7 +395,9 @@
                                 var last_style = "background-color:" + color;
                                 var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                                 var first_style = "background-color:" + first_color;
-                                cols += '<td class="first_color" colspan="14" style="' + first_style + '"></td>';
+                                cols += '<td class="first_color" colspan="13" style="' + first_style + '"></td>';
+                                if($("#set-furnizor").val() == "")
+                                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
                                 cols += '<td class="coloured" style="' + last_style + '"></td>';
                                 cols += '<td style="' + pi_style + '"></td>';
                                 cols += "<td colspan='4'>" + chdate + "</td>";
@@ -401,6 +405,8 @@
                                 cols += '<td colspan="2">' + newVal + '</td>';
                                 cols += '<td colspan="2">' + modBy + '</td>';
                                 cols += "<td colspan='18'></td>";
+                                if($("#set-furnizor").val() != "")
+                                    cols += '<td></td>';
                                 newRow.append(cols);
                                 newRow.insertAfter($(_this).closest("tr"));
                                 if (line_counter == 0)
