@@ -57,13 +57,23 @@ class Webservice {
                 }
             }
         } else if (strcmp($type, 'purch-order') == 0) {
-            $porders = Data::getSalesOrderFlow($item);
-            $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
-            foreach ($links as $link) {
-                if (strcmp($str, '') == 0)
-                    $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
-                else {
-                    $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+            if (is_null($item) || empty($item)) {
+                $links = DB::select("select * from pitems where ebeln = '$porder' order by ebelp");
+                foreach ($links as $link) {
+                    if (strcmp($str, '') == 0)
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
+                    else {
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+                    }
+                }
+            } else {
+                $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
+                foreach ($links as $link) {
+                    if (strcmp($str, '') == 0)
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
+                    else {
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+                    }
                 }
             }
         } else {
