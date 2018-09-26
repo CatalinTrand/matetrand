@@ -18,7 +18,6 @@ class CreatePordersTable extends Migration
             $table->boolean('nof');
             $table->dateTime('wtime');
             $table->dateTime('ctime');
-            $table->string('vbeln',10);
             $table->string('lifnr',10);
             $table->string('lifnr_name',35);
             $table->string('ekgrp',3);
@@ -27,17 +26,9 @@ class CreatePordersTable extends Migration
             $table->string('ernam',30)->default('');
             $table->string('curr',3)->default('');
             $table->string('fxrate',10)->default('');
-            $table->string('kunnr',10)->default('');
-            $table->string('kunnr_name',35)->default('');
-            $table->string('shipto',10)->default('');
-            $table->string('shipto_name',35)->default('');
-            $table->string('ctv', 20)->default('');
-            $table->string('ctv_name')->default('');
             $table->primary("ebeln");
-            $table->index("vbeln");
             $table->index("lifnr");
             $table->index("ekgrp");
-            $table->index("ctv");
         });
     }
 

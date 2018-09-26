@@ -121,7 +121,7 @@
                                 use Illuminate\Support\Facades\DB;
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
 
-                                $orders = \App\User::getOrders($id);
+                                $orders = \App\Materom\Data::getOrders($id, $furnizor);
 
                                 echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$furnizor\">";
 
@@ -134,8 +134,8 @@
                                             $seen.= " $order->ebeln";
                                         else
                                             continue;
-
-                                        $comanda = "<button type='button' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"\"); return false;'>+</button> $order->ebeln";
+                                        $viewebeln = substr($order->ebeln, 0, 10);
+                                        $comanda = "<button type='button' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button> $viewebeln";
                                     } else {
                                         if(strchr($seen,$order->vbeln) == null)
                                             $seen.= " $order->vbeln";
@@ -298,7 +298,7 @@
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
                             cols += '<td class="first_color" style="' + so_style + '" colspan="13"></td>';
-                            cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'\');\">+</button> " + id + "</td>";
+                            cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
                             cols += '<td colspan="1"></td>';
                             cols += '<td colspan="2">' + lifnr + '</td>';
                             cols += '<td colspan="2">' + lifnr_name + '</td>';

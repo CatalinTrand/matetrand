@@ -16,7 +16,8 @@ class CreatePitemsTable extends Migration
         Schema::create('pitems', function (Blueprint $table) {
             $table->string('ebeln',10);
             $table->string('ebelp',5);
-            $table->string('posnr',6);
+            $table->string('vbeln',10)->default('');
+            $table->string('posnr',6)->default('');
             $table->string('idnlf',35)->default('');
             $table->string('mfrnr',10)->default('');
             $table->string('mfrnr_name',35)->default('');
@@ -28,7 +29,15 @@ class CreatePitemsTable extends Migration
             $table->string('sales_curr',3)->default('');
             $table->string('qty',10)->default('');
             $table->string('qty_uom',3)->default('');
+            $table->string('kunnr',10)->default('');
+            $table->string('kunnr_name',35)->default('');
+            $table->string('shipto',10)->default('');
+            $table->string('shipto_name',35)->default('');
+            $table->string('ctv', 20)->default('');
+            $table->string('ctv_name')->default('');
             $table->dateTime('lfdat')->default(now());
+            $table->primary(['ebeln', 'ebelp']);
+            $table->index('vbeln');
         });
     }
 

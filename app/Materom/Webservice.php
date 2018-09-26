@@ -43,17 +43,22 @@ class Webservice {
 
     static public function getOrderInfo($order, $type, $item) {
         $str = "";
+        $porder = substr($order, 0, 10);
         if (strcmp($type, 'sales-order') == 0) {
-            $links = DB::select("select * from porders where vbeln = '$order' order by ebeln");
-            foreach ($links as $link) {
-                if (strcmp($str, '') == 0)
-                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order";
-                else {
-                    $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order" . '=' . $str;
+            $porders = Data::getSalesOrderFlow($order);
+            foreach($porders as $porder) {
+                $links = DB::select("select * from porders where ebeln = '$porder->ebeln'");
+                foreach ($links as $link) {
+                    if (strcmp($str, '') == 0)
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order";
+                    else {
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order" . '=' . $str;
+                    }
                 }
             }
-        } else if (strcmp($type, 'purch-order') == 0){
-            $links = DB::select("select * from pitems where ebeln = '$order' order by ebelp");
+        } else if (strcmp($type, 'purch-order') == 0) {
+            $porders = Data::getSalesOrderFlow($item);
+            $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
                     $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
@@ -62,7 +67,7 @@ class Webservice {
                 }
             }
         } else {
-            $links = DB::select("select * from pitemchg where ebeln = '$order' and ebelp = '$item' order by cdate desc");
+            $links = DB::select("select * from pitemchg where ebeln = '$porder' and ebelp = '$item' order by cdate desc");
             foreach ($links as $link) {
                 if (strcmp($str, '') == 0)
                     $str = "$link->ebeln#$link->ebelp#$link->cdate#$link->oldval#$link->newval#$link->cuser_name";
