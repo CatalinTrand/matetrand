@@ -200,13 +200,19 @@
         function parent(id) {
             if (id.startsWith('I')) {
                 let res = id.substring(1);
-                if(($("#set-furnizor").val() == ""))
+                if (($("#set-furnizor").val() == ""))
                     return $("input[name*='_" + res.split("_")[0] + "']")[0].name;
                 else
                     return $("input[name*='" + res.split("_")[0] + "']")[0].name;
-            } else {
+            } else if(id.startsWith('P')){
+
+                if (($("#set-furnizor").val() == "1"))
+                    return null;
+
                 let res = id.substring(1);
                 return "S" + res.split("_")[0];
+            } else {
+                return null;
             }
         }
 
@@ -224,12 +230,38 @@
             return isChecked(parent(id));
         }
 
+        function isChildOf(node,maybeParent){
+
+            if(parent(node) == null)
+                return false;
+
+            if(node == maybeParent)
+                return true;
+
+            if(parent(node) == maybeParent)
+                return true;
+
+
+            if(node.startsWith('I') && maybeParent.startsWith('S'))
+                if(parent(parent(node)) == maybeParent)
+                    return true;
+
+            return false;
+        }
+
         function addToChecked(id) {
             if ($.inArray(id, checkedList) <= -1) {
                 checkedList.push(id);
             }
             if ($.inArray(id, unCheckedList) > -1)
                 unCheckedList.splice($.inArray(id, unCheckedList), 1);
+
+            for (let i = 0; i < unCheckedList.length; i++) {
+                if(isChildOf(unCheckedList[i],id)){
+                    unCheckedList.splice(i, 1);
+                    i--;
+                }
+            }
         }
 
         function removeFromChecked(id) {
@@ -237,6 +269,13 @@
                 checkedList.splice($.inArray(id, checkedList), 1);
             else if ($.inArray(id, unCheckedList) <= -1)
                 unCheckedList.push(id);
+
+            for (let i = 0; i < checkedList.length; i++) {
+                if(isChildOf(checkedList[i],id)){
+                    checkedList.splice(i, 1);
+                    i--;
+                }
+            }
         }
 
         function boxCheck(_this) {
