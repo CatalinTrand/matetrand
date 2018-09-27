@@ -34,6 +34,8 @@ Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertvendoruser','WebserviceController@insertVendorID');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/getOrderInfo','WebserviceController@getOrderInfo');
+Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
+Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');
 Route::get('webservice/sap_activate_user','WebserviceController@sapActivateUser');

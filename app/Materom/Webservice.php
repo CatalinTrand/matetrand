@@ -46,6 +46,20 @@ class Webservice
         return false;
     }
 
+    public static function acceptItemCHG($id,$type){
+        $item = DB::select("select * from pitems where ebelp = '$id'")[0];
+        DB::update("update pitems set stage = 'A' where ebelp = '$id'");
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$item->ebeln','$id','A',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
+        return "";
+    }
+
+    public static function cancelItem($id,$type){
+        $item = DB::select("select * from pitems where ebelp = '$id'")[0];
+        DB::update("update pitems set stage = 'X' where ebelp = '$id'");
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$item->ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
+        return "";
+    }
+
     static public function getOrderInfo($order, $type, $item)
     {
         $str = "";
@@ -71,9 +85,9 @@ class Webservice
                 $links = DB::select("select * from pitems where ebeln = '$porder' order by ebelp");
                 foreach ($links as $link) {
                     $owner = self::getOwner($link,$type);
-                    if($link->stage[0] == 'A')
+                    if($link->stage[0] == 'X')
                         $stage = 2;
-                    else if($link->stage[0] == 'V'){
+                    else if($link->stage[0] == 'A'){
                         $stage = 1;
                     } else
                         $stage = 0;
@@ -87,9 +101,9 @@ class Webservice
                 $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
                     $owner = self::getOwner($link,$type);
-                    if($link->stage[0] == 'A')
+                    if($link->stage[0] == 'X')
                         $stage = 2;
-                    else if($link->stage[0] == 'V'){
+                    else if($link->stage[0] == 'A'){
                         $stage = 1;
                     } else
                         $stage = 0;

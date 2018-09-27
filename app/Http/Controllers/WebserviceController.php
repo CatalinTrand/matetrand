@@ -39,6 +39,20 @@ class WebserviceController extends Controller
         );
     }
 
+    public function acceptItemCHG(){
+        return Webservice::acceptItemCHG(
+            Input::get("id"),
+            Input::get("type")
+        );
+    }
+
+    public function cancelItem(){
+        return Webservice::cancelItem(
+            Input::get("id"),
+            Input::get("type")
+        );
+    }
+
     public function changePassword() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));

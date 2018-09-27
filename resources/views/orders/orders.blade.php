@@ -8,7 +8,9 @@
         @endphp
     @endguest
     @php
-        use Illuminate\Support\Facades\DB;if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
+        use Illuminate\Support\Facades\DB;
+
+        if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
             $furnizor = true;
         } else {
             if(isset($_POST['all']) && strcmp($_POST['all'],"true") == 0)
@@ -26,6 +28,7 @@
             $selF = "";
             $selAll = " selected";
         }
+
     @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -172,10 +175,13 @@
                             </tr>
                             @php
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
+                                $uname = \Illuminate\Support\Facades\Auth::user()->username;
 
                                 $orders = \App\Materom\Data::getOrders($id, $furnizor);
 
                                 echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$furnizor\">";
+                                echo "<input type=\"hidden\" id=\"user_id\" value=\"$id\">";
+                                echo "<input type=\"hidden\" id=\"user_name\" value=\"$uname\">";
 
                                 $seen = "";
                                 $line_counter = 1;
@@ -244,7 +250,7 @@
                                             $style = "background-color:LightYellow;";
                                         else
                                             $style = "background-color:Wheat;";
-                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td>3</td><td>4</td><td>5</td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td></td><td></td><td></td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
                                         $data = "<td>$order->kunnr</td><td>$order->kunnr_name</td><td>$order->shipto</td><td>$order->shipto_name</td><td>$order->ctv</td><td>$order->ctv_name</td><td></td>";
@@ -388,6 +394,154 @@
             }
         }
 
+        function accept(_this,id,type) {
+            var _data,_status = "";
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+
+            $.post("webservice/acceptItemCHG",
+                {
+                    id: id,
+                    type: type,
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_status == "success") {
+                switch (type) {
+                    case 'item':
+                        //show new row
+                        if(_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
+                            var date = new Date();
+                            var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                            var cuser = $("#user_id").val();
+                            var cuser_name = $("#user_name").val();
+                            var ctext = "Acceptare";
+                            var creason = "";
+                            if (chdate != null) {
+                                var newRow = $("<tr>");
+                                var cols = "";
+                                var pi_style = "background-color:" + $(_this).css("background-color") + ";";
+                                var color = $(_this).closest("tr").find(".coloured").css("background-color");
+                                var last_style = "background-color:" + color;
+                                var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                                var first_style = "background-color:" + first_color;
+                                cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                                let colsafter = "12";
+                                if ($("#set-furnizor").val() == "")
+                                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                                else colsafter = "13";
+                                cols += '<td class="coloured" style="' + last_style + '"></td>';
+                                cols += '<td style="' + pi_style + '"></td>';
+                                cols += "<td colspan='3'>" + chdate + "</td>";
+                                cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
+                                cols += '<td colspan="6">' + ctext + '</td>';
+                                cols += '<td colspan="2">' + creason + '</td>';
+                                cols += "<td colspan=" + colsafter + "></td>";
+                                if ($("#set-furnizor").val() != "")
+                                    cols += '<td></td>';
+                                cols += '<td colspan="4"></td>';
+                                newRow.append(cols);
+                                newRow.insertAfter($(_this).closest("tr"));
+                                if (line_counter == 0)
+                                    newRow.attr('style', "background-color:Azure; vertical-align: middle;");
+                                else
+                                    newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
+                                newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
+                                    chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
+                            }
+                        } else alert("Accepted!");
+                        break;
+                    case 'purch-order':
+                        //TODO - apply to all children items
+                        break;
+                    case 'sales-order':
+                        //TODO - apply to all children items
+                        break;
+                }
+            } else alert('Error processing operation!');
+        }
+
+        function reject(_this,id,type){
+            var _data,_status = "";
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+
+            $.post("webservice/cancelItem",
+                {
+                    id: id,
+                    type: type,
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_status == "success") {
+                switch (type) {
+                    case 'item':
+                        //show new row
+                        if(_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
+                            var date = new Date();
+                            var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                            var cuser = $("#user_id").val();
+                            var cuser_name = $("#user_name").val();
+                            var ctext = "Rejectare";
+                            var creason = "";
+                            if (chdate != null) {
+                                var newRow = $("<tr>");
+                                var cols = "";
+                                var pi_style = "background-color:" + $(_this).css("background-color") + ";";
+                                var color = $(_this).closest("tr").find(".coloured").css("background-color");
+                                var last_style = "background-color:" + color;
+                                var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                                var first_style = "background-color:" + first_color;
+                                cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                                let colsafter = "12";
+                                if ($("#set-furnizor").val() == "")
+                                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                                else colsafter = "13";
+                                cols += '<td class="coloured" style="' + last_style + '"></td>';
+                                cols += '<td style="' + pi_style + '"></td>';
+                                cols += "<td colspan='3'>" + chdate + "</td>";
+                                cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
+                                cols += '<td colspan="6">' + ctext + '</td>';
+                                cols += '<td colspan="2">' + creason + '</td>';
+                                cols += "<td colspan=" + colsafter + "></td>";
+                                if ($("#set-furnizor").val() != "")
+                                    cols += '<td></td>';
+                                cols += '<td colspan="4"></td>';
+                                newRow.append(cols);
+                                newRow.insertAfter($(_this).closest("tr"));
+                                if (line_counter == 0)
+                                    newRow.attr('style', "background-color:Azure; vertical-align: middle;");
+                                else
+                                    newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
+                                newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
+                                    chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
+                            }
+                        } else alert("Rejected!");
+                        break;
+                    case 'purch-order':
+                        //TODO - apply to all children items
+                        break;
+                    case 'sales-order':
+                        //TODO - apply to all children items
+                        break;
+                }
+            } else alert('Error processing operation!');
+        }
+
         function loadSub(item, type, _btn, ebelp) {
             var _data, _status;
             var _this;
@@ -451,9 +605,9 @@
                             let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">'+ image_info +'</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">'+image_owner+'</td>';
-                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">3</td>';
-                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">4</td>';
-                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">5</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">6</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + buttonok + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + buttoncancel + '</td>';
@@ -488,8 +642,8 @@
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
-                            let buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
-                            let buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
+                            let buttonok = "<button type='button' onclick='accept(this,\""+id+"\",\"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
+                            let buttoncancel = "<button type='button' onclick='reject(this,\""+id+"\",\"item\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
                             var image_owner = "";
                             if(owner2 == 1)
