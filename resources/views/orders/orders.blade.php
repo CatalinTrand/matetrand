@@ -8,7 +8,7 @@
         @endphp
     @endguest
     @php
-        if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
+        use Illuminate\Support\Facades\DB;if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
             $furnizor = true;
         } else {
             if(isset($_POST['all']) && strcmp($_POST['all'],"true") == 0)
@@ -69,7 +69,6 @@
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="1%">
-                                <col width="4%">
                                 <col width="2%">
                                 <col width="2%">
                                 <col width="2%">
@@ -79,6 +78,7 @@
                                 <col width="2%">
                                 <col width="2%">
                                 <col width="2%">
+                                <col width="2%">
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
@@ -107,19 +107,39 @@
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
-                                <col width="3%">
+                                <col width="5%">
                             </colgroup>
                             <tr>
-                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-check-all-50.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-info-50.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.5rem;' src='/images/icons8-close-window-50.png'/></th>
-                                <th colspan="1" class="td01"><image style='height: 1.5rem;' src='/images/icons8-error-50.png'/></th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.3rem;' src='/images/icons8-check-all-50.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.3rem;' src='/images/icons8-info-50.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.5rem;' src='/images/icons8-close-window-50.png'/>
+                                </th>
+                                <th colspan="1" class="td01">
+                                    <image style='height: 1.5rem;' src='/images/icons8-error-50.png'/>
+                                </th>
                                 @php
                                     if($furnizor){
                                         echo '<th class="td02" colspan="3">Comanda aprovizionare</th>';
@@ -148,10 +168,9 @@
                                 <th>{{$th5}}</th>
                                 <th>{{$th6}}</th>
                                 <th>{{$th7}}</th>
-                                @php for ($i = 0; $i < 20; $i++) echo "<th>&nbsp;</th>"; @endphp
+                                @php for ($i = 0; $i < 21; $i++) echo "<th>&nbsp;</th>"; @endphp
                             </tr>
                             @php
-                                use Illuminate\Support\Facades\DB;
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
 
                                 $orders = \App\Materom\Data::getOrders($id, $furnizor);
@@ -190,16 +209,6 @@
                                     $wtime = strtotime($order->wtime);
                                     $ctime = strtotime($order->ctime);
 
-                                    $interval_wtime = $now - $wtime;
-                                    if($interval_wtime > 0){
-                                        $interval_ctime = $now - $ctime;
-                                        if($interval_ctime > 0){
-                                            $prio = "<image style='height: 1rem;' src='/images/critical.png'>";
-                                        } else {
-                                            $prio = "<image style='height: 1rem;' src='/images/warning.png'>";
-                                        }
-                                    } else $prio = "None";
-
                                     $status = "<image style='height: 1rem;' src='/images/status.png'>"; //TODO
                                     $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
                                     $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
@@ -208,19 +217,63 @@
                                     if($furnizor){
                                         $oid = "P" . $order->ebeln;
                                         $data = "<td>$order->lifnr</td><td>$order->lifnr_name</td><td>$order->ekgrp</td><td>$order->ekgrp_name</td><td>$order->erdat</td><td>$order->curr</td><td>$order->fxrate</td>";
+                                        switch (\App\Materom\Webservice::getGravity($order, "purch-order")){
+                                            case 0:
+                                                $info = "";
+                                            break;
+                                            case 1:
+                                                $info = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                                            break;
+                                            case 2:
+                                                $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                                            break;
+                                        }
+                                        switch (\App\Materom\Webservice::getOwner($order,"purch-order")){
+                                            case 0:
+                                                $owner = "";
+                                            break;
+                                            case 1:
+                                                $owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                                            break;
+                                            case 2:
+                                                $owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                            break;
+                                        }
                                         if ($line_counter == 0)
                                             $style = "background-color:LightYellow;";
                                         else
                                             $style = "background-color:Wheat;";
-                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td>3</td><td>4</td><td>5</td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
                                         $data = "<td>$order->kunnr</td><td>$order->kunnr_name</td><td>$order->shipto</td><td>$order->shipto_name</td><td>$order->ctv</td><td>$order->ctv_name</td><td></td>";
+                                        switch (\App\Materom\Webservice::getGravity($order, "sales-order")){
+                                            case 0:
+                                                $info = "";
+                                            break;
+                                            case 1:
+                                                $info = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                                            break;
+                                            case 2:
+                                                $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                                            break;
+                                        }
+                                        switch (\App\Materom\Webservice::getOwner($order,"sales-order")){
+                                            case 0:
+                                                $owner = "";
+                                            break;
+                                            case 1:
+                                                $owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                                            break;
+                                            case 2:
+                                                $owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                            break;
+                                        }
                                         if ($line_counter == 0)
                                             $style = "background-color:white;";
                                         else
                                             $style = "background-color:WhiteSmoke;";
-                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td colspan='7'></td><td colspan='3' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td colspan='7'></td><td colspan='3' class='first_color'>$comanda</td>$data<td colspan='21'></td></tr>";
                                     }
                                 }
                             @endphp
@@ -288,6 +341,7 @@
         }
 
         function addToChecked(id) {
+
             if ($.inArray(id, checkedList) <= -1) {
                 checkedList.push(id);
             }
@@ -317,9 +371,10 @@
         }
 
         function boxCheck(_this) {
-            if (_this.checked) {
+            if (!isChecked(_this.name)) {
                 addToChecked(_this.name);
             } else {
+                removeFromChecked(_this.name);
                 removeFromChecked(_this.name);
             }
             refreshCheck();
@@ -374,6 +429,18 @@
                             var erdat = _ord.split('#')[6];
                             var curr = _ord.split('#')[7];
                             var fxrate = _ord.split('#')[8];
+                            var gravity = _ord.split('#')[9];
+                            var owner = _ord.split('#')[10];
+                            var image_info = "";
+                            if(gravity == 1)
+                                image_info = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                            if(gravity == 2)
+                                image_info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                            var image_owner = "";
+                            if(owner == 1)
+                                image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                            if(owner == 2)
+                                image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
@@ -381,8 +448,8 @@
                             let buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
                             let buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
-                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">1</td>';
-                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">2</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">'+ image_info +'</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">'+image_owner+'</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">3</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">4</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">5</td>';
@@ -399,7 +466,7 @@
                             cols += '<td colspan="1">' + erdat + '</td>';
                             cols += '<td colspan="1">' + curr + '</td>';
                             cols += '<td colspan="1">' + fxrate + '</td>';
-                            cols += '<td colspan="16"></td>';
+                            cols += '<td colspan="20"></td>';
                             newRow.append(cols).hide();
                             newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                             if (line_counter == 0)
@@ -412,6 +479,7 @@
                             var id = _ord.split('#')[1];
                             var posnr = _ord.split('#')[2];
                             var idnlf = _ord.split('#')[3];
+                            var owner2 = _ord.split('#')[4];
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + ebeln2 + "_" + id + '" value="I' + ebeln2 + "_" + id + '"></td>';
@@ -421,9 +489,14 @@
                             let buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
                             let buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
+                            var image_owner = "";
+                            if(owner2 == 1)
+                                image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                            if(owner2 == 2)
+                                image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
                             if ($("#set-furnizor").val() == "") {
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">1</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">2</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+image_owner+'</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">3</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">4</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">5</td>';
@@ -433,8 +506,8 @@
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + buttonrequest + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                             } else {
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">1</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">2</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '"></td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '"></td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">3</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">4</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">5</td>';
@@ -447,7 +520,7 @@
                             cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td>' + posnr + '</td>';
                             cols += '<td>' + idnlf + '</td>';
-                            cols += '<td colspan="15"></td>';
+                            cols += '<td colspan="25"></td>';
                             if ($("#set-furnizor").val() != "")
                                 cols += '<td colspan="1"></td>';
                             newRow.append(cols).hide();
@@ -487,6 +560,7 @@
                                 cols += "<td colspan=" + colsafter + "></td>";
                                 if ($("#set-furnizor").val() != "")
                                     cols += '<td></td>';
+                                cols += '<td colspan="4"></td>';
                                 newRow.append(cols);
                                 newRow.insertAfter($(_this).closest("tr"));
                                 if (line_counter == 0)
@@ -511,7 +585,7 @@
                         cols += '<td colspan="1"><b>ERDAT</b></td>';
                         cols += '<td colspan="1"><b>CURR</b></td>';
                         cols += '<td colspan="1"><b>FXRATE</b></td>';
-                        cols += '<td colspan="16"><b></b></td>';
+                        cols += '<td colspan="20"><b></b></td>';
                         newRow.append(cols).hide();
                         newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                         newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
@@ -531,7 +605,7 @@
                         cols += '<td colspan="2"><b>Pozitie</b></td>';
                         cols += '<td><b>Posnr</b></td>';
                         cols += '<td><b>IDNLF</b></td>';
-                        cols += '<td colspan="15"></td>';
+                        cols += '<td colspan="25"></td>';
                         newRow.append(cols).hide();
                         newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                         newRow.attr('style', "background-color:YellowGreen; vertical-align: middle;");
@@ -545,10 +619,10 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        var colsafter = "12";
+                        var colsafter = "13";
                         if ($("#set-furnizor").val() == "")
                             cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        else colsafter = "13";
+                        else colsafter = "14";
                         cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="3"><b>Data</b></td>';

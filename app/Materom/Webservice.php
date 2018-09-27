@@ -9,15 +9,18 @@ use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 
-class Webservice {
+class Webservice
+{
 
     static public function rfcPing($rfc_router, $rfc_server, $rfc_sysnr,
-                                   $rfc_client, $rfc_user, $rfc_password) {
+                                   $rfc_client, $rfc_user, $rfc_password)
+    {
         return (new RFCData($rfc_router, $rfc_server, $rfc_sysnr,
             $rfc_client, $rfc_user, $rfc_password))->ping();
     }
 
-    static public function insertVendorID($userid, $wglif, $mfrnr) {
+    static public function insertVendorID($userid, $wglif, $mfrnr)
+    {
         $find = DB::select("select * from users_sel where id = '$userid' and wglif = '$wglif' and mfrnr = '$mfrnr'");
         if (count($find) == 0) {
             DB::insert("insert into users_sel (id, wglif, mfrnr) values ('$userid','$wglif','$mfrnr')");
@@ -25,34 +28,41 @@ class Webservice {
         } else return "Vendor already defined for this user";
     }
 
-    static public function changePassword($userid, $newPass) {
+    static public function changePassword($userid, $newPass)
+    {
         $hash = Hash::make($newPass);
         DB::update("update users set password = '$hash' where id = '$userid'");
         return "OK";
     }
 
-    static public function verifyAPIToken($token){
+    static public function verifyAPIToken($token)
+    {
 
         $user = DB::select("select * from users where api_token = '$token'");
 
-        if($user)
+        if ($user)
             return true;
 
         return false;
     }
 
-    static public function getOrderInfo($order, $type, $item) {
+    static public function getOrderInfo($order, $type, $item)
+    {
         $str = "";
         $porder = substr($order, 0, 10);
         if (strcmp($type, 'sales-order') == 0) {
             $porders = Data::getSalesOrderFlow($order);
-            foreach($porders as $porder) {
+            foreach ($porders as $porder) {
                 $links = DB::select("select * from porders where ebeln = '$porder->ebeln'");
                 foreach ($links as $link) {
+
+                    $gravity = self::getGravity($link,"purch-order");
+                    $owner = self::getOwner($link,$type);
+
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate";
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner";
                     else {
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate" . '=' . $str;
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner" . '=' . $str;
                     }
                 }
             }
@@ -60,19 +70,21 @@ class Webservice {
             if (is_null($item) || empty($item)) {
                 $links = DB::select("select * from pitems where ebeln = '$porder' order by ebelp");
                 foreach ($links as $link) {
+                    $owner = self::getOwner($link,$type);
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner" . '=' . $str;
                     }
                 }
             } else {
                 $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
+                    $owner = self::getOwner($link,$type);
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner" . '=' . $str;
                     }
                 }
             }
@@ -131,7 +143,96 @@ class Webservice {
         return $result;
     }
 
-    static public function sapActivateUser($id) {
+    static public function getGravity($order, $type)
+    {
+        //gravitate : 2 = critical, 1 = warning, 0 = nimic
+        if (strcmp($type, "purch-order") == 0) {
+            $now = strtotime(date('Y-m-d H:i:s'));
+            $wtime = strtotime($order->wtime);
+            $ctime = strtotime($order->ctime);
+            $interval_wtime = $now - $wtime;
+            if ($interval_wtime > 0) {
+                $interval_ctime = $now - $ctime;
+                if ($interval_ctime > 0) {
+                    return 2;
+                } else {
+                    return 1;
+                }
+            }
+            return 0;
+        } else {
+            $max = 0;
+            $links_items = DB::select("select ebeln from pitems where vbeln = '$order->vbeln'");
+            $links = array();
+            foreach ($links_items as $link_item) {
+                $links = array_merge($links, DB::select("select wtime,ctime from porders where ebeln = '$link_item->ebeln'"));
+            }
+            foreach ($links as $link) {
+                $now = strtotime(date('Y-m-d H:i:s'));
+                $wtime = strtotime($link->wtime);
+                $ctime = strtotime($link->ctime);
+                $interval_wtime = $now - $wtime;
+                if ($interval_wtime > 0) {
+                    $interval_ctime = $now - $ctime;
+                    if ($interval_ctime > 0) {
+                        $gravitate = 2;
+                    } else {
+                        $gravitate = 1;
+                    }
+                } else $gravitate = 0;
+
+                if ($gravitate > $max)
+                    $max = $gravitate;
+
+            }
+            return $max;
+        }
+    }
+
+    static public function getOwner($order, $type)
+    {
+        // 0 = not owned, 1 = yellow arrow, 2 = blue arrow
+        if (strcmp($type, "purch-order") == 0) {
+            if (strcmp(Auth::user()->role, "Administrator") == 0)
+                return 2;
+            else {
+                $owner = 0;
+                $items = DB::select("select stage from pitems where ebeln='$order->ebeln'");
+                foreach ($items as $item) {
+                    $ownerT = 0;
+                    if (Auth::user()->role[0] == $item->stage)
+                        $ownerT = 2;
+                    if (Auth::user()->role[0] == 'R' && $item->stage == 'F')
+                        $ownerT = 1;
+
+                    if ($ownerT > $owner)
+                        $owner = $ownerT;
+                }
+                return $owner;
+            }
+        } else {
+            if (strcmp(Auth::user()->role, "Administrator") == 0)
+                return 2;
+            else {
+                $owner = 0;
+                $items = DB::select("select stage from pitems where vbeln='$order->vbeln'");
+                foreach ($items as $item) {
+                    $ownerT = 0;
+                    if (Auth::user()->role[0] == $item->stage)
+                        $ownerT = 2;
+                    if (Auth::user()->role[0] == 'R' && $item->stage == 'F')
+                        $ownerT = 1;
+
+                    if ($ownerT > $owner)
+                        $owner = $ownerT;
+                }
+                return $owner;
+            }
+        }
+    }
+
+        static public function sapActivateUser($id)
+    {
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) == 0) return "User does not exist";
         $user = $users[0];
@@ -140,7 +241,8 @@ class Webservice {
         return "OK";
     }
 
-    static public function sapDeactivateUser($id) {
+    static public function sapDeactivateUser($id)
+    {
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) == 0) return "User does not exist";
         $user = $users[0];
@@ -149,23 +251,25 @@ class Webservice {
         return "OK";
     }
 
-    static public function sapCreateUser($id, $username, $role, $email, $language, $lifnr, $password) {
+    static public function sapCreateUser($id, $username, $role, $email, $language, $lifnr, $password)
+    {
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) != 0) return "User already exists";
         User::create([
-            'id'       => $id,
+            'id' => $id,
             'username' => $username,
-            'role'     => $role,
-            'email'    => $email,
-            'lang'     => $language,
-            'lifnr'    => $lifnr,
+            'role' => $role,
+            'email' => $email,
+            'lang' => $language,
+            'lifnr' => $lifnr,
             'password' => Hash::make($password),
             'created_at' => Carbon::now()->getTimestamp()
         ]);
         return "OK";
     }
 
-    static public function sapDeleteUser($id) {
+    static public function sapDeleteUser($id)
+    {
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) == 0) return "User does not exist";
         $user = $users[0];
@@ -175,11 +279,13 @@ class Webservice {
         return "OK";
     }
 
-    static public function sapGetUserMakers($userid) {
+    static public function sapGetUserMakers($userid)
+    {
         return "Not yet implemented";
     }
 
-    static public function sapProcessPO($ebeln) {
+    static public function sapProcessPO($ebeln)
+    {
         $data = SAP::rfcGetPOData($ebeln);
         return Data::processPOdata($ebeln, $data);
     }
