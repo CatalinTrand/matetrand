@@ -8,6 +8,7 @@
 
 namespace App\Materom;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class Data
@@ -184,7 +185,113 @@ class Data
         return $result;
     }
 
-    static public function processPOdata($data) {
+    static public function processPOdata($ebeln, $data) {
         if (empty($data)) return "OK";
+        $saphdr = $data["ES_HEADER"];
+        if ($ebeln != $saphdr->ebeln) return "Wrong purchase order";
+        $orders = DB::select("select * from porders where ebeln = '$ebeln'");
+        if (count($orders) == 0) $order = null;
+        else $order = $orders[0];
+        $norder = null;
+        $now = new Carbon();
+        $erdat = new Carbon();
+        $norder->lifnr = $saphdr->lifnr;
+        $norder->lifnr_name = $saphdr->lifnr_name;
+        $norder->ekgrp = $saphdr->ekgrp;
+        $norder->ekgrp_name = $saphdr->ekgrp_name;
+        $erdat->hour = $now->hour;
+        $erdat->minute = $now->minute;
+        $erdat->second = $now->second;
+        $norder->erdat = $erdat->getTimestamp();
+        $norder->ernam = $saphdr->ernam;
+        $norder->curr = $saphdr->curr;
+        $norder->fxrate = $saphdr->fxrate;
+        $norder->nof = true;
+        $now->addHours(24);
+        $norder->wtime = $now->getTimestamp();
+        $now->addHours(24);
+        $norder->ctime = $now->getTimestamp();
+
+        DB::beginTransaction();
+
+        if (is_null($order)) {
+            $sql = "insert into porders (ebeln, nof, wtime, ctime, lifnr, lifnr_name, ekgrp, ekgrp_name, " .
+                "erdat, ernam, curr, fxrate) values " .
+                "('$norder->ebeln', '$norder->nof', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
+                "'$norder->lifnr_name', '$norder->ekgrp', '$norder->ekgrp_name', '$norder->erdat', " .
+                "'$norder->ernam', '$norder->curr', '$norder->fxrate')";
+            DB::insert($sql);
+        } else {
+            $sql = "update porders set nof = '$norder->nof', " .
+                "lifnr = '$norder->lifnr', ".
+                "lifnr_name = '$norder->lifnr_name', ".
+                "ekgrp = '$norder->ekgrp', ".
+                "ekgrp_name = '$norder->ekgrp_name', " .
+                "curr = '$norder->curr', " .
+                "fxrate = '$norder->fxrate') " .
+                "where $ebeln = '$norder->ebeln'";
+            DB::update($sql);
+        }
+
+        $items = DB::select("select * from pitems where ebeln = '$ebeln' order by ebelp");
+        $sapitms = $data["ET_ITEMS"];
+        $citem = null;
+        foreach($sapitms as $sapitm) {
+            foreach($items as $item) {
+                if ($item->ebelp == $sapitm->ebelp) {
+                    $citem = $item;
+                    break;
+                }
+            }
+            $nitem = null;
+            $nitem->ebeln = $sapitm->ebeln;
+            if ($ebeln != $item->ebeln) return "Wrong purchase order items";
+            $nitem->ebelp = $sapitm->ebelp;
+            $nitem->idnlf = $sapitm->idnlf;
+            $nitem->qty = $sapitm->qty;
+            $nitem->qty_uom = $sapitm->qty_uom;
+            $nitem->lfdat = $sapitm->lfdat;
+            $nitem->mfrnr = $sapitm->mfrnr;
+            $nitem->mfrnr_name = $sapitm->mfrnr_name;
+            $nitem->mfrpn = $sapitm->mfrpn;
+            $nitem->mfrpn_name = $sapitm->mfrpn_name;
+            $nitem->purch_price = $sapitm->purch;
+            $nitem->purch_curr = $sapitm->purch;
+            $nitem->purch_prun = $sapitm->purch;
+            $nitem->purch_puom = $sapitm->purch;
+            $nitem->vbeln = $sapitm->vbeln;
+            $nitem->posnr = $sapitm->posnr;
+            $nitem->sales_price = $sapitm->sales;
+            $nitem->sales_curr = $sapitm->sales;
+            $nitem->sales_prun = $sapitm->sales;
+            $nitem->sales_puom = $sapitm->sales;
+            $nitem->kunnr = $sapitm->kunnr;
+            $nitem->kunnr_name = $sapitm->kunnr_name;
+            $nitem->shipto = $sapitm->shipto;
+            $nitem->shipto_name = $sapitm->shipto_name;
+            $nitem->ctv = $sapitm->ctv;
+            $nitem->ctv_name = $sapitm->ctv_name;
+            $nitem->stage = 'F';
+            $nitem->changed = false;
+
+            $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
+            if (count($users) > 0) $nitem->ctv = $users[0]->id;
+            $sql = "insert into pitems (ebeln, ebelp, idnlf, qty, qty_uom, lfdat, mfrnr, mfrnr_name,".
+                                       "mfrpn, mfrpn_name, purch_price, purch_curr, purch_prun, purch_puom, ".
+                                       "sales_price, sales_curr, sales_prun, sales_puom, ".
+                                       "kunnr, kunnr_name, shipto, shipto_name, ctv, ctv_name, stage, changed ".
+                                       ") values (".
+                   "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '$nitem->qty', ''$nitem->qty_uom', ".
+                   "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
+                   "'$nitem->mfrpn', '$nitem->mfrpn_name', '$nitem->purch_price', '$nitem->purch_curr', ".
+                   "'$nitem->purch_prun', '$nitem->purch_puom', ".
+                   "'$nitem->sales_price', '$nitem->sales_curr', '$nitem->sales_prun', ".
+                   "'$nitem->sales_puom', '$nitem->kunnr', '$nitem->kunnr_name', ".
+                   "'$nitem->shipto', '$nitem->shipto_name', '$nitem->ctv', '$nitem->ctv_name', ".
+                   "'$nitem->stage', 0)";
+        }
+
+        DB::commit();
+
     }
 }

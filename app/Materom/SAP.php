@@ -57,7 +57,7 @@ class SAP
             $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_PO_DATA2');
             $result = $sapfm->invoke(['P_EBELN' => $ebeln]);
             $sapconn->close();
-            return Data::processPOdata($result);
+            return $result;
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();

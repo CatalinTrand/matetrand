@@ -181,7 +181,7 @@ class Webservice {
 
     static public function sapProcessPO($ebeln) {
         $data = SAP::rfcGetPOData($ebeln);
-        return $data;
+        return Data::processPOdata($ebeln, $data);
     }
 
 }
