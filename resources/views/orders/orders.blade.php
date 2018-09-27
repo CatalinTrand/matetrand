@@ -479,7 +479,7 @@
                             var id = _ord.split('#')[1];
                             var posnr = _ord.split('#')[2];
                             var idnlf = _ord.split('#')[3];
-                            var owner = _ord.split('#')[4];
+                            var owner2 = _ord.split('#')[4];
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + ebeln2 + "_" + id + '" value="I' + ebeln2 + "_" + id + '"></td>';
@@ -490,9 +490,9 @@
                             let buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
                             var image_owner = "";
-                            if(owner == 1)
+                            if(owner2 == 1)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
-                            if(owner == 2)
+                            if(owner2 == 2)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
                             if ($("#set-furnizor").val() == "") {
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';

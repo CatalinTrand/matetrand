@@ -70,9 +70,7 @@ class Webservice
             if (is_null($item) || empty($item)) {
                 $links = DB::select("select * from pitems where ebeln = '$porder' order by ebelp");
                 foreach ($links as $link) {
-
-                    $owner = self::getOwner($links,$type);
-
+                    $owner = self::getOwner($link,$type);
                     if (strcmp($str, '') == 0)
                         $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner";
                     else {
@@ -82,10 +80,11 @@ class Webservice
             } else {
                 $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
+                    $owner = self::getOwner($link,$type);
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner" . '=' . $str;
                     }
                 }
             }
