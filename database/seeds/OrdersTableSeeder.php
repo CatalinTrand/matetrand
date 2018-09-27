@@ -38,11 +38,11 @@ class OrdersTableSeeder extends Seeder
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf)" .
             " values ('P000000003', '00060', 'S000000003', '00100', 'IDNLF6')");
 
-        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason)" .
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, text, oebeln, reason)" .
             " values ('P000000001', '00010', 'A', '2018-09-01 18:01:00', 'f20786', 'Furnizor 20786', 'oldvalue', 'newvalue', 'Negociere')");
-        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason)" .
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, text, oebeln, reason)" .
             " values ('P000000001', '00010', 'B', '2018-09-01 18:02:00', 'f20786', 'Furnizor 20786', 'oldvalue2', 'newvalue2', 'Negociere2')");
-        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason)" .
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, text, oebeln, reason)" .
             " values ('P000000002', '00040', 'C', '2018-09-01 18:03:00', 'Radu', 'Trandafir', 'oldvalue3', 'newvalue3', 'Negociere3')");
 
     }
