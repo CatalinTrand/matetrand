@@ -50,14 +50,14 @@ class SAP
             $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
-            \SAPNWRFC\Connection::setTraceLevel(3);
-            \SAPNWRFC\Connection::setTraceDir("/home/srm.materom.ro/public/storage/logs");
+//            \SAPNWRFC\Connection::setTraceLevel(3);
+//            \SAPNWRFC\Connection::setTraceDir("/home/srm.materom.ro/public/storage/logs");
+//            \SAPNWRFC\Connection::setTraceDir("C:/Users/Radu/Apache24/htdocs/matetrand/storage/logs");
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_PO_DATA');
-            $returnValue = $sapfm->invoke(['P_EBELN' => $ebeln,
-                                           'RESULT2' => '']);
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_PO_DATA2');
+            $result = $sapfm->invoke(['P_EBELN' => $ebeln]);
             $sapconn->close();
-            return $returnValue;
+            return Data::processPOdata($result);
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();

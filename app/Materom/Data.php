@@ -41,24 +41,66 @@ class Data
             }
         }
 
-        if ($user->role == "CTV")
-            if ($mode) { // purchase orders
-                return DB::select("select * from porders where ctv = '$id' order by vbeln, ebeln");
-            } else {
-
+        if ($user->role == "CTV") {
+            if ($mode) { // purchase orders \
+                $porders2 = DB::select("select distinct ebeln from pitems where ctv = '$id'");
+                $porders = array();
+                foreach($porders2 as $porder2) {
+                    $result = DB::select("select * from porders where ebeln = '$porder2->ebeln'");
+                    $porders = array_merge($porders, $result);
+                }
+                foreach($porders as $porder) $porder->vbeln = '';
+                return $porders;
+            } else {     // sales orders
+                $result = array();
+                $sorders = DB::select("select distinct vbeln from pitems where ctv = '$id' order by vbeln");
+                foreach($sorders AS $sorder) {
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln);
+                    foreach($porders AS $porder) {
+                        $orders = DB::select("select * from porders where ebeln = '$porder->ebeln' order by ebeln");
+                        foreach($orders as $order) {
+                            $order->vbeln = $sorder->vbeln;
+                            $order->ebeln .= $porder->ebeln_id;
+                        }
+                        $result = array_merge($result, $orders);
+                    }
+                }
+                return $result;
             }
+        }
 
-        if ($user->role == "Referent")
-            if ($mode) { // purchase orders
-                return DB::select("select * from porders where ekgrp = '$user->ekgrp' order by vbeln, ebeln");
-            } else { // sales orders
-
+        if ($user->role == "Referent") {
+            if ($mode) { // purchase orders \
+                $porders = DB::select("select * from porders where ekgrp = '$user->ekgrp' order by ebeln");
+                foreach($porders as $porder) $porder->vbeln = '';
+                return $porders;
+            } else {     // sales orders
+                $result = array();
+                $porders = DB::select("select distinct ebeln from porders where ekgrp = '$user->ekgrp'");
+                if (count($porders) == 0) return $porders;
+                $sql = "";
+                foreach($porders as $porder) {
+                    if (!empty($sql)) $sql .= " or";
+                    $sql .= " ebeln = '$porder->ebeln'";
+                }
+                $sql = "select distinct vbeln from pitems where" . $sql . " order by vbeln";
+                $sorders = DB::select($sql);
+                foreach($sorders AS $sorder) {
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln);
+                    foreach($porders AS $porder) {
+                        $orders = DB::select("select * from porders where ebeln = '$porder->ebeln' and ekgrp = '$user->ekgrp' order by ebeln");
+                        foreach($orders as $order) {
+                            $order->vbeln = $sorder->vbeln;
+                            $order->ebeln .= $porder->ebeln_id;
+                        }
+                        $result = array_merge($result, $orders);
+                    }
+                }
+                return $result;
             }
+        }
 
         // Furnizor
-        $sql = "select * from porders where id ='$id'";
-        /*
-        $sql = "select * from porders where lifnr = '$user->lifnr'";
         $brands = DB::select("select * from users_sel where id ='$id'");
         $xsql = "";
         foreach($brands as $brand) {
@@ -67,16 +109,47 @@ class Data
                 $sel1 = "wglif = '$brand->wglif'";
             if (!empty(trim($brand->mfrnr))) {
                 if (!empty($sel1)) $sel1 .= " and ";
-                $sel1 = "wglif = '$brand->wglif'";
+                $sel1 = "mfrnr = '$brand->mfrnr'";
             }
             if (empty($sel1)) continue;
             $sel1 = "(". $sel1 . ")";
             if (empty($zsql)) $xsql = $sel1;
             else $xsql .= ' or ' . $sel1;
         }
-        if (!empty($xsql)) $sql .= " and (" . $xsql . ")";
-        $sql .= " order by ebeln";
-        */
+        if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
+
+        if ($mode) { // purchase orders \
+            $porders = DB::select("select * from porders where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            foreach($porders as $porder) $porder->vbeln = '';
+            return $porders;
+        } else {     // sales orders
+            $result = array();
+            $porders = DB::select("select distinct ebeln from porders where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            if (count($porders) == 0) return $porders;
+            $sql = "";
+            foreach($porders as $porder) {
+                if (!empty($sql)) $sql .= " or";
+                $sql .= " ebeln = '$porder->ebeln'";
+            }
+            $sql = "select distinct vbeln from pitems where" . $sql . " order by vbeln";
+            $sorders = DB::select($sql);
+            foreach($sorders AS $sorder) {
+                $porders = Data::getSalesOrderFlow($sorder->vbeln);
+                foreach($porders AS $porder) {
+                    $orders = DB::select("select * from porders where ebeln = '$porder->ebeln'".
+                        " and lifnr = '$user->lifnr'".$xsql.
+                        " order by ebeln");
+                    foreach($orders as $order) {
+                        $order->vbeln = $sorder->vbeln;
+                        $order->ebeln .= $porder->ebeln_id;
+                    }
+                    $result = array_merge($result, $orders);
+                }
+            }
+            return $result;
+        }
+
+        $sql = "select * from porders where id ='$id'";
         return DB::select($sql);
     }
 
@@ -101,5 +174,9 @@ class Data
             if ($sorder->vbeln == $vbeln) array_push($result, $sorder);
         }
         return $result;
+    }
+
+    static public function processPOdata($data) {
+        if (empty($data)) return "OK";
     }
 }
