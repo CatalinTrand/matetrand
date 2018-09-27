@@ -189,12 +189,13 @@
                                         $viewebeln = substr($order->ebeln, 0, 10);
                                         $comanda = "<button type='button' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button> $viewebeln";
                                     } else {
-                                        if(strchr($seen,$order->vbeln) == null)
-                                            $seen.= " $order->vbeln";
+                                        $lvbeln = $order->vbeln;
+                                        if(strchr($seen,$lvbeln) == null)
+                                            $seen.= " $lvbeln";
                                         else
                                             continue;
 
-                                        $comanda = "<button type='button' id='btn_S$order->vbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $order->vbeln";
+                                        $comanda = "<button type='button' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $order->vbeln";
                                     }
 
                                     $line_counter = $line_counter + 1;

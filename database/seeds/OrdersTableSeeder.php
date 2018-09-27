@@ -19,24 +19,44 @@ class OrdersTableSeeder extends Seeder
             " values (FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
             "         'P000000001', 'A01', '0000020786', 'Furnizor 20786')");
         DB::insert("insert into porders (nof, wtime, ctime, ebeln, ekgrp, lifnr, lifnr_name)" .
-            " values (FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
+            " values (TRUE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
             "         'P000000002', 'A01', '0000020786', 'Furnizor 20786')");
         DB::insert("insert into porders (nof, wtime, ctime, ebeln, ekgrp, lifnr, lifnr_name)" .
             " values (FALSE, '2018-09-01 18:00:00', '2018-09-02 00:00:00', " .
             "         'P000000003', 'A02', '0000020786', 'Furnizor 20786')");
+        DB::insert("insert into porders (nof, wtime, ctime, ebeln, ekgrp, lifnr, lifnr_name)" .
+            " values (TRUE, '2018-09-28 10:00:00', '2018-09-02 00:00:00', " .
+            "         'P000000014', 'A01', '0000016098', 'TENET SRL')");
+        DB::insert("insert into porders (nof, wtime, ctime, ebeln, ekgrp, lifnr, lifnr_name)" .
+            " values (FALSE, '2018-09-29 10:00:00', '2018-09-02 00:00:00', " .
+            "         'P000000015', 'A02', '0000020019', 'STAHLGRUBER GmbH')");
 
-        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf)" .
-            " values ('P000000001', '00010', 'S000000001', '00010', 'IDNLF1')");
-        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf)" .
-            " values ('P000000001', '00020', 'S000000001', '00030', 'IDNLF2')");
-        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf)" .
-            " values ('P000000002', '00030', 'S000000002', '00050', 'IDNLF3')");
-        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf)" .
-            " values ('P000000002', '00040', 'S000000003', '00070', 'IDNLF4')");
-        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf)" .
-            " values ('P000000003', '00050', 'S000000001', '00090', 'IDNLF5')");
-        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf)" .
-            " values ('P000000003', '00060', 'S000000003', '00100', 'IDNLF6')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, stage)" .
+            " values ('P000000001', '00010', 'S000000001', '00010', 'IDNLF1', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, stage)" .
+            " values ('P000000001', '00020', 'S000000001', '00030', 'IDNLF2', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, stage)" .
+            " values ('P000000002', '00030', 'S000000002', '00050', 'IDNLF3', 'R')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, stage)" .
+            " values ('P000000002', '00040', 'S000000003', '00070', 'IDNLF4', 'R')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, stage)" .
+            " values ('P000000003', '00050', 'S000000001', '00090', 'IDNLF5', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, stage)" .
+            " values ('P000000003', '00060', 'S000000003', '00100', 'IDNLF6', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, qty, qty_uom, stage)" .
+            " values ('P000000014', '00110', 'Replenish', '', 'IDNLF5', 10, 'buc', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, qty, qty_uom, stage)" .
+            " values ('P000000014', '00120', 'Replenish', '', 'IDNLF6', 15, 'buc', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, qty, qty_uom, stage)" .
+            " values ('P000000014', '00130', 'Replenish', '', 'IDNLF5', 20, 'buc', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, qty, qty_uom, stage)" .
+            " values ('P000000014', '00140', 'Replenish', '', 'IDNLF6', 25, 'buc', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, qty, qty_uom, stage)" .
+            " values ('P000000015', '00200', 'S000000010', '000100', 'IDNLF6', 150, 'buc', 'F')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, qty, qty_uom, stage)" .
+            " values ('P000000015', '00250', 'S000000011', '000100', 'IDNLF5', 200, 'buc', 'R')");
+        DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, qty, qty_uom, stage)" .
+            " values ('P000000015', '00300', 'S000000012', '000100', 'IDNLF6', 250, 'buc', 'R')");
 
         DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason)" .
             " values ('P000000001', '00010', 'Q', '2018-09-01 18:01:00', 'f20786', 'Furnizor 20786', '50 buc', '40 buc', 'Stoc insuficient')");

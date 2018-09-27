@@ -260,6 +260,7 @@ class Data
             $nitem->purch_prun = $sapitm->purch;
             $nitem->purch_puom = $sapitm->purch;
             $nitem->vbeln = $sapitm->vbeln;
+            if (is_null($nitem->vbeln) || empty($nitem->vbeln)) $nitem->vbeln = "Replenish";
             $nitem->posnr = $sapitm->posnr;
             $nitem->sales_price = $sapitm->sales;
             $nitem->sales_curr = $sapitm->sales;
