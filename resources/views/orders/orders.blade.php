@@ -481,6 +481,7 @@
                             var posnr = _ord.split('#')[2];
                             var idnlf = _ord.split('#')[3];
                             var owner2 = _ord.split('#')[4];
+                            var stage = _ord.split('#')[5];
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + ebeln2 + "_" + id + '" value="I' + ebeln2 + "_" + id + '"></td>';
@@ -495,12 +496,26 @@
                                 image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
                             if(owner2 == 2)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+
+                            var blue_circle = "";
+                            var green_tick = "";
+                            var red_cross = "";
+
+                            if(stage == 0)
+                                blue_circle = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+
+                            if(stage == 1)
+                                green_tick = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+
+                            if(stage == 2)
+                                red_cross = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+
                             if ($("#set-furnizor").val() == "") {
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+image_owner+'</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">3</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">4</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">5</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ blue_circle +'</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ green_tick +'</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ red_cross +'</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">6</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + buttonok + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + buttoncancel + '</td>';
@@ -508,10 +523,10 @@
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                             } else {
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '"></td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '"></td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">3</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">4</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">5</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ image_owner +'</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">'+ blue_circle +'</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">'+ green_tick +'</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">'+ red_cross +'</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">6</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttonok + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttoncancel + '</td>';

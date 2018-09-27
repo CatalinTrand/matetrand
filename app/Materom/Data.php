@@ -70,6 +70,14 @@ class Data
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
                             $order->ebeln .= $porder->ebeln_id;
+
+                            $ssorder = DB::select("select * from pitems where vbeln='$order->vbeln'")[0];
+                            $order->kunnr = $ssorder->kunnr;
+                            $order->kunnr_name = $ssorder->kunnr_name;
+                            $order->ctv = $ssorder->ctv;
+                            $order->ctv_name = $ssorder->ctv_name;
+                            $order->shipto = $ssorder->shipto;
+                            $order->shipto_name = $ssorder->shipto_name;
                         }
                         $result = array_merge($result, $orders);
                     }
@@ -101,6 +109,14 @@ class Data
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
                             $order->ebeln .= $porder->ebeln_id;
+
+                            $ssorder = DB::select("select * from pitems where vbeln='$order->vbeln'")[0];
+                            $order->kunnr = $ssorder->kunnr;
+                            $order->kunnr_name = $ssorder->kunnr_name;
+                            $order->ctv = $ssorder->ctv;
+                            $order->ctv_name = $ssorder->ctv_name;
+                            $order->shipto = $ssorder->shipto;
+                            $order->shipto_name = $ssorder->shipto_name;
                         }
                         $result = array_merge($result, $orders);
                     }
@@ -151,6 +167,14 @@ class Data
                     foreach($orders as $order) {
                         $order->vbeln = $sorder->vbeln;
                         $order->ebeln .= $porder->ebeln_id;
+
+                        $ssorder = DB::select("select * from pitems where vbeln='$order->vbeln'")[0];
+                        $order->kunnr = $ssorder->kunnr;
+                        $order->kunnr_name = $ssorder->kunnr_name;
+                        $order->ctv = $ssorder->ctv;
+                        $order->ctv_name = $ssorder->ctv_name;
+                        $order->shipto = $ssorder->shipto;
+                        $order->shipto_name = $ssorder->shipto_name;
                     }
                     $result = array_merge($result, $orders);
                 }

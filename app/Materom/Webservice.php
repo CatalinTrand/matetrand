@@ -71,20 +71,32 @@ class Webservice
                 $links = DB::select("select * from pitems where ebeln = '$porder' order by ebelp");
                 foreach ($links as $link) {
                     $owner = self::getOwner($link,$type);
+                    if($link->stage[0] == 'A')
+                        $stage = 2;
+                    else if($link->stage[0] == 'V'){
+                        $stage = 1;
+                    } else
+                        $stage = 0;
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage" . '=' . $str;
                     }
                 }
             } else {
                 $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
                     $owner = self::getOwner($link,$type);
+                    if($link->stage[0] == 'A')
+                        $stage = 2;
+                    else if($link->stage[0] == 'V'){
+                        $stage = 1;
+                    } else
+                        $stage = 0;
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage" . '=' . $str;
                     }
                 }
             }
