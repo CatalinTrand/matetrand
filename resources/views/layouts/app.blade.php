@@ -119,6 +119,20 @@
             background-position: center center;
         }
 
+        .order-button-rejected {
+            background-image:url('/images/icons8-delete-50-4.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
+        .order-button-request {
+            background-image:url('/images/icons8-error-50.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
         .header-fixed {
             width: 100%
         }
