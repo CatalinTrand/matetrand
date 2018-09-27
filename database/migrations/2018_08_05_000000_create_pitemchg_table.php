@@ -16,14 +16,15 @@ class CreatePitemchgTable extends Migration
         Schema::create('pitemchg', function (Blueprint $table) {
             $table->string('ebeln',10);
             $table->string('ebelp',5);
-            $table->string('ctype',1);
             $table->dateTime('cdate');
-            $table->string('cuser');
-            $table->string('cuser_name',35);
-            $table->string('text',80);
-            $table->string('oebeln',16);
-            $table->string('oebelp',5);
-            $table->string('reason',100);
+            $table->string('ctype',1);
+            $table->string('cuser')->default('');
+            $table->string('cuser_name',35)->default('');
+            $table->string('oldval',80)->default('');
+            $table->string('newval',80)->default('');
+            $table->string('oebeln',16)->default('');
+            $table->string('oebelp',5)->default('');
+            $table->string('reason',100)->default('');
         });
     }
 

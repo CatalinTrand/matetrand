@@ -14,8 +14,6 @@ class CreatePitemsTable extends Migration
     public function up()
     {
         Schema::create('pitems', function (Blueprint $table) {
-            $table->boolean('changed');
-            $table->string('stage',1);
             $table->string('ebeln',10);
             $table->string('ebelp',5);
             $table->string('vbeln',10)->default('');
@@ -42,6 +40,8 @@ class CreatePitemsTable extends Migration
             $table->string('ctv', 20)->default('');
             $table->string('ctv_name')->default('');
             $table->dateTime('lfdat')->default(now());
+            $table->boolean('changed')->default(false);
+            $table->string('stage',1)->default('F');
             $table->primary(['ebeln', 'ebelp']);
             $table->index('vbeln');
         });

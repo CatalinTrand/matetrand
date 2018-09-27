@@ -79,10 +79,34 @@ class Webservice {
         } else {
             $links = DB::select("select * from pitemchg where ebeln = '$porder' and ebelp = '$item' order by cdate desc");
             foreach ($links as $link) {
+                $text = "";
+                switch ($link->ctype) {
+                    case "A":
+                        $text = "Acceptare";
+                        break;
+                    case "T":
+                        $text = "Acceptare cu aprobare";
+                        break;
+                    case "X":
+                        $text = "Rejectare";
+                        break;
+                    case "Q":
+                        $text = "Modif. cantitate de la " . $link->oldval . " la " . $link->newval;
+                        break;
+                    case "P":
+                        $text = "Modificare pret de la " . $link->oldval . " la " . $link->newval;
+                        break;
+                    case "D":
+                        $text = "Modif. data livrare de la " . $link->oldval . " la " . $link->newval;
+                        break;
+                    case "M":
+                        $text = "Modif. material de la " . $link->oldval . " la " . $link->newval;
+                        break;
+                }
                 if (strcmp($str, '') == 0)
-                    $str = "$link->ebeln#$link->ebelp#$link->cdate#$link->oldval#$link->newval#$link->cuser_name";
+                    $str = "$link->ebeln#$link->ebelp#$link->cdate#$link->cuser#$link->cuser_name#$text#$link->reason";
                 else {
-                    $str = "$link->ebeln#$link->ebelp#$link->cdate#$link->oldval#$link->newval#$link->cuser_name" . '=' . $str;
+                    $str = "$link->ebeln#$link->ebelp#$link->cdate#$link->cuser#$link->cuser_name#$text#$link->reason" . '=' . $str;
                 }
             }
         }

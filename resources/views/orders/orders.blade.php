@@ -69,16 +69,16 @@
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="1%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
+                                <col width="4%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
@@ -111,8 +111,19 @@
                             </colgroup>
                             <tr>
                                 <th colspan="1">Sel</th>
+                                <th colspan="1">Info</th>
+                                <th colspan="1">A</th>
+                                <th colspan="1">C</th>
+                                <th colspan="1">A</th>
+                                <th colspan="1">R</th>
+                                <th colspan="1">P</th>
+                                <th colspan="1">A</th>
+                                <th colspan="1">R</th>
+                                <th colspan="1">D</th>
                                 @php
                                     if($furnizor){
+                                        $cmdcolspan = 3;
+                                        echo '<th colspan="' . $cmdcolspan . '">Comanda aprovizionare</th>';
                                         $th1 = "LIFNR";
                                         $th2 = "LIFNR_NAME";
                                         $th3 = "EKGRP";
@@ -121,6 +132,8 @@
                                         $th6 = "CURR";
                                         $th7 = "FXRATE";
                                         } else {
+                                        $cmdcolspan = 3;
+                                        echo '<th colspan="' . $cmdcolspan . '">Comanda vanzare</th>';
                                         $th1 = "KUNNR";
                                         $th2 = "KUNNR_NAME";
                                         $th3 = "SHIPTO";
@@ -137,9 +150,7 @@
                                 <th>{{$th5}}</th>
                                 <th>{{$th6}}</th>
                                 <th>{{$th7}}</th>
-                                <th style="width: 1.2rem" colspan="1">INFO</th>
-                                <th colspan="4">ID Comanda</th>
-                                <th colspan="22"></th>
+                                @php for ($i = 0; $i < 20; $i++) echo "<th>&nbsp;</th>"; @endphp
                             </tr>
                             @php
                                 use Illuminate\Support\Facades\DB;
@@ -200,6 +211,8 @@
                                             $style = "background-color:LightYellow;";
                                         else
                                             $style = "background-color:Wheat;";
+                                        $style .= " vertical-align: middle;";
+                                        echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td colspan='$cmdcolspan' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
                                         $data = "<td>$order->kunnr</td><td>$order->kunnr_name</td><td>$order->shipto</td><td>$order->shipto_name</td><td>$order->ctv</td><td>$order->ctv_name</td><td></td>";
@@ -207,9 +220,9 @@
                                             $style = "background-color:white;";
                                         else
                                             $style = "background-color:WhiteSmoke;";
+                                        $style .= " vertical-align: middle;";
+                                        echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td colspan='7'></td><td colspan='$cmdcolspan' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }
-                                    $style .= " vertical-align: middle;";
-                                    echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>$data<td>$prio</td><td colspan='4' class='first_color'>$comanda</td><td colspan='22'></td></tr>";
                                 }
                             @endphp
                         </table>
@@ -366,7 +379,17 @@
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="9"></td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">1</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">2</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">3</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">4</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">5</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">6</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">7</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">8</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">9</td>';
+                            cols += '<td class="first_color" style="' + so_style + '" colspan="1"></td>';
+                            cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
                             cols += '<td colspan="1">' + lifnr + '</td>';
                             cols += '<td colspan="1">' + lifnr_name + '</td>';
                             cols += '<td colspan="1">' + ekgrp + '</td>';
@@ -374,7 +397,6 @@
                             cols += '<td colspan="1">' + erdat + '</td>';
                             cols += '<td colspan="1">' + curr + '</td>';
                             cols += '<td colspan="1">' + fxrate + '</td>';
-                            cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
                             cols += '<td colspan="16"></td>';
                             newRow.append(cols).hide();
                             newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
@@ -395,9 +417,26 @@
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
                             if ($("#set-furnizor").val() == "") {
-                                cols += '<td class="first_color" colspan="16" style="' + first_style + '"></td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">1</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">2</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">3</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">4</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">5</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">6</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">7</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">8</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">9</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
                             } else {
-                                cols += '<td class="first_color" colspan="15" style="' + po_style + '"></td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">1</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">2</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">3</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">4</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">5</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">6</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">7</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">8</td>';
+                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">9</td>';
                             }
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
@@ -417,10 +456,11 @@
                             var ebeln3 = _ord.split('#')[0];
                             var ebelp3 = _ord.split('#')[1];
                             var chdate = _ord.split('#')[2];
-                            var oldVal = _ord.split('#')[3];
-                            var newVal = _ord.split('#')[4];
-                            var modBy = _ord.split('#')[5];
-                            if (chdate != null && modBy != null) {
+                            var cuser = _ord.split('#')[3];
+                            var cuser_name = _ord.split('#')[4];
+                            var ctext = _ord.split('#')[5];
+                            var creason = _ord.split('#')[6];
+                            if (chdate != null) {
                                 var newRow = $("<tr>");
                                 var cols = "";
                                 var pi_style = "background-color:" + $(_this).css("background-color") + ";";
@@ -428,16 +468,18 @@
                                 var last_style = "background-color:" + color;
                                 var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                                 var first_style = "background-color:" + first_color;
-                                cols += '<td class="first_color" colspan="13" style="' + first_style + '"></td>';
+                                cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                                let colsafter = "12";
                                 if ($("#set-furnizor").val() == "")
                                     cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                                else colsafter = "13";
                                 cols += '<td class="coloured" style="' + last_style + '"></td>';
                                 cols += '<td style="' + pi_style + '"></td>';
-                                cols += "<td colspan='4'>" + chdate + "</td>";
-                                cols += '<td colspan="2">' + oldVal + '</td>';
-                                cols += '<td colspan="2">' + newVal + '</td>';
-                                cols += '<td colspan="2">' + modBy + '</td>';
-                                cols += "<td colspan='18'></td>";
+                                cols += "<td colspan='3'>" + chdate + "</td>";
+                                cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
+                                cols += '<td colspan="6">' + ctext + '</td>';
+                                cols += '<td colspan="2">' + creason + '</td>';
+                                cols += "<td colspan=" + colsafter + "></td>";
                                 if ($("#set-furnizor").val() != "")
                                     cols += '<td></td>';
                                 newRow.append(cols);
@@ -455,7 +497,8 @@
                         var newRow = $("<tr>");
                         var cols = "";
                         var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                        cols += '<td class="first_color" style="' + so_style + '" colspan="10"></td>';
+                        cols += '<td class="first_color" style="' + so_style + '" colspan="11"></td>';
+                        cols += '<td colspan="3"><b>Comanda aprovizionare</b></td>';
                         cols += '<td colspan="1"><b>LIFNR</b></td>';
                         cols += '<td colspan="1"><b>LIFNR_NAME</b></td>';
                         cols += '<td colspan="1"><b>EKGRP</b></td>';
@@ -463,8 +506,7 @@
                         cols += '<td colspan="1"><b>ERDAT</b></td>';
                         cols += '<td colspan="1"><b>CURR</b></td>';
                         cols += '<td colspan="1"><b>FXRATE</b></td>';
-                        cols += '<td colspan="4"><b>Comanda aprovizionare</b></td>';
-                        cols += '<td colspan="23"><b></b></td>';
+                        cols += '<td colspan="16"><b></b></td>';
                         newRow.append(cols).hide();
                         newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                         newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
@@ -476,9 +518,9 @@
                         var first_color = $(_this).find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         if ($("#set-furnizor").val() == "") {
-                            cols += '<td class="first_color" colspan="17" style="' + first_style + '"></td>';
+                            cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
                         } else {
-                            cols += '<td class="first_color" colspan="17" style="' + po_style + '"></td>';
+                            cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
                         }
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td colspan="2"><b>Pozitie</b></td>';
@@ -497,15 +539,18 @@
                         var last_style = "background-color:" + color;
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
-                        cols += '<td class="first_color" colspan="14" style="' + first_style + '"></td>';
+                        cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                        var colsafter = "12";
+                        if ($("#set-furnizor").val() == "")
+                            cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                        else colsafter = "13";
                         cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + po_style + '"></td>';
-                        cols += '<td colspan="4"><b>Change date</b></td>';
-                        cols += '<td colspan="2"><b>Old Value</b></td>';
-                        cols += '<td colspan="2"><b>New Value</b></td>';
-                        ;
-                        cols += '<td colspan="2"><b>Modfied by</b></td>';
-                        cols += '<td colspan="18"><b></b></td>';
+                        cols += '<td colspan="3"><b>Data</b></td>';
+                        cols += '<td colspan="4"><b>Utilizator</b></td>';
+                        cols += '<td colspan="6"><b>Ce s-a schimbat</b></td>';
+                        cols += '<td colspan="2"><b>Motiv</b></td>';
+                        cols += '<td colspan=' + colsafter + '><b></b></td>';
                         newRow.append(cols).hide();
                         newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                         newRow.attr('style', "background-color:#ADD8E6; vertical-align: middle;");
