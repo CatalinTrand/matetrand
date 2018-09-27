@@ -110,20 +110,20 @@
                                 <col width="3%">
                             </colgroup>
                             <tr>
-                                <th colspan="1">Sel</th>
-                                <th colspan="1">Info</th>
-                                <th colspan="1">A</th>
-                                <th colspan="1">C</th>
-                                <th colspan="1">A</th>
-                                <th colspan="1">R</th>
-                                <th colspan="1">P</th>
-                                <th colspan="1">A</th>
-                                <th colspan="1">R</th>
-                                <th colspan="1">D</th>
+                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-check-all-50.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-info-50.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.5rem;' src='/images/icons8-close-window-50.png'/></th>
+                                <th colspan="1" class="td01"><image style='height: 1.5rem;' src='/images/icons8-error-50.png'/></th>
                                 @php
                                     if($furnizor){
                                         $cmdcolspan = 3;
-                                        echo '<th colspan="' . $cmdcolspan . '">Comanda aprovizionare</th>';
+                                        echo '<th class="td02" colspan="' . $cmdcolspan . '">Comanda aprovizionare</th>';
                                         $th1 = "LIFNR";
                                         $th2 = "LIFNR_NAME";
                                         $th3 = "EKGRP";
@@ -133,7 +133,7 @@
                                         $th7 = "FXRATE";
                                         } else {
                                         $cmdcolspan = 3;
-                                        echo '<th colspan="' . $cmdcolspan . '">Comanda vanzare</th>';
+                                        echo '<th class="td02" colspan="' . $cmdcolspan . '">Comanda vanzare</th>';
                                         $th1 = "KUNNR";
                                         $th2 = "KUNNR_NAME";
                                         $th3 = "SHIPTO";
@@ -203,6 +203,7 @@
                                     } else $prio = "None";
 
                                     $status = "<image style='height: 1rem;' src='/images/status.png'>"; //TODO
+                                    $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
 
                                     if($furnizor){
                                         $oid = "P" . $order->ebeln;
@@ -211,8 +212,7 @@
                                             $style = "background-color:LightYellow;";
                                         else
                                             $style = "background-color:Wheat;";
-                                        $style .= " vertical-align: middle;";
-                                        echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td colspan='$cmdcolspan' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td style='padding: 0;'>$buttonok</td><td>8</td><td>9</td><td colspan='$cmdcolspan' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
                                         $data = "<td>$order->kunnr</td><td>$order->kunnr_name</td><td>$order->shipto</td><td>$order->shipto_name</td><td>$order->ctv</td><td>$order->ctv_name</td><td></td>";
@@ -220,8 +220,7 @@
                                             $style = "background-color:white;";
                                         else
                                             $style = "background-color:WhiteSmoke;";
-                                        $style .= " vertical-align: middle;";
-                                        echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td colspan='7'></td><td colspan='$cmdcolspan' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>1</td><td>2</td><td colspan='7'></td><td colspan='$cmdcolspan' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }
                                 }
                             @endphp
@@ -379,16 +378,17 @@
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">1</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">2</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">3</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">4</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">5</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">6</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">7</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">8</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1">9</td>';
-                            cols += '<td class="first_color" style="' + so_style + '" colspan="1"></td>';
+                            let buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">1</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">2</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">3</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">4</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">5</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">6</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + buttonok + '</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">8</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">9</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
                             cols += "<td colspan='4'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
                             cols += '<td colspan="1">' + lifnr + '</td>';
                             cols += '<td colspan="1">' + lifnr_name + '</td>';
@@ -416,27 +416,28 @@
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
+                            let buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
                             if ($("#set-furnizor").val() == "") {
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">1</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">2</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">3</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">4</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">5</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">6</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">7</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">8</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '">9</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">1</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">2</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">3</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">4</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">5</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">6</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + buttonok + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">8</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">9</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                             } else {
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">1</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">2</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">3</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">4</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">5</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">6</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">7</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">8</td>';
-                                cols += '<td class="first_color" colspan="1" style="' + po_style + '">9</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">1</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">2</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">3</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">4</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">5</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">6</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + buttonok + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">8</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">9</td>';
                             }
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";

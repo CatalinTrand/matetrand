@@ -111,6 +111,14 @@
             background-repeat:   no-repeat;
             background-position: center left;
         }
+
+        .order-button-accepted {
+            background-image:url('/images/icons8-checkmark-50.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
         .header-fixed {
             width: 100%
         }
@@ -166,6 +174,14 @@
         }
         .orders-table td, .orders-table th {
             padding: 0.2rem;
+            vertical-align: middle;
+        }
+
+        .td01 {
+            text-align: center;
+        }
+        .td02 {
+            text-align: left;
         }
 
     </style>
