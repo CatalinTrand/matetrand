@@ -211,30 +211,32 @@ class Data
 
     static public function processPOdata($ebeln, $data) {
         if (empty($data)) return "OK";
+        if (!array_key_exists("ES_HEADER", $data)) return $data;
         $saphdr = $data["ES_HEADER"];
-        if ($ebeln != $saphdr->ebeln) return "Wrong purchase order";
+        if ($ebeln != $saphdr["EBELN"]) return "Wrong purchase order";
         $orders = DB::select("select * from porders where ebeln = '$ebeln'");
         if (count($orders) == 0) $order = null;
         else $order = $orders[0];
-        $norder = null;
+        $norder = new \stdClass();
         $now = new Carbon();
         $erdat = new Carbon();
-        $norder->lifnr = $saphdr->lifnr;
-        $norder->lifnr_name = $saphdr->lifnr_name;
-        $norder->ekgrp = $saphdr->ekgrp;
-        $norder->ekgrp_name = $saphdr->ekgrp_name;
+        $norder->ebeln = $ebeln;
+        $norder->lifnr = $saphdr["LIFNR"];
+        $norder->lifnr_name = $saphdr["LIFNR_NAME"];
+        $norder->ekgrp = $saphdr["EKGRP"];
+        $norder->ekgrp_name = $saphdr["EKGRP_NAME"];
         $erdat->hour = $now->hour;
         $erdat->minute = $now->minute;
         $erdat->second = $now->second;
-        $norder->erdat = $erdat->getTimestamp();
-        $norder->ernam = $saphdr->ernam;
-        $norder->curr = $saphdr->curr;
-        $norder->fxrate = $saphdr->fxrate;
+        $norder->erdat = $erdat->toDateTimeString();
+        $norder->ernam = $saphdr["ERNAM"];
+        $norder->curr = $saphdr["CURR"];
+        $norder->fxrate = $saphdr["FXRATE"];
         $norder->nof = true;
         $now->addHours(24);
-        $norder->wtime = $now->getTimestamp();
+        $norder->wtime = $now->toDateTimeString();
         $now->addHours(24);
-        $norder->ctime = $now->getTimestamp();
+        $norder->ctime = $now->toDateTimeString();
 
         DB::beginTransaction();
 
@@ -262,40 +264,45 @@ class Data
         $citem = null;
         foreach($sapitms as $sapitm) {
             foreach($items as $item) {
-                if ($item->ebelp == $sapitm->ebelp) {
+                if ($item->ebelp == $sapitm["EBELP"]) {
                     $citem = $item;
                     break;
                 }
             }
-            $nitem = null;
-            $nitem->ebeln = $sapitm->ebeln;
-            if ($ebeln != $item->ebeln) return "Wrong purchase order items";
-            $nitem->ebelp = $sapitm->ebelp;
-            $nitem->idnlf = $sapitm->idnlf;
-            $nitem->qty = $sapitm->qty;
-            $nitem->qty_uom = $sapitm->qty_uom;
-            $nitem->lfdat = $sapitm->lfdat;
-            $nitem->mfrnr = $sapitm->mfrnr;
-            $nitem->mfrnr_name = $sapitm->mfrnr_name;
-            $nitem->mfrpn = $sapitm->mfrpn;
-            $nitem->mfrpn_name = $sapitm->mfrpn_name;
-            $nitem->purch_price = $sapitm->purch;
-            $nitem->purch_curr = $sapitm->purch;
-            $nitem->purch_prun = $sapitm->purch;
-            $nitem->purch_puom = $sapitm->purch;
-            $nitem->vbeln = $sapitm->vbeln;
+            $nitem = new \stdClass();
+            $nitem->ebeln = $sapitm["EBELN"];
+            if ($ebeln != $nitem->ebeln) return "Wrong purchase order items";
+            $nitem->ebelp = $sapitm["EBELP"];
+            $nitem->idnlf = $sapitm["IDNLF"];
+            $nitem->qty = $sapitm["MENGE"];
+            $nitem->qty_uom = $sapitm["MEINS"];
+            $nitem->lfdat = $sapitm["LFDAT"];
+            $lfdat = new Carbon();
+            $lfdat->year = substr($nitem->lfdat, 0, 4);
+            $lfdat->month = substr($nitem->lfdat, 4, 2);
+            $lfdat->day = substr($nitem->lfdat, 6, 2);
+            $nitem->lfdat = $lfdat->toDateTimeString();
+            $nitem->mfrnr = $sapitm["MFRNR"];
+            $nitem->mfrnr_name = $sapitm["MFRNR_NAME"];
+            $nitem->mfrpn = $sapitm["MFRPN"];
+            $nitem->mfrpn_name = $sapitm["MFRPN_NAME"];
+            $nitem->purch_price = $sapitm["PURCH_PRICE"];
+            $nitem->purch_curr = $sapitm["PURCH_CURR"];
+            $nitem->purch_prun = $sapitm["PURCH_PRUN"];
+            $nitem->purch_puom = $sapitm["PURCH_PUOM"];
+            $nitem->vbeln = trim($sapitm["VBELN"]);
             if (is_null($nitem->vbeln) || empty($nitem->vbeln)) $nitem->vbeln = "Replenish";
-            $nitem->posnr = $sapitm->posnr;
-            $nitem->sales_price = $sapitm->sales;
-            $nitem->sales_curr = $sapitm->sales;
-            $nitem->sales_prun = $sapitm->sales;
-            $nitem->sales_puom = $sapitm->sales;
-            $nitem->kunnr = $sapitm->kunnr;
-            $nitem->kunnr_name = $sapitm->kunnr_name;
-            $nitem->shipto = $sapitm->shipto;
-            $nitem->shipto_name = $sapitm->shipto_name;
-            $nitem->ctv = $sapitm->ctv;
-            $nitem->ctv_name = $sapitm->ctv_name;
+            $nitem->posnr = $sapitm["POSNR"];
+            $nitem->sales_price = $sapitm["SALES_PRICE"];
+            $nitem->sales_curr = $sapitm["SALES_CURR"];
+            $nitem->sales_prun = $sapitm["SALES_PRUN"];
+            $nitem->sales_puom = $sapitm["SALES_PUOM"];
+            $nitem->kunnr = $sapitm["KUNNR"];
+            $nitem->kunnr_name = $sapitm["KUNNR_NAME"];
+            $nitem->shipto = $sapitm["SHIPTO"];
+            $nitem->shipto_name = $sapitm["SHIPTO_NAME"];
+            $nitem->ctv = $sapitm["CTV"];
+            $nitem->ctv_name = $sapitm["CTV_NAME"];
             $nitem->stage = 'F';
             $nitem->changed = false;
 
@@ -306,17 +313,19 @@ class Data
                                        "sales_price, sales_curr, sales_prun, sales_puom, ".
                                        "kunnr, kunnr_name, shipto, shipto_name, ctv, ctv_name, stage, changed ".
                                        ") values (".
-                   "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '$nitem->qty', ''$nitem->qty_uom', ".
+                   "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', $nitem->qty, '$nitem->qty_uom', ".
                    "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
                    "'$nitem->mfrpn', '$nitem->mfrpn_name', '$nitem->purch_price', '$nitem->purch_curr', ".
-                   "'$nitem->purch_prun', '$nitem->purch_puom', ".
-                   "'$nitem->sales_price', '$nitem->sales_curr', '$nitem->sales_prun', ".
+                   "$nitem->purch_prun, '$nitem->purch_puom', ".
+                   "'$nitem->sales_price', '$nitem->sales_curr', $nitem->sales_prun, ".
                    "'$nitem->sales_puom', '$nitem->kunnr', '$nitem->kunnr_name', ".
                    "'$nitem->shipto', '$nitem->shipto_name', '$nitem->ctv', '$nitem->ctv_name', ".
                    "'$nitem->stage', 0)";
+
+            DB::insert($sql);
         }
 
         DB::commit();
-
+        return "OK";
     }
 }

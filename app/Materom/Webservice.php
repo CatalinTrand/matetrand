@@ -46,17 +46,15 @@ class Webservice
         return false;
     }
 
-    public static function acceptItemCHG($id,$type){
-        $item = DB::select("select * from pitems where ebelp = '$id'")[0];
-        DB::update("update pitems set stage = 'A' where ebelp = '$id'");
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$item->ebeln','$id','A',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
+    public static function acceptItemCHG($ebeln, $id, $type){
+        DB::update("update pitems set stage = 'A' where ebeln = '$ebeln' and ebelp = '$id'");
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','A',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
         return "";
     }
 
-    public static function cancelItem($id,$type){
-        $item = DB::select("select * from pitems where ebelp = '$id'")[0];
-        DB::update("update pitems set stage = 'X' where ebelp = '$id'");
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$item->ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
+    public static function cancelItem($ebeln, $id, $type){
+        DB::update("update pitems set stage = 'X' where ebeln = '$ebeln' and ebelp = '$id'");
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
         return "";
     }
 
@@ -71,12 +69,17 @@ class Webservice
                 foreach ($links as $link) {
 
                     $gravity = self::getGravity($link,"purch-order");
-                    $owner = self::getOwner($link,$type);
+                    $link->vbeln = $porder->vbeln;
+                    $owner = self::getOwner($link, $type);
+
+                    $stage = 0;
+                    if (DB::table('pitemchg')->where('ebeln', $porder->ebeln)->exists())
+                        $stage = 10;
 
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner";
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner#$stage";
                     else {
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner" . '=' . $str;
+                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner#$stage" . '=' . $str;
                     }
                 }
             }
@@ -84,29 +87,36 @@ class Webservice
             if (is_null($item) || empty($item)) {
                 $links = DB::select("select * from pitems where ebeln = '$porder' order by ebelp");
                 foreach ($links as $link) {
+                    $price = $link->purch_price . " " . $link->purch_curr;
+                    $quantity = $link->qty . " " . $link->qty_uom;
+                    $deldate = $link->lfdat;
                     $owner = self::getOwner($link,$type);
+                    $stage = 0;
+                    if (DB::table('pitemchg')->where('ebeln', $porder)->where('ebelp', $link->ebelp)->exists())
+                        $stage = 10;
                     if($link->stage[0] == 'X')
-                        $stage = 2;
+                        $stage = $stage + 2;
                     else if($link->stage[0] == 'A'){
-                        $stage = 1;
-                    } else
-                        $stage = 0;
+                        $stage = $stage + 1;
+                    }
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage#$quantity#$deldate#$price";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage#$quantity#$deldate#$price" . '=' . $str;
                     }
                 }
             } else {
                 $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
                     $owner = self::getOwner($link,$type);
+                    $stage = 0;
+                    if (DB::table('pitemchg')->where('ebeln', $porder)->where('ebelp', $link->ebelp)->exists())
+                        $stage = 10;
                     if($link->stage[0] == 'X')
-                        $stage = 2;
+                        $stage = $stage + 2;
                     else if($link->stage[0] == 'A'){
-                        $stage = 1;
-                    } else
-                        $stage = 0;
+                        $stage = $stage + 1;
+                    }
                     if (strcmp($str, '') == 0)
                         $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage";
                     else {

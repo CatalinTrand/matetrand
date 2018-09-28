@@ -41,6 +41,7 @@ class WebserviceController extends Controller
 
     public function acceptItemCHG(){
         return Webservice::acceptItemCHG(
+            Input::get("ebeln"),
             Input::get("id"),
             Input::get("type")
         );
@@ -48,6 +49,7 @@ class WebserviceController extends Controller
 
     public function cancelItem(){
         return Webservice::cancelItem(
+            Input::get("ebeln"),
             Input::get("id"),
             Input::get("type")
         );
