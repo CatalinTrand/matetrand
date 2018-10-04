@@ -246,7 +246,9 @@
         <br>
         <br>
 
-        <div class="container" id="vendor_div" style="display: none;">
+        <div class="container" style="display: inline-block; float: left; margin-left: 12%">
+
+        <div class="container" id="vendor_div" style="display: none; margin-left: 25%">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card" style="height: 250px">
@@ -345,6 +347,9 @@
             </div>
         </div>
     </div>
+
+    </div>
+
     </div>
 
     <script>
