@@ -28,6 +28,20 @@ class Webservice
         } else return "Vendor already defined for this user";
     }
 
+    static public function insertRefferalID($userid, $refid)
+    {
+        $find = DB::select("select * from users where id = '$refid'");
+        if (count($find) == 0) {
+            return "No such user!";
+        }
+
+        $find = DB::select("select * from users_ref where id = '$userid' and refid = '$refid'");
+        if (count($find) == 0) {
+            DB::insert("insert into users_ref (id, refid) values ('$userid','$refid')");
+            return "";
+        } else return "Refferal already defined for this user";
+    }
+
     static public function changePassword($userid, $newPass)
     {
         $hash = Hash::make($newPass);
