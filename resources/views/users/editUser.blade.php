@@ -93,6 +93,14 @@
             DB::delete("delete from users_sel where id = '$id' and wglif = '$wglif' and mfrnr = '$mfrnr'");
             $msg_sel = "Vendor deleted!";
         }
+
+        //refferal delete
+        if(isset($_GET['refidDEL'])){
+            $myID = $_GET['id'];
+            $refID = $_GET['refidDEL'];
+            DB::delete("delete from users_ref where id = '$id' and refid = '$refID'");
+            $msg_sel = "Refferal deleted!";
+        }
     @endphp
     <div class="container-fluid">
         <div class="container" style="width: 40%;">
@@ -238,7 +246,9 @@
         <br>
         <br>
 
-        <div class="container" id="vendor_div" style="display: none;">
+        <div class="container" style="display: inline-block; float: left; margin-left: 7%">
+
+        <div class="container" id="vendor_div" style="display: none; margin-left: 25%; width: 100%">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card" style="height: 250px">
@@ -287,6 +297,61 @@
         </div>
     </div>
 
+    <div class="container" id="ref_div" style="display: none; width: 60%">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card" style="height: 250px">
+                    <div class="card-header">
+                        <table width="100%">
+                            <tr>
+                                <td width="90%">Referenti</td>
+                                <td align="right">
+                                    <button id="new-vendor-button" type="button"
+                                            onclick="new_refferal_id('{{$id}}');return false;">New
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="refferal-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                        <form method="POST" action="/editUser" aria-label="Edit Refferals" style="margin-top: -20px">
+                            @csrf
+                        </form>
+                        <br>
+                        <table class="basicTable table table-striped">
+                            <tr>
+                                <th>
+                                    ID Referent
+                                </th>
+                                <th>
+                                    Nume referent
+                                </th>
+                                <th>
+                                    Action
+                                </th>
+                            </tr>
+                            @php
+                                use App\User;
+                                $myREFs = DB::select("select * from users_ref where id='$id'");
+                                $table = "";
+                                foreach ($myREFs as $aREF){
+                                        $id_in_ref = $aREF->refid;
+                                        $ref_name = User::where('id','=',$id_in_ref)->get()[0]->username;
+                                        $table .= "<tr style='line-height: 35px'><td>$id_in_ref</td><td>$ref_name</td><td><a href='/editUser?id=$id&refidDEL=$aREF->refid'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                }
+                                echo $table;
+                            @endphp
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    </div>
+
     <script>
         function generateNew() {
             var api_token = document.getElementById("api_token");
@@ -297,6 +362,7 @@
     <script>
         function selectCheck(nameSelect) {
             var lifnr_div = document.getElementById("lifnr_div");
+            var ref_div = document.getElementById("ref_div");
             var ekgrp_div = document.getElementById("ekgrp_div");
             var vendor_div = document.getElementById("vendor_div");
             var token_div = document.getElementById("token_div");
@@ -306,11 +372,13 @@
                 if (nameSelect.value == "Referent" || nameSelect.value == "Furnizor") {
                     if (nameSelect.value == "Referent") {
                         ekgrp_div.style.display = "";
+                        ref_div.style.display = "none";
                         lifnr_div.style.display = "none";
                         vendor_div.style.display = "none";
                         sapuser_div.style.display = "none";
                     } else {
                         ekgrp_div.style.display = "none";
+                        ref_div.style.display = "";
                         lifnr_div.style.display = "";
                         vendor_div.style.display = "";
                         sapuser_div.style.display = "none";
@@ -318,6 +386,7 @@
                     token_div.style.display = "none";
                 }
                 else {
+                    ref_div.style.display = "none";
                     lifnr_div.style.display = "none";
                     ekgrp_div.style.display = "none";
                     vendor_div.style.display = "none";
@@ -338,6 +407,7 @@
             else {
                 lifnr_div.style.display = "none";
                 ekgrp_div.style.display = "none";
+                ref_div.style.display = "none";
                 vendor_div.style.display = "none";
                 token_div.style.display = "none";
             }
@@ -357,7 +427,6 @@
         });
     </script>
 
-    //  Adding a new vendor ID
     <div id="new-vendor-dialog" title="Define new vendor">
         <form>
             <br>
@@ -409,7 +478,7 @@
                             newVendorDialog.dialog("close");
                         } else {
                             if (vendorData != "")
-                                $("#new_sel_msg").text(followUpData);
+                                $("#new_sel_msg").text(refferalData);
                             else $("#new_sel_msg").text("An error occured checking/creating the maker selections");
                         }
                     },
@@ -440,6 +509,86 @@
             $("#new-vendor-dialog").dialog('option', 'title', 'Define new maker selection for ' + userid);
             vendorForUser = userid;
             newVendorDialog.dialog("open");
+        }
+    </script>
+
+    <div id="new-refferal-dialog" title="Define new refferal">
+        <form>
+            <br>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_ref_id" class="col-md-4 col-form-label text-md-left">Refferal ID</label>
+                <input id="new_ref_id" type="text" name="new_rel_id" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+
+            <i id="new_sel_msg" style="color: red"></i>
+        </form>
+    </div>
+
+
+    <script>
+
+        var refferalForUser, newRefferalDialog, newRefferalForm;
+        var refferalData, refferalStatus;
+        $(function () {
+            newRefferalDialog = $("#new-refferal-dialog").dialog({
+                autoOpen: false,
+                height: 260,
+                width: 400,
+                modal: true,
+                buttons: {
+                    Add: function () {
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        $.post("webservice/insertrefferaluser",
+                            {
+                                id: refferalForUser,
+                                refid: $("#new_ref_id").val()
+                            },
+                            function (data, status) {
+                                refferalData = data;
+                                refferalStatus = status;
+                            });
+                        jQuery.ajaxSetup({async: true});
+                        if (refferalStatus == "success" && refferalData == "") {
+                            newRefferalDialog.dialog("close");
+                        } else {
+                            if (refferalData != "")
+                                alert(refferalData);
+                            else $("#new_ref_msg").text("An error occured checking/creating the maker selections");
+                        }
+                    },
+                    Cancel: function () {
+                        newRefferalDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    newRefferalForm[0].reset();
+                    location.replace(location.pathname + "?id=" + refferalForUser);
+                },
+                position: {
+                    my: 'top',
+                    at: 'middle',
+                    of: $('#refferal-ids-card-body')
+                }
+            });
+            $("#new_ref_id").on('input', function () {
+                if ($("#new_ref_msg").text() != "") $("#new_ref_msg").text("")
+            });
+            newRefferalForm = newRefferalDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
+        function new_refferal_id(userid) {
+            $("#new_ref_msg").text("");
+            $("#new-refferal-dialog").dialog('option', 'title', 'Define new refferal for ' + userid);
+            refferalForUser = userid;
+            newRefferalDialog.dialog("open");
         }
     </script>
 

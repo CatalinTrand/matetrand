@@ -55,6 +55,13 @@ class WebserviceController extends Controller
         );
     }
 
+    function insertRefferalID(){
+        return Webservice::insertRefferalID(
+          Input::get("id"),
+          Input::get("refid")
+        );
+    }
+
     public function changePassword() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));
