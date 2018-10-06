@@ -12,18 +12,14 @@
                         @csrf
 
                         <div class="form-group row">
-                            <label for="id" class="col-sm-4 col-form-label text-md-right">User ID</label>
-
-                            <div class="col-md-6">
-                                <input id="id" type="text" class="form-control" name="id" value="{{ old('id') }}" required autofocus>
+                            <div class="col-md-6 offset-md-3">
+                                <input id="id" type="text" class="user-icon-background form-control" name="id" value="{{ old('id') }}" required autofocus placeholder="{{__('User ID')}}">
                             </div>
                         </div>
 
                         <div class="form-group row">
-                            <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required>
+                            <div class="col-md-6 offset-md-3">
+                                <input id="password" type="password" class="passw-icon-background form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required  placeholder="{{__('Password')}}">
 
                                 @if ($errors->has('password'))
                                     <span class="invalid-feedback" role="alert">

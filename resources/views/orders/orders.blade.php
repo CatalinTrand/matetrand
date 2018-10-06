@@ -141,7 +141,7 @@
                                     <image style='height: 1.5rem;' src='/images/icons8-close-window-50.png'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.5rem;' src='/images/icons8-error-50.png'/>
+                                    <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png'/>
                                 </th>
                                 @php
                                     if($furnizor){

@@ -25,7 +25,8 @@ class EditUsers {
             SAP::rfcUpdateAPIToken($token);
             DB::update("update users set api_token = '' where id <> '$id'");
         }
-        return redirect()->back();
+
+        return redirect()->route("users");
 
     }
 }

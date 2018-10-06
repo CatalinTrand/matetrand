@@ -127,7 +127,7 @@
         }
 
         .order-button-request {
-            background-image:url('/images/icons8-error-50.png');
+            background-image:url('/images/icons8-greater-than-50.png');
             background-size:     contain;
             background-repeat:   no-repeat;
             background-position: center center;
@@ -178,6 +178,24 @@
             padding-left: 1.2rem;
             padding-top: 0.2rem;
             margin-bottom: 0rem;
+        }
+
+        input.user-icon-background {
+            padding-left: 2.2rem;
+            background-repeat: no-repeat;
+            background-color: #fff;
+            background-image: url('/images/icons8-user-50.png');
+            background-position: left center;
+            background-size: contain;
+        }
+
+        input.passw-icon-background {
+            padding-left: 2.2rem;
+            background-repeat: no-repeat;
+            background-color: #fff;
+            background-image: url('/images/icons8-lock-50.png');
+            background-position: left center;
+            background-size: contain;
         }
 
         .orders-table {
