@@ -16,6 +16,7 @@ class CreateUsersRefTable extends Migration
         Schema::create('users_ref', function (Blueprint $table) {
             $table->string('id');
             $table->string('refid');
+            $table->primary(['id', 'refid']);
         });
     }
 

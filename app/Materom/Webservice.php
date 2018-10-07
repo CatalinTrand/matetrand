@@ -19,16 +19,19 @@ class Webservice
             $rfc_client, $rfc_user, $rfc_password))->ping();
     }
 
-    static public function insertVendorID($userid, $wglif, $mfrnr)
+    static public function insertManufacturer($userid, $mfrnr)
     {
-        $find = DB::select("select * from users_sel where id = '$userid' and wglif = '$wglif' and mfrnr = '$mfrnr'");
+        if (ctype_digit($mfrnr)) $mfrnr = str_pad($mfrnr, 10, "0", STR_PAD_LEFT);
+        $find = DB::select("select * from users_sel where id = '$userid' and mfrnr = '$mfrnr'");
         if (count($find) == 0) {
-            DB::insert("insert into users_sel (id, wglif, mfrnr) values ('$userid','$wglif','$mfrnr')");
+            $mfrnr_name = SAP::rfcGetVendorName($mfrnr);
+            if (is_array($mfrnr_name) || strlen(trim($mfrnr_name)) == 0) return __('Manufacturer does not exist');
+            DB::insert("insert into users_sel (id, mfrnr, mfrnr_name) values ('$userid','$mfrnr', '$mfrnr_name')");
             return "";
-        } else return "Vendor already defined for this user";
+        } else return __("Manufacturer already exists");
     }
 
-    static public function insertRefferalID($userid, $refid)
+    static public function insertReferenceUser($userid, $refid)
     {
         $find = DB::select("select * from users where id = '$refid'");
         if (count($find) == 0) {
@@ -39,7 +42,7 @@ class Webservice
         if (count($find) == 0) {
             DB::insert("insert into users_ref (id, refid) values ('$userid','$refid')");
             return "";
-        } else return "Refferal already defined for this user";
+        } else return __("Reference user already exists");
     }
 
     static public function changePassword($userid, $newPass)
@@ -120,7 +123,10 @@ class Webservice
                     }
                 }
             } else {
-                $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
+                if ($item == "SALESORDER")
+                    $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln <> 'REPLENISH' order by ebelp");
+                else
+                    $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
                     $owner = self::getOwner($link,$type);
                     $stage = 0;

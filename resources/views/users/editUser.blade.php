@@ -30,12 +30,9 @@
 
         $user = $users[0];
 
-        if(!$user->ekgrp){
-            $user->ekgrp = "";
-        }
-        if(!$user->lifnr){
-            $user->lifnr = "";
-        }
+        if(is_null($user->ekgrp)) $user->ekgrp = "";
+        if(is_null($user->lifnr))  $user->lifnr = "";
+        if(is_null($user->sapuser))  $user->sapuser = "";
 
         $selectedAdmin = "";
         $selectedReferent = "";
@@ -87,11 +84,10 @@
         }
 
         //vendor::delete
-        if(isset($_GET['wglifDEL'])){
-            $wglif = $_GET['wglifDEL'];
+        if(isset($_GET['mfrnrDEL'])){
             $mfrnr = $_GET['mfrnrDEL'];
-            DB::delete("delete from users_sel where id = '$id' and wglif = '$wglif' and mfrnr = '$mfrnr'");
-            $msg_sel = "Vendor deleted!";
+            DB::delete("delete from users_sel where id = '$id' and mfrnr = '$mfrnr'");
+            $msg_sel = "Manufacturer deleted!";
         }
 
         //refferal delete
@@ -99,7 +95,7 @@
             $myID = $_GET['id'];
             $refID = $_GET['refidDEL'];
             DB::delete("delete from users_ref where id = '$id' and refid = '$refID'");
-            $msg_sel = "Refferal deleted!";
+            $msg_sel = "Reference user deleted!";
         }
     @endphp
     <div class="container-fluid">
@@ -255,7 +251,7 @@
                         <div class="card-header">
                             <table width="100%">
                                 <tr>
-                                    <td width="90%">Branduri</td>
+                                    <td width="90%">{{__('Manufacturers')}}</td>
                                     <td align="right">
                                         <button id="new-vendor-button" type="button"
                                                 onclick="new_vendor_id('{{$id}}');return false;">New
@@ -272,10 +268,10 @@
                             <table class="basicTable table table-striped">
                                 <tr>
                                     <th>
-                                        Mat. group
+                                        {{ __('Manufacturer') }}
                                     </th>
                                     <th>
-                                        Manufacturer
+                                        {{ __('Manufacturer name') }}
                                     </th>
                                     <th>
                                         Action
@@ -285,7 +281,10 @@
                                     $mySELs = DB::select("select * from users_sel where id='$id'");
                                     $table = "";
                                     foreach ($mySELs as $aSEL){
-                                            $table .= "<tr style='line-height: 35px'><td>$aSEL->wglif</td><td>$aSEL->mfrnr</td><td><a href='/editUser?id=$id&wglifDEL=$aSEL->wglif&mfrnrDEL=$aSEL->mfrnr'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                            $mfrnr = $aSEL->mfrnr;
+                                            if ($mfrnr != '0000000000' && ctype_digit($mfrnr))
+                                                while (substr($mfrnr, 0, 1) == '0') $mfrnr = substr($mfrnr, 1, 10);
+                                            $table .= "<tr style='line-height: 20px'><td>$mfrnr</td><td>$aSEL->mfrnr_name</td><td><a href='/editUser?id=$id&mfrnrDEL=$aSEL->mfrnr'><img src='/images/delete.png' class='delete'></a></td></tr>";
                                     }
                                     echo $table;
                                 @endphp
@@ -304,7 +303,7 @@
                     <div class="card-header">
                         <table width="100%">
                             <tr>
-                                <td width="90%">Referenti</td>
+                                <td width="90%">{{__('Referenti')}}</td>
                                 <td align="right">
                                     <button id="new-vendor-button" type="button"
                                             onclick="new_refferal_id('{{$id}}');return false;">New
@@ -321,10 +320,10 @@
                         <table class="basicTable table table-striped">
                             <tr>
                                 <th>
-                                    ID Referent
+                                    {{ __('Referent') }}
                                 </th>
                                 <th>
-                                    Nume referent
+                                    {{ __('Nume referent') }}
                                 </th>
                                 <th>
                                     Action
@@ -337,7 +336,7 @@
                                 foreach ($myREFs as $aREF){
                                         $id_in_ref = $aREF->refid;
                                         $ref_name = User::where('id','=',$id_in_ref)->get()[0]->username;
-                                        $table .= "<tr style='line-height: 35px'><td>$id_in_ref</td><td>$ref_name</td><td><a href='/editUser?id=$id&refidDEL=$aREF->refid'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                        $table .= "<tr style='line-height: 20px'><td>$id_in_ref</td><td>$ref_name</td><td><a href='/editUser?id=$id&refidDEL=$aREF->refid'><img src='/images/delete.png' class='delete'></a></td></tr>";
                                 }
                                 echo $table;
                             @endphp
@@ -427,14 +426,9 @@
         });
     </script>
 
-    <div id="new-vendor-dialog" title="Define new vendor">
+    <div id="new-vendor-dialog" title="Define new manufacturer selection">
         <form>
             <br>
-            <div class="form-group row" style="width: 80%">
-                <label for="new_sel_id" class="col-md-4 col-form-label text-md-left">Mat. Group</label>
-                <input id="new_sel_id" type="text" name="new_sel_id" size="20" style="width: 200px;"
-                       class="form-control col-md-6" required value="">
-            </div>
             <div class="form-group row" style="width: 80%">
                 <label for="new_mfrnr" class="col-md-4 col-form-label text-md-left">Manufacturer</label>
                 <input id="new_mfrnr" type="text" name="new_mfrnr" size="20" style="width: 200px;"
@@ -463,10 +457,9 @@
                             }
                         });
                         jQuery.ajaxSetup({async: false});
-                        $.post("webservice/insertvendoruser",
+                        $.post("webservice/insertmanufacturer",
                             {
                                 user_id: vendorForUser,
-                                wglif: $("#new_sel_id").val(),
                                 mfrnr: $("#new_mfrnr").val()
                             },
                             function (data, status) {
@@ -478,8 +471,8 @@
                             newVendorDialog.dialog("close");
                         } else {
                             if (vendorData != "")
-                                $("#new_sel_msg").text(refferalData);
-                            else $("#new_sel_msg").text("An error occured checking/creating the maker selections");
+                                $("#new_sel_msg").text(vendorData);
+                            else $("#new_sel_msg").text("An error occured checking/creating the manufacturer selections");
                         }
                     },
                     Cancel: function () {
@@ -496,7 +489,7 @@
                     of: $('#vendor-ids-card-body')
                 }
             });
-            $("#new_sel_id").on('input', function () {
+            $("#new_mfrnr").on('input', function () {
                 if ($("#new_sel_msg").text() != "") $("#new_sel_msg").text("")
             });
             newVendorForm = newVendorDialog.find("form").on("submit", function (event) {
@@ -506,13 +499,13 @@
 
         function new_vendor_id(userid) {
             $("#new_sel_msg").text("");
-            $("#new-vendor-dialog").dialog('option', 'title', 'Define new maker selection for ' + userid);
+            $("#new-vendor-dialog").dialog('option', 'title', 'Define new manufacturer selection for ' + userid);
             vendorForUser = userid;
             newVendorDialog.dialog("open");
         }
     </script>
 
-    <div id="new-refferal-dialog" title="Define new refferal">
+    <div id="new-refferal-dialog" title="Define new reference user">
         <form>
             <br>
             <div class="form-group row" style="width: 80%">
@@ -544,7 +537,7 @@
                             }
                         });
                         jQuery.ajaxSetup({async: false});
-                        $.post("webservice/insertrefferaluser",
+                        $.post("webservice/insertreferenceuser",
                             {
                                 id: refferalForUser,
                                 refid: $("#new_ref_id").val()
@@ -559,7 +552,7 @@
                         } else {
                             if (refferalData != "")
                                 alert(refferalData);
-                            else $("#new_ref_msg").text("An error occured checking/creating the maker selections");
+                            else $("#new_ref_msg").text("An error occured checking/creating the reference user");
                         }
                     },
                     Cancel: function () {
@@ -586,7 +579,7 @@
 
         function new_refferal_id(userid) {
             $("#new_ref_msg").text("");
-            $("#new-refferal-dialog").dialog('option', 'title', 'Define new refferal for ' + userid);
+            $("#new-refferal-dialog").dialog('option', 'title', 'Define new reference user for ' + userid);
             refferalForUser = userid;
             newRefferalDialog.dialog("open");
         }

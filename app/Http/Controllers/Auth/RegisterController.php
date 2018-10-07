@@ -67,14 +67,21 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $sapuser = $data['sapuser'];
+        if (is_null($sapuser) || !isset($sapuser)) $sapuser = "";
+        $ekgrp = $data['ekgrp'];
+        if (is_null($ekgrp) || !isset($ekgrp)) $ekgrp = "";
+        $lifnr = $data['lifnr'];
+        if (is_null($lifnr) || !isset($lifnr)) $lifnr = "";
+
         return User::create([
             'id' => $data['id'],
             'role' => $data['role'],
             'username' => $data['username'],
             'lang' => $data['lang'],
-            'sapuser' => $data['sapuser'],
-            'ekgrp' => '\'' . $data["ekgrp"] . '\'',
-            'lifnr' => '\'' . $data["lifnr"] . '\'',
+            'sapuser' => $sapuser,
+            'ekgrp' => $ekgrp,
+            'lifnr' => $lifnr,
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'created_at' => Carbon::now()->getTimestamp()

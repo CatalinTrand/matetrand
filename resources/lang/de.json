@@ -3,5 +3,13 @@
   "User ID": "Benutzer",
   "Password": "Passwort",
   "Remember Me": "Angemeldet bleiben",
-  "Forgot Your Password?": "Passwort vergessen?"
+  "Forgot Your Password?": "Passwort vergessen?",
+  "Manufacturer": "Hersteller",
+  "Manufacturers": "Manufacturers",
+  "Manufacturer name": "Name",
+  "Referent": "Referenz",
+  "Referenti": "Referenzliste",
+  "Nume referent": "Name",
+  "Stock": "Lageraufträge",
+  "Emergency": "Kundenaufträge"
 }

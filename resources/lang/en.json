@@ -3,5 +3,13 @@
   "User ID": "User ID",
   "Password": "Password",
   "Remember Me": "Keep me logged in",
-  "Forgot Your Password?": "Forgotten password?"
+  "Forgot Your Password?": "Forgotten password?",
+  "Manufacturer": "Manufacturer",
+  "Manufacturers": "Manufacturers",
+  "Manufacturer name": "Name",
+  "Referent": "Reference",
+  "Referenti": "References",
+  "Nume referent": "Name",
+  "Stock": "Stock orders",
+  "Emergency": "Client orders"
 }

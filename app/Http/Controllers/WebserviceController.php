@@ -29,12 +29,11 @@ class WebserviceController extends Controller
             );
     }
 
-    public function insertVendorID()
+    public function insertManufacturer()
     {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
-        return Webservice::insertVendorID(
+        return Webservice::insertManufacturer(
             Input::get("user_id"),
-            Input::get("wglif"),
             Input::get("mfrnr")
         );
     }
@@ -55,8 +54,8 @@ class WebserviceController extends Controller
         );
     }
 
-    function insertRefferalID(){
-        return Webservice::insertRefferalID(
+    function insertReferenceUser(){
+        return Webservice::insertReferenceUser(
           Input::get("id"),
           Input::get("refid")
         );

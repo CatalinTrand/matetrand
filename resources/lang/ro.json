@@ -3,5 +3,13 @@
   "User ID": "Utilizator",
   "Password": "Parola",
   "Remember Me": "Păstrează-mă logat",
-  "Forgot Your Password?": "V-aţi uitat parola?"
+  "Forgot Your Password?": "V-aţi uitat parola?",
+  "Manufacturer": "Fabricant",
+  "Manufacturers": "Fabricanti",
+  "Manufacturer name": "Nume",
+  "Referent": "Referent",
+  "Referenti": "Lista referenti",
+  "Nume referent": "Nume",
+  "Stock": "Stoc",
+  "Emergency": "Urgenţă"
 }

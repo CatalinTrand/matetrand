@@ -3,5 +3,13 @@
   "User ID": "Használó",
   "Password": "Jelszó",
   "Remember Me": "Maradjak bejelentkezve",
-  "Forgot Your Password?": "Elfelejtett jelszó?"
+  "Forgot Your Password?": "Elfelejtett jelszó?",
+  "Manufacturer": "Manufacturer",
+  "Manufacturers": "Manufacturers",
+  "Manufacturer name": "Name",
+  "Referent": "Reference",
+  "Referenti": "References",
+  "Nume referent": "Name",
+  "Stock": "Stock orders",
+  "Emergency": "Client orders"
 }

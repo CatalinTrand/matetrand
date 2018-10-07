@@ -31,8 +31,8 @@ Route::post('/editUser', 'HomeController@save_edit')->name('save_edit');
 Route::post('/editUser/edit','EditUserController@editUsers');
 
 Route::post('webservice/rfcping','WebserviceController@rfcPing');
-Route::post('webservice/insertvendoruser','WebserviceController@insertVendorID');
-Route::post('webservice/insertrefferaluser','WebserviceController@insertRefferalID');
+Route::post('webservice/insertmanufacturer','WebserviceController@insertManufacturer');
+Route::post('webservice/insertreferenceuser','WebserviceController@insertReferenceUser');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/getOrderInfo','WebserviceController@getOrderInfo');
 Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');

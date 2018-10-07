@@ -15,8 +15,9 @@ class CreateUsersSelTable extends Migration
     {
         Schema::create('users_sel', function (Blueprint $table) {
             $table->string('id');
-            $table->string('wglif',18);
             $table->string('mfrnr',10);
+            $table->string('mfrnr_name',35)->default('');
+            $table->primary(['id', 'mfrnr']);
         });
     }
 

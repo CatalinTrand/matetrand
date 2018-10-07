@@ -10,23 +10,20 @@
     @php
         use Illuminate\Support\Facades\DB;
 
-        if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) == 0){
-            $furnizor = true;
-        } else {
-            if(isset($_POST['all']) && strcmp($_POST['all'],"true") == 0)
-                $furnizor = false;
-            else if (isset($_POST['all']))
-                $furnizor = true;
-            else
-                $furnizor = false;
-        }
+        $groupByPO = false;
+        if(isset($_POST['groupOrdersBy']) && strcmp($_POST['groupOrdersBy'], "sales-orders") == 0)
+            $groupByPO = false;
+        else if (isset($_POST['groupOrdersBy']))
+            $groupByPO = true;
+        else
+            $groupByPO = false;
 
-        if($furnizor){
-            $selF = " selected";
-            $selAll = "";
+        if($groupByPO){
+            $selByPO = " selected";
+            $selBySO = "";
         } else {
-            $selF = "";
-            $selAll = " selected";
+            $selByPO = "";
+            $selBySO = " selected";
         }
 
     @endphp
@@ -58,16 +55,14 @@
 
                     <div class="card-body orders-table-div">
 
-                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
-                            <form action="orders" method="post">
-                                Afisare dupa:
-                                <select name="all" onchange="this.form.submit()">
-                                    <option value="true"{{$selAll}}>comenzi de vanzare</option>
-                                    <option value="false"{{$selF}}>comenzi de aprovizionare</option>
-                                </select>
-                                {{csrf_field()}}
-                            </form>
-                        @endif
+                        <form action="orders" method="post">
+                            Afisare dupa:&nbsp;
+                            <select name="groupOrdersBy" onchange="this.form.submit()">
+                                <option value="sales-orders"{{$selBySO}}>Comenzi client</option>
+                                <option value="purch-orders"{{$selByPO}}>Comenzi de aprovizionare</option>
+                            </select>
+                            {{csrf_field()}}
+                        </form>
 
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
@@ -132,7 +127,7 @@
                                     <image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-qmark-50.png'/>
                                 </th>
                                 <th colspan="1" class="td01">
                                     <image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png'/>
@@ -144,7 +139,7 @@
                                     <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png'/>
                                 </th>
                                 @php
-                                    if($furnizor){
+                                    if($groupByPO){
                                         echo '<th class="td02" colspan="3">Comanda aprovizionare</th>';
                                         $th1 = "Furnizor";
                                         $th2 = "Nume";
@@ -154,7 +149,7 @@
                                         $th6 = "Moneda";
                                         $th7 = "Rata schimb";
                                         } else {
-                                        echo '<th class="td02" colspan="3">Comanda vanzare</th>';
+                                        echo '<th class="td02" colspan="3">Comanda client</th>';
                                         $th1 = "Client";
                                         $th2 = "Nume";
                                         $th3 = "Livrare la";
@@ -177,9 +172,9 @@
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
                                 $uname = \Illuminate\Support\Facades\Auth::user()->username;
 
-                                $orders = \App\Materom\Data::getOrders($id, $furnizor);
+                                $orders = \App\Materom\Data::getOrders($id, $groupByPO);
 
-                                echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$furnizor\">";
+                                echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$groupByPO\">";
                                 echo "<input type=\"hidden\" id=\"user_id\" value=\"$id\">";
                                 echo "<input type=\"hidden\" id=\"user_name\" value=\"$uname\">";
 
@@ -187,8 +182,8 @@
                                 $line_counter = 1;
                                 foreach ($orders as $order) {
 
-                                    if($furnizor){
-                                        if(strchr($seen,$order->ebeln) == null)
+                                    if($groupByPO){
+                                        if(strchr($seen, $order->ebeln) == null)
                                             $seen.= " $order->ebeln";
                                         else
                                             continue;
@@ -196,12 +191,14 @@
                                         $comanda = "<button type='button' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button> $viewebeln";
                                     } else {
                                         $lvbeln = $order->vbeln;
-                                        if(strchr($seen,$lvbeln) == null)
+                                        if(strchr($seen, $lvbeln) == null)
                                             $seen.= " $lvbeln";
                                         else
                                             continue;
-
-                                        $comanda = "<button type='button' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $order->vbeln";
+                                        $buttname = $lvbeln;
+                                        if (strtoupper($lvbeln) == "REPLENISH") $buttname = __('Stock');
+                                        elseif (strtoupper($lvbeln) == "SALESORDER") $buttname = __('Emergency');
+                                        $comanda = "<button type='button' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $buttname";
                                     }
 
                                     $line_counter = $line_counter + 1;
@@ -217,11 +214,11 @@
                                     $ctime = strtotime($order->ctime);
 
                                     $status = "<image style='height: 1rem;' src='/images/status.png'>"; //TODO
-                                    $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
-                                    $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
-                                    $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
+                                    $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                    $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                                    $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
 
-                                    if($furnizor){
+                                    if($groupByPO){
                                         $oid = "P" . $order->ebeln;
                                         $data = "<td>$order->lifnr</td><td>$order->lifnr_name</td><td>$order->ekgrp</td><td>$order->ekgrp_name</td><td>$order->erdat</td><td>$order->curr</td><td>$order->fxrate</td>";
                                         switch (\App\Materom\Webservice::getGravity($order, "purch-order")){

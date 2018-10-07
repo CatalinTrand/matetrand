@@ -9,6 +9,7 @@
 namespace App\Materom;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class Data
@@ -130,22 +131,28 @@ class Data
         $xsql = "";
         foreach($brands as $brand) {
             $sel1 = "";
-            if (!empty(trim($brand->wglif)))
-                $sel1 = "wglif = '$brand->wglif'";
-            if (!empty(trim($brand->mfrnr))) {
-                if (!empty($sel1)) $sel1 .= " and ";
-                $sel1 = "mfrnr = '$brand->mfrnr'";
-            }
-            if (empty($sel1)) continue;
+            if (empty(trim($brand->mfrnr))) continue;
+            $sel1 = "mfrnr = '$brand->mfrnr'";
             $sel1 = "(". $sel1 . ")";
-            if (empty($zsql)) $xsql = $sel1;
+            if (empty($sql)) $xsql = $sel1;
             else $xsql .= ' or ' . $sel1;
         }
         if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
 
         if ($mode) { // purchase orders \
             $porders = DB::select("select * from porders where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
-            foreach($porders as $porder) $porder->vbeln = '';
+            foreach($porders as $porder) {
+                $sorders = DB::select("select distinct vbeln from pitems where ebeln = '$porder->ebeln' order by vbeln");
+                $porder->vbeln = $sorders[0]->vbeln;
+                $ssorder = DB::select("select * from pitems where vbeln='$porder->vbeln'")[0];
+                if (strtoupper($sorders[0]->vbeln) != 'REPLENISH') $porder->vbeln = "SALESORDER";
+                $porder->kunnr = $ssorder->kunnr;
+                $porder->kunnr_name = $ssorder->kunnr_name;
+                $porder->ctv = $ssorder->ctv;
+                $porder->ctv_name = $ssorder->ctv_name;
+                $porder->shipto = $ssorder->shipto;
+                $porder->shipto_name = $ssorder->shipto_name;
+            }
             return $porders;
         } else {     // sales orders
             $result = array();
@@ -175,6 +182,7 @@ class Data
                         $order->ctv_name = $ssorder->ctv_name;
                         $order->shipto = $ssorder->shipto;
                         $order->shipto_name = $ssorder->shipto_name;
+                        if ($order->vbeln != 'REPLENISH') $order->vbeln = "SALESORDER";
                     }
                     $result = array_merge($result, $orders);
                 }
@@ -187,7 +195,55 @@ class Data
     }
 
     static public function getSalesOrderFlow($vbeln) {
-        $porders = DB::select("select distinct ebeln from pitems where vbeln = '$vbeln' order by ebeln");
+        $xsql = "";
+        if ($vbeln == "SALESORDER") {
+            $brands = DB::select("select * from users_sel where id ='" . Auth::user()->id . "'");
+            $xsql = "";
+            foreach($brands as $brand) {
+                $sel1 = "";
+                if (empty(trim($brand->mfrnr))) continue;
+                $sel1 = "mfrnr = '$brand->mfrnr'";
+                $sel1 = "(". $sel1 . ")";
+                if (empty($sql)) $xsql = $sel1;
+                else $xsql .= ' or ' . $sel1;
+            }
+            if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
+            $porders = DB::select("select distinct ebeln from porders where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
+        } else {
+            if (Auth::user()->role == "Furnizor") {
+                $brands = DB::select("select * from users_sel where id ='" . Auth::user()->id . "'");
+                $xsql = "";
+                foreach($brands as $brand) {
+                    $sel1 = "";
+                    if (empty(trim($brand->mfrnr))) continue;
+                    $sel1 = "mfrnr = '$brand->mfrnr'";
+                    $sel1 = "(". $sel1 . ")";
+                    if (empty($sql)) $xsql = $sel1;
+                    else $xsql .= ' or ' . $sel1;
+                }
+                if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
+                $porders = DB::select("select distinct ebeln from porders where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
+                $xsql = "";
+                foreach($porders as $porder) {
+                    $sel1 = "ebeln = '$porder->ebeln'";
+                    $sel1 = "(". $sel1 . ")";
+                    if (empty($xsql)) $xsql = $sel1;
+                    else $xsql .= ' or ' . $sel1;
+                }
+                if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
+            } elseif (Auth::user()->role == "Referent") {
+                $porders = DB::select("select distinct ebeln from porders where ekgrp = '" . Auth::user()->ekgrp . "' order by ebeln");
+                $xsql = "";
+                foreach($porders as $porder) {
+                    $sel1 = "ebeln = '$porder->ebeln'";
+                    $sel1 = "(". $sel1 . ")";
+                    if (empty($xsql)) $xsql = $sel1;
+                    else $xsql .= ' or ' . $sel1;
+                }
+                if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
+            }
+            $porders = DB::select("select distinct ebeln from pitems where vbeln = '$vbeln'" . $xsql . " order by ebeln");
+        }
         $sql = "";
         foreach($porders as $porder) {
             if (!empty($sql)) $sql .= " or";
@@ -195,6 +251,30 @@ class Data
         }
         $sql = "select distinct vbeln, ebeln from pitems where" . $sql . " order by ebeln, vbeln";
         $sorders = DB::select($sql);
+        if ($vbeln == "SALESORDER") {
+            foreach($sorders as $sorder) {
+                if ($sorder->vbeln != "REPLENISH") $sorder->vbeln = $vbeln;
+            }
+            asort($sorders);
+            $prev_sorder = '##########';
+            $prev_porder = '##########';
+            $i = 0;
+            foreach($sorders as $sorder) {
+                if ($prev_sorder != $sorder->vbeln) {
+                    $prev_sorder = $sorder->vbeln;
+                    $prev_porder = $sorder->ebeln;
+                    $i = $i + 1;
+                } else {
+                    if ($prev_porder != $sorder->ebeln) {
+                        $prev_porder = $sorder->ebeln;
+                        $i = $i + 1;
+                    } else {
+                        unset($sorders[$i]);
+                        $i = $i + 1;
+                    }
+                }
+            }
+        }
         $prev_porder = '##########';
         $result = array();
         foreach($sorders as $sorder) {
@@ -274,6 +354,7 @@ class Data
             if ($ebeln != $nitem->ebeln) return "Wrong purchase order items";
             $nitem->ebelp = $sapitm["EBELP"];
             $nitem->idnlf = $sapitm["IDNLF"];
+            $nitem->mtext = $sapitm["MAT_TEXT"];
             $nitem->qty = $sapitm["MENGE"];
             $nitem->qty_uom = $sapitm["MEINS"];
             $nitem->lfdat = $sapitm["LFDAT"];
@@ -284,14 +365,12 @@ class Data
             $nitem->lfdat = $lfdat->toDateTimeString();
             $nitem->mfrnr = $sapitm["MFRNR"];
             $nitem->mfrnr_name = $sapitm["MFRNR_NAME"];
-            $nitem->mfrpn = $sapitm["MFRPN"];
-            $nitem->mfrpn_name = $sapitm["MFRPN_NAME"];
             $nitem->purch_price = $sapitm["PURCH_PRICE"];
             $nitem->purch_curr = $sapitm["PURCH_CURR"];
             $nitem->purch_prun = $sapitm["PURCH_PRUN"];
             $nitem->purch_puom = $sapitm["PURCH_PUOM"];
             $nitem->vbeln = trim($sapitm["VBELN"]);
-            if (is_null($nitem->vbeln) || empty($nitem->vbeln)) $nitem->vbeln = "Replenish";
+            if (is_null($nitem->vbeln) || empty($nitem->vbeln)) $nitem->vbeln = "REPLENISH";
             $nitem->posnr = $sapitm["POSNR"];
             $nitem->sales_price = $sapitm["SALES_PRICE"];
             $nitem->sales_curr = $sapitm["SALES_CURR"];
@@ -308,14 +387,14 @@ class Data
 
             $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
             if (count($users) > 0) $nitem->ctv = $users[0]->id;
-            $sql = "insert into pitems (ebeln, ebelp, idnlf, qty, qty_uom, lfdat, mfrnr, mfrnr_name,".
-                                       "mfrpn, mfrpn_name, purch_price, purch_curr, purch_prun, purch_puom, ".
+            $sql = "insert into pitems (ebeln, ebelp, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, mfrnr_name,".
+                                       "purch_price, purch_curr, purch_prun, purch_puom, ".
                                        "sales_price, sales_curr, sales_prun, sales_puom, ".
                                        "kunnr, kunnr_name, shipto, shipto_name, ctv, ctv_name, stage, changed ".
                                        ") values (".
-                   "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', $nitem->qty, '$nitem->qty_uom', ".
+                   "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '$nitem->mtext',$nitem->qty, '$nitem->qty_uom', ".
                    "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
-                   "'$nitem->mfrpn', '$nitem->mfrpn_name', '$nitem->purch_price', '$nitem->purch_curr', ".
+                   "'$nitem->purch_price', '$nitem->purch_curr', ".
                    "$nitem->purch_prun, '$nitem->purch_puom', ".
                    "'$nitem->sales_price', '$nitem->sales_curr', $nitem->sales_prun, ".
                    "'$nitem->sales_puom', '$nitem->kunnr', '$nitem->kunnr_name', ".

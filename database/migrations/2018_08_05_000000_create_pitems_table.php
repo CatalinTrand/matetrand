@@ -19,10 +19,9 @@ class CreatePitemsTable extends Migration
             $table->string('vbeln',10)->default('');
             $table->string('posnr',6)->default('');
             $table->string('idnlf',35)->default('');
+            $table->string('mtext',35)->default('');
             $table->string('mfrnr',10)->default('');
             $table->string('mfrnr_name',35)->default('');
-            $table->string('mfrpn',40)->default('');
-            $table->string('mfrpn_name',35)->default('');
             $table->string('purch_price',15)->default('');
             $table->string('purch_curr',3)->default('');
             $table->integer('purch_prun', false)->default(1);
