@@ -63,6 +63,11 @@
             }
         }
 
+
+        $time_val = null;
+
+        if(isset($_POST['time_search']) && $f_history == 2)
+            $time_val = $_POST['time_search'];
     @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -104,40 +109,69 @@
                             @if(isset($_POST['filter_history']))
                                 <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
                             @endif
+                            @if(isset($_POST['time_search']))
+                                <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
+                            @endif
                             {{csrf_field()}}
                         </form>
                         <br><br>
-                        <form action="orders" method="post">
-                            Filtrare dupa status:
-                            <select name="filter_status" onchange="this.form.submit()">
-                                <option value="NA"{{$selNa}}>toate</option>
-                                <option value="AP"{{$selAp}}>aprobat</option>
-                                <option value="RE"{{$selRe}}>rejectat</option>
-                            </select>
-                            @if(isset($_POST['groupOrdersBy']))
-                                <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                            @endif
-                            @if(isset($_POST['filter_history']))
-                                <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                            @endif
-                            {{csrf_field()}}
-                        </form>
-                        <br>
-                        <form action="orders" method="post">
-                            Filtrare dupa istoric:
-                            <select name="filter_history" onchange="this.form.submit()">
-                                <option value="New"{{$selHNew}}>noi</option>
-                                <option value="Old"{{$selHOld}}>arhive</option>
-                            </select>
-                            @if(isset($_POST['groupOrdersBy']))
-                                <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                            @endif
-                            @if(isset($_POST['filter_status']))
-                                <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                            @endif
-                            {{csrf_field()}}
-                        </form>
 
+                        <div class="container row" style="display: inline-block">
+                            <form action="orders" method="post" style="display: inline-block">
+                                Filtrare dupa status:
+                                <select name="filter_status" onchange="this.form.submit()">
+                                    <option value="NA"{{$selNa}}>toate</option>
+                                    <option value="AP"{{$selAp}}>aprobat</option>
+                                    <option value="RE"{{$selRe}}>rejectat</option>
+                                </select>
+                                @if(isset($_POST['groupOrdersBy']))
+                                    <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                @endif
+                                @if(isset($_POST['filter_history']))
+                                    <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                                @endif
+                                @if(isset($_POST['time_search']))
+                                    <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
+                                @endif
+                                {{csrf_field()}}
+                            </form>
+
+                            <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
+                                Filtrare dupa istoric:
+                                <select name="filter_history" onchange="this.form.submit()">
+                                    <option value="New"{{$selHNew}}>noi</option>
+                                    <option value="Old"{{$selHOld}}>arhive</option>
+                                </select>
+                                @if(isset($_POST['groupOrdersBy']))
+                                    <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                @endif
+                                @if(isset($_POST['filter_status']))
+                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                                @endif
+                                @if(isset($_POST['time_search']))
+                                    <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
+                                @endif
+                                {{csrf_field()}}
+                            </form>
+
+                            @if($f_history == 2)
+                            <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
+                                Limita de timp:
+                                <input type="date" id="time_search" name="time_search" value="{{$time_val}}" onchange="this.form.submit()">
+                                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1">
+                                @if(isset($_POST['groupOrdersBy']))
+                                    <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                @endif
+                                @if(isset($_POST['filter_status']))
+                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                                @endif
+                                @if(isset($_POST['filter_history']))
+                                    <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                                @endif
+                                {{csrf_field()}}
+                            </form>
+                            @endif
+                        </div>
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="1%">
@@ -246,7 +280,7 @@
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
                                 $uname = \Illuminate\Support\Facades\Auth::user()->username;
 
-                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history);
+                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history, $time_val);
 
                                 echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$groupByPO\">";
                                 echo "<input type=\"hidden\" id=\"filter-status\" value=\"$f_type\">";
@@ -369,6 +403,8 @@
     </div>
     <script>
 
+        //$('#time_search').val(new Date().getTime());
+
         var checkedList = [];
         var unCheckedList = [];
 
@@ -472,7 +508,7 @@
         }
 
         function accept(_this, ebeln, id, type) {
-            var _data,_status = "";
+            var _data, _status = "";
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -495,7 +531,7 @@
                 switch (type) {
                     case 'item':
                         //show new row
-                        if(_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
+                        if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
                             var date = new Date();
                             var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
                             var cuser = $("#user_id").val();
@@ -546,8 +582,8 @@
             } else alert('Error processing operation!');
         }
 
-        function reject(_this, ebeln, id, type){
-            var _data,_status = "";
+        function reject(_this, ebeln, id, type) {
+            var _data, _status = "";
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -570,7 +606,7 @@
                 switch (type) {
                     case 'item':
                         //show new row
-                        if(_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
+                        if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
                             var date = new Date();
                             var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
                             var cuser = $("#user_id").val();
@@ -621,9 +657,9 @@
             } else alert('Error processing operation!');
         }
 
-        function hasNoChildrenWithStatus(id,status,type) {
+        function hasNoChildrenWithStatus(id, status, type) {
 
-            var _data,_status;
+            var _data, _status;
 
             let f_history = $("#filter-history").val();
 
@@ -648,7 +684,7 @@
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
 
-                if(_data == 1)
+                if (_data == 1)
                     return false;
             }
             return true;
@@ -707,24 +743,24 @@
 
                             let filter_status = $("#filter-status").val();
 
-                            if(filter_status == "1" && stage != 0 && stage < 10)
+                            if (filter_status == "1" && stage != 0 && stage < 10)
                                 return;
 
-                            if((filter_status == "2" || filter_status == "3") && hasNoChildrenWithStatus(id,filter_status,1))
+                            if ((filter_status == "2" || filter_status == "3") && hasNoChildrenWithStatus(id, filter_status, 1))
                                 return;
 
-                            if(gravity == 1)
+                            if (gravity == 1)
                                 image_info = "<image style='height: 1.2rem;' src='/images/warning.png'>";
-                            if(gravity == 2)
+                            if (gravity == 2)
                                 image_info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                             var image_owner = "";
-                            if(owner == 1)
+                            if (owner == 1)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
-                            if(owner == 2)
+                            if (owner == 2)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
 
                             var blue_circle = "";
-                            if(stage >= 10)
+                            if (stage >= 10)
                                 blue_circle = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
 
                             var newRow = $("<tr>");
@@ -734,8 +770,8 @@
                             let buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
                             let buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
-                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">'+ image_info +'</td>';
-                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">'+image_owner+'</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_info + '</td>';
+                            cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_owner + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + blue_circle + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
@@ -776,20 +812,20 @@
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
-                            let buttonok = "<button type='button' onclick='accept(this, \""+ebeln2+"\", \""+id+"\", \"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
-                            let buttoncancel = "<button type='button' onclick='reject(this, \""+ebeln2+"\",  \""+id+"\", \"item\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
+                            let buttonok = "<button type='button' onclick='accept(this, \"" + ebeln2 + "\", \"" + id + "\", \"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
+                            let buttoncancel = "<button type='button' onclick='reject(this, \"" + ebeln2 + "\",  \"" + id + "\", \"item\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
                             var image_owner = "";
-                            if(owner2 == 1)
+                            if (owner2 == 1)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
-                            if(owner2 == 2)
+                            if (owner2 == 2)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
 
                             var blue_circle = "";
                             var green_tick = "";
                             var red_cross = "";
 
-                            if(stage >= 10)
+                            if (stage >= 10)
                                 blue_circle = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
 
                             if ((stage == 1) || (stage == 11))
@@ -800,19 +836,19 @@
 
                             let filter_status = $("#filter-status").val();
 
-                            if(filter_status != "0") {
+                            if (filter_status != "0") {
                                 if (filter_status == "2" && stage != 1 && stage != 11)
                                     return;
-                                if(filter_status == "3" && stage != 2 && stage != 12)
+                                if (filter_status == "3" && stage != 2 && stage != 12)
                                     return;
                             }
 
                             if ($("#set-furnizor").val() == "") {
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+image_owner+'</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ blue_circle +'</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ green_tick +'</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ red_cross +'</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + image_owner + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + blue_circle + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + green_tick + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + red_cross + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">6</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + buttonok + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + buttoncancel + '</td>';
@@ -820,10 +856,10 @@
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                             } else {
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '"></td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">'+ image_owner +'</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">'+ blue_circle +'</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">'+ green_tick +'</td>';
-                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">'+ red_cross +'</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + image_owner + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + blue_circle + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + green_tick + '</td>';
+                                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + red_cross + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">6</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttonok + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttoncancel + '</td>';

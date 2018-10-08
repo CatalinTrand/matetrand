@@ -15,24 +15,32 @@ use Illuminate\Support\Facades\DB;
 class Data
 {
 
-    public static function getOrders($id, $mode, $history) {
+    public static function getOrders($id, $mode, $history, $time_limit) {
 
         $orders_table = $history == 1 ? "porders" : "porders_arch";
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
+        //$_time = null;
+        //if($time_limit != null){
+        //    $parts = explode("/",$time_limit);
+        //    $_time = mktime(0, 0, 0, $parts[1]  , $parts[0] , $parts[2]);
+        //}
+
+        $time_search_sql = $time_limit === null ? "" : " where creation >= $time_limit ";
 
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) == 0) return array();
         $user = $users[0];
 
         if ($user->role == "Administrator") {
-            if ($mode) { // purchase orders \
-                $porders =  DB::select("select * from $orders_table order by ebeln");
+            if ($mode) { // purchase orders
+                $porders =  DB::select("select * from ".$orders_table . $time_search_sql . "order by ebeln ");
                 foreach($porders as $porder) $porder->vbeln = '';
                 return $porders;
             } else {     // sales orders
                 $result = array();
-                $sorders = DB::select("select distinct vbeln from $items_table order by vbeln");
+                $sorders = DB::select("select distinct vbeln from ". $items_table . $time_search_sql . " order by vbeln ");
                 foreach($sorders AS $sorder) {
                     $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
                     foreach($porders AS $porder) {
