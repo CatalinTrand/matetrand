@@ -63,57 +63,95 @@ class Webservice
         return false;
     }
 
-    public static function acceptItemCHG($ebeln, $id, $type){
+    public static function acceptItemCHG($ebeln, $id, $type)
+    {
         DB::update("update pitems set stage = 'A' where ebeln = '$ebeln' and ebelp = '$id'");
         DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','A',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
         return "";
     }
 
-    public static function cancelItem($ebeln, $id, $type){
+    public static function cancelItem($ebeln, $id, $type)
+    {
         DB::update("update pitems set stage = 'X' where ebeln = '$ebeln' and ebelp = '$id'");
         DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
         return "";
     }
 
-    static public function getOrderInfo($order, $type, $item)
+    public static function getNrOfStatusChildren($id, $status, $type, $history, $vbeln)
     {
+        $orders_table = $history == 1 ? "porders" : "porders_arch";
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
+        $addedClause = $vbeln === null ? "" : " and vbeln = '$vbeln'";
+
+        if ($status == 0)
+            return 1;
+
+        if ($type == 0) {
+            //sale-order
+            $links = DB::select("select distinct ebeln from ". $items_table ." where vbeln = '$id'");
+            foreach ($links as $link) {
+                if (self::getNrOfStatusChildren($link->ebeln, $status, 1, $history, $id) > 0)
+                    return 1;
+            }
+
+            return 0;
+        } else {
+            $links = DB::select("select * from ". $items_table ." where ebeln = '$id'" . $addedClause);
+            foreach ($links as $link) {
+                if ($link->stage[0] == 'A' && $status == 2)
+                    return 1;
+                if ($link->stage[0] == 'X' && $status == 3)
+                    return 1;
+            }
+            return 0;
+        }
+    }
+
+    static public function getOrderInfo($order, $type, $item, $history)
+    {
+        $orders_table = $history == 1 ? "porders" : "porders_arch";
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
         $str = "";
         $porder = substr($order, 0, 10);
         if (strcmp($type, 'sales-order') == 0) {
-            $porders = Data::getSalesOrderFlow($order);
+            $porders = Data::getSalesOrderFlow($order, $history);
             foreach ($porders as $porder) {
-                $links = DB::select("select * from porders where ebeln = '$porder->ebeln'");
+                $links = DB::select("select * from " . $orders_table . " where ebeln = '$porder->ebeln'");
                 foreach ($links as $link) {
 
-                    $gravity = self::getGravity($link,"purch-order");
+                    $gravity = self::getGravity($link, "purch-order", $history);
                     $link->vbeln = $porder->vbeln;
-                    $owner = self::getOwner($link, $type);
+                    $owner = self::getOwner($link, $type, $history);
 
                     $stage = 0;
-                    if (DB::table('pitemchg')->where('ebeln', $porder->ebeln)->exists())
+                    if (DB::table($itemchg_table)->where('ebeln', $porder->ebeln)->exists())
                         $stage = 10;
 
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner#$stage";
+                        $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner#$stage";
                     else {
-                        $str = "$link->ebeln$porder->ebeln_id#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner#$stage" . '=' . $str;
+                        $str = "$link->ebeln#$link->lifnr#$link->lifnr_name#$link->ekgrp#$order#$link->ekgrp_name#$link->erdat#$link->curr#$link->fxrate#$gravity#$owner#$stage" . '=' . $str;
                     }
                 }
             }
         } else if (strcmp($type, 'purch-order') == 0) {
             if (is_null($item) || empty($item)) {
-                $links = DB::select("select * from pitems where ebeln = '$porder' order by ebelp");
+                $links = DB::select("select * from " .$items_table . " where ebeln = '$porder' order by ebelp");
                 foreach ($links as $link) {
                     $price = $link->purch_price . " " . $link->purch_curr;
                     $quantity = $link->qty . " " . $link->qty_uom;
                     $deldate = $link->lfdat;
-                    $owner = self::getOwner($link,$type);
+                    $owner = self::getOwner($link, $type, $history);
                     $stage = 0;
-                    if (DB::table('pitemchg')->where('ebeln', $porder)->where('ebelp', $link->ebelp)->exists())
+                    if (DB::table($itemchg_table)->where('ebeln', $porder)->where('ebelp', $link->ebelp)->exists())
                         $stage = 10;
-                    if($link->stage[0] == 'X')
+                    if ($link->stage[0] == 'X')
                         $stage = $stage + 2;
-                    else if($link->stage[0] == 'A'){
+                    else if ($link->stage[0] == 'A') {
                         $stage = $stage + 1;
                     }
                     if (strcmp($str, '') == 0)
@@ -124,17 +162,17 @@ class Webservice
                 }
             } else {
                 if ($item == "SALESORDER")
-                    $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln <> 'REPLENISH' order by ebelp");
+                    $links = DB::select("select * from ". $items_table ." where ebeln = '$porder' and vbeln <> 'REPLENISH' order by ebelp");
                 else
-                    $links = DB::select("select * from pitems where ebeln = '$porder' and vbeln = '$item' order by ebelp");
+                    $links = DB::select("select * from ". $items_table ." where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
-                    $owner = self::getOwner($link,$type);
+                    $owner = self::getOwner($link, $type, $history);
                     $stage = 0;
-                    if (DB::table('pitemchg')->where('ebeln', $porder)->where('ebelp', $link->ebelp)->exists())
+                    if (DB::table($itemchg_table)->where('ebeln', $porder)->where('ebelp', $link->ebelp)->exists())
                         $stage = 10;
-                    if($link->stage[0] == 'X')
+                    if ($link->stage[0] == 'X')
                         $stage = $stage + 2;
-                    else if($link->stage[0] == 'A'){
+                    else if ($link->stage[0] == 'A') {
                         $stage = $stage + 1;
                     }
                     if (strcmp($str, '') == 0)
@@ -145,7 +183,7 @@ class Webservice
                 }
             }
         } else {
-            $links = DB::select("select * from pitemchg where ebeln = '$porder' and ebelp = '$item' order by cdate desc");
+            $links = DB::select("select * from ".$itemchg_table ." where ebeln = '$porder' and ebelp = '$item' order by cdate desc");
             foreach ($links as $link) {
                 $text = "";
                 switch ($link->ctype) {
@@ -199,9 +237,14 @@ class Webservice
         return $result;
     }
 
-    static public function getGravity($order, $type)
+    static public function getGravity($order, $type, $history)
     {
         //gravitate : 2 = critical, 1 = warning, 0 = nimic
+
+        $orders_table = $history == 1 ? "porders" : "porders_arch";
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
         if (strcmp($type, "purch-order") == 0) {
             $now = strtotime(date('Y-m-d H:i:s'));
             $wtime = strtotime($order->wtime);
@@ -218,10 +261,10 @@ class Webservice
             return 0;
         } else {
             $max = 0;
-            $links_items = DB::select("select ebeln from pitems where vbeln = '$order->vbeln'");
+            $links_items = DB::select("select ebeln from ".$items_table ." where vbeln = '$order->vbeln'");
             $links = array();
             foreach ($links_items as $link_item) {
-                $links = array_merge($links, DB::select("select wtime,ctime from porders where ebeln = '$link_item->ebeln'"));
+                $links = array_merge($links, DB::select("select wtime,ctime from ".$orders_table." where ebeln = '$link_item->ebeln'"));
             }
             foreach ($links as $link) {
                 $now = strtotime(date('Y-m-d H:i:s'));
@@ -245,15 +288,19 @@ class Webservice
         }
     }
 
-    static public function getOwner($order, $type)
+    static public function getOwner($order, $type, $history)
     {
         // 0 = not owned, 1 = yellow arrow, 2 = blue arrow
+        $orders_table = $history == 1 ? "porders" : "porders_arch";
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
         if (strcmp($type, "purch-order") == 0) {
             if (strcmp(Auth::user()->role, "Administrator") == 0)
                 return 2;
             else {
                 $owner = 0;
-                $items = DB::select("select stage from pitems where ebeln='$order->ebeln'");
+                $items = DB::select("select stage from ". $items_table ." where ebeln='$order->ebeln'");
                 foreach ($items as $item) {
                     $ownerT = 0;
                     if (Auth::user()->role[0] == $item->stage)
@@ -271,7 +318,7 @@ class Webservice
                 return 2;
             else {
                 $owner = 0;
-                $items = DB::select("select stage from pitems where vbeln='$order->vbeln'");
+                $items = DB::select("select stage from ". $items_table ." where vbeln='$order->vbeln'");
                 foreach ($items as $item) {
                     $ownerT = 0;
                     if (Auth::user()->role[0] == $item->stage)
@@ -287,7 +334,7 @@ class Webservice
         }
     }
 
-        static public function sapActivateUser($id)
+    static public function sapActivateUser($id)
     {
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) == 0) return "User does not exist";

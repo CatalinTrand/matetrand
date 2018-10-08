@@ -15,28 +15,33 @@ use Illuminate\Support\Facades\DB;
 class Data
 {
 
-    public static function getOrders($id, $mode) {
+    public static function getOrders($id, $mode, $history) {
+
+        $orders_table = $history == 1 ? "porders" : "porders_arch";
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) == 0) return array();
         $user = $users[0];
 
         if ($user->role == "Administrator") {
             if ($mode) { // purchase orders \
-                $porders =  DB::select("select * from porders order by ebeln");
+                $porders =  DB::select("select * from $orders_table order by ebeln");
                 foreach($porders as $porder) $porder->vbeln = '';
                 return $porders;
             } else {     // sales orders
                 $result = array();
-                $sorders = DB::select("select distinct vbeln from pitems order by vbeln");
+                $sorders = DB::select("select distinct vbeln from $items_table order by vbeln");
                 foreach($sorders AS $sorder) {
-                    $porders = Data::getSalesOrderFlow($sorder->vbeln);
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
                     foreach($porders AS $porder) {
-                        $orders = DB::select("select * from porders where ebeln = '$porder->ebeln' order by ebeln");
+                        $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' order by ebeln");
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
                             $order->ebeln .= $porder->ebeln_id;
 
-                            $ssorder = DB::select("select * from pitems where vbeln='$order->vbeln'")[0];
+                            $ssorder = DB::select("select * from $items_table where vbeln='$order->vbeln'")[0];
                             $order->kunnr = $ssorder->kunnr;
                             $order->kunnr_name = $ssorder->kunnr_name;
                             $order->ctv = $ssorder->ctv;
@@ -53,26 +58,26 @@ class Data
 
         if ($user->role == "CTV") {
             if ($mode) { // purchase orders \
-                $porders2 = DB::select("select distinct ebeln from pitems where ctv = '$id'");
+                $porders2 = DB::select("select distinct ebeln from $items_table where ctv = '$id'");
                 $porders = array();
                 foreach($porders2 as $porder2) {
-                    $result = DB::select("select * from porders where ebeln = '$porder2->ebeln'");
+                    $result = DB::select("select * from $orders_table where ebeln = '$porder2->ebeln'");
                     $porders = array_merge($porders, $result);
                 }
                 foreach($porders as $porder) $porder->vbeln = '';
                 return $porders;
             } else {     // sales orders
                 $result = array();
-                $sorders = DB::select("select distinct vbeln from pitems where ctv = '$id' order by vbeln");
+                $sorders = DB::select("select distinct vbeln from $items_table where ctv = '$id' order by vbeln");
                 foreach($sorders AS $sorder) {
-                    $porders = Data::getSalesOrderFlow($sorder->vbeln);
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
                     foreach($porders AS $porder) {
-                        $orders = DB::select("select * from porders where ebeln = '$porder->ebeln' order by ebeln");
+                        $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' order by ebeln");
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
                             $order->ebeln .= $porder->ebeln_id;
 
-                            $ssorder = DB::select("select * from pitems where vbeln='$order->vbeln'")[0];
+                            $ssorder = DB::select("select * from $items_table where vbeln='$order->vbeln'")[0];
                             $order->kunnr = $ssorder->kunnr;
                             $order->kunnr_name = $ssorder->kunnr_name;
                             $order->ctv = $ssorder->ctv;
@@ -89,29 +94,29 @@ class Data
 
         if ($user->role == "Referent") {
             if ($mode) { // purchase orders \
-                $porders = DB::select("select * from porders where ekgrp = '$user->ekgrp' order by ebeln");
+                $porders = DB::select("select * from $orders_table where ekgrp = '$user->ekgrp' order by ebeln");
                 foreach($porders as $porder) $porder->vbeln = '';
                 return $porders;
             } else {     // sales orders
                 $result = array();
-                $porders = DB::select("select distinct ebeln from porders where ekgrp = '$user->ekgrp'");
+                $porders = DB::select("select distinct ebeln from $orders_table where ekgrp = '$user->ekgrp'");
                 if (count($porders) == 0) return $porders;
                 $sql = "";
                 foreach($porders as $porder) {
                     if (!empty($sql)) $sql .= " or";
                     $sql .= " ebeln = '$porder->ebeln'";
                 }
-                $sql = "select distinct vbeln from pitems where" . $sql . " order by vbeln";
+                $sql = "select distinct vbeln from $orders_table where" . $sql . " order by vbeln";
                 $sorders = DB::select($sql);
                 foreach($sorders AS $sorder) {
-                    $porders = Data::getSalesOrderFlow($sorder->vbeln);
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
                     foreach($porders AS $porder) {
-                        $orders = DB::select("select * from porders where ebeln = '$porder->ebeln' and ekgrp = '$user->ekgrp' order by ebeln");
+                        $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' and ekgrp = '$user->ekgrp' order by ebeln");
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
                             $order->ebeln .= $porder->ebeln_id;
 
-                            $ssorder = DB::select("select * from pitems where vbeln='$order->vbeln'")[0];
+                            $ssorder = DB::select("select * from $orders_table where vbeln='$order->vbeln'")[0];
                             $order->kunnr = $ssorder->kunnr;
                             $order->kunnr_name = $ssorder->kunnr_name;
                             $order->ctv = $ssorder->ctv;
@@ -140,11 +145,11 @@ class Data
         if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
 
         if ($mode) { // purchase orders \
-            $porders = DB::select("select * from porders where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            $porders = DB::select("select * from $orders_table where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
             foreach($porders as $porder) {
-                $sorders = DB::select("select distinct vbeln from pitems where ebeln = '$porder->ebeln' order by vbeln");
+                $sorders = DB::select("select distinct vbeln from $items_table where ebeln = '$porder->ebeln' order by vbeln");
                 $porder->vbeln = $sorders[0]->vbeln;
-                $ssorder = DB::select("select * from pitems where vbeln='$porder->vbeln'")[0];
+                $ssorder = DB::select("select * from $items_table where vbeln='$porder->vbeln'")[0];
                 if (strtoupper($sorders[0]->vbeln) != 'REPLENISH') $porder->vbeln = "SALESORDER";
                 $porder->kunnr = $ssorder->kunnr;
                 $porder->kunnr_name = $ssorder->kunnr_name;
@@ -156,26 +161,26 @@ class Data
             return $porders;
         } else {     // sales orders
             $result = array();
-            $porders = DB::select("select distinct ebeln from porders where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
             if (count($porders) == 0) return $porders;
             $sql = "";
             foreach($porders as $porder) {
                 if (!empty($sql)) $sql .= " or";
                 $sql .= " ebeln = '$porder->ebeln'";
             }
-            $sql = "select distinct vbeln from pitems where" . $sql . " order by vbeln";
+            $sql = "select distinct vbeln from $items_table where" . $sql . " order by vbeln";
             $sorders = DB::select($sql);
             foreach($sorders AS $sorder) {
-                $porders = Data::getSalesOrderFlow($sorder->vbeln);
+                $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
                 foreach($porders AS $porder) {
-                    $orders = DB::select("select * from porders where ebeln = '$porder->ebeln'".
+                    $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln'".
                         " and lifnr = '$user->lifnr'".$xsql.
                         " order by ebeln");
                     foreach($orders as $order) {
                         $order->vbeln = $sorder->vbeln;
                         $order->ebeln .= $porder->ebeln_id;
 
-                        $ssorder = DB::select("select * from pitems where vbeln='$order->vbeln'")[0];
+                        $ssorder = DB::select("select * from $items_table where vbeln='$order->vbeln'")[0];
                         $order->kunnr = $ssorder->kunnr;
                         $order->kunnr_name = $ssorder->kunnr_name;
                         $order->ctv = $ssorder->ctv;
@@ -190,11 +195,16 @@ class Data
             return $result;
         }
 
-        $sql = "select * from porders where id ='$id'";
+        $sql = "select * from $orders_table where id ='$id'";
         return DB::select($sql);
     }
 
-    static public function getSalesOrderFlow($vbeln) {
+    static public function getSalesOrderFlow($vbeln, $history) {
+
+        $orders_table = $history == 1 ? "porders" : "porders_arch";
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
         $xsql = "";
         if ($vbeln == "SALESORDER") {
             $brands = DB::select("select * from users_sel where id ='" . Auth::user()->id . "'");
@@ -208,7 +218,7 @@ class Data
                 else $xsql .= ' or ' . $sel1;
             }
             if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
-            $porders = DB::select("select distinct ebeln from porders where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
+            $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
         } else {
             if (Auth::user()->role == "Furnizor") {
                 $brands = DB::select("select * from users_sel where id ='" . Auth::user()->id . "'");
@@ -222,7 +232,7 @@ class Data
                     else $xsql .= ' or ' . $sel1;
                 }
                 if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
-                $porders = DB::select("select distinct ebeln from porders where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
+                $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
                 $xsql = "";
                 foreach($porders as $porder) {
                     $sel1 = "ebeln = '$porder->ebeln'";
@@ -232,7 +242,7 @@ class Data
                 }
                 if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
             } elseif (Auth::user()->role == "Referent") {
-                $porders = DB::select("select distinct ebeln from porders where ekgrp = '" . Auth::user()->ekgrp . "' order by ebeln");
+                $porders = DB::select("select distinct ebeln from $orders_table where ekgrp = '" . Auth::user()->ekgrp . "' order by ebeln");
                 $xsql = "";
                 foreach($porders as $porder) {
                     $sel1 = "ebeln = '$porder->ebeln'";
@@ -242,14 +252,14 @@ class Data
                 }
                 if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
             }
-            $porders = DB::select("select distinct ebeln from pitems where vbeln = '$vbeln'" . $xsql . " order by ebeln");
+            $porders = DB::select("select distinct ebeln from $items_table where vbeln = '$vbeln'" . $xsql . " order by ebeln");
         }
         $sql = "";
         foreach($porders as $porder) {
             if (!empty($sql)) $sql .= " or";
             $sql .= " ebeln = '$porder->ebeln'";
         }
-        $sql = "select distinct vbeln, ebeln from pitems where" . $sql . " order by ebeln, vbeln";
+        $sql = "select distinct vbeln, ebeln from $items_table where" . $sql . " order by ebeln, vbeln";
         $sorders = DB::select($sql);
         if ($vbeln == "SALESORDER") {
             foreach($sorders as $sorder) {

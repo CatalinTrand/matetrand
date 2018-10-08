@@ -26,6 +26,43 @@
             $selBySO = " selected";
         }
 
+        $f_type = 0;
+        $selAp = "";
+        $selRe = "";
+        $selNa = "";
+        if(isset($_POST['filter_status'])){
+            if(strcmp($_POST['filter_status'],"NA") == 0){
+                //toate
+                $f_type = 0;
+                $selNa = "selected";
+            } else if(strcmp($_POST['filter_status'],"AP") == 0){
+                //aprobat
+                $f_type = 2;
+                $selAp = "selected";
+            } else {
+                //rejectat
+                $f_type = 3;
+                $selRe = "selected";
+            }
+        }
+
+        $f_history = 1;
+        $selHNew = "selected";
+        $selHOld = "";
+        if(isset($_POST['filter_history'])){
+            if(strcmp($_POST['filter_history'],"New") == 0){
+                //noi
+                $f_history = 1;
+                $selHNew = "selected";
+                $selHOld = "";
+            } else {
+                //vechi
+                $f_history = 2;
+                $selHNew = "";
+                $selHOld = "selected";
+            }
+        }
+
     @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -61,6 +98,43 @@
                                 <option value="sales-orders"{{$selBySO}}>Comenzi client</option>
                                 <option value="purch-orders"{{$selByPO}}>Comenzi de aprovizionare</option>
                             </select>
+                            @if(isset($_POST['filter_status']))
+                                <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                            @endif
+                            @if(isset($_POST['filter_history']))
+                                <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                            @endif
+                            {{csrf_field()}}
+                        </form>
+                        <br><br>
+                        <form action="orders" method="post">
+                            Filtrare dupa status:
+                            <select name="filter_status" onchange="this.form.submit()">
+                                <option value="NA"{{$selNa}}>toate</option>
+                                <option value="AP"{{$selAp}}>aprobat</option>
+                                <option value="RE"{{$selRe}}>rejectat</option>
+                            </select>
+                            @if(isset($_POST['groupOrdersBy']))
+                                <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                            @endif
+                            @if(isset($_POST['filter_history']))
+                                <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                            @endif
+                            {{csrf_field()}}
+                        </form>
+                        <br>
+                        <form action="orders" method="post">
+                            Filtrare dupa istoric:
+                            <select name="filter_history" onchange="this.form.submit()">
+                                <option value="New"{{$selHNew}}>noi</option>
+                                <option value="Old"{{$selHOld}}>arhive</option>
+                            </select>
+                            @if(isset($_POST['groupOrdersBy']))
+                                <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                            @endif
+                            @if(isset($_POST['filter_status']))
+                                <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                            @endif
                             {{csrf_field()}}
                         </form>
 
@@ -172,9 +246,11 @@
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
                                 $uname = \Illuminate\Support\Facades\Auth::user()->username;
 
-                                $orders = \App\Materom\Data::getOrders($id, $groupByPO);
+                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history);
 
                                 echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$groupByPO\">";
+                                echo "<input type=\"hidden\" id=\"filter-status\" value=\"$f_type\">";
+                                echo "<input type=\"hidden\" id=\"filter-history\" value=\"$f_history\">";
                                 echo "<input type=\"hidden\" id=\"user_id\" value=\"$id\">";
                                 echo "<input type=\"hidden\" id=\"user_name\" value=\"$uname\">";
 
@@ -221,7 +297,7 @@
                                     if($groupByPO){
                                         $oid = "P" . $order->ebeln;
                                         $data = "<td>$order->lifnr</td><td>$order->lifnr_name</td><td>$order->ekgrp</td><td>$order->ekgrp_name</td><td>$order->erdat</td><td>$order->curr</td><td>$order->fxrate</td>";
-                                        switch (\App\Materom\Webservice::getGravity($order, "purch-order")){
+                                        switch (\App\Materom\Webservice::getGravity($order, "purch-order",$f_history)){
                                             case 0:
                                                 $info = "";
                                             break;
@@ -232,7 +308,7 @@
                                                 $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                                             break;
                                         }
-                                        switch (\App\Materom\Webservice::getOwner($order,"purch-order")){
+                                        switch (\App\Materom\Webservice::getOwner($order,"purch-order", $f_history)){
                                             case 0:
                                                 $owner = "";
                                             break;
@@ -247,11 +323,13 @@
                                             $style = "background-color:LightYellow;";
                                         else
                                             $style = "background-color:Wheat;";
-                                        echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td></td><td></td><td></td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+
+                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->ebeln,$f_type,1, $f_history, null) > 0)
+                                            echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td></td><td></td><td></td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
                                         $data = "<td>$order->kunnr</td><td>$order->kunnr_name</td><td>$order->shipto</td><td>$order->shipto_name</td><td>$order->ctv</td><td>$order->ctv_name</td><td></td>";
-                                        switch (\App\Materom\Webservice::getGravity($order, "sales-order")){
+                                        switch (\App\Materom\Webservice::getGravity($order, "sales-order", $f_history)){
                                             case 0:
                                                 $info = "";
                                             break;
@@ -262,7 +340,7 @@
                                                 $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                                             break;
                                         }
-                                        switch (\App\Materom\Webservice::getOwner($order,"sales-order")){
+                                        switch (\App\Materom\Webservice::getOwner($order,"sales-order", $f_history)){
                                             case 0:
                                                 $owner = "";
                                             break;
@@ -278,7 +356,8 @@
                                             $style = "background-color:white;";
                                         else
                                             $style = "background-color:WhiteSmoke;";
-                                        echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td colspan='7'></td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='21'></td></tr>";
+                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->vbeln,$f_type,0, $f_history, null) > 0)
+                                            echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td colspan='7'></td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='21'></td></tr>";
                                     }
                                 }
                             @endphp
@@ -542,7 +621,43 @@
             } else alert('Error processing operation!');
         }
 
+        function hasNoChildrenWithStatus(id,status,type) {
+
+            var _data,_status;
+
+            let f_history = $("#filter-history").val();
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+
+            $.post("webservice/getNrOfStatusChildren",
+                {
+                    id: id,
+                    status: status,
+                    type: type,
+                    history: f_history
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_status == "success") {
+
+                if(_data == 1)
+                    return false;
+            }
+            return true;
+        }
+
         function loadSub(item, type, _btn, ebelp) {
+
+            let f_history = $("#filter-history").val();
+
             var _data, _status;
             var _this;
             if (type == "sales-order") _this = document.getElementById("tr_S" + item);
@@ -560,7 +675,8 @@
                 {
                     order: item,
                     type: type,
-                    item: ebelp
+                    item: ebelp,
+                    history: f_history
                 },
                 function (data, status) {
                     _data = data;
@@ -588,6 +704,15 @@
                             var owner = _ord.split('#')[10];
                             var stage = _ord.split('#')[11];
                             var image_info = "";
+
+                            let filter_status = $("#filter-status").val();
+
+                            if(filter_status == "1" && stage != 0 && stage < 10)
+                                return;
+
+                            if((filter_status == "2" || filter_status == "3") && hasNoChildrenWithStatus(id,filter_status,1))
+                                return;
+
                             if(gravity == 1)
                                 image_info = "<image style='height: 1.2rem;' src='/images/warning.png'>";
                             if(gravity == 2)
@@ -619,7 +744,7 @@
                             cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + buttoncancel + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + buttonrequest + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
-                            cols += "<td colspan='3'><button type='button' id='btn_P" + id + "' onclick=\"loadSub(\'" + id + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
+                            cols += "<td colspan='3'><button type='button' id='btn_P" + id + "_" + vbeln + "' onclick=\"loadSub(\'" + id + "_" + vbeln + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
                             cols += '<td colspan="1">' + lifnr + '</td>';
                             cols += '<td colspan="2">' + lifnr_name + '</td>';
                             cols += '<td colspan="1">' + ekgrp + '</td>';
@@ -634,7 +759,7 @@
                                 newRow.attr('style', "background-color:LightYellow; vertical-align: middle;");
                             else
                                 newRow.attr('style', "background-color:Wheat; vertical-align: middle;");
-                            newRow.attr('id', "tr_P" + id);
+                            newRow.attr('id', "tr_P" + id + "_" + vbeln);
                         } else if (type == 'purch-order') {
                             var ebeln2 = _ord.split('#')[0];
                             var id = _ord.split('#')[1];
@@ -672,6 +797,15 @@
 
                             if ((stage == 2) || (stage == 12))
                                 red_cross = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+
+                            let filter_status = $("#filter-status").val();
+
+                            if(filter_status != "0") {
+                                if (filter_status == "2" && stage != 1 && stage != 11)
+                                    return;
+                                if(filter_status == "3" && stage != 2 && stage != 12)
+                                    return;
+                            }
 
                             if ($("#set-furnizor").val() == "") {
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';

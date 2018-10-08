@@ -66,9 +66,24 @@ class WebserviceController extends Controller
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));
     }
 
+    function getNrOfStatusChildren(){
+        return Webservice::getNrOfStatusChildren(
+            Input::get("id"),
+            Input::get("status"),
+            Input::get("type"),
+            Input::get("history"),
+            null
+        );
+    }
+
     public function getOrderInfo() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
-        return Webservice::getOrderInfo(Input::get("order"), Input::get("type"), Input::get("item"));
+        return Webservice::getOrderInfo(
+            Input::get("order"),
+            Input::get("type"),
+            Input::get("item"),
+            Input::get("history")
+        );
     }
 
     public function getVendorUsers(){
