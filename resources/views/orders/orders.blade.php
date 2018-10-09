@@ -68,15 +68,25 @@
         if(isset($_POST['time_search']) && $f_history == 2)
             $time_val = $_POST['time_search'];
 
-        if(isset($_POST['filter_Soid']))
-            $old_f_Soid = $_POST['filter_Soid'];
+        if(isset($_POST['filter_vbeln']))
+            $old_f_vbeln = $_POST['filter_vbeln'];
         else
-            $old_f_Soid = "";
+            $old_f_vbeln = "";
 
-        if(isset($_POST['filter_Poid']))
-            $old_f_Poid = $_POST['filter_Poid'];
+        if(isset($_POST['filter_ebeln']))
+            $old_f_ebeln = $_POST['filter_ebeln'];
         else
-            $old_f_Poid = "";
+            $old_f_ebeln = "";
+
+        if(isset($_POST['filter_matnr']))
+            $old_f_matnr = $_POST['filter_matnr'];
+        else
+            $old_f_matnr = "";
+
+        if(isset($_POST['filter_mtext']))
+            $old_f_mtext = $_POST['filter_mtext'];
+        else
+            $old_f_mtext = "";
 
         if(isset($_POST['filter_lifnr']))
             $old_f_lifnr = $_POST['filter_lifnr'];
@@ -192,19 +202,25 @@
                             @endif
                         </div>
 
-                        <br><br><br><br>
+                        <br><br>
 
                         <form action="orders" method="post" style="margin-bottom: -15px">
-                            @if(!$groupByPO)
-                                S-OID:
-                                <input type="text" name="filter_Soid" value="{{$old_f_Soid}}">
-                            @endif
-                            P-OID:
-                            <input type="text" name="filter_Poid" value="{{$old_f_Poid}}">
 
+                            @if(!$groupByPO)
+                                {{__("Sales order")}}:
+                                    <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_vbeln" value="{{$old_f_vbeln}}">&nbsp;&nbsp;
+                            @endif
+                            {{__("Purchase order")}}:
+                                <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_ebeln" value="{{$old_f_ebeln}}">&nbsp;&nbsp;
+                            {{__("Material")}}:
+                                <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_matnr" value="{{$old_f_matnr}}">&nbsp;&nbsp;
+                            {{__("Material description")}}:
+                                <input type="text" class="input-sm" style="width: 12rem; height: 1.4rem;" name="filter_mtext" value="{{$old_f_mtext}}">&nbsp;&nbsp;
                             @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
-                                LIFNR:<input type="text" name="filter_lifnr" value="{{$old_f_lifnr}}">
-                                LIFNR_NAME:<input type="text" name="filter_lifnr_name" value="{{$old_f_lifnr_name}}">
+                                {{__("Supplier")}}:
+                                    <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$old_f_lifnr}}">&nbsp;&nbsp;
+                                {{__("Supplier name")}}:
+                                    <input type="text" class="input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$old_f_lifnr_name}}">&nbsp;&nbsp;
                             @endif
 
                             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
@@ -333,30 +349,38 @@
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
                                 $uname = \Illuminate\Support\Facades\Auth::user()->username;
 
-                                $filter_category = null;
-                                $filter_barrier = null;
-
-                                if(isset($_POST['filter_Soid']) && strlen($_POST['filter_Soid']) > 0){
-                                    $filter_category = 1;
-                                    $filter_barrier = $_POST['filter_Soid'];
-                                } else if(isset($_POST['filter_Poid']) && strlen($_POST['filter_Poid']) > 0){
-                                    $filter_category = 2;
-                                    $filter_barrier = $_POST['filter_Poid'];
-                                } else if(isset($_POST['filter_lifnr']) && strlen($_POST['filter_lifnr']) > 0){
-                                    $filter_category = 3;
-                                    $filter_barrier = $_POST['filter_lifnr'];
-                                } else if(isset($_POST['filter_lifnr_name']) && strlen($_POST['filter_lifnr_name']) > 0){
-                                    $filter_category = 4;
-                                    $filter_barrier = $_POST['filter_lifnr_name'];
+                                $filter_vbeln = "";
+                                if(isset($_POST['filter_vbeln']) && strlen($_POST['filter_vbeln']) > 0){
+                                    $filter_vbeln = $_POST['filter_vbeln'];
+                                }
+                                $filter_ebeln = "";
+                                if(isset($_POST['filter_ebeln']) && strlen($_POST['filter_ebeln']) > 0){
+                                    $filter_ebeln = $_POST['filter_ebeln'];
+                                }
+                                $filter_matnr = "";
+                                if(isset($_POST['filter_matnr']) && strlen($_POST['filter_matnr']) > 0){
+                                    $filter_matnr = $_POST['filter_matnr'];
+                                }
+                                $filter_mtext = "";
+                                if(isset($_POST['filter_mtext']) && strlen($_POST['filter_mtext']) > 0){
+                                    $filter_mtext = $_POST['filter_mtext'];
+                                }
+                                $filter_lifnr = "";
+                                if(isset($_POST['filter_lifnr']) && strlen($_POST['filter_lifnr']) > 0){
+                                    $filter_lifnr = $_POST['filter_lifnr'];
+                                }
+                                $filter_lifnr_name = "";
+                                if(isset($_POST['filter_lifnr_name']) && strlen($_POST['filter_lifnr_name']) > 0){
+                                    $filter_vbeln = $_POST['filter_lifnr_name'];
                                 }
 
-                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history, $time_val, $filter_category, $filter_barrier);
+                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history, $time_val,
+                                     $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                                     $filter_lifnr, $filter_lifnr_name);
 
                                 echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$groupByPO\">";
                                 echo "<input type=\"hidden\" id=\"filter-status\" value=\"$f_type\">";
                                 echo "<input type=\"hidden\" id=\"filter-history\" value=\"$f_history\">";
-                                echo "<input type=\"hidden\" id=\"filter-category\" value=\"$filter_category\">";
-                                echo "<input type=\"hidden\" id=\"filter-barrier\" value=\"$filter_barrier\">";
                                 echo "<input type=\"hidden\" id=\"user_id\" value=\"$id\">";
                                 echo "<input type=\"hidden\" id=\"user_name\" value=\"$uname\">";
 
@@ -804,6 +828,14 @@
             if (type == "purch-order") _this = document.getElementById("tr_P" + item);
             if (type == "purch-item") _this = document.getElementById("tr_I" + item + "_" + ebelp);
 
+            let time_limit = $("#time_search").val();
+            let filter_vbeln = $("#filter_vbeln").val();
+            let filter_ebeln = $("#filter_ebeln").val();
+            let filter_matnr = $("#filter_matnr").val();
+            let filter_mtext = $("#filter_mtext").val();
+            let filter_lifnr = $("#filter_lifnr").val();
+            let filter_lifnr_name = $("#filter_lifnr_name").val();
+
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -816,7 +848,14 @@
                     order: item,
                     type: type,
                     item: ebelp,
-                    history: f_history
+                    history: f_history,
+                    time_limit: time_limit,
+                    filter_vbeln: filter_vbeln,
+                    filter_ebeln: filter_ebeln,
+                    filter_matnr: filter_matnr,
+                    filter_mtext: filter_mtext,
+                    filter_lifnr: filter_lifnr,
+                    filter_lifnr_name: filter_lifnr_name
                 },
                 function (data, status) {
                     _data = data;
@@ -829,8 +868,6 @@
                     var line_counter = 1;
 
                     let filter_status = $("#filter-status").val();
-                    let filter_category = $("#filter-category").val();
-                    let filter_barrier = $("#filter-barrier").val();
 
                     split.forEach(function (_ord) {
                         line_counter = line_counter + 1;
@@ -849,46 +886,44 @@
                             var owner = _ord.split('#')[10];
                             var stage = _ord.split('#')[11];
                             var image_info = "";
-                            if (filter_category != null && filter_barrier != null) {
-                                switch (filter_category) {
-                                    case "1":
-                                        if (filter_barrier.indexOf("*") != -1) {
-                                            if (vbeln.indexOf(filter_barrier.replace(/\*/g, "")) == -1)
-                                                return;
-                                        } else {
-                                            if (vbeln != filter_barrier)
-                                                return;
-                                        }
-                                        break;
-                                    case "2":
-                                        if (filter_barrier.indexOf("*") != -1) {
-                                            if (id.indexOf(filter_barrier.replace(/\*/g, "")) == -1)
-                                                return;
-                                        } else {
-                                            if (id != filter_barrier)
-                                                return;
-                                        }
-                                        break;
-                                    case "3":
-                                        if (filter_barrier.indexOf("*") != -1) {
-                                            if (lifnr.indexOf(filter_barrier.replace(/\*/g, "")) == -1)
-                                                return;
-                                        } else {
-                                            if (lifnr != filter_barrier)
-                                                return;
-                                        }
-                                        break;
-                                    case "4":
-                                        if (filter_barrier.indexOf("*") != -1) {
-                                            if (!lifnr_name.contains(filter_barrier.replace(/\*/g, "")) == -1)
-                                                return;
-                                        } else {
-                                            if (lifnr_name != filter_barrier)
-                                                return;
-                                        }
-                                        break;
+
+                            if (filter_vbeln != null && filter_vbeln.length > 0) {
+                                if (filter_vbeln.indexOf("*") != -1) {
+                                    if (vbeln.indexOf(filter_vbeln.replace(/\*/g, "")) == -1)
+                                        return;
+                                } else {
+                                    if (vbeln != filter_vbeln)
+                                        return;
                                 }
-                            }
+                            };
+                            if (filter_ebeln != null && filter_ebeln.length > 0) {
+                                if (filter_ebeln.indexOf("*") != -1) {
+                                    if (ebeln.indexOf(filter_ebeln.replace(/\*/g, "")) == -1)
+                                        return;
+                                } else {
+                                    if (ebeln != filter_ebeln)
+                                        return;
+                                }
+                            };
+                            if (filter_lifnr != null && filter_lifnr.length > 0) {
+                                if (filter_lifnr.indexOf("*") != -1) {
+                                    if (lifnr.indexOf(filter_lifnr.replace(/\*/g, "")) == -1)
+                                        return;
+                                } else {
+                                    if (lifnr != filter_lifnr)
+                                        return;
+                                }
+                            };
+                            if (filter_lifnr_name != null && filter_lifnr_name.length > 0) {
+                                if (filter_lifnr_name.indexOf("*") != -1) {
+                                    if (lifnr_name.indexOf(filter_lifnr_name.replace(/\*/g, "")) == -1)
+                                        return;
+                                } else {
+                                    if (lifnr_name != filter_lifnr_name)
+                                        return;
+                                }
+                            };
+
 
                             if (filter_status == "1" && stage != 0 && stage < 10)
                                 return;

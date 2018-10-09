@@ -15,44 +15,45 @@ use Illuminate\Support\Facades\DB;
 class Data
 {
 
-    public static function getOrders($id, $mode, $history, $time_limit, $filter_category, $filter_barrier) {
+    private static function addFilters(string ...$filters) {
+        $filter_sum = "";
+        foreach($filters as $filter)
+            $filter_sum = self::addFilter($filter_sum, trim($filter));
+        if (!empty($filter_sum)) $filter_sum = "(" . $filter_sum . ")";
+        return $filter_sum;
+    }
+
+    private static function addFilter($filter_sum, $filter) {
+        if (empty($filter)) return $filter_sum;
+        if (empty($filter_sum)) return $filter;
+        return $filter_sum . " and " . $filter;
+    }
+
+    private static function processFilter($field, $filter_val) {
+        if (is_null($filter_val) || empty($filter_val)) return "";
+        $val = trim($filter_val);
+        if (strchr($val, "*") != null) {
+            $val = str_replace("*","%", $filter_val);
+            return "$field like '$val'";
+        } else {
+            return "$field = '$filter_val'";
+        }
+    }
+
+    public static function getOrders($id, $mode, $history, $time_limit,
+                                     $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                                     $filter_lifnr, $filter_lifnr_name) {
 
         $orders_table = $history == 1 ? "porders" : "porders_arch";
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
 
-        //$_time = null;
-        //if($time_limit != null){
-        //    $parts = explode("/",$time_limit);
-        //    $_time = mktime(0, 0, 0, $parts[1]  , $parts[0] , $parts[2]);
-        //}
-
-        $filter_sql = "";
-
-        if($filter_category != null) {
-
-            switch ($filter_category) {
-                case 1:
-                    $filter_sql .= " vbeln ";
-                    break;
-                case 2:
-                    $filter_sql .= " ebeln ";
-                    break;
-                case 3:
-                    $filter_sql .= " lifnr ";
-                    break;
-                case 4:
-                    $filter_sql .= " lifnr_name ";
-                    break;
-            }
-
-            if (strchr($filter_barrier, "*") != null){
-                $replaced_barrier = str_replace("*","%",$filter_barrier);
-                $filter_sql .= " like '$replaced_barrier'";
-            } else
-                $filter_sql .= " = '$filter_barrier'";
-
-        }
+        $filter_vbeln_sql = self::processFilter("vbeln", $filter_vbeln);
+        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln);;
+        $filter_matnr_sql = self::processFilter("idnlf", $filter_matnr);
+        $filter_mtext_sql = self::processFilter("mtext", $filter_mtext);
+        $filter_lifnr_sql = self::processFilter("lifnr", $filter_lifnr);
+        $filter_lifnr_name_sql = self::processFilter("lifnr_name", $filter_lifnr_name);
 
         $time_search_sql = $time_limit === null ? "" : " where creation >= '$time_limit 00:00:00' ";
 
@@ -60,31 +61,45 @@ class Data
         if (count($users) == 0) return array();
         $user = $users[0];
 
-        if(strlen($filter_sql) > 0)
-            if(strlen($time_search_sql) == 0)
-                $filter_sql = " where" . $filter_sql;
-            else
-                $filter_sql = " and" . $filter_sql;
-
         if ($user->role == "Administrator") {
             if ($mode) { // purchase orders
-                $porders =  DB::select("select * from ".$orders_table . $time_search_sql . $filter_sql ." order by ebeln ");
+                $filter_sql = self::addFilters($filter_ebeln_sql, $filter_lifnr_sql, $filter_lifnr_name_sql);
+                if (empty($time_search_sql)) {
+                    if (!empty($filter_sql))
+                        $filter_sql = " where " . $filter_sql;
+                } else {
+                    if (!empty($filter_sql))
+                        $filter_sql = $time_search_sql . " and " . $filter_sql;
+                    else
+                        $filter_sql = $time_search_sql;
+                }
+                $porders = DB::select("select * from ".$orders_table . $filter_sql ." order by ebeln ");
                 foreach($porders as $porder) $porder->vbeln = '';
                 return $porders;
             } else {     // sales orders
+                $filter_sql = self::addFilters($filter_ebeln_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql);
+                if (empty($time_search_sql)) {
+                    if (!empty($filter_sql))
+                        $filter_sql = " where " . $filter_sql;
+                } else {
+                    if (!empty($filter_sql))
+                        $filter_sql = $time_search_sql . " and " . $filter_sql;
+                    else
+                        $filter_sql = $time_search_sql;
+                }
                 $result = array();
-                $sorders = DB::select("select distinct vbeln from ". $items_table . $time_search_sql ." order by vbeln ");
+                $sorders = DB::select("select distinct vbeln from ". $items_table . $filter_sql ." order by vbeln ");
                 foreach($sorders AS $sorder) {
-                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history, $time_limit,
+                        $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                        $filter_lifnr, $filter_lifnr_name);
                     foreach($porders AS $porder) {
-                        if($filter_sql != null && strlen($filter_sql) > 7)
-                            $filter_sql = " and " . substr($filter_sql,6);
-                        $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' $filter_sql order by ebeln");
+                        $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' order by ebeln");
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
                             $order->ebeln .= $porder->ebeln_id;
 
-                            $ssorder = DB::select("select * from $items_table where vbeln='$order->vbeln'")[0];
+                            $ssorder = DB::select("select * from $items_table where ebeln = '$porder->ebeln' and vbeln='$order->vbeln'")[0];
                             $order->kunnr = $ssorder->kunnr;
                             $order->kunnr_name = $ssorder->kunnr_name;
                             $order->ctv = $ssorder->ctv;
@@ -100,22 +115,52 @@ class Data
         }
 
         if ($user->role == "CTV") {
+            $filter_sql = self::addFilters($filter_ebeln_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql);
+            if (empty($time_search_sql)) {
+                if (!empty($filter_sql))
+                    $filter_sql = " where " . $filter_sql;
+            } else {
+                if (!empty($filter_sql))
+                    $filter_sql = $time_search_sql . " and " . $filter_sql;
+                else
+                    $filter_sql = $time_search_sql;
+            }
             if ($mode) { // purchase orders \
-                $porders2 = DB::select("select distinct ebeln from $items_table $time_search_sql and ctv = '$id'");
+                if (empty($filter_sql)) {
+                    $porders2 = DB::select("select distinct ebeln from $items_table where ctv = '$id'");
+                } else {
+                    $porders2 = DB::select("select distinct ebeln from $items_table $filter_sql and ctv = '$id'");
+                }
                 $porders = array();
                 foreach($porders2 as $porder2) {
-                    $result = DB::select("select * from $orders_table where ebeln = '$porder2->ebeln' $filter_sql");
+                    $result = DB::select("select * from $orders_table where ebeln = '$porder2->ebeln'");
                     $porders = array_merge($porders, $result);
                 }
                 foreach($porders as $porder) $porder->vbeln = '';
                 return $porders;
             } else {     // sales orders
                 $result = array();
-                $sorders = DB::select("select distinct vbeln from $items_table $time_search_sql and ctv = '$id' order by vbeln");
+                $filter_sql = self::addFilters($filter_ebeln_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql);
+                if (empty($time_search_sql)) {
+                    if (!empty($filter_sql))
+                        $filter_sql = " where " . $filter_sql;
+                } else {
+                    if (!empty($filter_sql))
+                        $filter_sql = $time_search_sql . " and " . $filter_sql;
+                    else
+                        $filter_sql = $time_search_sql;
+                }
+                if (empty($filter_sql)) {
+                    $sorders = DB::select("select distinct vbeln from $items_table where ctv = '$id' order by vbeln");
+                } else {
+                    $sorders = DB::select("select distinct vbeln from $items_table $filter_sql and ctv = '$id' order by vbeln");
+                }
                 foreach($sorders AS $sorder) {
-                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history, $time_limit,
+                        $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                        $filter_lifnr, $filter_lifnr_name);
                     foreach($porders AS $porder) {
-                        $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' $filter_sql order by ebeln");
+                        $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' order by ebeln");
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
                             $order->ebeln .= $porder->ebeln_id;
@@ -136,23 +181,43 @@ class Data
         }
 
         if ($user->role == "Referent") {
-            if ($mode) { // purchase orders \
-                $porders = DB::select("select * from $orders_table $time_search_sql $filter_sql and = '$user->ekgrp' order by ebeln");
+            $filter_sql = self::addFilters($filter_ebeln_sql, $filter_lifnr_sql, $filter_lifnr_name_sql);
+            if (empty($time_search_sql)) {
+                if (!empty($filter_sql))
+                    $filter_sql = " where " . $filter_sql;
+            } else {
+                if (!empty($filter_sql))
+                    $filter_sql = $time_search_sql . " and " . $filter_sql;
+                else
+                    $filter_sql = $time_search_sql;
+            }
+            if ($mode) { // purchase orders
+                if (empty($filter_sql)) {
+                    $porders = DB::select("select * from $orders_table where ekgrp = '$user->ekgrp' order by ebeln");
+                } else {
+                    $porders = DB::select("select * from $orders_table $filter_sql and ekgrp = '$user->ekgrp' order by ebeln");
+                }
                 foreach($porders as $porder) $porder->vbeln = '';
                 return $porders;
             } else {     // sales orders
                 $result = array();
-                $porders = DB::select("select distinct ebeln from $orders_table $time_search_sql $filter_sql and ekgrp = '$user->ekgrp'");
+                if (empty($filter_sql)) {
+                    $porders = DB::select("select distinct ebeln from $orders_table where ekgrp = '$user->ekgrp' order by ebeln");
+                } else {
+                    $porders = DB::select("select distinct ebeln from $orders_table $filter_sql and ekgrp = '$user->ekgrp'");
+                }
                 if (count($porders) == 0) return $porders;
                 $sql = "";
                 foreach($porders as $porder) {
                     if (!empty($sql)) $sql .= " or";
                     $sql .= " ebeln = '$porder->ebeln'";
                 }
-                $sql = "select distinct vbeln from $orders_table where" . $sql . " $filter_sql order by vbeln";
+                $sql = "select distinct vbeln from $orders_table where" . $sql . " order by vbeln";
                 $sorders = DB::select($sql);
                 foreach($sorders AS $sorder) {
-                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
+                    $porders = Data::getSalesOrderFlow($sorder->vbeln, $history, $time_limit,
+                        $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                        $filter_lifnr, $filter_lifnr_name);
                     foreach($porders AS $porder) {
                         $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' and ekgrp = '$user->ekgrp' $filter_sql order by ebeln");
                         foreach($orders as $order) {
@@ -187,8 +252,23 @@ class Data
         }
         if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
 
-        if ($mode) { // purchase orders \
-            $porders = DB::select("select * from $orders_table $time_search_sql $filter_sql and lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+        $filter_sql = self::addFilters($filter_ebeln_sql, $filter_lifnr_sql, $filter_lifnr_name_sql);
+        if (empty($time_search_sql)) {
+            if (!empty($filter_sql))
+                $filter_sql = " where " . $filter_sql;
+        } else {
+            if (!empty($filter_sql))
+                $filter_sql = $time_search_sql . " and " . $filter_sql;
+            else
+                $filter_sql = $time_search_sql;
+        }
+
+        if ($mode) { // purchase orders
+            if (empty($filter_sql)) {
+                $porders = DB::select("select * from $orders_table where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            } else {
+                $porders = DB::select("select * from $orders_table $filter_sql and lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            }
             foreach($porders as $porder) {
                 $sorders = DB::select("select distinct vbeln from $items_table where ebeln = '$porder->ebeln' order by vbeln");
                 $porder->vbeln = $sorders[0]->vbeln;
@@ -204,7 +284,11 @@ class Data
             return $porders;
         } else {     // sales orders
             $result = array();
-            $porders = DB::select("select distinct ebeln from $orders_table $time_search_sql $filter_sql and lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            if (empty($filter_sql)) {
+                $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            } else {
+                $porders = DB::select("select distinct ebeln from $orders_table $filter_sql and lifnr = '$user->lifnr'" . $xsql . " order by ebeln");
+            }
             if (count($porders) == 0) return $porders;
             $sql = "";
             foreach($porders as $porder) {
@@ -214,11 +298,12 @@ class Data
             $sql = "select distinct vbeln from $items_table where" . $sql . " order by vbeln";
             $sorders = DB::select($sql);
             foreach($sorders AS $sorder) {
-                $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
+                $porders = Data::getSalesOrderFlow($sorder->vbeln, $history, $time_limit,
+                    $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                    $filter_lifnr, $filter_lifnr_name);
                 foreach($porders AS $porder) {
                     $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln'".
-                        " and lifnr = '$user->lifnr'".$xsql.
-                        " $filter_sql order by ebeln");
+                        " and lifnr = '$user->lifnr'".$xsql. " order by ebeln");
                     foreach($orders as $order) {
                         $order->vbeln = $sorder->vbeln;
                         $order->ebeln .= $porder->ebeln_id;
@@ -237,15 +322,27 @@ class Data
             }
             return $result;
         }
-        $sql = "select * from $orders_table $time_search_sql $filter_sql and id ='$id'";
-        return DB::select($sql);
+
+        return array();
+
     }
 
-    static public function getSalesOrderFlow($vbeln, $history) {
+    static public function getSalesOrderFlow($vbeln, $history, $time_limit,
+                                             $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                                             $filter_lifnr, $filter_lifnr_name) {
 
         $orders_table = $history == 1 ? "porders" : "porders_arch";
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
+        $filter_vbeln_sql = self::processFilter("vbeln", $filter_vbeln);
+        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln);;
+        $filter_matnr_sql = self::processFilter("idnlf", $filter_matnr);
+        $filter_mtext_sql = self::processFilter("mtext", $filter_mtext);
+        $filter_lifnr_sql = self::processFilter("lifnr", $filter_lifnr);
+        $filter_lifnr_name_sql = self::processFilter("lifnr_name", $filter_lifnr_name);
+
+        $time_search_sql = $time_limit === null ? "" : " where creation >= '$time_limit 00:00:00' ";
 
         $xsql = "";
         if ($vbeln == "SALESORDER") {
@@ -260,7 +357,21 @@ class Data
                 else $xsql .= ' or ' . $sel1;
             }
             if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
-            $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
+            $filter_sql = self::addFilters($filter_ebeln_sql);
+            if (empty($time_search_sql)) {
+                if (!empty($filter_sql))
+                    $filter_sql = " where " . $filter_sql;
+            } else {
+                if (!empty($filter_sql))
+                    $filter_sql = $time_search_sql . " and " . $filter_sql;
+                else
+                    $filter_sql = $time_search_sql;
+            }
+            if (empty($filter_sql)) {
+                $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '" . Auth::user()->lifnr . "' " . $xsql . " order by ebeln");
+            } else {
+                $porders = DB::select("select distinct ebeln from $orders_table $filter_sql and lifnr = '" . Auth::user()->lifnr . "' " . $xsql . " order by ebeln");
+            }
         } else {
             if (Auth::user()->role == "Furnizor") {
                 $brands = DB::select("select * from users_sel where id ='" . Auth::user()->id . "'");
@@ -274,7 +385,21 @@ class Data
                     else $xsql .= ' or ' . $sel1;
                 }
                 if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
-                $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
+                $filter_sql = self::addFilters($filter_ebeln_sql);
+                if (empty($time_search_sql)) {
+                    if (!empty($filter_sql))
+                        $filter_sql = " where " . $filter_sql;
+                } else {
+                    if (!empty($filter_sql))
+                        $filter_sql = $time_search_sql . " and " . $filter_sql;
+                    else
+                        $filter_sql = $time_search_sql;
+                }
+                if (empty($filter_sql)) {
+                    $porders = DB::select("select distinct ebeln from $orders_table where lifnr = '" . Auth::user()->lifnr . "' " . $xsql . " order by ebeln");
+                } else {
+                    $porders = DB::select("select distinct ebeln from $orders_table $filter_sql and lifnr = '" . Auth::user()->lifnr . "' ". $xsql . " order by ebeln");
+                }
                 $xsql = "";
                 foreach($porders as $porder) {
                     $sel1 = "ebeln = '$porder->ebeln'";
@@ -284,7 +409,21 @@ class Data
                 }
                 if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
             } elseif (Auth::user()->role == "Referent") {
-                $porders = DB::select("select distinct ebeln from $orders_table where ekgrp = '" . Auth::user()->ekgrp . "' order by ebeln");
+                $filter_sql = self::addFilters($filter_ebeln_sql, $filter_lifnr_sql, $filter_lifnr_name_sql);
+                if (empty($time_search_sql)) {
+                    if (!empty($filter_sql))
+                        $filter_sql = " where " . $filter_sql;
+                } else {
+                    if (!empty($filter_sql))
+                        $filter_sql = $time_search_sql . " and " . $filter_sql;
+                    else
+                        $filter_sql = $time_search_sql;
+                }
+                if (empty($filter_sql)) {
+                    $porders = DB::select("select distinct ebeln from $orders_table where ekgrp = '" . Auth::user()->ekgrp . "' order by ebeln");
+                } else {
+                    $porders = DB::select("select distinct ebeln from $orders_table $filter_sql and ekgrp = '" . Auth::user()->ekgrp . "' order by ebeln");
+                }
                 $xsql = "";
                 foreach($porders as $porder) {
                     $sel1 = "ebeln = '$porder->ebeln'";
@@ -294,14 +433,42 @@ class Data
                 }
                 if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
             }
-            $porders = DB::select("select distinct ebeln from $items_table where vbeln = '$vbeln'" . $xsql . " order by ebeln");
+            $filter_sql = self::addFilters($filter_vbeln_sql, $filter_ebeln_sql, $filter_matnr_sql, $filter_mtext_sql);
+            if (empty($time_search_sql)) {
+                if (!empty($filter_sql))
+                    $filter_sql = " where " . $filter_sql;
+            } else {
+                if (!empty($filter_sql))
+                    $filter_sql = $time_search_sql . " and " . $filter_sql;
+                else
+                    $filter_sql = $time_search_sql;
+            }
+            if (empty($filter_sql)) {
+                $porders = DB::select("select distinct ebeln from $items_table where vbeln = '$vbeln'" . $xsql . " order by ebeln");
+            } else {
+                $porders = DB::select("select distinct ebeln from $items_table $filter_sql and vbeln = '$vbeln'" . $xsql . " order by ebeln");
+            }
         }
         $sql = "";
         foreach($porders as $porder) {
             if (!empty($sql)) $sql .= " or";
             $sql .= " ebeln = '$porder->ebeln'";
         }
-        $sql = "select distinct vbeln, ebeln from $items_table where" . $sql . " order by ebeln, vbeln";
+        $filter_sql = self::addFilters($filter_vbeln_sql, $filter_ebeln_sql, $filter_matnr_sql, $filter_mtext_sql);
+        if (empty($time_search_sql)) {
+            if (!empty($filter_sql))
+                $filter_sql = " where " . $filter_sql;
+        } else {
+            if (!empty($filter_sql))
+                $filter_sql = $time_search_sql . " and " . $filter_sql;
+            else
+                $filter_sql = $time_search_sql;
+        }
+        if (empty($filter_sql)) {
+            $sql = "select distinct vbeln, ebeln from $items_table where" . $sql . " order by ebeln, vbeln";
+        } else {
+            $sql = "select distinct vbeln, ebeln from $items_table $filter_sql and " . $sql . " order by ebeln, vbeln";
+        }
         $sorders = DB::select($sql);
         if ($vbeln == "SALESORDER") {
             foreach($sorders as $sorder) {

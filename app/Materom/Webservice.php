@@ -122,7 +122,9 @@ class Webservice
         }
     }
 
-    static public function getOrderInfo($order, $type, $item, $history)
+    static public function getOrderInfo($order, $type, $item, $history, $time_limit,
+                                        $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                                        $filter_lifnr, $filter_lifnr_name)
     {
         $orders_table = $history == 1 ? "porders" : "porders_arch";
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
@@ -131,7 +133,9 @@ class Webservice
         $str = "";
         $porder = substr($order, 0, 10);
         if (strcmp($type, 'sales-order') == 0) {
-            $porders = Data::getSalesOrderFlow($order, $history);
+            $porders = Data::getSalesOrderFlow($order, $history, $time_limit,
+                $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
+                $filter_lifnr, $filter_lifnr_name);
             foreach ($porders as $porder) {
                 $links = DB::select("select * from " . $orders_table . " where ebeln = '$porder->ebeln'");
                 foreach ($links as $link) {

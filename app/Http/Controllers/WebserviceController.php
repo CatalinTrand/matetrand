@@ -88,7 +88,14 @@ class WebserviceController extends Controller
             Input::get("order"),
             Input::get("type"),
             Input::get("item"),
-            Input::get("history")
+            Input::get("history"),
+            Input::get("time_limit"),
+            Input::get("filter_vbeln"),
+            Input::get("filter_ebeln"),
+            Input::get("filter_matnr"),
+            Input::get("filter_mtext"),
+            Input::get("filter_lifnr"),
+            Input::get("filter_lifnr_name")
         );
     }
 
