@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             GlobalRFCDataTableSeeder::class,
             RolesTableSeeder::class,
             OrdersTableSeeder::class,
+            OrdersTableSeederArchive::class,
         ]);
     }
 }
