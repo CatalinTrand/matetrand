@@ -64,6 +64,16 @@ class OrdersTableSeeder extends Seeder
             " values ('P000000001', '00010', 'P', '2018-09-01 18:02:00', 'f20786', 'Furnizor 20786', '25,33 RON/buc', '26,09 RON/buc', 'Crestere pret import')");
         DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval)" .
             " values ('P000000002', '00040', 'D', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '24.12.2018', '07.01.2019')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason)" .
+            " values ('P000000002', '00040', 'Q', '2018-09-01 18:01:00', 'f20786', 'Furnizor 20786', '500 buc', '400 buc', 'Stoc insuficient')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval)" .
+            " values ('P000000003', '00050', 'D', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '24.12.2018', '07.01.2019')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason)" .
+            " values ('P000000003', '00060', 'Q', '2018-09-01 18:01:00', 'f20786', 'Furnizor 20786', '500 buc', '400 buc', 'Stoc insuficient')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason)" .
+            " values ('P000000014', '00130', 'P', '2018-09-01 18:02:00', 'f16098', 'Furnizor 20786', '25,33 RON/buc', '26,09 RON/buc', 'Crestere pret import')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval)" .
+            " values ('P000000014', '00140', 'D', '2018-09-01 18:03:00', 'Catalin', 'Alexandru', '24.11.2018', '08.01.2019')");
 
     }
 }

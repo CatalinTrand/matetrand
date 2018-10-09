@@ -114,7 +114,7 @@
                         @endif
                     </div>
 
-                    <div class="card-body orders-table-div">
+                    <div class="card-body orders-table-div" style="height: 81vh">
 
                         <form action="orders" method="post">
                             Afisare dupa:&nbsp;
@@ -135,7 +135,7 @@
                         </form>
                         <br><br>
 
-                        <div class="container row" style="display: inline-block">
+                        <div class="container row" style="display: inline-block;">
                             <form action="orders" method="post" style="display: inline-block">
                                 Filtrare dupa status:
                                 <select name="filter_status" onchange="this.form.submit()">

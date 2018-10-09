@@ -65,13 +65,13 @@ class OrdersTableSeederArchive extends Seeder
         DB::insert("insert into pitemchg_arch (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, creation)" .
             " values ('PA00000002', '00040', 'D', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '24.12.2018', '07.01.2019', '2018-10-07 00:00:00')");
         DB::insert("insert into pitemchg_arch (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason, creation)" .
-            " values ('PA00000014', '00040', 'X', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '', '', 'Nu exista inca pret', '2018-10-01 00:00:00')");
+            " values ('PA00000014', '00130', 'X', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '', '', 'Nu exista inca pret', '2018-10-01 00:00:00')");
         DB::insert("insert into pitemchg_arch (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, creation)" .
-            " values ('PA00000014', '00040', 'A', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '24.12.2018', '07.01.2019', '2018-10-01 00:00:00')");
+            " values ('PA00000014', '00140', 'A', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '24.12.2018', '07.01.2019', '2018-10-01 00:00:00')");
         DB::insert("insert into pitemchg_arch (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, reason, creation)" .
-            " values ('PA00000015', '00040', 'X', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '', '', 'Nu se mai produce', '2018-10-02 00:00:00')");
+            " values ('PA00000015', '00200', 'X', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '', '', 'Nu se mai produce', '2018-10-02 00:00:00')");
         DB::insert("insert into pitemchg_arch (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, newval, creation)" .
-            " values ('PA00000015', '00040', 'A', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '', '', '2018-10-02 00:00:00')");
+            " values ('PA00000015', '00250', 'A', '2018-09-01 18:03:00', 'Radu', 'Trandafir', '', '', '2018-10-02 00:00:00')");
 
     }
 }

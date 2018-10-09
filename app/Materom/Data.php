@@ -54,7 +54,7 @@ class Data
 
         }
 
-        $time_search_sql = $time_limit === null ? "" : " where creation >= $time_limit ";
+        $time_search_sql = $time_limit === null ? "" : " where creation >= '$time_limit 00:00:00' ";
 
         $users = DB::select("select * from users where id ='$id'");
         if (count($users) == 0) return array();
@@ -77,7 +77,8 @@ class Data
                 foreach($sorders AS $sorder) {
                     $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
                     foreach($porders AS $porder) {
-                        $filter_sql = " and " . $filter_sql[6] . substr($filter_sql,6);
+                        if (strlen($filter_sql) > 0)
+                            $filter_sql = " and " . $filter_sql[6] . substr($filter_sql,6);
                         $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' $filter_sql order by ebeln");
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;
