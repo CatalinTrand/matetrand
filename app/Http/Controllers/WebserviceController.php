@@ -97,6 +97,11 @@ class WebserviceController extends Controller
         return Webservice::getVendorUsers(Input::get("lifnr"));
     }
 
+    public function getCTVUsers(){
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::getCTVUsers();
+    }
+
     public function sapActivateUser(){
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapActivateUser(Input::get("id"));

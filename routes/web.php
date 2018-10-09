@@ -41,6 +41,7 @@ Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');
+Route::get('webservice/get_ctv_users','WebserviceController@getCTVUsers');
 Route::get('webservice/sap_activate_user','WebserviceController@sapActivateUser');
 Route::get('webservice/sap_deactivate_user','WebserviceController@sapDeactivateUser');
 Route::get('webservice/sap_create_user','WebserviceController@sapCreateUser');

@@ -77,8 +77,8 @@ class Data
                 foreach($sorders AS $sorder) {
                     $porders = Data::getSalesOrderFlow($sorder->vbeln, $history);
                     foreach($porders AS $porder) {
-                        if($filter_sql != null && strlen($filter_sql > 7))
-                            $filter_sql = " and " . $filter_sql[6] . substr($filter_sql,6);
+                        if($filter_sql != null && strlen($filter_sql) > 7)
+                            $filter_sql = " and " . substr($filter_sql,6);
                         $orders = DB::select("select * from $orders_table where ebeln = '$porder->ebeln' $filter_sql order by ebeln");
                         foreach($orders as $order) {
                             $order->vbeln = $sorder->vbeln;

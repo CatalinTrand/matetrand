@@ -250,6 +250,25 @@ class Webservice
         return $result;
     }
 
+    static public function getCTVUsers()
+    {
+        $users = DB::select("select * from users where role = 'CTV'");
+        $result = '[ ';
+        foreach ($users AS $user) {
+            if ($user->active == 1) $user_active = 'X'; else $user_active = '';
+            $str = '"SRM_USER":"' . $user->id . '", ' .
+                '"SRM_USER_NAME":"' . $user->username . '", ' .
+                '"ACTIVE":"' . $user_active . '", ' .
+                '"EMAIL":"' . $user->email . '", ' .
+                '"SAP_USER":"' . $user->sapuser . '", ' .
+                '"LANG":"' . $user->lang . '"';
+            if (strlen($result) > 2) $result = $result . ", ";
+            $result = $result . "{ " . $str . " }";
+        }
+        $result = $result . " ]";
+        return $result;
+    }
+
     static public function getGravity($order, $type, $history)
     {
         //gravitate : 2 = critical, 1 = warning, 0 = nimic
