@@ -420,9 +420,9 @@
                                     $ctime = strtotime($order->ctime);
 
                                     $status = "<image style='height: 1rem;' src='/images/status.png'>"; //TODO
-                                    $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-                                    $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
-                                    $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                    $buttonok = "";
+                                    $buttoncancel = "";
+                                    $buttonrequest = "";
 
                                     if($groupByPO){
                                         $oid = "P" . $order->ebeln;
@@ -447,8 +447,25 @@
                                             break;
                                             case 2:
                                                 $owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                            break;
+                                            case 3:
+                                                $owner = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
+                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+
                                             break;
                                         }
+
+                                        if($f_history == 2){
+                                            $buttonok = "";
+                                            $buttoncancel = "";
+                                            $buttonrequest = "";
+                                        }
+
                                         if ($line_counter == 0)
                                             $style = "background-color:LightYellow;";
                                         else
@@ -479,8 +496,24 @@
                                             break;
                                             case 2:
                                                 $owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
                                             break;
+                                            case 3:
+                                                $owner = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
+                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                                break;
                                         }
+
+                                        if($f_history == 2){
+                                            $buttonok = "";
+                                            $buttoncancel = "";
+                                            $buttonrequest = "";
+                                        }
+
                                         $owner = "";
                                         if ($line_counter == 0)
                                             $style = "background-color:white;";
@@ -954,6 +987,10 @@
                             let buttonok = owner < 2 ? "" : "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
                             let buttoncancel = owner < 2 ? "" : "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = owner < 2 ? "" : "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
+
+                            if(f_history == 2)
+                                buttonok = buttoncancel = buttonrequest = "";
+
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_info + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_owner + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + blue_circle + '</td>';
@@ -999,6 +1036,10 @@
                             let buttonok = owner2 < 2 ? "" : "<button type='button' onclick='accept(this, \"" + ebeln2 + "\", \"" + id + "\", \"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
                             let buttoncancel = owner2 < 2 ? "" : "<button type='button' onclick='reject(this, \"" + ebeln2 + "\",  \"" + id + "\", \"item\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = owner2 < 2 ? "" : "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
+
+                            if(f_history == 2)
+                                buttonok = buttoncancel = buttonrequest = "";
+
                             var image_owner = "";
                             if (owner2 == 1)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
