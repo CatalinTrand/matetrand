@@ -67,6 +67,26 @@
 
         if(isset($_POST['time_search']) && $f_history == 2)
             $time_val = $_POST['time_search'];
+
+        if(isset($_POST['filter_Soid']))
+            $old_f_Soid = $_POST['filter_Soid'];
+        else
+            $old_f_Soid = "";
+
+        if(isset($_POST['filter_Poid']))
+            $old_f_Poid = $_POST['filter_Poid'];
+        else
+            $old_f_Poid = "";
+
+        if(isset($_POST['filter_lifnr']))
+            $old_f_lifnr = $_POST['filter_lifnr'];
+        else
+            $old_f_lifnr = "";
+
+        if(isset($_POST['filter_lifnr_name']))
+            $old_f_lifnr_name = $_POST['filter_lifnr_name'];
+        else
+            $old_f_lifnr_name = "";
     @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
@@ -177,14 +197,14 @@
                         <form action="orders" method="post" style="margin-bottom: -15px">
                             @if(!$groupByPO)
                                 S-OID:
-                                <input type="text" name="filter_Soid" value="{{$_POST['filter_Soid']}}">
+                                <input type="text" name="filter_Soid" value="{{$old_f_Soid}}">
                             @endif
                                 P-OID:
-                            <input type="text" name="filter_Poid" value="{{$_POST['filter_Poid']}}">
+                            <input type="text" name="filter_Poid" value="{{$old_f_Poid}}">
 
                             @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
-                                    LIFNR:<input type="text" name="filter_lifnr" value="{{$_POST['filter_lifnr']}}">
-                                LIFNR_NAME:<input type="text" name="filter_lifnr_name" value="{{$_POST['filter_lifnr_name']}}">
+                                    LIFNR:<input type="text" name="filter_lifnr" value="{{$old_f_lifnr}}">
+                                LIFNR_NAME:<input type="text" name="filter_lifnr_name" value="{{$old_f_lifnr_name}}">
                             @endif
 
                             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
