@@ -54,6 +54,12 @@ class WebserviceController extends Controller
         );
     }
 
+    public function getAllItems(){
+        return Webservice::getAllItems(
+            Input::get("history")
+        );
+    }
+
     function insertReferenceUser(){
         return Webservice::insertReferenceUser(
           Input::get("id"),

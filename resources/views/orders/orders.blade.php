@@ -199,11 +199,11 @@
                                 S-OID:
                                 <input type="text" name="filter_Soid" value="{{$old_f_Soid}}">
                             @endif
-                                P-OID:
+                            P-OID:
                             <input type="text" name="filter_Poid" value="{{$old_f_Poid}}">
 
                             @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
-                                    LIFNR:<input type="text" name="filter_lifnr" value="{{$old_f_lifnr}}">
+                                LIFNR:<input type="text" name="filter_lifnr" value="{{$old_f_lifnr}}">
                                 LIFNR_NAME:<input type="text" name="filter_lifnr_name" value="{{$old_f_lifnr_name}}">
                             @endif
 
@@ -579,7 +579,7 @@
             }
         }
 
-        function accept(_this, ebeln, id, type) {
+        function acceptItem(ebeln, id, type) {
             var _data, _status = "";
             $.ajaxSetup({
                 headers: {
@@ -600,61 +600,54 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
-                switch (type) {
-                    case 'item':
-                        //show new row
-                        if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
-                            var date = new Date();
-                            var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                            var cuser = $("#user_id").val();
-                            var cuser_name = $("#user_name").val();
-                            var ctext = "Acceptare";
-                            var creason = "";
-                            if (chdate != null) {
-                                var newRow = $("<tr>");
-                                var cols = "";
-                                var pi_style = "background-color:" + $(_this).css("background-color") + ";";
-                                var color = $(_this).closest("tr").find(".coloured").css("background-color");
-                                var last_style = "background-color:" + color;
-                                var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
-                                var first_style = "background-color:" + first_color;
-                                cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                                let colsafter = "12";
-                                if ($("#set-furnizor").val() == "")
-                                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                                else colsafter = "13";
-                                cols += '<td class="coloured" style="' + last_style + '"></td>';
-                                cols += '<td style="' + pi_style + '"></td>';
-                                cols += "<td colspan='3'>" + chdate + "</td>";
-                                cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
-                                cols += '<td colspan="6">' + ctext + '</td>';
-                                cols += '<td colspan="2">' + creason + '</td>';
-                                cols += "<td colspan=" + colsafter + "></td>";
-                                if ($("#set-furnizor").val() != "")
-                                    cols += '<td></td>';
-                                cols += '<td colspan="4"></td>';
-                                newRow.append(cols);
-                                newRow.insertAfter($(_this).closest("tr"));
-                                if (line_counter == 0)
-                                    newRow.attr('style', "background-color:Azure; vertical-align: middle;");
-                                else
-                                    newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
-                                newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
-                                    chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
-                            }
-                        } else alert("Accepted!");
-                        break;
-                    case 'purch-order':
-                        //TODO - apply to all children items
-                        break;
-                    case 'sales-order':
-                        //TODO - apply to all children items
-                        break;
+                alert("Accepted!");
+                return;//todo
+                //show new row
+                if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
+                    var date = new Date();
+                    var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                    var cuser = $("#user_id").val();
+                    var cuser_name = $("#user_name").val();
+                    var ctext = "Acceptare";
+                    var creason = "";
+                    if (chdate != null) {
+                        var newRow = $("<tr>");
+                        var cols = "";
+                        var pi_style = "background-color:" + $(_this).css("background-color") + ";";
+                        var color = $(_this).closest("tr").find(".coloured").css("background-color");
+                        var last_style = "background-color:" + color;
+                        var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                        var first_style = "background-color:" + first_color;
+                        cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                        let colsafter = "12";
+                        if ($("#set-furnizor").val() == "")
+                            cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                        else colsafter = "13";
+                        cols += '<td class="coloured" style="' + last_style + '"></td>';
+                        cols += '<td style="' + pi_style + '"></td>';
+                        cols += "<td colspan='3'>" + chdate + "</td>";
+                        cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
+                        cols += '<td colspan="6">' + ctext + '</td>';
+                        cols += '<td colspan="2">' + creason + '</td>';
+                        cols += "<td colspan=" + colsafter + "></td>";
+                        if ($("#set-furnizor").val() != "")
+                            cols += '<td></td>';
+                        cols += '<td colspan="4"></td>';
+                        newRow.append(cols);
+                        newRow.insertAfter($(_this).closest("tr"));
+                        if (line_counter == 0)
+                            newRow.attr('style', "background-color:Azure; vertical-align: middle;");
+                        else
+                            newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
+                        alert("Accepted!");
+                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
+                            chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
+                    }
                 }
             } else alert('Error processing operation!');
         }
 
-        function reject(_this, ebeln, id, type) {
+        function rejectItem(ebeln, id, type) {
             var _data, _status = "";
             $.ajaxSetup({
                 headers: {
@@ -675,58 +668,97 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
-                switch (type) {
-                    case 'item':
-                        //show new row
-                        if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
-                            var date = new Date();
-                            var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                            var cuser = $("#user_id").val();
-                            var cuser_name = $("#user_name").val();
-                            var ctext = "Rejectare";
-                            var creason = "";
-                            if (chdate != null) {
-                                var newRow = $("<tr>");
-                                var cols = "";
-                                var pi_style = "background-color:" + $(_this).css("background-color") + ";";
-                                var color = $(_this).closest("tr").find(".coloured").css("background-color");
-                                var last_style = "background-color:" + color;
-                                var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
-                                var first_style = "background-color:" + first_color;
-                                cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                                let colsafter = "12";
-                                if ($("#set-furnizor").val() == "")
-                                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                                else colsafter = "13";
-                                cols += '<td class="coloured" style="' + last_style + '"></td>';
-                                cols += '<td style="' + pi_style + '"></td>';
-                                cols += "<td colspan='3'>" + chdate + "</td>";
-                                cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
-                                cols += '<td colspan="6">' + ctext + '</td>';
-                                cols += '<td colspan="2">' + creason + '</td>';
-                                cols += "<td colspan=" + colsafter + "></td>";
-                                if ($("#set-furnizor").val() != "")
-                                    cols += '<td></td>';
-                                cols += '<td colspan="4"></td>';
-                                newRow.append(cols);
-                                newRow.insertAfter($(_this).closest("tr"));
-                                if (line_counter == 0)
-                                    newRow.attr('style', "background-color:Azure; vertical-align: middle;");
-                                else
-                                    newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
-                                newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
-                                    chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
-                            }
-                        } else alert("Rejected!");
-                        break;
-                    case 'purch-order':
-                        //TODO - apply to all children items
-                        break;
-                    case 'sales-order':
-                        //TODO - apply to all children items
-                        break;
+                alert("Rejected!");
+                return;//todo
+                //show new row
+                if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
+                    var date = new Date();
+                    var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                    var cuser = $("#user_id").val();
+                    var cuser_name = $("#user_name").val();
+                    var ctext = "Rejectare";
+                    var creason = "";
+                    if (chdate != null) {
+                        var newRow = $("<tr>");
+                        var cols = "";
+                        var pi_style = "background-color:" + $(_this).css("background-color") + ";";
+                        var color = $(_this).closest("tr").find(".coloured").css("background-color");
+                        var last_style = "background-color:" + color;
+                        var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
+                        var first_style = "background-color:" + first_color;
+                        cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                        let colsafter = "12";
+                        if ($("#set-furnizor").val() == "")
+                            cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                        else colsafter = "13";
+                        cols += '<td class="coloured" style="' + last_style + '"></td>';
+                        cols += '<td style="' + pi_style + '"></td>';
+                        cols += "<td colspan='3'>" + chdate + "</td>";
+                        cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
+                        cols += '<td colspan="6">' + ctext + '</td>';
+                        cols += '<td colspan="2">' + creason + '</td>';
+                        cols += "<td colspan=" + colsafter + "></td>";
+                        if ($("#set-furnizor").val() != "")
+                            cols += '<td></td>';
+                        cols += '<td colspan="4"></td>';
+                        newRow.append(cols);
+                        newRow.insertAfter($(_this).closest("tr"));
+                        if (line_counter == 0)
+                            newRow.attr('style', "background-color:Azure; vertical-align: middle;");
+                        else
+                            newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
+                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
+                            chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
+                    }
                 }
+                alert("Rejected!");
             } else alert('Error processing operation!');
+        }
+
+        function accept(_this, ebeln, id, type) {
+            if (checkedList.length > 0) {
+                //apply to all
+                let f_history = $("#filter-history").val();
+                var _data2, _status2 = "";
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                jQuery.ajaxSetup({async: false});
+
+                $.post("webservice/getAllItems",
+                    {
+                        history: f_history
+                    },
+                    function (data, status) {
+                        _data2 = data;
+                        _status2 = status;
+                    });
+                jQuery.ajaxSetup({async: true});
+                if (_status2 == "success") {
+                    var split = _data2.split('=');
+                    split.forEach(function (_ord) {
+                        let _ebeln = _ord.split('#')[0];
+                        let _id = _ord.split('#')[1];
+                        if(isChecked("I" + _ebeln + "_" + _id))
+                            acceptItem(_ebeln,_id,'item-purch');
+                    });
+                }
+            } else {
+                //apply individually
+                acceptItem(ebeln, id, 'item-purch');
+            }
+        }
+
+        function reject(_this, ebeln, id, type) {
+            if (checkedList.length > 0) {
+                //apply to all
+
+            } else {
+                //apply individually
+                rejectItem(ebeln, id, 'item-purch');
+            }
         }
 
         function hasNoChildrenWithStatus(id, status, type) {
@@ -817,11 +849,11 @@
                             var owner = _ord.split('#')[10];
                             var stage = _ord.split('#')[11];
                             var image_info = "";
-                            if(filter_category != null && filter_barrier != null) {
+                            if (filter_category != null && filter_barrier != null) {
                                 switch (filter_category) {
                                     case "1":
                                         if (filter_barrier.indexOf("*") != -1) {
-                                            if (vbeln.indexOf(filter_barrier.replace(/\*/g,"")) == -1)
+                                            if (vbeln.indexOf(filter_barrier.replace(/\*/g, "")) == -1)
                                                 return;
                                         } else {
                                             if (vbeln != filter_barrier)
@@ -830,7 +862,7 @@
                                         break;
                                     case "2":
                                         if (filter_barrier.indexOf("*") != -1) {
-                                            if (id.indexOf(filter_barrier.replace(/\*/g,"")) == -1)
+                                            if (id.indexOf(filter_barrier.replace(/\*/g, "")) == -1)
                                                 return;
                                         } else {
                                             if (id != filter_barrier)
@@ -839,7 +871,7 @@
                                         break;
                                     case "3":
                                         if (filter_barrier.indexOf("*") != -1) {
-                                            if (lifnr.indexOf(filter_barrier.replace(/\*/g,"")) == -1)
+                                            if (lifnr.indexOf(filter_barrier.replace(/\*/g, "")) == -1)
                                                 return;
                                         } else {
                                             if (lifnr != filter_barrier)
@@ -848,7 +880,7 @@
                                         break;
                                     case "4":
                                         if (filter_barrier.indexOf("*") != -1) {
-                                            if (!lifnr_name.contains(filter_barrier.replace(/\*/g,"")) == -1)
+                                            if (!lifnr_name.contains(filter_barrier.replace(/\*/g, "")) == -1)
                                                 return;
                                         } else {
                                             if (lifnr_name != filter_barrier)
