@@ -106,6 +106,7 @@ class Data
                             $order->ctv_name = $ssorder->ctv_name;
                             $order->shipto = $ssorder->shipto;
                             $order->shipto_name = $ssorder->shipto_name;
+                            $order->stage = $ssorder->stage;
                         }
                         $result = array_merge($result, $orders);
                     }
@@ -172,6 +173,7 @@ class Data
                             $order->ctv_name = $ssorder->ctv_name;
                             $order->shipto = $ssorder->shipto;
                             $order->shipto_name = $ssorder->shipto_name;
+                            $order->stage = $ssorder->stage;
                         }
                         $result = array_merge($result, $orders);
                     }
@@ -231,6 +233,7 @@ class Data
                             $order->ctv_name = $ssorder->ctv_name;
                             $order->shipto = $ssorder->shipto;
                             $order->shipto_name = $ssorder->shipto_name;
+                            $order->stage = $ssorder->stage;
                         }
                         $result = array_merge($result, $orders);
                     }
@@ -280,6 +283,7 @@ class Data
                 $porder->ctv_name = $ssorder->ctv_name;
                 $porder->shipto = $ssorder->shipto;
                 $porder->shipto_name = $ssorder->shipto_name;
+                $porder->stage = $ssorder->stage;
             }
             return $porders;
         } else {     // sales orders
@@ -315,6 +319,7 @@ class Data
                         $order->ctv_name = $ssorder->ctv_name;
                         $order->shipto = $ssorder->shipto;
                         $order->shipto_name = $ssorder->shipto_name;
+                        $order->stage = $ssorder->stage;
                         if ($order->vbeln != 'REPLENISH') $order->vbeln = "SALESORDER";
                     }
                     $result = array_merge($result, $orders);

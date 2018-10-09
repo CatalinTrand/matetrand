@@ -460,7 +460,16 @@
                                             break;
                                         }
 
-                                        if($f_history == 2){
+                                        $itemchg_table = $f_history < 2 ? "pitemchg" : "pitemchg_arch";
+                                        $stage = 0;
+                                        if (DB::table($itemchg_table)->where('ebeln', $order->ebeln)->exists())
+                                            $stage = 10;
+
+                                        $processed = "";
+                                        if($stage > 0)
+                                            $processed = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+
+                                        if($f_history == 2 || $stage > 0){
                                             $buttonok = "";
                                             $buttoncancel = "";
                                             $buttonrequest = "";
@@ -472,7 +481,7 @@
                                             $style = "background-color:Wheat;";
 
                                         if(\App\Materom\Webservice::getNrOfStatusChildren($order->ebeln,$f_type,1, $f_history, null) > 0)
-                                            echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td></td><td></td><td></td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+                                            echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td>$processed</td><td></td><td></td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
                                         $data = "<td>$order->kunnr</td><td>$order->kunnr_name</td><td>$order->shipto</td><td>$order->shipto_name</td><td>$order->ctv</td><td>$order->ctv_name</td><td></td>";
@@ -1023,6 +1032,9 @@
                             if(f_history == 2)
                                 buttonok = buttoncancel = buttonrequest = "";
 
+                            if(stage%10 > 0)
+                                buttonok = buttoncancel = "";
+
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_info + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_owner + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + blue_circle + '</td>';
@@ -1071,6 +1083,9 @@
 
                             if(f_history == 2)
                                 buttonok = buttoncancel = buttonrequest = "";
+
+                            if(stage%10 > 0)
+                                buttonok = buttoncancel = "";
 
                             var image_owner = "";
                             if (owner2 == 1)

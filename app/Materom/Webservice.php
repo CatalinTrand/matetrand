@@ -76,9 +76,21 @@ class Webservice
         return $result;
     }
 
+    static function straightAccept($ebeln,$id){
+        $links = DB::select("select * from pitemchg where ebeln = '$ebeln' and ebelp = '$id' order by cdate");
+
+        if(count($links) == 0 || strcmp($links[count($links) - 1]->cuser,Auth::user()->id) != 0)
+            return true;
+
+        return false;
+    }
+
     public static function acceptItemCHG($ebeln, $id, $type)
     {
-        DB::update("update pitems set stage = 'A' where ebeln = '$ebeln' and ebelp = '$id'");
+        if(self::straightAccept($ebeln,$id))
+            DB::update("update pitems set stage = 'A' where ebeln = '$ebeln' and ebelp = '$id'");
+        else
+            DB::update("update pitems set stage = 'T' where ebeln = '$ebeln' and ebelp = '$id'");
         DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','A',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
         return "";
     }
