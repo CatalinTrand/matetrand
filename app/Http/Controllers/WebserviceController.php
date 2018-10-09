@@ -50,7 +50,9 @@ class WebserviceController extends Controller
         return Webservice::cancelItem(
             Input::get("ebeln"),
             Input::get("id"),
-            Input::get("type")
+            Input::get("type"),
+            Input::get("category"),
+            Input::get("reason")
         );
     }
 

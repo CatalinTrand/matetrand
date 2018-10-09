@@ -704,7 +704,7 @@
             } else alert('Error processing operation!');
         }
 
-        function rejectItem(ebeln, id, type) {
+        function rejectItem(ebeln, id, type, category, reason) {
             var _data, _status = "";
             $.ajaxSetup({
                 headers: {
@@ -718,6 +718,8 @@
                     ebeln: ebeln,
                     id: id,
                     type: type,
+                    category: category,
+                    reason: reason
                 },
                 function (data, status) {
                     _data = data;
@@ -772,7 +774,7 @@
             } else alert('Error processing operation!');
         }
 
-        function accept(_this, ebeln, id, type) {
+        function accept(ebeln, id, type) {
             if (checkedList.length > 0) {
                 //apply to all
                 let f_history = $("#filter-history").val();
@@ -808,14 +810,44 @@
             }
         }
 
-        function reject(_this, ebeln, id, type) {
+        function reject(ebeln, id, type, category, reason) {
             if (checkedList.length > 0) {
                 //apply to all
+                //apply to all
+                let f_history = $("#filter-history").val();
+                var _data2, _status2 = "";
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                jQuery.ajaxSetup({async: false});
 
+                $.post("webservice/getAllItems",
+                    {
+                        history: f_history
+                    },
+                    function (data, status) {
+                        _data2 = data;
+                        _status2 = status;
+                    });
+                jQuery.ajaxSetup({async: true});
+                if (_status2 == "success") {
+                    var split = _data2.split('=');
+                    split.forEach(function (_ord) {
+                        let _ebeln = _ord.split('#')[0];
+                        let _id = _ord.split('#')[1];
+                        if(isChecked("I" + _ebeln + "_" + _id))
+                            rejectItem(_ebeln,_id,'item-purch',category,reason);
+                    });
+                    return true;
+                }
             } else {
                 //apply individually
-                rejectItem(ebeln, id, 'item-purch');
+                rejectItem(ebeln, id, 'item-purch', category,reason);
+                return true;
             }
+            return false;
         }
 
         function hasNoChildrenWithStatus(id, status, type) {
@@ -1033,8 +1065,8 @@
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
-                            let buttonok = owner2 < 2 ? "" : "<button type='button' onclick='accept(this, \"" + ebeln2 + "\", \"" + id + "\", \"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
-                            let buttoncancel = owner2 < 2 ? "" : "<button type='button' onclick='reject(this, \"" + ebeln2 + "\",  \"" + id + "\", \"item\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
+                            let buttonok = owner2 < 2 ? "" : "<button type='button' onclick='accept(\"" + ebeln2 + "\", \"" + id + "\", \"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
+                            let buttoncancel = owner2 < 2 ? "" : "<button type='button' onclick='reject_init(\"" + ebeln2 + "\",  \"" + id + "\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
                             let buttonrequest = owner2 < 2 ? "" : "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
 
                             if(f_history == 2)
@@ -1249,6 +1281,78 @@
                 loadSub(item, type, _btn, ebelp);
                 return false;
             };
+        }
+    </script>
+
+    <div id="init-rejection-dialog" title="Formular de rejectare" >
+        <form>
+            <br>
+            <div class="form-group container-fluid" align="middle">
+                <select id="reject-category" name="reject-category" onchange="rejectCategoryChange(this);return false;">
+                    <option value="1" selected>Diverse</option>
+                    <option value="2">Altele</option>
+                </select>
+                <br>
+                <label for="reject-reason" class="col-md-4 col-form-label text-md-left">Reason:</label>
+                <input id="reject-reason" type="text" name="reject-reason" size="20"
+                       class="form-control col-md-12" value="">
+            </div>
+
+            <i id="new_rej_msg" style="color: red"></i>
+        </form>
+    </div>
+
+    <script>
+        function rejectCategoryChange(_this){
+            if(_this.value == 2)
+                $("#reject-reason").attr('required', '');
+            else
+                $("#reject-reason").attr('required', '');
+        }
+    </script>
+
+    <script>
+
+        var rejectDialog, rejectForm, _ebelp, _id;
+        $(function () {
+            rejectDialog = $("#init-rejection-dialog").dialog({
+                autoOpen: false,
+                height: 200,
+                width: 400,
+                modal: true,
+                buttons: {
+                    Add: function (){
+                        if(!($("#reject-category").val() == 2 && $("#reject-reason").val().length == 0 ))
+                            if(reject(_ebelp,_id,'item',$("#reject-category").val(),$("#reject-reason").val()))
+                                rejectDialog.dialog("close");
+                    },
+                    Cancel: function () {
+                        rejectDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    rejectForm[0].reset();
+                },
+                position: {
+                    my: "center",
+                    at: "center",
+                    of: $("#orders_table")
+                }
+            });
+            $("#reject-category").on('input', function () {
+                if ($("#new_rej_msg").text() != "") $("#new_rej_msg").text("");
+            });
+            rejectForm = rejectDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
+        function reject_init(ebelp,id) {
+            $("#new_rej_msg").text("");
+            $("#init-rejection-dialog").dialog('option', 'title', 'Formular de rejectare');
+            _ebelp = ebelp;
+            _id = id;
+            rejectDialog.dialog("open");
         }
     </script>
 @endsection

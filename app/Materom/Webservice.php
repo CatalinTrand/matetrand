@@ -83,10 +83,10 @@ class Webservice
         return "";
     }
 
-    public static function cancelItem($ebeln, $id, $type)
+    public static function cancelItem($ebeln, $id, $type, $category, $reason)
     {
         DB::update("update pitems set stage = 'X' where ebeln = '$ebeln' and ebelp = '$id'");
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp) values ('$ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','$reason','$category')");
         return "";
     }
 
