@@ -63,6 +63,19 @@ class Webservice
         return false;
     }
 
+    public static function getAllItems($history){
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $links = DB::select("select * from ". $items_table);
+        $result = "";
+        foreach ($links as $link){
+            if(strcmp($result,"") != 0)
+                $result = "$link->ebeln#$link->ebelp" . "=" . $result;
+            else
+                $result = "$link->ebeln#$link->ebelp";
+        }
+        return $result;
+    }
+
     public static function acceptItemCHG($ebeln, $id, $type)
     {
         DB::update("update pitems set stage = 'A' where ebeln = '$ebeln' and ebelp = '$id'");

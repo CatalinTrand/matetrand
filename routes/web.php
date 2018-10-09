@@ -36,6 +36,7 @@ Route::post('webservice/insertreferenceuser','WebserviceController@insertReferen
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/getNrOfStatusChildren','WebserviceController@getNrOfStatusChildren');
 Route::post('webservice/getOrderInfo','WebserviceController@getOrderInfo');
+Route::post('webservice/getAllItems','WebserviceController@getAllItems');
 Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 
