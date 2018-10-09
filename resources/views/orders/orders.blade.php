@@ -177,14 +177,14 @@
                         <form action="orders" method="post" style="margin-bottom: -15px">
                             @if(!$groupByPO)
                                 S-OID:
-                                <input type="text" name="filter_Soid" value="">
+                                <input type="text" name="filter_Soid" value="{{$_POST['filter_Soid']}}">
                             @endif
                                 P-OID:
-                            <input type="text" name="filter_Poid" value="">
+                            <input type="text" name="filter_Poid" value="{{$_POST['filter_Poid']}}">
 
                             @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
-                                    LIFNR:<input type="text" name="filter_lifnr" value="">
-                                LIFNR_NAME:<input type="text" name="filter_lifnr_name" value="">
+                                    LIFNR:<input type="text" name="filter_lifnr" value="{{$_POST['filter_lifnr']}}">
+                                LIFNR_NAME:<input type="text" name="filter_lifnr_name" value="{{$_POST['filter_lifnr_name']}}">
                             @endif
 
                             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
