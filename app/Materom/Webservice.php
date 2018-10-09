@@ -304,7 +304,7 @@ class Webservice
                 foreach ($items as $item) {
                     $ownerT = 0;
                     if (Auth::user()->role[0] == $item->stage)
-                        $ownerT = 2;
+                        return 2;
                     if (Auth::user()->role[0] == 'R' && $item->stage == 'F')
                         $ownerT = 1;
 
@@ -322,9 +322,14 @@ class Webservice
                 foreach ($items as $item) {
                     $ownerT = 0;
                     if (Auth::user()->role[0] == $item->stage)
-                        $ownerT = 2;
+                        return 2;
                     if (Auth::user()->role[0] == 'R' && $item->stage == 'F')
-                        $ownerT = 1;
+                        if(isMyRefferent(Auth::user()->id, self::getLIFNROfItem($item, $orders_table)))
+                            $ownerT = 3;
+                        else
+                            $ownerT = 1;
+
+
 
                     if ($ownerT > $owner)
                         $owner = $ownerT;
@@ -332,6 +337,18 @@ class Webservice
                 return $owner;
             }
         }
+    }
+
+    static public function isMyRefferent($id,$lifnr){
+        $result = DB::select("select * from users_ref where id = '$lifnr' and refid = '$id'");
+        if(count($result) == 0)
+            return false;
+
+        return true;
+    }
+
+    static public function getLIFNROfItem($item, $orders_table){
+        return DB::select("select * from $orders_table where ebeln = '$item->ebeln'")[0]->lifnr;
     }
 
     static public function sapActivateUser($id)

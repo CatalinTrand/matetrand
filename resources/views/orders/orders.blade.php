@@ -63,7 +63,6 @@
             }
         }
 
-
         $time_val = null;
 
         if(isset($_POST['time_search']) && $f_history == 2)
@@ -155,23 +154,57 @@
                             </form>
 
                             @if($f_history == 2)
-                            <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
-                                Limita de timp:
-                                <input type="date" id="time_search" name="time_search" value="{{$time_val}}" onchange="this.form.submit()">
-                                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1">
-                                @if(isset($_POST['groupOrdersBy']))
-                                    <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                                @endif
-                                @if(isset($_POST['filter_status']))
-                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                                @endif
-                                @if(isset($_POST['filter_history']))
-                                    <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                                @endif
-                                {{csrf_field()}}
-                            </form>
+                                <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
+                                    Documente mai noi de:
+                                    <input type="date" id="time_search" name="time_search" value="{{$time_val}}"
+                                           onchange="this.form.submit()">
+                                    @if(isset($_POST['groupOrdersBy']))
+                                        <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                    @endif
+                                    @if(isset($_POST['filter_status']))
+                                        <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                                    @endif
+                                    @if(isset($_POST['filter_history']))
+                                        <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                                    @endif
+                                    {{csrf_field()}}
+                                </form>
                             @endif
                         </div>
+
+                        <br><br><br><br>
+
+                        <form action="orders" method="post" style="margin-bottom: -15px">
+                            @if(!$groupByPO)
+                                S-OID:
+                                <input type="text" name="filter_Soid" value="">
+                            @endif
+                                P-OID:
+                            <input type="text" name="filter_Poid" value="">
+
+                            @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
+                                    LIFNR:<input type="text" name="filter_lifnr" value="">
+                                LIFNR_NAME:<input type="text" name="filter_lifnr_name" value="">
+                            @endif
+
+                            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
+                                   tabindex="-1">
+
+                            @if(isset($_POST['groupOrdersBy']))
+                                <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                            @endif
+                            @if(isset($_POST['filter_status']))
+                                <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                            @endif
+                            @if(isset($_POST['filter_history']))
+                                <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                            @endif
+                            @if(isset($_POST['time_search']))
+                                <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
+                            @endif
+                            {{csrf_field()}}
+                        </form>
+
                         <table class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="1%">
@@ -280,11 +313,30 @@
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
                                 $uname = \Illuminate\Support\Facades\Auth::user()->username;
 
-                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history, $time_val);
+                                $filter_category = null;
+                                $filter_barrier = null;
+
+                                if(isset($_POST['filter_Soid']) && strlen($_POST['filter_Soid']) > 0){
+                                    $filter_category = 1;
+                                    $filter_barrier = $_POST['filter_Soid'];
+                                } else if(isset($_POST['filter_Poid']) && strlen($_POST['filter_Poid']) > 0){
+                                    $filter_category = 2;
+                                    $filter_barrier = $_POST['filter_Poid'];
+                                } else if(isset($_POST['filter_lifnr']) && strlen($_POST['filter_lifnr']) > 0){
+                                    $filter_category = 3;
+                                    $filter_barrier = $_POST['filter_lifnr'];
+                                } else if(isset($_POST['filter_lifnr_name']) && strlen($_POST['filter_lifnr_name']) > 0){
+                                    $filter_category = 4;
+                                    $filter_barrier = $_POST['filter_lifnr_name'];
+                                }
+
+                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history, $time_val, $filter_category, $filter_barrier);
 
                                 echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$groupByPO\">";
                                 echo "<input type=\"hidden\" id=\"filter-status\" value=\"$f_type\">";
                                 echo "<input type=\"hidden\" id=\"filter-history\" value=\"$f_history\">";
+                                echo "<input type=\"hidden\" id=\"filter-category\" value=\"$filter_category\">";
+                                echo "<input type=\"hidden\" id=\"filter-barrier\" value=\"$filter_barrier\">";
                                 echo "<input type=\"hidden\" id=\"user_id\" value=\"$id\">";
                                 echo "<input type=\"hidden\" id=\"user_name\" value=\"$uname\">";
 
@@ -723,6 +775,11 @@
                 if (_data.length > 0) {
                     var split = _data.split('=');
                     var line_counter = 1;
+
+                    let filter_status = $("#filter-status").val();
+                    let filter_category = $("#filter-category").val();
+                    let filter_barrier = $("#filter-barrier").val();
+
                     split.forEach(function (_ord) {
                         line_counter = line_counter + 1;
                         if (line_counter == 2) line_counter = 0;
@@ -740,8 +797,46 @@
                             var owner = _ord.split('#')[10];
                             var stage = _ord.split('#')[11];
                             var image_info = "";
-
-                            let filter_status = $("#filter-status").val();
+                            if(filter_category != null && filter_barrier != null) {
+                                switch (filter_category) {
+                                    case "1":
+                                        if (filter_barrier.indexOf("*") != -1) {
+                                            if (vbeln.indexOf(filter_barrier.replace(/\*/g,"")) == -1)
+                                                return;
+                                        } else {
+                                            if (vbeln != filter_barrier)
+                                                return;
+                                        }
+                                        break;
+                                    case "2":
+                                        if (filter_barrier.indexOf("*") != -1) {
+                                            if (id.indexOf(filter_barrier.replace(/\*/g,"")) == -1)
+                                                return;
+                                        } else {
+                                            if (id != filter_barrier)
+                                                return;
+                                        }
+                                        break;
+                                    case "3":
+                                        if (filter_barrier.indexOf("*") != -1) {
+                                            if (lifnr.indexOf(filter_barrier.replace(/\*/g,"")) == -1)
+                                                return;
+                                        } else {
+                                            if (lifnr != filter_barrier)
+                                                return;
+                                        }
+                                        break;
+                                    case "4":
+                                        if (filter_barrier.indexOf("*") != -1) {
+                                            if (!lifnr_name.contains(filter_barrier.replace(/\*/g,"")) == -1)
+                                                return;
+                                        } else {
+                                            if (lifnr_name != filter_barrier)
+                                                return;
+                                        }
+                                        break;
+                                }
+                            }
 
                             if (filter_status == "1" && stage != 0 && stage < 10)
                                 return;
@@ -758,6 +853,8 @@
                                 image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
                             if (owner == 2)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                            if (owner == 3)
+                                image_owner = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
 
                             var blue_circle = "";
                             if (stage >= 10)
@@ -767,9 +864,9 @@
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + vbeln + "_" + id + '" value="P' + vbeln + "_" + id + '"></td>';
                             var so_style = "background-color:" + $(_this).css("background-color") + ";";
-                            let buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
-                            let buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
-                            let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
+                            let buttonok = owner < 2 ? "" : "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
+                            let buttoncancel = owner < 2 ? "" : "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
+                            let buttonrequest = owner < 2 ? "" : "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_info + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + image_owner + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + blue_circle + '</td>';
@@ -812,14 +909,16 @@
                             var po_style = "background-color:" + $(_this).css("background-color") + ";";
                             var first_color = $(_this).find(".first_color").css("background-color");
                             var first_style = "background-color:" + first_color;
-                            let buttonok = "<button type='button' onclick='accept(this, \"" + ebeln2 + "\", \"" + id + "\", \"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
-                            let buttoncancel = "<button type='button' onclick='reject(this, \"" + ebeln2 + "\",  \"" + id + "\", \"item\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
-                            let buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
+                            let buttonok = owner2 < 2 ? "" : "<button type='button' onclick='accept(this, \"" + ebeln2 + "\", \"" + id + "\", \"item\");' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem;'/>";
+                            let buttoncancel = owner2 < 2 ? "" : "<button type='button' onclick='reject(this, \"" + ebeln2 + "\",  \"" + id + "\", \"item\");' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem;'/>";
+                            let buttonrequest = owner2 < 2 ? "" : "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem;'/>";
                             var image_owner = "";
                             if (owner2 == 1)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
                             if (owner2 == 2)
                                 image_owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                            if (owner2 == 3)
+                                image_owner = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
 
                             var blue_circle = "";
                             var green_tick = "";
