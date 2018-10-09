@@ -356,7 +356,7 @@ class Webservice
                     if (Auth::user()->role[0] == $item->stage)
                         return 2;
                     if (Auth::user()->role[0] == 'R' && $item->stage == 'F')
-                        if(isMyRefferent(Auth::user()->id, self::getLIFNROfItem($item, $orders_table)))
+                        if(isMyReference(Auth::user()->id, $order->ebeln, $orders_table))
                             $ownerT = 3;
                         else
                             $ownerT = 1;
@@ -371,16 +371,32 @@ class Webservice
         }
     }
 
-    static public function isMyRefferent($id,$lifnr){
-        $result = DB::select("select * from users_ref where id = '$lifnr' and refid = '$id'");
-        if(count($result) == 0)
-            return false;
-
-        return true;
+    static public function isMyReference($id, $ebeln, $orders_table) {
+        $lifnr = self::getLIFNROfItem($ebeln, $orders_table);
+        $users = DB::select("select distinct id from users where role='Furnizor' and lifnr='$lifnr'");
+        if (count($users) == 0) return false;
+        foreach ($users as $user) {
+            $brands = DB::select("select * from users_sel where id ='$user->id'");
+            $xsql = "";
+            foreach($brands as $brand) {
+                $sel1 = "";
+                if (empty(trim($brand->mfrnr))) continue;
+                $sel1 = "mfrnr = '$brand->mfrnr'";
+                $sel1 = "(". $sel1 . ")";
+                if (empty($sql)) $xsql = $sel1;
+                else $xsql .= ' or ' . $sel1;
+            }
+            if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
+            $result = DB::select("select * from $orders_table where ebeln='$ebeln' and lifnr='$lifnr' $xsql");
+            if(count($result) == 0) continue;
+            $result = DB::select("select * from users_ref where id = '$user->id' and refid = '$id'");
+            if(count($result) > 0) return true;
+        }
+        return false;
     }
 
-    static public function getLIFNROfItem($item, $orders_table){
-        return DB::select("select * from $orders_table where ebeln = '$item->ebeln'")[0]->lifnr;
+    static public function getLIFNROfItem($ebeln, $orders_table) {
+        return DB::select("select * from $orders_table where ebeln = '$ebeln'")[0]->lifnr;
     }
 
     static public function sapActivateUser($id)
