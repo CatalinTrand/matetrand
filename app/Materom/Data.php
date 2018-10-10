@@ -651,6 +651,7 @@ class Data
         }
 
         DB::commit();
+        Mailservice::sendNotification($norder->lifnr,$ebeln);
         return "OK";
     }
 }
