@@ -88,4 +88,13 @@ class SAP
         }
     }
 
+    static public function alpha_output($input) {
+        $output = $input;
+        if (ctype_digit($output)) {
+            $output = ltrim($output, "0");
+            if (empty($output)) $output = $input;
+        }
+        return $output;
+    }
+
 };

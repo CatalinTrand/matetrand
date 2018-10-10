@@ -171,7 +171,9 @@ class Webservice
             if (is_null($item) || empty($item)) {
                 $links = DB::select("select * from " .$items_table . " where ebeln = '$porder' order by ebelp");
                 foreach ($links as $link) {
-                    $price = $link->purch_price . " " . $link->purch_curr;
+                    $pprice = $link->purch_price . " " . $link->purch_curr;
+                    $sprice = $link->sales_price . " " . $link->sales_curr;
+                    if (Auth::user()->role == "Furnizor") $sprice = "";
                     $quantity = $link->qty . " " . $link->qty_uom;
                     $deldate = $link->lfdat;
                     $owner = self::getOwner($link, $type, $history);
@@ -184,9 +186,9 @@ class Webservice
                         $stage = $stage + 1;
                     }
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage#$quantity#$deldate#$price";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$link->mtext#$owner#$stage#$quantity#$deldate#$pprice#$sprice";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage#$quantity#$deldate#$price" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$link->mtext#$owner#$stage#$quantity#$deldate#$pprice#$sprice" . '=' . $str;
                     }
                 }
             } else {
@@ -195,6 +197,11 @@ class Webservice
                 else
                     $links = DB::select("select * from ". $items_table ." where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {
+                    $pprice = $link->purch_price . " " . $link->purch_curr;
+                    $sprice = $link->sales_price . " " . $link->sales_curr;
+                    if (Auth::user()->role == "Furnizor") $sprice = "";
+                    $quantity = $link->qty . " " . $link->qty_uom;
+                    $deldate = $link->lfdat;
                     $owner = self::getOwner($link, $type, $history);
                     $stage = 0;
                     if (DB::table($itemchg_table)->where('ebeln', $porder)->where('ebelp', $link->ebelp)->exists())
@@ -205,9 +212,9 @@ class Webservice
                         $stage = $stage + 1;
                     }
                     if (strcmp($str, '') == 0)
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage";
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$link->mtext#$owner#$stage#$quantity#$deldate#$pprice#$sprice";
                     else {
-                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$owner#$stage" . '=' . $str;
+                        $str = "$link->ebeln#$link->ebelp#$link->posnr#$link->idnlf#$link->mtext#$owner#$stage#$quantity#$deldate#$pprice#$sprice" . '=' . $str;
                     }
                 }
             }
@@ -217,25 +224,34 @@ class Webservice
                 $text = "";
                 switch ($link->ctype) {
                     case "A":
-                        $text = "Acceptare";
+                        $text = __("Accepted");
                         break;
                     case "T":
-                        $text = "Acceptare cu aprobare";
+                        $text = __("Accepted after change");
                         break;
                     case "X":
-                        $text = "Rejectare";
+                        $text = __("Rejected");
                         break;
                     case "Q":
-                        $text = "Modif. cantitate de la " . $link->oldval . " la " . $link->newval;
+                        $text = __("Quantity modified from") . " " . $link->oldval . " " . __("to") . " " . $link->newval;
                         break;
                     case "P":
-                        $text = "Modificare pret de la " . $link->oldval . " la " . $link->newval;
+                        $text = __("Price modified from") . " " . $link->oldval . " " . __("to") . " " . $link->newval;
+                        break;
+                    case "I":
+                        $text = __("Message to supplier");
+                        break;
+                    case "R":
+                        $text = __("Message from supplier");
+                        break;
+                    case "S":
+                        $text = __("Originating from a split");
                         break;
                     case "D":
-                        $text = "Modif. data livrare de la " . $link->oldval . " la " . $link->newval;
+                        $text = __("Delivery date modified from") . " " . $link->oldval . " " . __("to") . " " . $link->newval;
                         break;
                     case "M":
-                        $text = "Modif. material de la " . $link->oldval . " la " . $link->newval;
+                        $text =  __("Material code modified from") . " " . $link->oldval . " " . __("to") . " " . $link->newval;
                         break;
                 }
                 if (strcmp($str, '') == 0)

@@ -29,14 +29,18 @@ class Data
         return $filter_sum . " and " . $filter;
     }
 
-    private static function processFilter($field, $filter_val) {
+    private static function processFilter($field, $filter_val, $mode) {
         if (is_null($filter_val) || empty($filter_val)) return "";
         $val = trim($filter_val);
+        if ($mode != 0) {
+          if (ctype_digit($val))
+              $val = str_pad($val, $mode, "0", STR_PAD_LEFT);
+        }
         if (strchr($val, "*") != null) {
             $val = str_replace("*","%", $filter_val);
             return "$field like '$val'";
         } else {
-            return "$field = '$filter_val'";
+            return "$field = '$val'";
         }
     }
 
@@ -48,12 +52,12 @@ class Data
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
 
-        $filter_vbeln_sql = self::processFilter("vbeln", $filter_vbeln);
-        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln);;
-        $filter_matnr_sql = self::processFilter("idnlf", $filter_matnr);
-        $filter_mtext_sql = self::processFilter("mtext", $filter_mtext);
-        $filter_lifnr_sql = self::processFilter("lifnr", $filter_lifnr);
-        $filter_lifnr_name_sql = self::processFilter("lifnr_name", $filter_lifnr_name);
+        $filter_vbeln_sql = self::processFilter("vbeln", $filter_vbeln, 10);
+        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln, 10);;
+        $filter_matnr_sql = self::processFilter("idnlf", $filter_matnr, 0);
+        $filter_mtext_sql = self::processFilter("mtext", $filter_mtext, 0);
+        $filter_lifnr_sql = self::processFilter("lifnr", $filter_lifnr, 10);
+        $filter_lifnr_name_sql = self::processFilter("lifnr_name", $filter_lifnr_name, 0);
 
         $time_search_sql = $time_limit === null ? "" : " where creation >= '$time_limit 00:00:00' ";
 
@@ -340,12 +344,12 @@ class Data
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
 
-        $filter_vbeln_sql = self::processFilter("vbeln", $filter_vbeln);
-        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln);;
-        $filter_matnr_sql = self::processFilter("idnlf", $filter_matnr);
-        $filter_mtext_sql = self::processFilter("mtext", $filter_mtext);
-        $filter_lifnr_sql = self::processFilter("lifnr", $filter_lifnr);
-        $filter_lifnr_name_sql = self::processFilter("lifnr_name", $filter_lifnr_name);
+        $filter_vbeln_sql = self::processFilter("vbeln", $filter_vbeln, 10);
+        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln, 10);;
+        $filter_matnr_sql = self::processFilter("idnlf", $filter_matnr, 0);
+        $filter_mtext_sql = self::processFilter("mtext", $filter_mtext,0);
+        $filter_lifnr_sql = self::processFilter("lifnr", $filter_lifnr, 10);
+        $filter_lifnr_name_sql = self::processFilter("lifnr_name", $filter_lifnr_name, 0);
 
         $time_search_sql = $time_limit === null ? "" : " where creation >= '$time_limit 00:00:00' ";
 

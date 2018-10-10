@@ -124,37 +124,115 @@
                         @endif
                     </div>
 
-                    <div class="card-body orders-table-div" style="height: 81vh">
+                    <div class="card-body" style="padding-bottom: 0px;">
 
-                        <form action="orders" method="post">
-                            Afisare dupa:&nbsp;
-                            <select name="groupOrdersBy" onchange="this.form.submit()">
-                                <option value="sales-orders"{{$selBySO}}>Comenzi client</option>
-                                <option value="purch-orders"{{$selByPO}}>Comenzi de aprovizionare</option>
-                            </select>
-                            @if(isset($_POST['filter_status']))
-                                <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                            @endif
-                            @if(isset($_POST['filter_history']))
-                                <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                            @endif
-                            @if(isset($_POST['time_search']))
-                                <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
-                            @endif
-                            {{csrf_field()}}
-                        </form>
-                        <br><br>
+                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 7.5rem;">
 
-                        <div class="container row" style="display: inline-block;">
-                            <form action="orders" method="post" style="display: inline-block">
-                                Filtrare dupa status:
-                                <select name="filter_status" onchange="this.form.submit()">
-                                    <option value="NA"{{$selNa}}>toate</option>
-                                    <option value="AP"{{$selAp}}>aprobat</option>
-                                    <option value="RE"{{$selRe}}>rejectat</option>
+                            <form action="orders" method="post">
+                                Afisare dupa:&nbsp;
+                                <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="groupOrdersBy" onchange="this.form.submit()">
+                                    <option value="sales-orders"{{$selBySO}}>Comenzi client</option>
+                                    <option value="purch-orders"{{$selByPO}}>Comenzi de aprovizionare</option>
                                 </select>
+                                @if(isset($_POST['filter_status']))
+                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                                @endif
+                                @if(isset($_POST['filter_history']))
+                                    <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                                @endif
+                                @if(isset($_POST['time_search']))
+                                    <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
+                                @endif
+                                {{csrf_field()}}
+                            </form>
+                            <br>
+
+                            <div class="container row" style="display: inline-block;">
+                                <form action="orders" method="post" style="display: inline-block">
+                                    Filtrare dupa status:
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_status" onchange="this.form.submit()">
+                                        <option value="NA"{{$selNa}}>toate</option>
+                                        <option value="AP"{{$selAp}}>aprobat</option>
+                                        <option value="RE"{{$selRe}}>rejectat</option>
+                                    </select>
+                                    @if(isset($_POST['groupOrdersBy']))
+                                        <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                    @endif
+                                    @if(isset($_POST['filter_history']))
+                                        <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                                    @endif
+                                    @if(isset($_POST['time_search']))
+                                        <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
+                                    @endif
+                                    {{csrf_field()}}
+                                </form>
+
+                                <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
+                                    Filtrare dupa istoric:
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
+                                        <option value="New"{{$selHNew}}>{{__("Neprocesate")}}</option>
+                                        <option value="Old"{{$selHOld}}>{{__("Procesate")}}</option>
+                                    </select>
+                                    @if(isset($_POST['groupOrdersBy']))
+                                        <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                    @endif
+                                    @if(isset($_POST['filter_status']))
+                                        <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                                    @endif
+                                    @if(isset($_POST['time_search']))
+                                        <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
+                                    @endif
+                                    {{csrf_field()}}
+                                </form>
+
+                                @if ($f_history == 2)
+                                    <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
+                                        Documente mai noi de:
+                                        <input type="date" id="time_search" name="time_search" value="{{$time_val}}"
+                                               onchange="this.form.submit()">
+                                        @if(isset($_POST['groupOrdersBy']))
+                                            <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                        @endif
+                                        @if(isset($_POST['filter_status']))
+                                            <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                                        @endif
+                                        @if(isset($_POST['filter_history']))
+                                            <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
+                                        @endif
+                                        {{csrf_field()}}
+                                    </form>
+                                @endif
+                            </div>
+
+                            <br><br>
+
+                            <form action="orders" method="post" style="margin-bottom: -15px">
+
+                                @if(!$groupByPO)
+                                    {{__("Sales order")}}:
+                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_vbeln" value="{{$old_f_vbeln}}">&nbsp;&nbsp;
+                                @endif
+                                {{__("Purchase order")}}:
+                                <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_ebeln" value="{{$old_f_ebeln}}">&nbsp;&nbsp;
+                                {{__("Material")}}:
+                                <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_matnr" value="{{$old_f_matnr}}">&nbsp;&nbsp;
+                                {{__("Material description")}}:
+                                <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_mtext" value="{{$old_f_mtext}}">&nbsp;&nbsp;
+                                @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
+                                    {{__("Supplier")}}:
+                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$old_f_lifnr}}">&nbsp;&nbsp;
+                                    {{__("Supplier name")}}:
+                                    <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$old_f_lifnr_name}}">&nbsp;&nbsp;
+                                @endif
+
+                                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
+                                       tabindex="-1">
+
                                 @if(isset($_POST['groupOrdersBy']))
                                     <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                @endif
+                                @if(isset($_POST['filter_status']))
+                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
                                 @endif
                                 @if(isset($_POST['filter_history']))
                                     <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
@@ -165,85 +243,16 @@
                                 {{csrf_field()}}
                             </form>
 
-                            <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
-                                Filtrare dupa istoric:
-                                <select name="filter_history" onchange="this.form.submit()">
-                                    <option value="New"{{$selHNew}}>noi</option>
-                                    <option value="Old"{{$selHOld}}>arhive</option>
-                                </select>
-                                @if(isset($_POST['groupOrdersBy']))
-                                    <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                                @endif
-                                @if(isset($_POST['filter_status']))
-                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                                @endif
-                                @if(isset($_POST['time_search']))
-                                    <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
-                                @endif
-                                {{csrf_field()}}
-                            </form>
-
-                            @if($f_history == 2)
-                                <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
-                                    Documente mai noi de:
-                                    <input type="date" id="time_search" name="time_search" value="{{$time_val}}"
-                                           onchange="this.form.submit()">
-                                    @if(isset($_POST['groupOrdersBy']))
-                                        <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                                    @endif
-                                    @if(isset($_POST['filter_status']))
-                                        <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                                    @endif
-                                    @if(isset($_POST['filter_history']))
-                                        <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                                    @endif
-                                    {{csrf_field()}}
-                                </form>
-                            @endif
                         </div>
 
-                        <br><br>
+                    </div>
 
-                        <form action="orders" method="post" style="margin-bottom: -15px">
+                    <br>
 
-                            @if(!$groupByPO)
-                                {{__("Sales order")}}:
-                                    <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_vbeln" value="{{$old_f_vbeln}}">&nbsp;&nbsp;
-                            @endif
-                            {{__("Purchase order")}}:
-                                <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_ebeln" value="{{$old_f_ebeln}}">&nbsp;&nbsp;
-                            {{__("Material")}}:
-                                <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_matnr" value="{{$old_f_matnr}}">&nbsp;&nbsp;
-                            {{__("Material description")}}:
-                                <input type="text" class="input-sm" style="width: 12rem; height: 1.4rem;" name="filter_mtext" value="{{$old_f_mtext}}">&nbsp;&nbsp;
-                            @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
-                                {{__("Supplier")}}:
-                                    <input type="text" class="input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$old_f_lifnr}}">&nbsp;&nbsp;
-                                {{__("Supplier name")}}:
-                                    <input type="text" class="input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$old_f_lifnr_name}}">&nbsp;&nbsp;
-                            @endif
+                    <div class="card-body orders-table-div" style="height: 70vh; padding-top: 0rem;">
 
-                            <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
-                                   tabindex="-1">
-
-                            @if(isset($_POST['groupOrdersBy']))
-                                <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                            @endif
-                            @if(isset($_POST['filter_status']))
-                                <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                            @endif
-                            @if(isset($_POST['filter_history']))
-                                <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                            @endif
-                            @if(isset($_POST['time_search']))
-                                <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
-                            @endif
-                            {{csrf_field()}}
-                        </form>
-
-                        <table class="orders-table basicTable table table-striped" id="orders_table">
+                        <table style="border: 2px solid black; table-layout: fixed;" class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
-                                <col width="1%">
                                 <col width="2%">
                                 <col width="2%">
                                 <col width="2%">
@@ -254,6 +263,7 @@
                                 <col width="2%">
                                 <col width="2%">
                                 <col width="2%">
+                                <col width="2%">
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
@@ -274,15 +284,15 @@
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="5%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
+                                <col width="2%">
                             </colgroup>
                             <tr>
                                 <th colspan="1" class="td01">
@@ -316,34 +326,56 @@
                                     <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png'/>
                                 </th>
                                 @php
-                                    if($groupByPO){
-                                        echo '<th class="td02" colspan="3">Comanda aprovizionare</th>';
-                                        $th1 = "Furnizor";
-                                        $th2 = "Nume";
-                                        $th3 = "Grup";
-                                        $th4 = "Aprovizionare";
+                                    if($groupByPO) {
+                                        echo '<th class="td02" colspan="3">' . __('Comanda aprovizionare') . '</th>';
+                                        $th1 = __("Supplier");
+                                        $th2 = ""; // "Nume";
+                                        $th3 = __("Referent");
+                                        $th4 = ""; // "Aprovizionare";
                                         $th5 = "Data creare";
                                         $th6 = "Moneda";
                                         $th7 = "Rata schimb";
+                                    } else {
+                                        echo '<th class="td02" colspan="3">' . __('Comanda client') . '</th>';
+                                        if (strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0) {
+                                            $th1 = __("Client");
+                                            $th2 = ""; // "Nume";
+                                            $th3 = __("Livrare la");
+                                            $th4 = ""; // "Nume";
+                                            $th5 = __("CTV");
+                                            $th6 = __("Nume consilier");
+                                            $th7 = "";
                                         } else {
-                                        echo '<th class="td02" colspan="3">Comanda client</th>';
-                                        $th1 = "Client";
-                                        $th2 = "Nume";
-                                        $th3 = "Livrare la";
-                                        $th4 = "Nume";
-                                        $th5 = "CTV";
-                                        $th6 = "Nume consilier";
-                                        $th7 = "";
+                                            $th1 = "";
+                                            $th2 = "";
+                                            $th3 = "";
+                                            $th4 = "";
+                                            $th5 = "";
+                                            $th6 = "";
+                                            $th7 = "";
                                         }
+
+                                    }
+                                if($groupByPO) {
+                                    echo "<th colspan=2>$th1</th>";
+                                    echo "<th colspan=5>$th2</th>";
+                                    echo "<th colspan=2>$th3</th>";
+                                    echo "<th colspan=4>$th4</th>";
+                                    echo "<th colspan=3>$th5</th>";
+                                    echo "<th colspan=2>$th6</th>";
+                                    echo "<th colspan=3>$th7</th>";
+                                    for ($i = 0; $i < 6; $i++) echo "<th>&nbsp;</th>";
+                                } else {
+                                    echo "<th colspan=2>$th1</th>";
+                                    echo "<th colspan=5>$th2</th>";
+                                    echo "<th colspan=2>$th3</th>";
+                                    echo "<th colspan=5>$th4</th>";
+                                    echo "<th colspan=2>$th5</th>";
+                                    echo "<th colspan=5>$th6</th>";
+                                    echo "<th>$th7</th>";
+                                    for ($i = 0; $i < 5; $i++) echo "<th>&nbsp;</th>";
+                                }
                                 @endphp
-                                <th>{{$th1}}</th>
-                                <th>{{$th2}}</th>
-                                <th>{{$th3}}</th>
-                                <th>{{$th4}}</th>
-                                <th>{{$th5}}</th>
-                                <th>{{$th6}}</th>
-                                <th>{{$th7}}</th>
-                                @php for ($i = 0; $i < 21; $i++) echo "<th>&nbsp;</th>"; @endphp
                             </tr>
                             @php
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
@@ -394,7 +426,7 @@
                                         else
                                             continue;
                                         $viewebeln = substr($order->ebeln, 0, 10);
-                                        $comanda = "<button type='button' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button> $viewebeln";
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button> $viewebeln";
                                     } else {
                                         $lvbeln = $order->vbeln;
                                         if(strchr($seen, $lvbeln) == null)
@@ -404,7 +436,7 @@
                                         $buttname = $lvbeln;
                                         if (strtoupper($lvbeln) == "REPLENISH") $buttname = __('Stock');
                                         elseif (strtoupper($lvbeln) == "SALESORDER") $buttname = __('Emergency');
-                                        $comanda = "<button type='button' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $buttname";
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $buttname";
                                     }
 
                                     $line_counter = $line_counter + 1;
@@ -426,7 +458,13 @@
 
                                     if($groupByPO){
                                         $oid = "P" . $order->ebeln;
-                                        $data = "<td>$order->lifnr</td><td>$order->lifnr_name</td><td>$order->ekgrp</td><td>$order->ekgrp_name</td><td>$order->erdat</td><td>$order->curr</td><td>$order->fxrate</td>";
+                                        $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
+                                                "<td class='td02' colspan=5>$order->lifnr_name</td>" .
+                                                "<td class='td02' colspan=1>$order->ekgrp</td>" .
+                                                "<td class='td02' colspan=5>$order->ekgrp_name</td>" .
+                                                "<td class='td02' colspan=3>$order->erdat</td>" .
+                                                "<td class='td02' colspan=2>$order->curr</td>" .
+                                                "<td class='td02' colspan=3>$order->fxrate</td>";
                                         switch (\App\Materom\Webservice::getGravity($order, "purch-order",$f_history)){
                                             case 0:
                                                 $info = "";
@@ -462,14 +500,14 @@
 
                                         $itemchg_table = $f_history < 2 ? "pitemchg" : "pitemchg_arch";
                                         $stage = 0;
-                                        if (DB::table($itemchg_table)->where('ebeln', $order->ebeln)->exists())
+                                        if (\Illuminate\Support\Facades\DB::table($itemchg_table)->where('ebeln', $order->ebeln)->exists())
                                             $stage = 10;
 
                                         $processed = "";
                                         if($stage > 0)
                                             $processed = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
 
-                                        if($f_history == 2 || $stage > 0){
+                                        if($f_history == 2 || $stage > 0) {
                                             $buttonok = "";
                                             $buttoncancel = "";
                                             $buttonrequest = "";
@@ -481,10 +519,27 @@
                                             $style = "background-color:Wheat;";
 
                                         if(\App\Materom\Webservice::getNrOfStatusChildren($order->ebeln,$f_type,1, $f_history, null) > 0)
-                                            echo "<tr id='tr_$oid' style='$style' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td>$processed</td><td></td><td></td><td>6</td><td style='padding: 0;'>$buttonok</td><td style='padding: 0;'>$buttoncancel</td><td style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='20'></td></tr>";
+                                            echo "<tr id='tr_$oid' style='$style'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td class='td01'>$info</td><td class='td01'>$owner</td><td class='td01'>$processed</td><td class='td01'></td><td class='td01'></td><td class='td01'>6</td><td  class='td01' style='padding: 0;'>$buttonok</td><td class='td01' style='padding: 0;'>$buttoncancel</td><td class='td01' style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>".
+                                            "$data<td colspan='6'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
-                                        $data = "<td>$order->kunnr</td><td>$order->kunnr_name</td><td>$order->shipto</td><td>$order->shipto_name</td><td>$order->ctv</td><td>$order->ctv_name</td><td></td>";
+                                        if (strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0) {
+                                            $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->kunnr) . "</td>" .
+                                                    "<td class='td02' colspan=5>$order->kunnr_name</td>" .
+                                                    "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->shipto) . "</td>" .
+                                                    "<td class='td02' colspan=5>$order->shipto_name</td>" .
+                                                    "<td class='td02' colspan=2>$order->ctv</td>" .
+                                                    "<td class='td02' colspan=5>$order->ctv_name</td>".
+                                                    "<td></td>";
+                                                } else {
+                                            $data = "<td class='td02' colspan=2>&nbsp;</td>" .
+                                                    "<td class='td02' colspan=5>&nbsp;</td>" .
+                                                    "<td class='td02' colspan=2>&nbsp;</td>" .
+                                                    "<td class='td02' colspan=5>&nbsp;</td>" .
+                                                    "<td class='td02' colspan=2>&nbsp;</td>" .
+                                                    "<td class='td02' colspan=5>&nbsp;</td>".
+                                                    "<td></td>";
+                                                }
                                         switch (\App\Materom\Webservice::getGravity($order, "sales-order", $f_history)){
                                             case 0:
                                                 $info = "";
@@ -529,7 +584,8 @@
                                         else
                                             $style = "background-color:WhiteSmoke;";
                                         if(\App\Materom\Webservice::getNrOfStatusChildren($order->vbeln,$f_type,0, $f_history, null) > 0)
-                                            echo "<tr id='tr_$oid' style='$style' class='td01' colspan='1'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td colspan='7'></td><td colspan='3' class='td02' class='first_color'>$comanda</td>$data<td colspan='21'></td></tr>";
+                                            echo "<tr id='tr_$oid' style='$style' class='td01'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td colspan='7'></td><td colspan='3' class='td02' class='first_color'>$comanda</td>" .
+                                            "$data<td colspan='5'></td></tr>";
                                     }
                                 }
                             @endphp
@@ -541,7 +597,9 @@
     </div>
     <script>
 
-        //$('#time_search').val(new Date().getTime());
+        @php
+            echo 'let testvar = "' . (\Illuminate\Support\Facades\Auth::user()->role). '";';
+        @endphp
 
         var checkedList = [];
         var unCheckedList = [];
@@ -1045,15 +1103,15 @@
                             cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + buttoncancel + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + buttonrequest + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
-                            cols += "<td colspan='3'><button type='button' id='btn_P" + id + "_" + vbeln + "' onclick=\"loadSub(\'" + id + "_" + vbeln + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
-                            cols += '<td colspan="1">' + lifnr + '</td>';
-                            cols += '<td colspan="2">' + lifnr_name + '</td>';
-                            cols += '<td colspan="1">' + ekgrp + '</td>';
-                            cols += '<td colspan="2">' + ekgrp_name + '</td>';
-                            cols += '<td colspan="1">' + erdat + '</td>';
-                            cols += '<td colspan="1">' + curr + '</td>';
-                            cols += '<td colspan="1">' + fxrate + '</td>';
-                            cols += '<td colspan="18"></td>';
+                            cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' id='btn_P" + id + "_" + vbeln + "' onclick=\"loadSub(\'" + id + "_" + vbeln + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
+                            cols += '<td class="td02" colspan="2">' + lifnr + '</td>';
+                            cols += '<td class="td02" colspan="5">' + lifnr_name + '</td>';
+                            cols += '<td class="td02" colspan="1">' + ekgrp + '</td>';
+                            cols += '<td class="td02" colspan="5">' + ekgrp_name + '</td>';
+                            cols += '<td class="td02" colspan="3">' + erdat + '</td>';
+                            cols += '<td class="td02" colspan="2">' + curr + '</td>';
+                            cols += '<td class="td02" colspan="3">' + fxrate + '</td>';
+                            cols += '<td class="td02" colspan="5"></td>';
                             newRow.append(cols).hide();
                             newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                             if (line_counter == 0)
@@ -1066,11 +1124,13 @@
                             var id = _ord.split('#')[1];
                             var posnr = _ord.split('#')[2];
                             var idnlf = _ord.split('#')[3];
-                            var owner2 = _ord.split('#')[4];
-                            var stage = _ord.split('#')[5];
-                            var quantity = _ord.split('#')[6];
-                            var deldate = _ord.split('#')[7];
-                            var price = _ord.split('#')[8];
+                            var mtext = _ord.split('#')[4];
+                            var owner2 = _ord.split('#')[5];
+                            var stage = _ord.split('#')[6];
+                            var quantity = _ord.split('#')[7];
+                            var deldate = _ord.split('#')[8];
+                            var pur_price = _ord.split('#')[9];
+                            var sal_price = _ord.split('#')[10];
                             var newRow = $("<tr>");
                             var cols = "";
                             cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + ebeln2 + "_" + id + '" value="I' + ebeln2 + "_" + id + '"></td>';
@@ -1140,12 +1200,14 @@
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttonrequest + '</td>';
                             }
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
-                            cols += "<td colspan='2'><button type='button' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
-                            cols += '<td>' + idnlf + '</td>';
-                            cols += '<td colspan=3>' + quantity + '</td>';
-                            cols += '<td colspan=3>' + price + '</td>';
-                            cols += '<td>' + deldate + '</td>';
-                            cols += '<td colspan="19"></td>';
+                            cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
+                            cols += '<td class="td02h" colspan="2" onclick="change_matnr(\'' + ebeln2 + '\', \'' + id + '\');">' + idnlf + '</td>';
+                            cols += '<td class="td02h" colspan="5" onclick="change_matnr(\'' + ebeln2 + '\', \'' + id + '\');">' + mtext + '</td>';
+                            cols += '<td class="td02h" colspan="3" onclick="change_quantity(\'' + ebeln2 + '\', \'' + id + '\');">' + quantity + '</td>';
+                            cols += '<td class="td02h" colspan="3" onclick="change_delivery_date(\'' + ebeln2 + '\', \'' + id + '\');">' + deldate + '</td>';
+                            cols += '<td class="td02h" colspan="4" onclick="change_purchase_price(\'' + ebeln2 + '\', \'' + id + '\');">' + pur_price + '</td>';
+                            cols += '<td class="td02" colspan="4">' + sal_price + '</td>';
+                            cols += '<td colspan="5"></td>';
                             if ($("#set-furnizor").val() != "")
                                 cols += '<td colspan="1"></td>';
                             newRow.append(cols).hide();
@@ -1172,20 +1234,18 @@
                                 var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                                 var first_style = "background-color:" + first_color;
                                 cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                                let colsafter = "12";
+                                let colsreason = "10";
                                 if ($("#set-furnizor").val() == "")
                                     cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                                else colsafter = "13";
+                                else colsreason = "11";
                                 cols += '<td class="coloured" style="' + last_style + '"></td>';
                                 cols += '<td style="' + pi_style + '"></td>';
-                                cols += "<td colspan='3'>" + chdate + "</td>";
-                                cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
-                                cols += '<td colspan="6">' + ctext + '</td>';
-                                cols += '<td colspan="2">' + creason + '</td>';
-                                cols += "<td colspan=" + colsafter + "></td>";
-                                if ($("#set-furnizor").val() != "")
-                                    cols += '<td></td>';
-                                cols += '<td colspan="4"></td>';
+                                cols += '<td class="td02" colspan="3">' + chdate + '</td>';
+                                cols += '<td class="td02" colspan="2">' + cuser + '</td>';
+                                cols += '<td class="td02" colspan="4">' + cuser_name + '</td>';
+                                cols += '<td class="td02" colspan="8">' + ctext + '</td>';
+                                if ($("#set-furnizor").val() != "") colsreason = colsreason + 1;
+                                cols += '<td class="td02" colspan="' + colsreason + '">' + creason + '</td>';
                                 newRow.append(cols);
                                 newRow.insertAfter($(_this).closest("tr"));
                                 if (line_counter == 0)
@@ -1203,12 +1263,14 @@
                         var so_style = "background-color:" + $(_this).css("background-color") + ";";
                         cols += '<td class="first_color" style="' + so_style + '" colspan="11"></td>';
                         cols += '<td colspan="3"><b>Comanda aprovizionare</b></td>';
-                        cols += '<td colspan="3"><b>Furnizor</b></td>';
-                        cols += '<td colspan="3"><b>Grup aprovizionare</b></td>';
-                        cols += '<td colspan="1"><b>Data creare</b></td>';
-                        cols += '<td colspan="1"><b>Moneda</b></td>';
-                        cols += '<td colspan="1"><b>Rata de schimb</b></td>';
-                        cols += '<td colspan="18"><b></b></td>';
+                        cols += '<td colspan="2"><b>Furnizor</b></td>';
+                        cols += '<td colspan="5"><b>&nbsp;</b></td>';
+                        cols += '<td colspan="2"><b>Referent</b></td>';
+                        cols += '<td colspan="4"><b>&nbsp;</b></td>';
+                        cols += '<td colspan="3"><b>Data creare</b></td>';
+                        cols += '<td colspan="2"><b>Moneda</b></td>';
+                        cols += '<td colspan="3"><b>Rata de schimb</b></td>';
+                        cols += '<td colspan="5"><b></b></td>';
                         newRow.append(cols).hide();
                         newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                         newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
@@ -1221,16 +1283,25 @@
                         var first_style = "background-color:" + first_color;
                         if ($("#set-furnizor").val() == "") {
                             cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
+                            colsafter = 5;
                         } else {
                             cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
+                            colsafter = 6;
                         }
                         cols += '<td style="' + po_style + '"></td>';
-                        cols += '<td colspan="2"><b>Pozitie</b></td>';
-                        cols += '<td><b>Material</b></td>';
-                        cols += '<td colspan=3><b>Cantitate</b></td>';
-                        cols += '<td colspan=3><b>Pret</b></td>';
-                        cols += '<td><b>Data livrare</b></td>';
-                        cols += '<td colspan="19"></td>';
+                        cols += '<td class="td02" colspan="2"><b>Pozitie</b></td>';
+                        cols += '<td class="td02" colspan="2"><b>Material</b></td>';
+                        cols += '<td class="td02" colspan="5"><b>Descriere material</b></td>';
+                        cols += '<td class="td02" colspan="3"><b>Cantitate</b></td>';
+                        cols += '<td class="td02" colspan="3"><b>Data livrare</b></td>';
+                        cols += '<td class="td02" colspan="4"><b>Pret achizitie</b></td>';
+                        let sal_price_colname = "";
+                        @php
+                            if (strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
+                            echo 'sal_price_colname = "Pret vanzare";';
+                        @endphp
+                        cols += '<td class="td02" colspan="4"><b>' + sal_price_colname + '</b></td>';
+                        cols += '<td class="td02" colspan="' + colsafter + '"></td>';
                         newRow.append(cols).hide();
                         newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                         newRow.attr('style', "background-color:YellowGreen; vertical-align: middle;");
@@ -1244,16 +1315,16 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        var colsafter = "13";
+                        var colsafter = "8";
                         if ($("#set-furnizor").val() == "")
                             cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        else colsafter = "14";
+                        else colsafter = "9";
                         cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + po_style + '"></td>';
-                        cols += '<td colspan="3"><b>Data</b></td>';
-                        cols += '<td colspan="4"><b>Utilizator</b></td>';
-                        cols += '<td colspan="6"><b>Ce s-a schimbat</b></td>';
-                        cols += '<td colspan="2"><b>Motiv</b></td>';
+                        cols += '<td class="td02" colspan="3"><b>Data</b></td>';
+                        cols += '<td class="td02" colspan="6"><b>Utilizator</b></td>';
+                        cols += '<td class="td02" colspan="8"><b>Ce s-a schimbat</b></td>';
+                        cols += '<td class="td02" colspan="2"><b>Motiv</b></td>';
                         cols += '<td colspan=' + colsafter + '><b></b></td>';
                         newRow.append(cols).hide();
                         newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
@@ -1297,6 +1368,25 @@
                 return false;
             };
         }
+
+        function change_matnr(ebeln, ebelp) {
+            alert("Schimbare PITEMS-IDNLF cu salvare in PITEMSCHG");
+        }
+
+        function change_quantity(ebeln, ebelp) {
+            alert("Schimbare PITEMS-QTY + QTY_UOM cu salvare in PITEMSCHG");
+        }
+
+        function change_delivery_date(ebeln, ebelp) {
+            alert("Schimbare PITEMS-LFDAT cu salvare in PITEMSCHG");
+        }
+
+        function change_purchase_price(ebeln, ebelp) {
+            alert("Schimbare PITEMS-PURCH_PRICE + PURCH_CURR + PURCH_PRUN + PURCH_PUOM cu salvare in PITEMSCHG");
+        }
+
+
+
     </script>
 
     <div id="init-rejection-dialog" title="Formular de rejectare" >

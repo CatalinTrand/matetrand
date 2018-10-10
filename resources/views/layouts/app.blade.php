@@ -211,9 +211,23 @@
 
         .td01 {
             text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .td02 {
             text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .td02h {
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .td02h:hover {
+            color: #0000F0;
+            cursor: pointer;
         }
 
     </style>
