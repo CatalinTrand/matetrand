@@ -1202,7 +1202,7 @@
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td class="td02h" colspan="2" onclick="change_matnr(this, \'' + ebeln2 + '\', \'' + id + '\');">' + idnlf + '</td>';
-                            cols += '<td class="td02h" colspan="5" onclick="change_matnr(this, \'' + ebeln2 + '\', \'' + id + '\');">' + mtext + '</td>';
+                            cols += '<td class="td02h" colspan="5" onclick="change_desc(this, \'' + ebeln2 + '\', \'' + id + '\');">' + mtext + '</td>';
                             cols += '<td class="td02h" colspan="3" onclick="change_quantity(this, \'' + ebeln2 + '\', \'' + id + '\');">' + quantity + '</td>';
                             cols += '<td class="td02h" colspan="3" onclick="change_delivery_date(this, \'' + ebeln2 + '\', \'' + id + '\');">' + deldate + '</td>';
                             cols += '<td class="td02h" colspan="4" onclick="change_purchase_price(this, \'' + ebeln2 + '\', \'' + id + '\');">' + pur_price + '</td>';
@@ -1378,25 +1378,171 @@
             return output;
         }
 
+        function changeItemStat(c_type,c_value, old_value, c_ebeln, c_ebelp) {
+            let c_string = "";
+            switch (c_type) {
+                case 1:
+                    c_string = "idnlf";
+                    break;
+                case 2:
+                    c_string = "mtext";
+                    break;
+                case 3:
+                    c_string = "qty";
+                    break;
+                case 4:
+                    c_string = "lfdat";
+                    break;
+                case 5:
+                    c_string = "purch_price";
+                    break;
+            }
+
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var _dataC, _statusC;
+            jQuery.ajaxSetup({async: false});
+            $.post("webservice/changeItemStat",
+                {
+                    column: c_string,
+                    value: c_value,
+                    oldvalue: old_value,
+                    ebeln: c_ebeln,
+                    ebelp: c_ebelp
+                },
+                function (data, status) {
+                    _dataC = data;
+                    _statusC = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_statusC == "success") {
+                return true;
+            }
+            return false;
+        }
+
+        var change_cell, change_type, change_value, type_string, change_ebeln, change_ebelp, changeDialog, changeForm;
+
+        $(function () {
+            changeDialog = $("#change-dialog").dialog({
+                autoOpen: false,
+                height: 200,
+                width: 400,
+                modal: true,
+                buttons: {
+                    Change: function (){
+                        if(changeItemStat(change_type,$("#new_chg_val").val(),change_cell.innerHTML,change_ebeln,change_ebelp)) {
+                            change_cell.innerHTML = $("#new_chg_val").val();
+                            changeDialog.dialog("close");
+                        }
+                    },
+                    Cancel: function () {
+                        changeDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    changeForm[0].reset();
+                },
+                position: {
+                    my: "center",
+                    at: "center",
+                    of: $("#orders_table")
+                }
+            });
+
+            changeForm = changeDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
         function change_matnr(cell, ebeln, ebelp) {
-            alert("Schimbare PITEMS-IDNLF cu salvare in PITEMSCHG");
+
+            change_cell = cell;
+            change_type = 1;
+            let old_value = cell.innerHTML;
+            change_ebeln = ebeln;
+            change_ebelp = ebelp;
+            type_string = "IDNLF";
+
+
+            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
+            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            changeDialog.dialog("open");
+        }
+
+        function change_desc(cell, ebeln, ebelp) {
+
+            change_cell = cell;
+            change_type = 2;
+            let old_value = cell.innerHTML;
+            change_ebeln = ebeln;
+            change_ebelp = ebelp;
+
+            type_string = "MTEXT";
+            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
+            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            changeDialog.dialog("open");
         }
 
         function change_quantity(cell, ebeln, ebelp) {
-            alert("Schimbare PITEMS-QTY + QTY_UOM cu salvare in PITEMSCHG");
+
+            change_cell = cell;
+            change_type = 3;
+            let old_value = cell.innerHTML;
+            change_ebeln = ebeln;
+            change_ebelp = ebelp;
+
+            type_string = "QTY";
+            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
+            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            changeDialog.dialog("open");
         }
 
         function change_delivery_date(cell, ebeln, ebelp) {
-            alert("Schimbare PITEMS-LFDAT cu salvare in PITEMSCHG");
+
+            change_cell = cell;
+            change_type = 4;
+            let old_value = cell.innerHTML;
+            change_ebeln = ebeln;
+            change_ebelp = ebelp;
+
+            type_string = "LFDAT";
+            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
+            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            changeDialog.dialog("open");
         }
 
         function change_purchase_price(cell, ebeln, ebelp) {
-            alert("Schimbare PITEMS-PURCH_PRICE + PURCH_CURR + PURCH_PRUN + PURCH_PUOM cu salvare in PITEMSCHG");
+
+            change_cell = cell;
+            change_type = 5;
+            let old_value = cell.innerHTML;
+            change_ebeln = ebeln;
+            change_ebelp = ebelp;
+
+            type_string = "PURCH_PRICE";
+            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
+            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            changeDialog.dialog("open");
         }
 
-
-
     </script>
+
+    <div id="change-dialog" title="Schimbare pozitie" >
+        <form>
+            <br>
+            <div class="form-group container-fluid" align="middle">
+                <i id="old_chg_val"></i>
+                <br><br>
+                <input id="new_chg_val" type="text" name="new_chg_val" size="20"
+                       class="form-control col-md-8" value="">
+            </div>
+        </form>
+    </div>
 
     <div id="init-rejection-dialog" title="Rejectare pozitie" >
         <form>

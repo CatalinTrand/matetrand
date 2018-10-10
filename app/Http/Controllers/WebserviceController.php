@@ -56,6 +56,16 @@ class WebserviceController extends Controller
         );
     }
 
+    public function changeItemStat(){
+        return Webservice::changeItemStat(
+            Input::get("column"),
+            Input::get("value"),
+            Input::get("oldvalue"),
+            Input::get("ebeln"),
+            Input::get("ebelp")
+        );
+    }
+
     public function getAllItems(){
         return Webservice::getAllItems(
             Input::get("history")

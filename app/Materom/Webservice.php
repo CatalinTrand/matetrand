@@ -102,6 +102,23 @@ class Webservice
         return "";
     }
 
+    public static function changeItemStat($column, $value, $oldvalue, $ebeln, $ebelp)
+    {
+        DB::update("update pitems set $column = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        if($column[0]== 'i')
+            $type = 'M';
+        if($column[0]== 'm')
+            $type = 'M';
+        if($column[0]== 'q')
+            $type = 'Q';
+        if($column[0]== 'l')
+            $type = 'D';
+        if($column[0]== 'p')
+            $type = 'P';
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$value')");
+        return "";
+    }
+
     public static function getNrOfStatusChildren($id, $status, $type, $history, $vbeln)
     {
         $orders_table = $history == 1 ? "porders" : "porders_arch";
