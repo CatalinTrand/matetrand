@@ -1436,6 +1436,7 @@
                 buttons: {
                     Change: function (){
                         if(changeItemStat(change_type,$("#new_chg_val").val(),change_cell.innerHTML,change_ebeln,change_ebelp)) {
+                            hideSub(change_ebeln,'purch-item',$("#I"+change_ebeln+"_"+change_ebelp),change_ebelp);
                             change_cell.innerHTML = $("#new_chg_val").val();
                             changeDialog.dialog("close");
                         }
