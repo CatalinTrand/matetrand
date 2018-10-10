@@ -1201,11 +1201,11 @@
                             }
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
-                            cols += '<td class="td02h" colspan="2" onclick="change_matnr(\'' + ebeln2 + '\', \'' + id + '\');">' + idnlf + '</td>';
-                            cols += '<td class="td02h" colspan="5" onclick="change_matnr(\'' + ebeln2 + '\', \'' + id + '\');">' + mtext + '</td>';
-                            cols += '<td class="td02h" colspan="3" onclick="change_quantity(\'' + ebeln2 + '\', \'' + id + '\');">' + quantity + '</td>';
-                            cols += '<td class="td02h" colspan="3" onclick="change_delivery_date(\'' + ebeln2 + '\', \'' + id + '\');">' + deldate + '</td>';
-                            cols += '<td class="td02h" colspan="4" onclick="change_purchase_price(\'' + ebeln2 + '\', \'' + id + '\');">' + pur_price + '</td>';
+                            cols += '<td class="td02h" colspan="2" onclick="change_matnr(this, \'' + ebeln2 + '\', \'' + id + '\');">' + idnlf + '</td>';
+                            cols += '<td class="td02h" colspan="5" onclick="change_matnr(this, \'' + ebeln2 + '\', \'' + id + '\');">' + mtext + '</td>';
+                            cols += '<td class="td02h" colspan="3" onclick="change_quantity(this, \'' + ebeln2 + '\', \'' + id + '\');">' + quantity + '</td>';
+                            cols += '<td class="td02h" colspan="3" onclick="change_delivery_date(this, \'' + ebeln2 + '\', \'' + id + '\');">' + deldate + '</td>';
+                            cols += '<td class="td02h" colspan="4" onclick="change_purchase_price(this, \'' + ebeln2 + '\', \'' + id + '\');">' + pur_price + '</td>';
                             cols += '<td class="td02" colspan="4">' + sal_price + '</td>';
                             cols += '<td colspan="5"></td>';
                             if ($("#set-furnizor").val() != "")
@@ -1369,19 +1369,19 @@
             };
         }
 
-        function change_matnr(ebeln, ebelp) {
+        function change_matnr(cell, ebeln, ebelp) {
             alert("Schimbare PITEMS-IDNLF cu salvare in PITEMSCHG");
         }
 
-        function change_quantity(ebeln, ebelp) {
+        function change_quantity(cell, ebeln, ebelp) {
             alert("Schimbare PITEMS-QTY + QTY_UOM cu salvare in PITEMSCHG");
         }
 
-        function change_delivery_date(ebeln, ebelp) {
+        function change_delivery_date(cell, ebeln, ebelp) {
             alert("Schimbare PITEMS-LFDAT cu salvare in PITEMSCHG");
         }
 
-        function change_purchase_price(ebeln, ebelp) {
+        function change_purchase_price(cell, ebeln, ebelp) {
             alert("Schimbare PITEMS-PURCH_PRICE + PURCH_CURR + PURCH_PRUN + PURCH_PUOM cu salvare in PITEMSCHG");
         }
 
