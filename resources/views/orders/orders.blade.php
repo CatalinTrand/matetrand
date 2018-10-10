@@ -434,8 +434,8 @@
                                         else
                                             continue;
                                         $buttname = $lvbeln;
-                                        if (strtoupper($lvbeln) == "REPLENISH") $buttname = __('Stock');
-                                        elseif (strtoupper($lvbeln) == "SALESORDER") $buttname = __('Emergency');
+                                        if (strtoupper(trim($lvbeln)) == "REPLENISH") $buttname = __('Stock');
+                                        elseif (strtoupper(trim($lvbeln)) == "SALESORDER") $buttname = __('Emergency');
                                         $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $buttname";
                                     }
 
@@ -1104,7 +1104,7 @@
                             cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + buttonrequest + '</td>';
                             cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
                             cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' id='btn_P" + id + "_" + vbeln + "' onclick=\"loadSub(\'" + id + "_" + vbeln + "',\'purch-order\',this, \'" + vbeln + "\');\">+</button> " + id.substr(0, 10) + "</td>";
-                            cols += '<td class="td02" colspan="2">' + lifnr + '</td>';
+                            cols += '<td class="td02" colspan="2">' + conv_exit_alpha_output(lifnr) + '</td>';
                             cols += '<td class="td02" colspan="5">' + lifnr_name + '</td>';
                             cols += '<td class="td02" colspan="1">' + ekgrp + '</td>';
                             cols += '<td class="td02" colspan="5">' + ekgrp_name + '</td>';
@@ -1369,6 +1369,15 @@
             };
         }
 
+        function conv_exit_alpha_output(input) {
+            output = input;
+            if (/^\d+$/.test(output)) {
+                output = output.replace(/^0+/, '');
+                if (output.length == 0) output = input;
+            }
+            return output;
+        }
+
         function change_matnr(cell, ebeln, ebelp) {
             alert("Schimbare PITEMS-IDNLF cu salvare in PITEMSCHG");
         }
@@ -1389,7 +1398,7 @@
 
     </script>
 
-    <div id="init-rejection-dialog" title="Formular de rejectare" >
+    <div id="init-rejection-dialog" title="Rejectare pozitie" >
         <form>
             <br>
             <div class="form-group container-fluid" align="middle">

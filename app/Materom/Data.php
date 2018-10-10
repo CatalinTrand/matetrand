@@ -280,7 +280,7 @@ class Data
                 $sorders = DB::select("select distinct vbeln from $items_table where ebeln = '$porder->ebeln' order by vbeln");
                 $porder->vbeln = $sorders[0]->vbeln;
                 $ssorder = DB::select("select * from $items_table where vbeln='$porder->vbeln'")[0];
-                if (strtoupper($sorders[0]->vbeln) != 'REPLENISH') $porder->vbeln = "SALESORDER";
+                if (strtoupper(trim($sorders[0]->vbeln)) != 'REPLENISH') $porder->vbeln = "SALESORDER";
                 $porder->kunnr = $ssorder->kunnr;
                 $porder->kunnr_name = $ssorder->kunnr_name;
                 $porder->ctv = $ssorder->ctv;
@@ -324,7 +324,7 @@ class Data
                         $order->shipto = $ssorder->shipto;
                         $order->shipto_name = $ssorder->shipto_name;
                         $order->stage = $ssorder->stage;
-                        if ($order->vbeln != 'REPLENISH') $order->vbeln = "SALESORDER";
+                        if (trim($order->vbeln) != 'REPLENISH') $order->vbeln = "SALESORDER";
                     }
                     $result = array_merge($result, $orders);
                 }
@@ -481,7 +481,7 @@ class Data
         $sorders = DB::select($sql);
         if ($vbeln == "SALESORDER") {
             foreach($sorders as $sorder) {
-                if ($sorder->vbeln != "REPLENISH") $sorder->vbeln = $vbeln;
+                if (trim($sorder->vbeln) != "REPLENISH") $sorder->vbeln = $vbeln;
             }
             asort($sorders);
             $prev_sorder = '##########';
@@ -562,8 +562,8 @@ class Data
                 "ekgrp = '$norder->ekgrp', ".
                 "ekgrp_name = '$norder->ekgrp_name', " .
                 "curr = '$norder->curr', " .
-                "fxrate = '$norder->fxrate') " .
-                "where $ebeln = '$norder->ebeln'";
+                "fxrate = '$norder->fxrate' " .
+                "where ebeln = '$norder->ebeln'";
             DB::update($sql);
         }
 
@@ -582,7 +582,7 @@ class Data
             if ($ebeln != $nitem->ebeln) return "Wrong purchase order items";
             $nitem->ebelp = $sapitm["EBELP"];
             $nitem->idnlf = $sapitm["IDNLF"];
-            $nitem->mtext = $sapitm["MAT_TEXT"];
+            $nitem->mtext = $sapitm["MTEXT"];
             $nitem->qty = $sapitm["MENGE"];
             $nitem->qty_uom = $sapitm["MEINS"];
             $nitem->lfdat = $sapitm["LFDAT"];
@@ -597,13 +597,13 @@ class Data
             $nitem->purch_curr = $sapitm["PURCH_CURR"];
             $nitem->purch_prun = $sapitm["PURCH_PRUN"];
             $nitem->purch_puom = $sapitm["PURCH_PUOM"];
-            $nitem->vbeln = trim($sapitm["VBELN"]);
-            if (is_null($nitem->vbeln) || empty($nitem->vbeln)) $nitem->vbeln = "REPLENISH";
+            $nitem->vbeln = $sapitm["VBELN"];
             $nitem->posnr = $sapitm["POSNR"];
             $nitem->sales_price = $sapitm["SALES_PRICE"];
             $nitem->sales_curr = $sapitm["SALES_CURR"];
             $nitem->sales_prun = $sapitm["SALES_PRUN"];
             $nitem->sales_puom = $sapitm["SALES_PUOM"];
+            $nitem->vbeln = trim($nitem->vbeln);
             $nitem->kunnr = $sapitm["KUNNR"];
             $nitem->kunnr_name = $sapitm["KUNNR_NAME"];
             $nitem->shipto = $sapitm["SHIPTO"];
@@ -615,21 +615,39 @@ class Data
 
             $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
             if (count($users) > 0) $nitem->ctv = $users[0]->id;
-            $sql = "insert into pitems (ebeln, ebelp, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, mfrnr_name,".
-                                       "purch_price, purch_curr, purch_prun, purch_puom, ".
-                                       "sales_price, sales_curr, sales_prun, sales_puom, ".
-                                       "kunnr, kunnr_name, shipto, shipto_name, ctv, ctv_name, stage, changed ".
-                                       ") values (".
-                   "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '$nitem->mtext',$nitem->qty, '$nitem->qty_uom', ".
-                   "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
-                   "'$nitem->purch_price', '$nitem->purch_curr', ".
-                   "$nitem->purch_prun, '$nitem->purch_puom', ".
-                   "'$nitem->sales_price', '$nitem->sales_curr', $nitem->sales_prun, ".
-                   "'$nitem->sales_puom', '$nitem->kunnr', '$nitem->kunnr_name', ".
-                   "'$nitem->shipto', '$nitem->shipto_name', '$nitem->ctv', '$nitem->ctv_name', ".
-                   "'$nitem->stage', 0)";
+            if (is_null($citem)) {
+                $sql = "insert into pitems (ebeln, ebelp, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, mfrnr_name,".
+                                           "purch_price, purch_curr, purch_prun, purch_puom, ".
+                                           "sales_price, sales_curr, sales_prun, sales_puom, ".
+                                           "vbeln, posnr, kunnr, kunnr_name, shipto, shipto_name, ctv, ctv_name, stage, changed ".
+                                           ") values (".
+                       "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '$nitem->mtext',$nitem->qty, '$nitem->qty_uom', ".
+                       "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
+                       "'$nitem->purch_price', '$nitem->purch_curr', ".
+                       "$nitem->purch_prun, '$nitem->purch_puom', ".
+                       "'$nitem->sales_price', '$nitem->sales_curr', $nitem->sales_prun, ".
+                       "'$nitem->sales_puom', '$nitem->vbeln', '$nitem->posnr', '$nitem->kunnr', '$nitem->kunnr_name', ".
+                       "'$nitem->shipto', '$nitem->shipto_name', '$nitem->ctv', '$nitem->ctv_name', ".
+                       "'$nitem->stage', 0)";
 
-            DB::insert($sql);
+                DB::insert($sql);
+            } else {
+                $sql = "update pitems set idnlf = '$nitem->idnlf', " .
+                    "mtext = '$nitem->mtext', ".
+                    "qty = $nitem->qty, ".
+                    "qty_uom = '$nitem->qty_uom', ".
+                    "lfdat = '$nitem->lfdat', ".
+                    "purch_price = '$nitem->purch_price', " .
+                    "purch_curr = '$nitem->purch_curr', " .
+                    "purch_prun = $nitem->purch_prun, " .
+                    "purch_puom = '$nitem->purch_puom', " .
+                    "sales_price = '$nitem->sales_price', " .
+                    "sales_curr = '$nitem->sales_curr', " .
+                    "sales_prun = $nitem->sales_prun, " .
+                    "sales_puom = '$nitem->sales_puom' " .
+                    "where ebeln = '$nitem->ebeln' and ebelp = '$nitem->ebelp'";
+                DB::update($sql);
+            }
         }
 
         DB::commit();
