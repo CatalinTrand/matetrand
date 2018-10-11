@@ -92,6 +92,7 @@ class Webservice
         else
             DB::update("update pitems set stage = 'T' where ebeln = '$ebeln' and ebelp = '$id'");
         DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','A',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
+        SAP::acknowledgePOItem($ebeln, $id, " ");
         return "";
     }
 
@@ -102,12 +103,10 @@ class Webservice
         return "";
     }
 
-    public static function changeItemStat($column, $value, $oldvalue, $ebeln, $ebelp)
+    public static function changeItemStat($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)
     {
         DB::update("update pitems set $column = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
         if($column[0]== 'i')
-            $type = 'M';
-        if($column[0]== 'm')
             $type = 'M';
         if($column[0]== 'q')
             $type = 'Q';
@@ -115,7 +114,8 @@ class Webservice
             $type = 'D';
         if($column[0]== 'p')
             $type = 'P';
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$value')");
+        $newval = trim($value . " " . $valuehlp);
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         return "";
     }
 
@@ -210,7 +210,7 @@ class Webservice
                 }
             } else {
                 if ($item == "SALESORDER")
-                    $links = DB::select("select * from ". $items_table ." where ebeln = '$porder' and vbeln <> 'REPLENISH' order by ebelp");
+                    $links = DB::select("select * from ". $items_table ." where ebeln = '$porder' and vbeln <> '!REPLENISH' order by ebelp");
                 else
                     $links = DB::select("select * from ". $items_table ." where ebeln = '$porder' and vbeln = '$item' order by ebelp");
                 foreach ($links as $link) {

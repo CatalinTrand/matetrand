@@ -44,13 +44,13 @@ class OrdersTableSeeder extends Seeder
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, mtext, stage)" .
             " values ('P000000003', '00060', 'S000000003', '00100', 'IDNLF6', 'Descriere piesa 6',  'F')");
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage)" .
-            " values ('P000000014', '00110', 'REPLENISH', '', 'IDNLF5', 'Descriere piesa 5d',  10, 'buc', 'F')");
+            " values ('P000000014', '00110', '!REPLENISH', '', 'IDNLF5', 'Descriere piesa 5d',  10, 'buc', 'F')");
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage)" .
-            " values ('P000000014', '00120', 'REPLENISH', '', 'IDNLF6', 'Descriere piesa 6c',  15, 'buc', 'F')");
+            " values ('P000000014', '00120', '!REPLENISH', '', 'IDNLF6', 'Descriere piesa 6c',  15, 'buc', 'F')");
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage)" .
-            " values ('P000000014', '00130', 'REPLENISH', '', 'IDNLF5', 'Descriere piesa 5b',  20, 'buc', 'F')");
+            " values ('P000000014', '00130', '!REPLENISH', '', 'IDNLF5', 'Descriere piesa 5b',  20, 'buc', 'F')");
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage)" .
-            " values ('P000000014', '00140', 'REPLENISH', '', 'IDNLF6', 'Descriere piesa 6b',  25, 'buc', 'F')");
+            " values ('P000000014', '00140', '!REPLENISH', '', 'IDNLF6', 'Descriere piesa 6b',  25, 'buc', 'F')");
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage)" .
             " values ('P000000015', '00200', 'S000000010', '000100', 'IDNLF6',  'Descriere piesa 4', 150, 'buc', 'F')");
         DB::insert("insert into pitems (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage)" .

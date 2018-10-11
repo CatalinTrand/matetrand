@@ -44,13 +44,13 @@ class OrdersTableSeederArchive extends Seeder
         DB::insert("insert into pitems_arch (ebeln, ebelp, vbeln, posnr, idnlf, mtext, stage, creation)" .
             " values ('PA00000003', '00060', 'SA00000003', '00100', 'IDNLF6', 'Descriere piesa 6',  'F', '2018-10-05 00:00:00')");
         DB::insert("insert into pitems_arch (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage, creation)" .
-            " values ('PA00000014', '00110', 'REPLENISH', '', 'IDNLF5', 'Descriere piesa 5d',  10, 'buc', 'F', '2018-10-01 00:00:00')");
+            " values ('PA00000014', '00110', '!REPLENISH', '', 'IDNLF5', 'Descriere piesa 5d',  10, 'buc', 'F', '2018-10-01 00:00:00')");
         DB::insert("insert into pitems_arch (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage, creation)" .
-            " values ('PA00000014', '00120', 'REPLENISH', '', 'IDNLF6', 'Descriere piesa 6c',  15, 'buc', 'F', '2018-10-01 00:00:00')");
+            " values ('PA00000014', '00120', '!REPLENISH', '', 'IDNLF6', 'Descriere piesa 6c',  15, 'buc', 'F', '2018-10-01 00:00:00')");
         DB::insert("insert into pitems_arch (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage, creation)" .
-            " values ('PA00000014', '00130', 'REPLENISH', '', 'IDNLF5', 'Descriere piesa 5b',  20, 'buc', 'F', '2018-10-01 00:00:00')");
+            " values ('PA00000014', '00130', '!REPLENISH', '', 'IDNLF5', 'Descriere piesa 5b',  20, 'buc', 'F', '2018-10-01 00:00:00')");
         DB::insert("insert into pitems_arch (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage, creation)" .
-            " values ('PA00000014', '00140', 'REPLENISH', '', 'IDNLF6', 'Descriere piesa 6b',  25, 'buc', 'F', '2018-10-01 00:00:00')");
+            " values ('PA00000014', '00140', '!REPLENISH', '', 'IDNLF6', 'Descriere piesa 6b',  25, 'buc', 'F', '2018-10-01 00:00:00')");
         DB::insert("insert into pitems_arch (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage, creation)" .
             " values ('PA00000015', '00200', 'SA00000010', '000100', 'IDNLF6',  'Descriere piesa 4', 150, 'buc', 'F', '2018-10-02 00:00:00')");
         DB::insert("insert into pitems_arch (ebeln, ebelp, vbeln, posnr, idnlf, mtext, qty, qty_uom, stage, creation)" .

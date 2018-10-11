@@ -60,6 +60,7 @@ class WebserviceController extends Controller
         return Webservice::changeItemStat(
             Input::get("column"),
             Input::get("value"),
+            Input::get("valuehlp"),
             Input::get("oldvalue"),
             Input::get("ebeln"),
             Input::get("ebelp")

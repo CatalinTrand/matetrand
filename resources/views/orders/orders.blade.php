@@ -426,7 +426,8 @@
                                         else
                                             continue;
                                         $viewebeln = substr($order->ebeln, 0, 10);
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button> $viewebeln";
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button>".
+                                            \App\Materom\SAP::alpha_output($viewebeln);
                                     } else {
                                         $lvbeln = $order->vbeln;
                                         if(strchr($seen, $lvbeln) == null)
@@ -434,8 +435,9 @@
                                         else
                                             continue;
                                         $buttname = $lvbeln;
-                                        if (strtoupper(trim($lvbeln)) == "REPLENISH") $buttname = __('Stock');
+                                        if (strtoupper($lvbeln) == "!REPLENISH") $buttname = __('Stock');
                                         elseif (strtoupper(trim($lvbeln)) == "SALESORDER") $buttname = __('Emergency');
+                                        else $buttname = \App\Materom\SAP::alpha_output($lvbeln);
                                         $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $buttname";
                                     }
 
@@ -724,7 +726,6 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
-                alert("Accepted!");
                 return;//todo
                 //show new row
                 if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
@@ -1202,9 +1203,9 @@
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td class="td02h" colspan="2" onclick="change_matnr(this, \'' + ebeln2 + '\', \'' + id + '\');">' + idnlf + '</td>';
-                            cols += '<td class="td02h" colspan="5" onclick="change_desc(this, \'' + ebeln2 + '\', \'' + id + '\');">' + mtext + '</td>';
+                            cols += '<td class="td02h" colspan="5" onclick="change_matnr(this.previousSibling, \'' + ebeln2 + '\', \'' + id + '\');">' + mtext + '</td>';
                             cols += '<td class="td02h" colspan="3" onclick="change_quantity(this, \'' + ebeln2 + '\', \'' + id + '\');">' + quantity + '</td>';
-                            cols += '<td class="td02h" colspan="3" onclick="change_delivery_date(this, \'' + ebeln2 + '\', \'' + id + '\');">' + deldate + '</td>';
+                            cols += '<td class="td02h" colspan="3" onclick="change_delivery_date(this, \'' + ebeln2 + '\', \'' + id + '\');">' + deldate.substr(0, 10) + '</td>';
                             cols += '<td class="td02h" colspan="4" onclick="change_purchase_price(this, \'' + ebeln2 + '\', \'' + id + '\');">' + pur_price + '</td>';
                             cols += '<td class="td02" colspan="4">' + sal_price + '</td>';
                             cols += '<td colspan="5"></td>';
@@ -1378,14 +1379,11 @@
             return output;
         }
 
-        function changeItemStat(c_type,c_value, old_value, c_ebeln, c_ebelp) {
-            let c_string = "";
+        function changeItemStat(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp) {
+            var c_string = "";
             switch (c_type) {
                 case 1:
                     c_string = "idnlf";
-                    break;
-                case 2:
-                    c_string = "mtext";
                     break;
                 case 3:
                     c_string = "qty";
@@ -1410,6 +1408,7 @@
                 {
                     column: c_string,
                     value: c_value,
+                    valuehlp: c_value_hlp,
                     oldvalue: old_value,
                     ebeln: c_ebeln,
                     ebelp: c_ebelp
@@ -1435,9 +1434,12 @@
                 modal: true,
                 buttons: {
                     Change: function (){
-                        if(changeItemStat(change_type,$("#new_chg_val").val(),change_cell.innerHTML,change_ebeln,change_ebelp)) {
+                        if(changeItemStat(change_type, $("#new_chg_val").val(), $("#new_val_hlp").text(),
+                            change_cell.innerHTML,change_ebeln,change_ebelp)) {
                             hideSub(change_ebeln,'purch-item',$("#I"+change_ebeln+"_"+change_ebelp),change_ebelp);
-                            change_cell.innerHTML = $("#new_chg_val").val();
+                            change_cell.innerHTML = trim($("#new_chg_val").val() + " " + $("#new_val_hlp").text());
+                            $("#new_chg_val").text("");
+                            $("#new_val_hlp").text("");
                             changeDialog.dialog("close");
                         }
                     },
@@ -1449,9 +1451,9 @@
                     changeForm[0].reset();
                 },
                 position: {
-                    my: "center",
+                    my: "right",
                     at: "center",
-                    of: $("#orders_table")
+                    of: change_cell // $("#orders_table")
                 }
             });
 
@@ -1470,22 +1472,10 @@
             type_string = "IDNLF";
 
 
-            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
-            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
-            changeDialog.dialog("open");
-        }
-
-        function change_desc(cell, ebeln, ebelp) {
-
-            change_cell = cell;
-            change_type = 2;
-            let old_value = cell.innerHTML;
-            change_ebeln = ebeln;
-            change_ebelp = ebelp;
-
-            type_string = "MTEXT";
-            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
-            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            $("#old_chg_val").text("Codul existent: " + old_value);
+            $("#new_val_txt").text("Introduceti noul cod:");
+            $("#new_val_hlp").text("");
+            $("#change-dialog").dialog('option', 'title', 'Modificare cod material pozitia ' + ebelp);
             changeDialog.dialog("open");
         }
 
@@ -1494,12 +1484,15 @@
             change_cell = cell;
             change_type = 3;
             let old_value = cell.innerHTML;
+            let values = old_value.split(" ");
             change_ebeln = ebeln;
             change_ebelp = ebelp;
 
             type_string = "QTY";
-            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
-            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            $("#old_chg_val").text("Cantitatea existenta: " + old_value);
+            $("#new_val_txt").text("Introduceti noua cantitate:");
+            $("#new_val_hlp").text(values[1]);
+            $("#change-dialog").dialog('option', 'title', 'Modificare cantitate pozitia ' + ebelp);
             changeDialog.dialog("open");
         }
 
@@ -1512,8 +1505,10 @@
             change_ebelp = ebelp;
 
             type_string = "LFDAT";
-            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
-            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            $("#old_chg_val").text("Data de livrare existenta: " + old_value);
+            $("#new_val_txt").text("Introduceti noua data de livrare:");
+            $("#new_val_hlp").text("");
+            $("#change-dialog").dialog('option', 'title', 'Modificare data livrare pentru pozitia ' + ebelp);
             changeDialog.dialog("open");
         }
 
@@ -1522,25 +1517,32 @@
             change_cell = cell;
             change_type = 5;
             let old_value = cell.innerHTML;
+            let values = old_value.split(" ");
             change_ebeln = ebeln;
             change_ebelp = ebelp;
 
             type_string = "PURCH_PRICE";
-            $("#old_chg_val").text("Change " + type_string + " from oldval '" + old_value + "' to new value:");
-            $("#change-dialog").dialog('option', 'title', 'Formular de schimbare pentru item ' + ebelp);
+            $("#old_chg_val").text("Pretul existent: " + old_value);
+            $("#new_val_txt").text("Introduceti noul pret de achizitie:");
+            $("#new_val_hlp").text(values[1]);
+            $("#change-dialog").dialog('option', 'title', 'Modificare pret achizitie pentru pozitia ' + ebelp);
             changeDialog.dialog("open");
         }
 
     </script>
 
-    <div id="change-dialog" title="Schimbare pozitie" >
+    <div id="change-dialog" title="Modificare pozitie" >
         <form>
             <br>
-            <div class="form-group container-fluid" align="middle">
-                <i id="old_chg_val"></i>
+            <div class="form-group container" align="left">
+                <b id="old_chg_val"></b><br><br>
+                <i id="new_val_txt"></i>
                 <br><br>
-                <input id="new_chg_val" type="text" name="new_chg_val" size="20"
-                       class="form-control col-md-8" value="">
+                <table style="border: none; padding: 0px;" width="80%"><tr>
+                <td><input id="new_chg_val" type="text" name="new_chg_val" size="20"
+                       class="form-control col-md-8" value=""></td>
+                <td style="text-align: left;" width="4rem"><b style="text-align: left;  margin-left: -5rem;" id="new_val_hlp"></b></td>
+                </tr></table>
             </div>
         </form>
     </div>

@@ -280,7 +280,7 @@ class Data
                 $sorders = DB::select("select distinct vbeln from $items_table where ebeln = '$porder->ebeln' order by vbeln");
                 $porder->vbeln = $sorders[0]->vbeln;
                 $ssorder = DB::select("select * from $items_table where vbeln='$porder->vbeln'")[0];
-                if (strtoupper(trim($sorders[0]->vbeln)) != 'REPLENISH') $porder->vbeln = "SALESORDER";
+                if (strtoupper(trim($sorders[0]->vbeln)) != '!REPLENISH') $porder->vbeln = "SALESORDER";
                 $porder->kunnr = $ssorder->kunnr;
                 $porder->kunnr_name = $ssorder->kunnr_name;
                 $porder->ctv = $ssorder->ctv;
@@ -324,7 +324,7 @@ class Data
                         $order->shipto = $ssorder->shipto;
                         $order->shipto_name = $ssorder->shipto_name;
                         $order->stage = $ssorder->stage;
-                        if (trim($order->vbeln) != 'REPLENISH') $order->vbeln = "SALESORDER";
+                        if (trim($order->vbeln) != '!REPLENISH') $order->vbeln = "SALESORDER";
                     }
                     $result = array_merge($result, $orders);
                 }
@@ -481,7 +481,7 @@ class Data
         $sorders = DB::select($sql);
         if ($vbeln == "SALESORDER") {
             foreach($sorders as $sorder) {
-                if (trim($sorder->vbeln) != "REPLENISH") $sorder->vbeln = $vbeln;
+                if (trim($sorder->vbeln) != "!REPLENISH") $sorder->vbeln = $vbeln;
             }
             asort($sorders);
             $prev_sorder = '##########';
@@ -530,8 +530,11 @@ class Data
         $erdat = new Carbon();
         $norder->ebeln = $ebeln;
         $norder->lifnr = $saphdr["LIFNR"];
-        $norder->lifnr_name = $saphdr["LIFNR_NAME"];
         $norder->ekgrp = $saphdr["EKGRP"];
+        if (!DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->exists())
+            if (!DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1])->exists())
+                return "OK";
+        $norder->lifnr_name = $saphdr["LIFNR_NAME"];
         $norder->ekgrp_name = $saphdr["EKGRP_NAME"];
         $erdat->hour = $now->hour;
         $erdat->minute = $now->minute;
@@ -651,7 +654,11 @@ class Data
         }
 
         DB::commit();
+        foreach($sapitms as $sapitm) {
+            SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
+        }
         Mailservice::sendNotification($norder->lifnr,$ebeln);
         return "OK";
     }
+
 }

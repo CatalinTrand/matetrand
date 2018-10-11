@@ -88,6 +88,31 @@ class SAP
         }
     }
 
+    static public function acknowledgePOItem($ebeln, $ebelp, $ackflag) {
+
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_GET_SET_ACK_REJ');
+            $result = $sapfm->invoke(['I_EBELN' => $ebeln,
+                                      'I_EBELP' => $ebelp,
+                                      'I_GET_SET_FLAG' => 'B',
+                                      'I_INDICATOR' => $ackflag ]);
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+    }
+
     static public function alpha_output($input) {
         $output = $input;
         if (ctype_digit($output)) {
