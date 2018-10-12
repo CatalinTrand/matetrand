@@ -624,7 +624,7 @@ class Data
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
                                            "vbeln, posnr, kunnr, kunnr_name, shipto, shipto_name, ctv, ctv_name, stage, changed ".
                                            ") values (".
-                       "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '$nitem->mtext',$nitem->qty, '$nitem->qty_uom', ".
+                       "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 35) . "',$nitem->qty, '$nitem->qty_uom', ".
                        "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
                        "'$nitem->purch_price', '$nitem->purch_curr', ".
                        "$nitem->purch_prun, '$nitem->purch_puom', ".
@@ -634,6 +634,7 @@ class Data
                        "'$nitem->stage', 0)";
 
                 DB::insert($sql);
+
             } else {
                 $sql = "update pitems set idnlf = '$nitem->idnlf', " .
                     "mtext = '$nitem->mtext', ".
