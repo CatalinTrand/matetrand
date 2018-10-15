@@ -309,7 +309,7 @@
                             </tr>
                             @php
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
-                                App\Materom\Orders::fillCache($filter_history);
+                                App\Materom\Orders::loadFromCache();
                                 $orders = \App\Materom\Data::getOrders($id, $groupByPO == 1, $filter_history, $filter_time_val,
                                      $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
                                      $filter_lifnr, $filter_lifnr_name);

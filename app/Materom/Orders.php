@@ -189,7 +189,7 @@ class Orders
             "where pitems_cache.session = '$cacheid' order by pitems.ebeln, pitems.ebelp");
 
         $pitemschg = DB::select("select pitemchg.* from pitemchg join pitems_cache using (ebeln, ebelp) " .
-            "where pitems_cache.session = '$cacheid' order by pitemchg.ebeln, pitemchg.ebelp, pitemchg.cdate descending");
+            "where pitems_cache.session = '$cacheid' order by pitemchg.ebeln, pitemchg.ebelp, pitemchg.cdate desc");
 
         $xitem = 0;
         $xitemchg = 0;
@@ -230,15 +230,12 @@ class Orders
 
         $result = self::loadFromCache();
 
-        if($result == null)
-            echo $please->crash;
-
         $messages = array();
 
         foreach ($result as $order){
             foreach ($order->items as $item){
                 foreach ($item->changes as $item_chg){
-                    if($item->changes[count($item->changes) - 1]->acknowledged == 0){
+                    if($item_chg->acknowledged == 0){
                             $item_chg->vbeln = $item->vbeln;
                             array_push($messages,$item_chg);
                     }

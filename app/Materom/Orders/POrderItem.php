@@ -100,7 +100,7 @@ class POrderItem
         $this->purch_price = $pitem->purch_price;
         $this->purch_curr = $pitem->purch_curr;
         $this->purch_prun = $pitem->purch_prun;
-        $this->purch_puom = $pitem->purch_uom;
+        $this->purch_puom = $pitem->purch_puom;
         $this->sales_price = $pitem->sales_price;
         $this->sales_curr = $pitem->sales_curr;
         $this->sales_prun = $pitem->sales_prun;
