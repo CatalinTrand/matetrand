@@ -24,7 +24,7 @@ class Webservice
         if (ctype_digit($mfrnr)) $mfrnr = str_pad($mfrnr, 10, "0", STR_PAD_LEFT);
         $find = DB::select("select * from users_sel where id = '$userid' and mfrnr = '$mfrnr'");
         if (count($find) == 0) {
-            $mfrnr_name = SAP::rfcGetVendorName($mfrnr);
+            $mfrnr_name = SAP\MasterData::getLifnrName($mfrnr);
             if (is_array($mfrnr_name) || strlen(trim($mfrnr_name)) == 0) return __('Manufacturer does not exist');
             DB::insert("insert into users_sel (id, mfrnr, mfrnr_name) values ('$userid','$mfrnr', '$mfrnr_name')");
             return "";

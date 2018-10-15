@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
             RolesTableSeeder::class,
             OrdersTableSeeder::class,
             OrdersTableSeederArchive::class,
+            PurchGroupsTableSeeder::class,
+            SupplierTableSeeder::class,
+            CustomerTableSeeder::class,
         ]);
     }
 }

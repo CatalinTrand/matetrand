@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Materom\Orders;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -43,6 +44,8 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         Session::put('locale', strtolower(Auth::user()->lang));
+        Session::put('materomdbcache', Orders::newCacheToken());
+        Orders::fillCache();
     }
 
     protected function validateLogin(Request $request)

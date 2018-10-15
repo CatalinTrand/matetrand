@@ -8,243 +8,173 @@
         @endphp
     @endguest
     @php
-        use Illuminate\Support\Facades\DB;
 
-        $groupByPO = false;
-        if(isset($_POST['groupOrdersBy']) && strcmp($_POST['groupOrdersBy'], "sales-orders") == 0)
-            $groupByPO = false;
-        else if (isset($_POST['groupOrdersBy']))
-            $groupByPO = true;
-        else
-            $groupByPO = false;
+        $groupByPO = 1;
+        $tmp = \Illuminate\Support\Facades\Session::get('groupOrdersBy');
+        if(isset($tmp)) $groupByPO = $tmp == "sales-orders" ? 0 : 1;
 
-        if($groupByPO){
-            $selByPO = " selected";
-            $selBySO = "";
+        if($groupByPO == 1) {
+            $groupBySelPO = " selected";
+            $groupBySelSO = "";
         } else {
-            $selByPO = "";
-            $selBySO = " selected";
+            $groupBySelPO = "";
+            $groupBySelSO = " selected";
         }
 
-        $f_type = 0;
-        $selAp = "";
-        $selRe = "";
-        $selNa = "";
-        if(isset($_POST['filter_status'])){
-            if(strcmp($_POST['filter_status'],"NA") == 0){
-                //toate
-                $f_type = 0;
-                $selNa = "selected";
-            } else if(strcmp($_POST['filter_status'],"AP") == 0){
-                //aprobat
-                $f_type = 2;
-                $selAp = "selected";
-            } else {
-                //rejectat
-                $f_type = 3;
-                $selRe = "selected";
+        $filter_status_type = 0;
+        $filter_status_selAP = "";
+        $filter_status_selRE = "";
+        $filter_status_selNA = "";
+        $tmp = \Illuminate\Support\Facades\Session::get('filter_status');
+        if (isset($tmp)) {
+            if ($tmp == "NA") {
+                // toate
+                $filter_status_type = 0;
+                $filter_status_selNA = "selected";
+            } elseif ($tmp == "AP") {
+                // aprobat
+                $filter_status_type = 2;
+                $filter_status_selAP = "selected";
+            } elseif ($tmp == "RE")  {
+                // rejectat
+                $filter_status_type = 3;
+                $filter_status_selRE = "selected";
             }
         }
 
-        $f_history = 1;
-        $selHNew = "selected";
-        $selHOld = "";
-        if(isset($_POST['filter_history'])){
-            if(strcmp($_POST['filter_history'],"New") == 0){
-                //noi
-                $f_history = 1;
-                $selHNew = "selected";
-                $selHOld = "";
+        $filter_history = 1;
+        $filter_history_curr = " selected";
+        $filter_history_arch = "";
+        $tmp = \Illuminate\Support\Facades\Session::get('filter_history');
+        if (isset($tmp)) {
+            if (intval($tmp) != 2) {
+                // noi
+                $filter_history = 1;
+                $filter_history_curr = " selected";
+                $filter_history_arch = "";
             } else {
-                //vechi
-                $f_history = 2;
-                $selHNew = "";
-                $selHOld = "selected";
+                // vechi
+                $filter_history = 2;
+                $filter_history_curr = "";
+                $filter_history_arch = " selected";
             }
         }
 
-        $time_val = null;
+        $filter_time_val = null;
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_archdate");
+        if(isset($tmp) && $filter_history == 2) $filter_time_val = $tmp;
 
-        if(isset($_POST['time_search']) && $f_history == 2)
-            $time_val = $_POST['time_search'];
+        $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
+        if (!isset($filter_vbeln)) $filter_vbeln = "";
 
-        if(isset($_POST['filter_vbeln']))
-            $old_f_vbeln = $_POST['filter_vbeln'];
-        else
-            $old_f_vbeln = "";
+        $filter_ebeln = \Illuminate\Support\Facades\Session::get("filter_ebeln");
+        if (!isset($filter_ebeln)) $filter_ebeln = "";
 
-        if(isset($_POST['filter_ebeln']))
-            $old_f_ebeln = $_POST['filter_ebeln'];
-        else
-            $old_f_ebeln = "";
+        $filter_matnr = \Illuminate\Support\Facades\Session::get("filter_matnr");
+        if (!isset($filter_matnr)) $filter_matnr = "";
 
-        if(isset($_POST['filter_matnr']))
-            $old_f_matnr = $_POST['filter_matnr'];
-        else
-            $old_f_matnr = "";
+        $filter_mtext = \Illuminate\Support\Facades\Session::get("filter_mtext");
+        if (!isset($filter_mtext)) $filter_mtext = "";
 
-        if(isset($_POST['filter_mtext']))
-            $old_f_mtext = $_POST['filter_mtext'];
-        else
-            $old_f_mtext = "";
+        $filter_lifnr = \Illuminate\Support\Facades\Session::get("filter_lifnr");
+        if (!isset($filter_lifnr)) $filter_lifnr = "";
 
-        if(isset($_POST['filter_lifnr']))
-            $old_f_lifnr = $_POST['filter_lifnr'];
-        else
-            $old_f_lifnr = "";
+        $filter_lifnr_name = \Illuminate\Support\Facades\Session::get("filter_lifnr_name");
+        if (!isset($filter_lifnr_name)) $filter_lifnr_name = "";
 
-        if(isset($_POST['filter_lifnr_name']))
-            $old_f_lifnr_name = $_POST['filter_lifnr_name'];
-        else
-            $old_f_lifnr_name = "";
     @endphp
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
-                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
+                        @if (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
                             <a href="/roles"><p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line first">Roles</p></a>
+                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                class="card-line first">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-administrative-tools-48.png'/>
+                                {{__("Roles")}}
+                                </p></a>
                             <a href="/users"><p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line">Users</p></a>
+                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                class="card-line">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
+                                {{__("Users")}}
+                                </p></a>
                             <a href="/messages"><p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line">Messages</p></a>
+                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                class="card-line">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                {{__("Messages")}}
+                                </p></a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                               class="card-line selector">Comenzi</p>
+                               class="card-line selector">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                {{__("Orders")}}
+                            </p>
                         @else
                             <a href="/messages"><p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line first">Messages</p></a>
+                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                class="card-line first">Messages</p></a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                               class="card-line selector">Comenzi</p>
+                               class="card-line selector">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                {{__("Orders")}}
+                            </p>
                         @endif
                     </div>
 
                     <div class="card-body" style="padding-bottom: 0px;">
 
                         <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 7.5rem;">
-
                             <form action="orders" method="post">
-                                Afisare dupa:&nbsp;
-                                <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="groupOrdersBy" onchange="this.form.submit()">
-                                    <option value="sales-orders"{{$selBySO}}>Comenzi client</option>
-                                    <option value="purch-orders"{{$selByPO}}>Comenzi de aprovizionare</option>
-                                </select>
-                                @if(isset($_POST['filter_status']))
-                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                                @endif
-                                @if(isset($_POST['filter_history']))
-                                    <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                                @endif
-                                @if(isset($_POST['time_search']))
-                                    <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
-                                @endif
                                 {{csrf_field()}}
-                            </form>
-                            <br>
-
-                            <div class="container row" style="display: inline-block;">
-                                <form action="orders" method="post" style="display: inline-block">
+                                <div class="container row" style="display: block; max-width: 100%;">
+                                    Afisare dupa:&nbsp;
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="groupOrdersBy" onchange="this.form.submit()">
+                                        <option value="sales-orders"{{$groupBySelSO}}>Comenzi client</option>
+                                        <option value="purch-orders"{{$groupBySelPO}}>Comenzi de aprovizionare</option>
+                                    </select>
                                     Filtrare dupa status:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_status" onchange="this.form.submit()">
-                                        <option value="NA"{{$selNa}}>toate</option>
-                                        <option value="AP"{{$selAp}}>aprobat</option>
-                                        <option value="RE"{{$selRe}}>rejectat</option>
+                                        <option value="NA"{{$filter_status_selNA}}>{{__('Toate')}}</option>
+                                        <option value="AP"{{$filter_status_selAP}}>{{__('Aprobate')}}</option>
+                                        <option value="RE"{{$filter_status_selRE}}>{{__('Rejectate')}}</option>
                                     </select>
-                                    @if(isset($_POST['groupOrdersBy']))
-                                        <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                                    @endif
-                                    @if(isset($_POST['filter_history']))
-                                        <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                                    @endif
-                                    @if(isset($_POST['time_search']))
-                                        <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
-                                    @endif
-                                    {{csrf_field()}}
-                                </form>
-
-                                <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
+                                </div><br>
+                                <div class="container row" style="display: block; max-width: 100%;">
                                     Filtrare dupa istoric:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
-                                        <option value="New"{{$selHNew}}>{{__("Neprocesate")}}</option>
-                                        <option value="Old"{{$selHOld}}>{{__("Procesate")}}</option>
+                                        <option value="1"{{$filter_history_curr}}>{{__("Neprocesate")}}</option>
+                                        <option value="2"{{$filter_history_arch}}>{{__("Procesate")}}</option>
+                                        @if ($filter_history == 2)
+                                            &nbsp;&nbsp;&nbsp;Documente arhivate de la:
+                                            <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                                   onchange="this.form.submit()">
+                                        @endif
                                     </select>
-                                    @if(isset($_POST['groupOrdersBy']))
-                                        <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
+                                </div><br>
+                                <div class="container row" style="display: block; max-width: 100%;">
+                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                                        {{__("Sales order")}}:
+                                        <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_vbeln" value="{{$filter_vbeln}}">&nbsp;&nbsp;
                                     @endif
-                                    @if(isset($_POST['filter_status']))
-                                        <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
+                                    {{__("Purchase order")}}:
+                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_ebeln" value="{{$filter_ebeln}}">&nbsp;&nbsp;
+                                    {{__("Material")}}:
+                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_matnr" value="{{$filter_matnr}}">&nbsp;&nbsp;
+                                    {{__("Material description")}}:
+                                    <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_mtext" value="{{$filter_mtext}}">&nbsp;&nbsp;
+                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                                        {{__("Supplier")}}:
+                                        <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$filter_lifnr}}">&nbsp;&nbsp;
+                                        {{__("Supplier name")}}:
+                                        <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
                                     @endif
-                                    @if(isset($_POST['time_search']))
-                                        <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
-                                    @endif
-                                    {{csrf_field()}}
-                                </form>
-
-                                @if ($f_history == 2)
-                                    <form action="orders" method="post" style="display: inline-block; margin-left: 20px">
-                                        Documente mai noi de:
-                                        <input type="date" id="time_search" name="time_search" value="{{$time_val}}"
-                                               onchange="this.form.submit()">
-                                        @if(isset($_POST['groupOrdersBy']))
-                                            <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                                        @endif
-                                        @if(isset($_POST['filter_status']))
-                                            <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                                        @endif
-                                        @if(isset($_POST['filter_history']))
-                                            <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                                        @endif
-                                        {{csrf_field()}}
-                                    </form>
-                                @endif
-                            </div>
-
-                            <br><br>
-
-                            <form action="orders" method="post" style="margin-bottom: -15px">
-
-                                @if(!$groupByPO)
-                                    {{__("Sales order")}}:
-                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_vbeln" value="{{$old_f_vbeln}}">&nbsp;&nbsp;
-                                @endif
-                                {{__("Purchase order")}}:
-                                <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_ebeln" value="{{$old_f_ebeln}}">&nbsp;&nbsp;
-                                {{__("Material")}}:
-                                <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_matnr" value="{{$old_f_matnr}}">&nbsp;&nbsp;
-                                {{__("Material description")}}:
-                                <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_mtext" value="{{$old_f_mtext}}">&nbsp;&nbsp;
-                                @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
-                                    {{__("Supplier")}}:
-                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$old_f_lifnr}}">&nbsp;&nbsp;
-                                    {{__("Supplier name")}}:
-                                    <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$old_f_lifnr_name}}">&nbsp;&nbsp;
-                                @endif
-
-                                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
-                                       tabindex="-1">
-
-                                @if(isset($_POST['groupOrdersBy']))
-                                    <input type="hidden" name="groupOrdersBy" value="{{$_POST['groupOrdersBy']}}">
-                                @endif
-                                @if(isset($_POST['filter_status']))
-                                    <input type="hidden" name="filter_status" value="{{$_POST['filter_status']}}">
-                                @endif
-                                @if(isset($_POST['filter_history']))
-                                    <input type="hidden" name="filter_history" value="{{$_POST['filter_history']}}">
-                                @endif
-                                @if(isset($_POST['time_search']))
-                                    <input type="hidden" name="time_search" value="{{$_POST['time_search']}}">
-                                @endif
-                                {{csrf_field()}}
+                                </div>
+                                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1">
                             </form>
-
                         </div>
-
                     </div>
 
                     <br>
@@ -326,7 +256,7 @@
                                     <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png'/>
                                 </th>
                                 @php
-                                    if($groupByPO) {
+                                    if ($groupByPO == 1) {
                                         echo '<th class="td02" colspan="3">' . __('Comanda aprovizionare') . '</th>';
                                         $th1 = __("Supplier");
                                         $th2 = ""; // "Nume";
@@ -337,7 +267,7 @@
                                         $th7 = "Rata schimb";
                                     } else {
                                         echo '<th class="td02" colspan="3">' . __('Comanda client') . '</th>';
-                                        if (strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0) {
+                                        if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
                                             $th1 = __("Client");
                                             $th2 = ""; // "Nume";
                                             $th3 = __("Livrare la");
@@ -356,7 +286,7 @@
                                         }
 
                                     }
-                                if($groupByPO) {
+                                if ($groupByPO == 1) {
                                     echo "<th colspan=2>$th1</th>";
                                     echo "<th colspan=5>$th2</th>";
                                     echo "<th colspan=2>$th3</th>";
@@ -379,48 +309,16 @@
                             </tr>
                             @php
                                 $id = \Illuminate\Support\Facades\Auth::user()->id;
-                                $uname = \Illuminate\Support\Facades\Auth::user()->username;
-
-                                $filter_vbeln = "";
-                                if(isset($_POST['filter_vbeln']) && strlen($_POST['filter_vbeln']) > 0){
-                                    $filter_vbeln = $_POST['filter_vbeln'];
-                                }
-                                $filter_ebeln = "";
-                                if(isset($_POST['filter_ebeln']) && strlen($_POST['filter_ebeln']) > 0){
-                                    $filter_ebeln = $_POST['filter_ebeln'];
-                                }
-                                $filter_matnr = "";
-                                if(isset($_POST['filter_matnr']) && strlen($_POST['filter_matnr']) > 0){
-                                    $filter_matnr = $_POST['filter_matnr'];
-                                }
-                                $filter_mtext = "";
-                                if(isset($_POST['filter_mtext']) && strlen($_POST['filter_mtext']) > 0){
-                                    $filter_mtext = $_POST['filter_mtext'];
-                                }
-                                $filter_lifnr = "";
-                                if(isset($_POST['filter_lifnr']) && strlen($_POST['filter_lifnr']) > 0){
-                                    $filter_lifnr = $_POST['filter_lifnr'];
-                                }
-                                $filter_lifnr_name = "";
-                                if(isset($_POST['filter_lifnr_name']) && strlen($_POST['filter_lifnr_name']) > 0){
-                                    $filter_vbeln = $_POST['filter_lifnr_name'];
-                                }
-
-                                $orders = \App\Materom\Data::getOrders($id, $groupByPO, $f_history, $time_val,
+                                App\Materom\Orders::reloadCache($filter_history);
+                                $orders = \App\Materom\Data::getOrders($id, $groupByPO == 1, $filter_history, $filter_time_val,
                                      $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
                                      $filter_lifnr, $filter_lifnr_name);
-
-                                echo "<input type=\"hidden\" id=\"set-furnizor\" value=\"$groupByPO\">";
-                                echo "<input type=\"hidden\" id=\"filter-status\" value=\"$f_type\">";
-                                echo "<input type=\"hidden\" id=\"filter-history\" value=\"$f_history\">";
-                                echo "<input type=\"hidden\" id=\"user_id\" value=\"$id\">";
-                                echo "<input type=\"hidden\" id=\"user_name\" value=\"$uname\">";
 
                                 $seen = "";
                                 $line_counter = 1;
                                 foreach ($orders as $order) {
 
-                                    if($groupByPO){
+                                    if ($groupByPO == 1) {
                                         if(strchr($seen, $order->ebeln) == null)
                                             $seen.= " $order->ebeln";
                                         else
@@ -458,7 +356,7 @@
                                     $buttoncancel = "";
                                     $buttonrequest = "";
 
-                                    if($groupByPO){
+                                    if ($groupByPO == 1) {
                                         $oid = "P" . $order->ebeln;
                                         $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
                                                 "<td class='td02' colspan=5>$order->lifnr_name</td>" .
@@ -467,7 +365,7 @@
                                                 "<td class='td02' colspan=3>$order->erdat</td>" .
                                                 "<td class='td02' colspan=2>$order->curr</td>" .
                                                 "<td class='td02' colspan=3>$order->fxrate</td>";
-                                        switch (\App\Materom\Webservice::getGravity($order, "purch-order",$f_history)){
+                                        switch (\App\Materom\Webservice::getGravity($order, "purch-order",$filter_history)){
                                             case 0:
                                                 $info = "";
                                             break;
@@ -478,7 +376,7 @@
                                                 $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                                             break;
                                         }
-                                        switch (\App\Materom\Webservice::getOwner($order,"purch-order", $f_history)){
+                                        switch (\App\Materom\Webservice::getOwner($order,"purch-order", $filter_history)){
                                             case 0:
                                                 $owner = "";
                                             break;
@@ -500,7 +398,7 @@
                                             break;
                                         }
 
-                                        $itemchg_table = $f_history < 2 ? "pitemchg" : "pitemchg_arch";
+                                        $itemchg_table = $filter_history < 2 ? "pitemchg" : "pitemchg_arch";
                                         $stage = 0;
                                         if (\Illuminate\Support\Facades\DB::table($itemchg_table)->where('ebeln', $order->ebeln)->exists())
                                             $stage = 10;
@@ -509,7 +407,7 @@
                                         if($stage > 0)
                                             $processed = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
 
-                                        if($f_history == 2 || $stage > 0) {
+                                        if($filter_history == 2 || $stage > 0) {
                                             $buttonok = "";
                                             $buttoncancel = "";
                                             $buttonrequest = "";
@@ -520,12 +418,12 @@
                                         else
                                             $style = "background-color:Wheat;";
 
-                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->ebeln,$f_type,1, $f_history, null) > 0)
+                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->ebeln, $filter_status_type, 1, $filter_history, null) > 0)
                                             echo "<tr id='tr_$oid' style='$style'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td class='td01'>$info</td><td class='td01'>$owner</td><td class='td01'>$processed</td><td class='td01'></td><td class='td01'></td><td class='td01'>6</td><td  class='td01' style='padding: 0;'>$buttonok</td><td class='td01' style='padding: 0;'>$buttoncancel</td><td class='td01' style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>".
                                             "$data<td colspan='6'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
-                                        if (strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0) {
+                                        if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
                                             $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->kunnr) . "</td>" .
                                                     "<td class='td02' colspan=5>$order->kunnr_name</td>" .
                                                     "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->shipto) . "</td>" .
@@ -542,7 +440,7 @@
                                                     "<td class='td02' colspan=5>&nbsp;</td>".
                                                     "<td></td>";
                                                 }
-                                        switch (\App\Materom\Webservice::getGravity($order, "sales-order", $f_history)){
+                                        switch (\App\Materom\Webservice::getGravity($order, "sales-order", $filter_history)){
                                             case 0:
                                                 $info = "";
                                             break;
@@ -553,7 +451,7 @@
                                                 $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                                             break;
                                         }
-                                        switch (\App\Materom\Webservice::getOwner($order,"sales-order", $f_history)){
+                                        switch (\App\Materom\Webservice::getOwner($order,"sales-order", $filter_history)){
                                             case 0:
                                                 $owner = "";
                                             break;
@@ -574,7 +472,7 @@
                                                 break;
                                         }
 
-                                        if($f_history == 2){
+                                        if($filter_history == 2){
                                             $buttonok = "";
                                             $buttoncancel = "";
                                             $buttonrequest = "";
@@ -585,7 +483,7 @@
                                             $style = "background-color:white;";
                                         else
                                             $style = "background-color:WhiteSmoke;";
-                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->vbeln,$f_type,0, $f_history, null) > 0)
+                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->vbeln, $filter_status_type, 0, $filter_history, null) > 0)
                                             echo "<tr id='tr_$oid' style='$style' class='td01'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td colspan='7'></td><td colspan='3' class='td02' class='first_color'>$comanda</td>" .
                                             "$data<td colspan='5'></td></tr>";
                                     }
@@ -609,17 +507,18 @@
         function parent(id) {
             if (id.startsWith('I')) {
                 let res = id.substring(1);
-                if (($("#set-furnizor").val() == ""))
+                @if ($groupByPO == 0)
                     return $("input[name*='_" + res.split("_")[0] + "']")[0].name;
-                else
+                @else
                     return $("input[name*='" + res.split("_")[0] + "']")[0].name;
+                @endif
             } else if (id.startsWith('P')) {
-
-                if (($("#set-furnizor").val() == "1"))
+                @if ($groupByPO == 1)
                     return null;
-
-                let res = id.substring(1);
-                return "S" + res.split("_")[0];
+                @else
+                    let res = id.substring(1);
+                    return "S" + res.split("_")[0];
+                @endif
             } else {
                 return null;
             }
@@ -632,7 +531,11 @@
             if ($.inArray(id, unCheckedList) > -1)
                 return false;
 
-            if (id.startsWith('S') || (($("#set-furnizor").val() != "") && id.startsWith('P'))) {
+            @if ($groupByPO == 1)
+                if (id.startsWith('S') || id.startsWith('P')) {
+            @else
+                if (id.startsWith('S')) {
+            @endif
                 return false;
             }
 
@@ -731,9 +634,9 @@
                 if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
                     var date = new Date();
                     var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                    var cuser = $("#user_id").val();
-                    var cuser_name = $("#user_name").val();
-                    var ctext = "Acceptare";
+                    var cuser = "{{\Illuminate\Support\Facades\Auth::user()->id}}";
+                    var cuser_name = "{{\Illuminate\Support\Facades\Auth::user()->username}}";
+                    var ctext = "{{__("Acceptare")}}";
                     var creason = "";
                     if (chdate != null) {
                         var newRow = $("<tr>");
@@ -744,10 +647,12 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        let colsafter = "12";
-                        if ($("#set-furnizor").val() == "")
+                        @if ($groupByPO == 0)
+                            let colsafter = "12";
                             cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        else colsafter = "13";
+                        @else
+                            let colsafter = "13";
+                        @endif
                         cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + pi_style + '"></td>';
                         cols += "<td colspan='3'>" + chdate + "</td>";
@@ -755,8 +660,9 @@
                         cols += '<td colspan="6">' + ctext + '</td>';
                         cols += '<td colspan="2">' + creason + '</td>';
                         cols += "<td colspan=" + colsafter + "></td>";
-                        if ($("#set-furnizor").val() != "")
+                        @if ($groupByPO == 1)
                             cols += '<td></td>';
+                        @endif
                         cols += '<td colspan="4"></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
@@ -801,9 +707,9 @@
                 if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
                     var date = new Date();
                     var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                    var cuser = $("#user_id").val();
-                    var cuser_name = $("#user_name").val();
-                    var ctext = "Rejectare";
+                    var cuser = "{{\Illuminate\Support\Facades\Auth::user()->id}}";
+                    var cuser_name = "{{\Illuminate\Support\Facades\Auth::user()->username}}";
+                    var ctext = "{{__("Rejectare")}}";
                     var creason = "";
                     if (chdate != null) {
                         var newRow = $("<tr>");
@@ -814,10 +720,12 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        let colsafter = "12";
-                        if ($("#set-furnizor").val() == "")
+                        @if ($groupByPO == 0)
+                            let colsafter = "12";
                             cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        else colsafter = "13";
+                        @else
+                            let colsafter = "12";
+                        @endif
                         cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + pi_style + '"></td>';
                         cols += "<td colspan='3'>" + chdate + "</td>";
@@ -825,8 +733,9 @@
                         cols += '<td colspan="6">' + ctext + '</td>';
                         cols += '<td colspan="2">' + creason + '</td>';
                         cols += "<td colspan=" + colsafter + "></td>";
-                        if ($("#set-furnizor").val() != "")
+                        @if ($groupByPO == 1)
                             cols += '<td></td>';
+                        @endif
                         cols += '<td colspan="4"></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
@@ -845,7 +754,7 @@
         function accept(ebeln, id, type) {
             if (checkedList.length > 0) {
                 //apply to all
-                let f_history = $("#filter-history").val();
+                let f_history = {{$filter_history}};
                 var _data2, _status2 = "";
                 $.ajaxSetup({
                     headers: {
@@ -882,7 +791,7 @@
             if (checkedList.length > 0) {
                 //apply to all
                 //apply to all
-                let f_history = $("#filter-history").val();
+                let f_history = {{$filter_history}};
                 var _data2, _status2 = "";
                 $.ajaxSetup({
                     headers: {
@@ -922,7 +831,7 @@
 
             var _data, _status;
 
-            let f_history = $("#filter-history").val();
+            let f_history = {{$filter_history}};
 
             $.ajaxSetup({
                 headers: {
@@ -953,7 +862,7 @@
 
         function loadSub(item, type, _btn, ebelp) {
 
-            let f_history = $("#filter-history").val();
+            let f_history = {{$filter_history}};
 
             var _data, _status;
             var _this;
@@ -1000,7 +909,7 @@
                     var split = _data.split('=');
                     var line_counter = 1;
 
-                    let filter_status = $("#filter-status").val();
+                    let filter_status = {{$filter_status_type}};
 
                     split.forEach(function (_ord) {
                         line_counter = line_counter + 1;
@@ -1169,7 +1078,7 @@
                             if ((stage == 2) || (stage == 12))
                                 red_cross = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
 
-                            let filter_status = $("#filter-status").val();
+                            let filter_status = {{$filter_status_type}};
 
                             if (filter_status != "0") {
                                 if (filter_status == "2" && stage != 1 && stage != 11)
@@ -1178,7 +1087,7 @@
                                     return;
                             }
 
-                            if ($("#set-furnizor").val() == "") {
+                            @if ($groupByPO == 0)
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + image_owner + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + blue_circle + '</td>';
@@ -1189,7 +1098,7 @@
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + buttoncancel + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + buttonrequest + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
-                            } else {
+                            @else
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '"></td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + image_owner + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + blue_circle + '</td>';
@@ -1199,7 +1108,7 @@
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttonok + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttoncancel + '</td>';
                                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + buttonrequest + '</td>';
-                            }
+                            @endif
                             cols += '<td class="coloured" style="' + po_style + '"></td>';
                             cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' id='btn_I" + ebeln2 + "_" + id + "' onclick=\"loadSub(\'" + ebeln2 + "',\'purch-item\',this, \'" + id + "');\">+</button> " + id + "</td>";
                             cols += '<td class="td02h" colspan="2" onclick="change_matnr(this, \'' + ebeln2 + '\', \'' + id + '\');">' + idnlf + '</td>';
@@ -1209,8 +1118,9 @@
                             cols += '<td class="td02h" colspan="4" onclick="change_purchase_price(this, \'' + ebeln2 + '\', \'' + id + '\');">' + pur_price + '</td>';
                             cols += '<td class="td02" colspan="4">' + sal_price + '</td>';
                             cols += '<td colspan="5"></td>';
-                            if ($("#set-furnizor").val() != "")
+                            @if ($groupByPO == 1)
                                 cols += '<td colspan="1"></td>';
+                            @endif
                             newRow.append(cols).hide();
                             newRow.insertAfter($(_this).closest("tr")).fadeIn(250);
                             if (line_counter == 0)
@@ -1235,17 +1145,21 @@
                                 var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                                 var first_style = "background-color:" + first_color;
                                 cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                                let colsreason = "10";
-                                if ($("#set-furnizor").val() == "")
+                                @if ($groupByPO == 0)
+                                    let colsreason = "10";
                                     cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                                else colsreason = "11";
+                                @else
+                                    let colsreason = "11";
+                                @endif
                                 cols += '<td class="coloured" style="' + last_style + '"></td>';
                                 cols += '<td style="' + pi_style + '"></td>';
                                 cols += '<td class="td02" colspan="3">' + chdate + '</td>';
                                 cols += '<td class="td02" colspan="2">' + cuser + '</td>';
                                 cols += '<td class="td02" colspan="4">' + cuser_name + '</td>';
                                 cols += '<td class="td02" colspan="8">' + ctext + '</td>';
-                                if ($("#set-furnizor").val() != "") colsreason = colsreason + 1;
+                                @if ($groupByPO == 1)
+                                    colsreason = colsreason + 1;
+                                @endif
                                 cols += '<td class="td02" colspan="' + colsreason + '">' + creason + '</td>';
                                 newRow.append(cols);
                                 newRow.insertAfter($(_this).closest("tr"));
@@ -1282,13 +1196,13 @@
                         var po_style = "background-color:" + $(_this).css("background-color") + ";";
                         var first_color = $(_this).find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
-                        if ($("#set-furnizor").val() == "") {
+                        @if ($groupByPO == 0)
                             cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
                             colsafter = 5;
-                        } else {
+                        @else
                             cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
                             colsafter = 6;
-                        }
+                        @endif
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td class="td02" colspan="2"><b>Pozitie</b></td>';
                         cols += '<td class="td02" colspan="2"><b>Material</b></td>';
@@ -1298,7 +1212,7 @@
                         cols += '<td class="td02" colspan="4"><b>Pret achizitie</b></td>';
                         let sal_price_colname = "";
                         @php
-                            if (strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Furnizor" ) != 0)
+                            if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                             echo 'sal_price_colname = "Pret vanzare";';
                         @endphp
                         cols += '<td class="td02" colspan="4"><b>' + sal_price_colname + '</b></td>';
@@ -1316,10 +1230,12 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        var colsafter = "8";
-                        if ($("#set-furnizor").val() == "")
+                        @if ($groupByPO == 0)
+                            let colsafter = "8";
                             cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        else colsafter = "9";
+                        @else
+                            let colsafter = "9";
+                        @endif
                         cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + po_style + '"></td>';
                         cols += '<td class="td02" colspan="3"><b>Data</b></td>';

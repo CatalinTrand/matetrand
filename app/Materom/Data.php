@@ -53,7 +53,7 @@ class Data
         $itemchg_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
 
         $filter_vbeln_sql = self::processFilter("vbeln", $filter_vbeln, 10);
-        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln, 10);;
+        $filter_ebeln_sql = self::processFilter("ebeln", $filter_ebeln, 10);
         $filter_matnr_sql = self::processFilter("idnlf", $filter_matnr, 0);
         $filter_mtext_sql = self::processFilter("mtext", $filter_mtext, 0);
         $filter_lifnr_sql = self::processFilter("lifnr", $filter_lifnr, 10);
@@ -660,6 +660,12 @@ class Data
         }
         Mailservice::sendNotification($norder->lifnr,$ebeln);
         return "OK";
+    }
+
+    public static function debug($var) {
+        $tmp = $var;
+        $tmp2 = \Illuminate\Support\Facades\Session::get("filter_history");
+        $tmp3 = "";
     }
 
 }

@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Materom\Orders;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller
 {
@@ -36,9 +39,25 @@ class HomeController extends Controller
         return view('users.editUser');
     }
 
-    public function orders()
+    public function orders_get()
     {
         return view('orders.orders');
+    }
+
+    public function orders_post()
+    {
+        Session::put("groupOrdersBy", Input::get("groupOrdersBy"));
+        Session::put("filter_status", Input::get("filter_status"));
+        Session::put("filter_history", Input::get("filter_history"));
+        Session::put("filter_archdate", Input::get("time_search"));
+        Session::put("filter_vbeln", Input::get("filter_vbeln"));
+        Session::put("filter_ebeln", Input::get("filter_ebeln"));
+        Session::put("filter_matnr", Input::get("filter_matnr"));
+        Session::put("filter_mtext", Input::get("filter_mtext"));
+        Session::put("filter_lifnr", Input::get("filter_lifnr"));
+        Session::put("filter_lifnr_name", Input::get("filter_lifnr_name"));
+        Orders::fillCache();
+        return redirect()->back();
     }
 
     public function roles()

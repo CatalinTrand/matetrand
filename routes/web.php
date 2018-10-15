@@ -56,7 +56,8 @@ Route::post('/roles/roleUpdate','RolesController@insertRoleData');
 Route::get('/roles', 'HomeController@roles')->name('roles');
 Route::post('/roles', 'HomeController@save_roles')->name('save_roles');
 
-Route::any('/orders', 'HomeController@orders')->name('orders');
+Route::get('/orders', 'HomeController@orders_get')->name('orders');
+Route::post('/orders', 'HomeController@orders_post');
 
 Route::group(['prefix' => 'messages'], function () {
     Route::get('/', ['as' => 'messages', 'uses' => 'MessagesController@index']);
