@@ -226,28 +226,22 @@ class Orders
         $result = self::loadFromCache();
     }
 
-    public static function msg_contains_item($msg,$item){
-        foreach ($msg as $m){
-            if(strcmp($m->ebeln, $item->ebeln) == 0 && strcmp($m->ebelp, $item->ebelp) == 0 && strcmp($m->cdate, $item->cdate) == 0)
-                return true;
-        }
-        return false;
-    }
-
     public static function getMessageList() {
 
         $result = self::loadFromCache();
 
+        if($result == null)
+            echo $please->crash;
+
         $messages = array();
 
-        foreach ((array)$result as $order){
-            foreach ($order as $item){
-                foreach ($item as $item_chg){
-                    if($item_chg->acknowledged == 0)
-                        if(!self::msg_contains_item($messages,$item_chg)){
+        foreach ($result as $order){
+            foreach ($order->items as $item){
+                foreach ($item->changes as $item_chg){
+                    if($item->changes[count($item->changes) - 1]->acknowledged == 0){
                             $item_chg->vbeln = $item->vbeln;
                             array_push($messages,$item_chg);
-                        }
+                    }
                 }
             }
         }
