@@ -18,4 +18,4 @@ $table->string('newval', 80)->default('');
 $table->string('oebeln', 16)->default('');
 $table->string('oebelp', 5)->default('');
 $table->string('reason', 120)->default('');
-$table->integer('acknowledged', 1)->default(0);
+$table->integer('acknowledged')->default(0);
