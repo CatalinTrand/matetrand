@@ -189,7 +189,7 @@ class Orders
             "where pitems_cache.session = '$cacheid' order by pitems.ebeln, pitems.ebelp");
 
         $pitemschg = DB::select("select pitemchg.* from pitemchg join pitems_cache using (ebeln, ebelp) " .
-            "where pitems_cache.session = '$cacheid' order by pitemchg.ebeln, pitemchg.ebelp, pitemchg.cdate descending");
+            "where pitems_cache.session = '$cacheid' order by pitemchg.ebeln, pitemchg.ebelp, pitemchg.cdate desc");
 
         $xitem = 0;
         $xitemchg = 0;

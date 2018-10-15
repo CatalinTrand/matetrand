@@ -53,7 +53,7 @@ class POrderItemChg
         $this->newval = $pitemchg->newval;
         $this->reason = $pitemchg->reason;
         $this->oebeln = $pitemchg->oebeln;
-        $this->oebelp = $pitemchg->nebelp;
+        $this->oebelp = $pitemchg->oebelp;
         $this->acknowledged = $pitemchg->acknowledged;
     }
 
