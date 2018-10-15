@@ -54,6 +54,7 @@ class POrderItemChg
         $this->reason = $pitemchg->reason;
         $this->oebeln = $pitemchg->oebeln;
         $this->oebelp = $pitemchg->nebelp;
+        $this->acknowledged = $pitemchg->acknowledged;
     }
 
     public function fill() {
