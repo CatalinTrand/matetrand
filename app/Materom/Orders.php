@@ -226,4 +226,10 @@ class Orders
         $result = self::loadFromCache();
     }
 
+    public static function getMessageList() {
+
+        $result = self::loadFromCache();
+    }
+
+
 }
