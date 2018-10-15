@@ -1,0 +1,1 @@
+{{"Hello $user->username, comanda de aprovizionare $ebeln a fost creata/actualizata."}}
