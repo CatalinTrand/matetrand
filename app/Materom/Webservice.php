@@ -63,6 +63,45 @@ class Webservice
         return false;
     }
 
+    public static function getSubTree($type, $sorder, $porder, $item)
+    {
+        $data = Orders::loadFromCache();
+        if ($type == 'S') return self::getSOSubTree($sorder, $data);
+        if ($type == 'P') return self::getPOSubTree($porder, $sorder, $data);
+        if ($type == 'I') return self::getPOItemSubTree($porder, $item, $data);
+    }
+
+    public static function getSOSubTree($sorderno, $allporders)
+    {
+        $porders = array();
+        foreach ($allporders as $porder) {
+            if (isset($porder->salesorders[$sorderno]))
+                $porders[$porder->ebeln] = $porder;
+        }
+        if (empty($porders)) return "{}";
+        $outporders = array();
+        foreach($porders as $porder) {
+            $outporder = $porder;
+            unset($outporder->items);
+            unset($outporder->wtime);
+            unset($outporder->ctime);
+            unset($outporder->salesorders);
+            $outporders[] = $outporder;
+        }
+        $json = json_encode($outporders);
+        return $json;
+    }
+
+    public static function getPOSubTree($porderno, $sorderno, $allporders)
+    {
+
+    }
+
+    public static function getPOItemSubTree($porderno, $itemno, $allporders)
+    {
+
+    }
+
     public static function getAllItems($history){
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $links = DB::select("select * from ". $items_table);

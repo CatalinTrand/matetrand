@@ -133,6 +133,16 @@ class WebserviceController extends Controller
         );
     }
 
+    public function getSubTree() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return Webservice::getSubTree(
+            Input::get("type"),
+            Input::get("sorder"),
+            Input::get("porder"),
+            Input::get("item")
+        );
+    }
+
     public function getVendorUsers(){
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::getVendorUsers(Input::get("lifnr"));

@@ -75,5 +75,14 @@ class POrder
         foreach ($this->items as $item) {
             $this->salesorders[$item->sorder] = $item->ebelp;
         }
+        $this->info = 0;
+        $this->owner = 0;
+        $this->changed = 0;
+        $this->accepted = 0;
+        $this->rejected = 0;
+        $this->inquired = 0;
+        $this->accept = 1;
+        $this->reject = 1;
+        $this->inquire = 1;
     }
 }

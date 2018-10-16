@@ -30,6 +30,7 @@ Route::get('/editUser', 'HomeController@editUser')->name('editUser');
 Route::post('/editUser', 'HomeController@save_edit')->name('save_edit');
 Route::post('/editUser/edit','EditUserController@editUsers');
 
+// Webservices
 Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertmanufacturer','WebserviceController@insertManufacturer');
 Route::post('webservice/insertreferenceuser','WebserviceController@insertReferenceUser');
@@ -41,7 +42,9 @@ Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/changeItemStat','WebserviceController@changeItemStat');
 Route::post('webservice/sendAck','WebserviceController@sendAck');
+Route::get('webservice/getsubtree','WebserviceController@getSubTree');
 
+// SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');
 Route::get('webservice/get_ctv_users','WebserviceController@getCTVUsers');
 Route::get('webservice/sap_activate_user','WebserviceController@sapActivateUser');

@@ -37,7 +37,7 @@ class POrderItem
     public $status;      // A-accepted, X-rejected,
                          // T-tentatively accepted,
                          // R-tentatively rejected
-    public $changed;     // 0=no, 1=yes
+    public $changed;  // 0=no, 1=yes
 
     // sales order position related information
     public $sales_price; // VBAP-NETPR
@@ -58,8 +58,8 @@ class POrderItem
     public $info;     // 0=empty, 1=new item, 2=warning, 3=critical, 4=new message
     public $owner;    // 0=no, 1=direct, 2=indirect
     // changed:  $this->changed
-    // accepted; $this->status = A
-    // rejected; $this->status = X
+    public $accepted; // $this->status = A
+    public $rejected; // $this->status = X
     public $inquired; // 0=no, 1=tentatively accepted, 2=rejected, 3=simple message
 
     // buttons
@@ -137,6 +137,15 @@ class POrderItem
             $this->kunnr_name = MasterData::getKunnrName($this->kunnr, 2);
             $this->shipto_name = MasterData::getKunnrName($this->shipto, 2);
         }
+
+        $this->info = 0;
+        $this->owner = 0;
+        $this->accepted = 0;
+        $this->rejected = 0;
+        $this->inquired = 0;
+        $this->accept = 1;
+        $this->reject = 1;
+        $this->inquire = 1;
     }
 
 

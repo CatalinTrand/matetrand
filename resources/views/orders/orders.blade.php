@@ -261,9 +261,9 @@
                                         $th2 = ""; // "Nume";
                                         $th3 = __("Referent");
                                         $th4 = ""; // "Aprovizionare";
-                                        $th5 = "Data creare";
-                                        $th6 = "Moneda";
-                                        $th7 = "Rata schimb";
+                                        $th5 = __("Data creare");
+                                        $th6 = __("Moneda");
+                                        $th7 = __("Rata schimb");
                                     } else {
                                         echo '<th class="td02" colspan="3">' . __('Comanda client') . '</th>';
                                         if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
@@ -307,25 +307,20 @@
                                 @endphp
                             </tr>
                             @php
-                                /* $id = \Illuminate\Support\Facades\Auth::user()->id;
-                                $orders = \App\Materom\Data::getOrders($id, $groupByPO == 1, $filter_history, $filter_time_val,
-                                     $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
-                                     $filter_lifnr, $filter_lifnr_name); */
                                 $orders = App\Materom\Orders::getOrderList();
-
-                                $seen = "";
                                 $line_counter = 1;
+
                                 foreach ($orders as $order) {
 
                                     if ($groupByPO == 1) {
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_P$order->ebeln' onclick='loadSub2(this); return false;'>+</button> ".
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> ".
                                             \App\Materom\SAP::alpha_output($order->ebeln);
                                     } else {
                                         $buttname = $order->vbeln;
                                         if (strtoupper($buttname) == "!REPLENISH") $buttname = __('Stock');
                                         elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
                                         else $buttname = \App\Materom\SAP::alpha_output($buttname);
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_S$order->vbeln' onclick='loadSub2(this); return false;'>+</button> $buttname";
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
                                     }
 
                                     $line_counter = $line_counter + 1;
@@ -382,9 +377,9 @@
                                             $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
                                         $accepted_icon = "";
                                         if ($order->accepted == 1)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                                         elseif ($order->accepted == 2)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                                         $rejected_icon = "";
                                         if ($order->rejected == 1)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
@@ -889,6 +884,269 @@
                     return false;
             }
             return true;
+        }
+
+        function getSubTree(thisbtn) {
+            var currentrow;
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            let rowtype = rowid.substr(3, 1);
+            let order = rowid.substr(4, 10);
+            let sorder = "";
+            let porder = "";
+            let item = "";
+            if (rowtype == 'S') sorder = order;
+            if (rowtype == "I") item = rowid.substr(15, 5);
+            if (rowtype == 'P') {
+                porder = order;
+                @if ($groupByPO == 0)
+                    sorder = $(currentrow).prev().attr("id").substr(4, 10);
+                @endif
+            }
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _data, _status;
+            $.get("webservice/getsubtree",
+                {
+                    type: rowtype,
+                    sorder: sorder,
+                    porder: porder,
+                    item: item
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_status != "success") return;
+            if (_data.length > 0) {
+                if (rowtype == 'S') getSOSubTree(currentrow, sorder, _data);
+                else if (rowtype == 'P') getPOSubTree(currentrow, porder, sorder, _data);
+                else if (rowtype == 'I') getPOItemSubTree(currentrow, porder, item, _data);
+            }
+            thisbtn.innerHTML = '-';
+            thisbtn.onclick = function () {
+                hideSubTree(this);
+                return false;
+            };
+            return false;
+        }
+
+        function getSOSubTree(currentrow, order, _data)
+        {
+            // PO header
+            var newRow = $("<tr>");
+            var cols = "";
+            var so_style = "background-color:" + $(currentrow).css("background-color") + ";";
+            cols += '<td class="first_color" style="' + so_style + '" colspan="11"></td>';
+            cols += '<td colspan="3"><b>{{__("Comanda aprovizionare")}}</b></td>';
+            cols += '<td colspan="2"><b>{{__("Supplier")}}</b></td>';
+            cols += '<td colspan="5"><b>&nbsp;</b></td>';
+            cols += '<td colspan="2"><b>{{__("Referent")}}</b></td>';
+            cols += '<td colspan="4"><b>&nbsp;</b></td>';
+            cols += '<td colspan="3"><b>{{__("Data creare")}}</b></td>';
+            cols += '<td colspan="2"><b>{{__("Moneda")}}</b></td>';
+            cols += '<td colspan="3"><b>{{__("Rata de schimb")}}</b></td>';
+            cols += '<td colspan="5"><b></b></td>';
+            newRow.append(cols).hide();
+            $(currentrow).after(newRow);
+            newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
+            newRow.attr('id', "tr_HS" + order);
+
+            // POs
+            for (i = 0; i < _data.length; i++) {
+                let prevrow = newRow;
+                let porder = _data[i];
+
+                let info_icon = "";
+                switch (porder.info) {
+                    case 0:
+                        info_icon = "";
+                        break;
+                    case 1:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        break;
+                    case 2:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                        break;
+                    case 3:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                        break;
+                    case 4:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                        break;
+                }
+                let owner_icon = "";
+                switch (porder.owner) {
+                    case 0:
+                        owner_icon = "";
+                        break;
+                    case 1:
+                        owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                        break;
+                    case 2:
+                        owner_icon = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                        break;
+                    case 3:
+                        owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
+                        break;
+                }
+
+                let changed_icon = "";
+                if (porder.changed != 0)
+                    changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+
+                let accepted_icon = "";
+                if (porder.accepted == 1)
+                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                else
+                    if (porder.accepted == 2)
+                        accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+
+                let rejected_icon = "";
+                if (porder.rejected == 1)
+                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                else
+                    if (porder.rejected == 2)
+                        rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+
+                let inquired_icon = "";
+                if (porder.inquired == 1)
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                else
+                    if (porder.inquired == 2)
+                        inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                    else
+                        if (porder.inquired == 3)
+                            inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
+
+                let button_accept = "";
+                if (porder.accept == 1)
+                    button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                let button_reject = "";
+                if (porder.reject == 1)
+                    button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                let button_inquire = "";
+                if (porder.inquire == 1)
+                    button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+
+
+                var newRow = $("<tr>");
+                var cols = "";
+                cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="P' + order + "_" + porder.ebeln + '" value="P' + order + "_" + porder.ebeln + '"></td>';
+                var so_style = "background-color:" + $(currentrow).css("background-color") + ";";
+                cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + info_icon + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + owner_icon + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + changed_icon + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + accepted_icon + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + rejected_icon + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '" colspan="1">' + inquired_icon + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_accept + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_reject + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_inquire + '</td>';
+                cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
+                cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);\">+</button> " + conv_exit_alpha_output(porder.ebeln) + "</td>";
+                cols += '<td class="td02" colspan="2">' + conv_exit_alpha_output(porder.lifnr) + '</td>';
+                cols += '<td class="td02" colspan="5">' + porder.lifnr_name + '</td>';
+                cols += '<td class="td02" colspan="1">' + porder.ekgrp + '</td>';
+                cols += '<td class="td02" colspan="5">' + porder.ekgrp_name + '</td>';
+                cols += '<td class="td02" colspan="3">' + porder.erdat + '</td>';
+                cols += '<td class="td02" colspan="2">' + porder.curr + '</td>';
+                cols += '<td class="td02" colspan="3">' + porder.fxrate + '</td>';
+                cols += '<td class="td02" colspan="5"></td>';
+                newRow.append(cols).hide();
+                $(prevrow).after(newRow);
+                if (i%2 == 0)
+                    newRow.attr('style', "background-color:LightYellow; vertical-align: middle;");
+                else
+                    newRow.attr('style', "background-color:Wheat; vertical-align: middle;");
+                newRow.attr('id', "tr_P" + porder.ebeln);
+            }
+        }
+
+        function getPOSubTree(currentrow, order, sorder, _data)
+        {
+            // PO item header
+            var newRow = $("<tr>");
+            var cols = "";
+            var po_style = "background-color:" + $(currentrow).css("background-color") + ";";
+            var first_color = $(currentrow).find(".first_color").css("background-color");
+            var first_style = "background-color:" + first_color;
+            @if ($groupByPO == 0)
+                cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
+            colsafter = 5;
+            @else
+                cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
+                colsafter = 6;
+            @endif
+            cols += '<td style="' + po_style + '"></td>';
+            cols += '<td class="td02" colspan="2"><b>{{__("Pozitie")}}</b></td>';
+            cols += '<td class="td02" colspan="2"><b>{{__("Material")}}</b></td>';
+            cols += '<td class="td02" colspan="5"><b>{{__("Descriere material")}}</b></td>';
+            cols += '<td class="td02" colspan="3"><b>{{__("Cantitate")}}</b></td>';
+            cols += '<td class="td02" colspan="3"><b>{{__("Data livrare")}}</b></td>';
+            cols += '<td class="td02" colspan="4"><b>{{__("Pret achizitie")}}</b></td>';
+            @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                cols += '<td class="td02" colspan="4"><b>{{__("Pret vanzare")}}</b></td>';
+            @else
+                cols += '<td class="td02" colspan="4"><b>&nbsp;</b></td>';
+            @endif
+            cols += '<td class="td02" colspan="' + colsafter + '"></td>';
+            newRow.append(cols).hide();
+            $(currentrow).after(newRow);
+            newRow.attr('style', "background-color:YellowGreen; vertical-align: middle;");
+            newRow.attr('id', "tr_HP" + order);
+        }
+
+        function getPOItemSubTree(currentrow, order, item, _data)
+        {
+            // PO item changes header
+            var newRow = $("<tr>");
+            var cols = "";
+            var po_style = "background-color:" + $(currentrow).css("background-color") + ";";
+            var color = $(currentrow).closest("tr").find(".coloured").css("background-color");
+            var last_style = "background-color:" + color;
+            var first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
+            var first_style = "background-color:" + first_color;
+            cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+            @if ($groupByPO == 0)
+                let colsafter = "8";
+                cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+            @else
+                let colsafter = "9";
+            @endif
+            cols += '<td class="coloured" style="' + last_style + '"></td>';
+            cols += '<td style="' + po_style + '"></td>';
+            cols += '<td class="td02" colspan="3"><b>{{__("Data")}}</b></td>';
+            cols += '<td class="td02" colspan="6"><b>{{__("Utilizator")}}</b></td>';
+            cols += '<td class="td02" colspan="8"><b>{{__("Ce s-a schimbat")}}</b></td>';
+            cols += '<td class="td02" colspan="2"><b>{{__("Motiv")}}</b></td>';
+            cols += '<td colspan=' + colsafter + '><b></b></td>';
+            newRow.append(cols).hide();
+            $(currentrow).after(newRow);
+            newRow.attr('style', "background-color:#ADD8E6; vertical-align: middle;");
+            newRow.attr('id', "tr_HI" + order + "_" + item);
+        }
+
+        function hideSubTree(thisbtn)
+        {
+            var currentrow, nextrow;
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            while (((nextrow = $(currentrow).next()) != null) &&
+                   (nextrow !== undefined) &&
+                   (nextrow.length > 0) &&
+                   (nextrow.attr('id').substr(0, 4).toUpperCase() != rowid.substr(0, 4))) {
+                nextrow.remove();
+            }
+            thisbtn.innerHTML = '+';
+            thisbtn.onclick = function () {
+                getSubTree(this);
+                return false;
+            }
         }
 
         function loadSub(item, type, _btn, ebelp) {
