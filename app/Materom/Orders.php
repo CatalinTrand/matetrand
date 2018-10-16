@@ -224,6 +224,7 @@ class Orders
         if (!isset($groupByPO)) $groupByPO = 1;
 
         $result = self::loadFromCache();
+
     }
 
     public static function getMessageList() {

@@ -308,11 +308,11 @@
                                 @endphp
                             </tr>
                             @php
-                                $id = \Illuminate\Support\Facades\Auth::user()->id;
-                                App\Materom\Orders::loadFromCache();
+                                /* $id = \Illuminate\Support\Facades\Auth::user()->id;
                                 $orders = \App\Materom\Data::getOrders($id, $groupByPO == 1, $filter_history, $filter_time_val,
                                      $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
-                                     $filter_lifnr, $filter_lifnr_name);
+                                     $filter_lifnr, $filter_lifnr_name); */
+                                App\Materom\Orders::loadFromCache();
 
                                 $seen = "";
                                 $line_counter = 1;
