@@ -42,7 +42,9 @@ Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/changeItemStat','WebserviceController@changeItemStat');
 Route::post('webservice/sendAck','WebserviceController@sendAck');
+Route::post('webservice/replyMsg','WebserviceController@replyMsg');
 Route::get('webservice/getsubtree','WebserviceController@getSubTree');
+Route::post('webservice/sortBy','WebserviceController@sortBy');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');
@@ -63,12 +65,5 @@ Route::post('/roles', 'HomeController@save_roles')->name('save_roles');
 Route::get('/orders', 'HomeController@orders_get')->name('orders');
 Route::post('/orders', 'HomeController@orders_post');
 
-Route::group(['prefix' => 'messages'], function () {
-    Route::get('/', ['as' => 'messages', 'uses' => 'MessagesController@index']);
-    Route::get('create', ['as' => 'messages.create', 'uses' => 'MessagesController@create']);
-    Route::get('viewMsg', ['as' => 'messages.viewMsg', 'uses' => 'MessagesController@viewMsg']);
-    Route::get('sentMessages', ['as' => 'messages.sentMessages', 'uses' => 'MessagesController@sentMessages']);
-    Route::post('/', ['as' => 'messages.store', 'uses' => 'MessagesController@store']);
-    Route::get('{id}', ['as' => 'messages.show', 'uses' => 'MessagesController@show']);
-    Route::put('{id}', ['as' => 'messages.update', 'uses' => 'MessagesController@update']);
-});
+Route::get('/messages', 'HomeController@messages_get')->name('messages');
+Route::post('/messages', 'HomeController@messages_post');

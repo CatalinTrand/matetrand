@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Session;
 
 
 class Webservice
@@ -115,11 +116,18 @@ class Webservice
         return $result;
     }
 
+    public static function sortBy($type){
+        Session::put("message-filter",$type);
+        return "";
+    }
+
     static function new_simple_chg($ebeln,$ebelp,$ctype,$stage,$cuser,$cuser_name,$oldval,$newval,$reason){
         DB::insert("insert into pitemchg (ebeln,ebelp,cdate,internal,ctype,stage,cuser,cuser_name,oldval,newval,reason) values ('$ebeln','$ebelp',NOW(),'0','$ctype','$stage','$cuser','$cuser_name','$oldval','$newval','$reason')");
     }
 
-    static function replyMsg($ebeln,$ebelp,$cdate,$idnlf,$lfdat,$qty,$purch_price,$reason){
+    public static function replyMsg($ebeln,$ebelp,$cdate,$idnlf,$lfdat,$qty,$purch_price,$reason){
+
+        //TODO - cand mai mult de una difera, nu mai merge, individual merg toate
 
         $oldItem = DB::select("select * from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'")[0];
 
@@ -127,23 +135,34 @@ class Webservice
         $uname = Auth::user()->username;
         $stage = (strtoupper($uname))[0];
         if($stage == 'A') $stage = 'R';
-        $ctype = "M";
 
-        if(strcmp($oldItem->idnlf,$idnlf) != 0){
+
+        if(strcmp($oldItem->idnlf,$idnlf) != 0 && strcmp("",$idnlf) != 0){
+            $ctype = "M";
             self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->idnlf,$idnlf,$reason);
+        } else {
+            $idnlf = $oldItem->idnlf;
         }
 
-        if(strcmp($oldItem->lfdat,$lfdat) != 0){
-
+        if(strcmp($oldItem->lfdat,$lfdat ) != 0 && strcmp("",$lfdat) != 0){
+            $ctype = "D";
             self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->lfdat,$lfdat,$reason);
+        } else {
+            $lfdat = $oldItem->lfdat;
         }
 
-        if(strcmp($oldItem->qty,$qty) != 0){
+        if(strcmp($oldItem->qty,$qty) != 0 && strcmp("",$qty) != 0){
+            $ctype = "Q";
             self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->qty,$qty,$reason);
+        } else {
+            $qty = $oldItem->qty;
         }
 
-        if(strcmp($oldItem->purch_price,$purch_price) != 0){
+        if(strcmp($oldItem->purch_price,$purch_price) != 0 && strcmp("",$purch_price) != 0){
+            $ctype = "P";
             self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->purch_price,$purch_price,$reason);
+        } else {
+            $purch_price = $oldItem->purch_price;
         }
 
 

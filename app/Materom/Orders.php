@@ -203,6 +203,7 @@ class Orders
                     && (($pitemchg = $pitemschg[$xitemchg])->ebeln == $pitem->ebeln)
                     && (($pitemchg = $pitemschg[$xitemchg])->ebelp == $pitem->ebelp)) {
                     $xitemchg++;
+                    $pitemchg->sorder = $_pitem->sorder;
                     $_pitemchg = new POrderItemChg($pitemchg);
                     $_pitemchg->fill();
                     $_pitem->appendChange($_pitemchg);
@@ -273,7 +274,96 @@ class Orders
         return $orders;
     }
 
-    public static function getMessageList() {
+    static function cmp_ebeln($a, $b){
+        return strcmp($a->ebeln, $b->ebeln);
+    }
+
+    static function cmp_cdate($a, $b){
+        return strcmp($b->cdate, $a->cdate);
+    }
+
+    static function cmp_cuser($a, $b){
+        return strcmp($a->cuser, $b->cuser);
+    }
+
+    static function matchesFilters($item_chg){
+
+        $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln_msg");
+        if (isset($filter_vbeln)){
+            if (strpos($filter_vbeln, '*') !== false){
+                $filter_vbeln = str_replace("*",".*",$filter_vbeln);
+                if (!preg_match("/^$filter_vbeln$/",$item_chg->vbeln))
+                    return false;
+            } else {
+                if(strcmp($filter_vbeln,$item_chg->vbeln) != 0)
+                    return false;
+            }
+        }
+
+        $filter_ebeln = \Illuminate\Support\Facades\Session::get("filter_ebeln_msg");
+        if (isset($filter_ebeln) && strcmp($filter_ebeln,"") != 0){
+            if (strpos($filter_ebeln, '*') !== false){
+                $filter_ebeln = str_replace("*",".*",$filter_ebeln);
+                if (!preg_match("/^$filter_ebeln$/",$item_chg->ebeln))
+                    return false;
+            } else {
+                if(strcmp($filter_ebeln,$item_chg->ebeln) != 0)
+                    return false;
+            }
+        }
+
+        $filter_matnr = \Illuminate\Support\Facades\Session::get("filter_matnr_msg");
+        if (isset($filter_matnr) && strcmp($filter_matnr,"") != 0){
+            if (strpos($filter_matnr, '*') !== false){
+                $filter_matnr = str_replace("*",".*",$filter_matnr);
+                if (!preg_match("/^$filter_matnr$/",$item_chg->matnr))
+                    return false;
+            } else {
+                if(strcmp($filter_matnr,$item_chg->matnr) != 0)
+                    return false;
+            }
+        }
+
+        $filter_mtext = \Illuminate\Support\Facades\Session::get("filter_mtext_msg");
+        if (isset($filter_mtext) && strcmp($filter_mtext,"") != 0){
+            if (strpos($filter_mtext, '*') !== false){
+                $filter_mtext = str_replace("*",".*",$filter_mtext);
+                if (!preg_match("/^$filter_mtext$/",$item_chg->mtext))
+                    return false;
+            } else {
+                if(strcmp($filter_mtext,$item_chg->mtext) != 0)
+                    return false;
+            }
+        }
+
+        $filter_lifnr = \Illuminate\Support\Facades\Session::get("filter_lifnr_msg");
+        if (isset($filter_lifnr) && strcmp($filter_lifnr,"") != 0){
+            if (strpos($filter_lifnr, '*') !== false){
+                $filter_lifnr = str_replace("*",".*",$filter_lifnr);
+                if (!preg_match("/^$filter_lifnr$/",$item_chg->cuser))
+                    return false;
+            } else {
+                if(strcmp($filter_lifnr,$item_chg->cuser) != 0)
+                    return false;
+            }
+        }
+
+        $filter_lifnr_name = \Illuminate\Support\Facades\Session::get("filter_lifnr_name_msg");
+        if (isset($filter_lifnr_name) && strcmp($filter_lifnr_name,"") != 0){
+            if (strpos($filter_lifnr_name, '*') !== false){
+                $filter_lifnr_name = str_replace("*",".*",$filter_lifnr_name);
+                if (!preg_match("/^$filter_lifnr_name$/",$item_chg->cuser_name))
+                    return false;
+            } else {
+                if(strcmp($filter_lifnr_name,$item_chg->cuser_name) != 0)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static function getMessageList($filter) {
 
         $result = self::loadFromCache();
 
@@ -282,13 +372,20 @@ class Orders
         foreach ($result as $order){
             foreach ($order->items as $item){
                 foreach ($item->changes as $item_chg){
-                    if($item_chg->acknowledged == 0){
-                            $item_chg->vbeln = $item->vbeln;
+                    $item_chg->vbeln = $item->vbeln;
+                    if($item_chg->acknowledged == 0 && self::matchesFilters($item_chg)){
                             array_push($messages,$item_chg);
                     }
                 }
             }
         }
+
+        if(strcmp($filter,"ebeln") == 0)
+            usort($messages, array("App\Materom\Orders","cmp_ebeln"));
+        if(strcmp($filter,"cdate") == 0)
+            usort($messages, array("App\Materom\Orders","cmp_cdate"));
+        if(strcmp($filter,"cuser") == 0)
+            usort($messages, array("App\Materom\Orders","cmp_cuser"));
 
         return $messages;
 

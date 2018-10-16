@@ -60,6 +60,23 @@ class HomeController extends Controller
         return redirect()->back();
     }
 
+    public function messages_get()
+    {
+        return view('messenger.messages');
+    }
+
+    public function messages_post()
+    {
+        Session::put("filter_vbeln_msg", Input::get("filter_vbeln"));
+        Session::put("filter_ebeln_msg", Input::get("filter_ebeln"));
+        Session::put("filter_matnr_msg", Input::get("filter_matnr"));
+        Session::put("filter_mtext_msg", Input::get("filter_mtext"));
+        Session::put("filter_lifnr_msg", Input::get("filter_lifnr"));
+        Session::put("filter_lifnr_name_msg", Input::get("filter_lifnr_name"));
+        Orders::fillCache();
+        return redirect()->back();
+    }
+
     public function roles()
     {
         return view('roles.roles');
