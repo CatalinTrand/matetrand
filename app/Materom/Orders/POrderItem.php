@@ -10,6 +10,7 @@ namespace App\Materom\Orders;
 
 
 use App\Materom\Orders;
+use App\Materom\SAP\MasterData;
 use Illuminate\Support\Facades\Auth;
 
 class POrderItem
@@ -126,10 +127,15 @@ class POrderItem
             $this->sales_prun = "";
             $this->sales_puom = "";
             $this->kunnr = "";
+            $this->kunnr_name = "";
             $this->shipto = "";
+            $this->shipto_name = "";
             $this->ctv = "";
             $this->ctv_name = "";
             if (!empty($this->sorder)) $this->sorder = Orders::salesorder;
+        } else {
+            $this->kunnr_name = MasterData::getKunnrName($this->kunnr, 2);
+            $this->shipto_name = MasterData::getKunnrName($this->shipto, 2);
         }
     }
 

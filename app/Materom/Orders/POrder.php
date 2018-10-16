@@ -9,6 +9,8 @@
 namespace App\Materom\Orders;
 
 
+use App\Materom\SAP\MasterData;
+
 class POrder
 {
     public $ebeln;    // EKKO-EBELN
@@ -20,7 +22,6 @@ class POrder
     public $erdat;    // EKKO-ERDAT
     public $curr;     // EKKO-WAERS
     public $fxrate;   // EKKO-WKURS
-    public $nof;      // new/old flag
     public $wtime;    // processing warning date
     public $ctime;    // processing critical date
 
@@ -68,6 +69,11 @@ class POrder
 
     public function fill()
     {
-
+        $this->lifnr_name = MasterData::getLifnrName($this->lifnr, 2);
+        $this->ekgrp_name = MasterData::getEkgrpName($this->ekgrp, 2);
+        $this->salesorders = array();
+        foreach ($this->items as $item) {
+            $this->salesorders[$item->sorder] = $item->ebelp;
+        }
     }
 }

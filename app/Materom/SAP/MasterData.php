@@ -42,6 +42,7 @@ class MasterData
 
     static public function getLifnrName($lifnr, $cover_error = 0)
     {
+        if (empty(trim($lifnr))) return "";
         $lifnr_name = DB::table("sap_lfa1")->where("lifnr", $lifnr)->value("name1");
         if (isset($lifnr_name)) return $lifnr_name;
         $lifnr_name = self::getData("LIFNR_NAME", $lifnr);
@@ -56,6 +57,7 @@ class MasterData
 
     static public function getKunnrName($kunnr, $cover_error = 0)
     {
+        if (empty(trim($kunnr))) return "";
         $kunnr_name = DB::table("sap_kna1")->where("kunnr", $kunnr)->value("name1");
         if (isset($kunnr_name)) return $kunnr_name;
         $kunnr_name = self::getData("KUNNR_NAME", $kunnr);
@@ -70,6 +72,7 @@ class MasterData
 
     static public function getEkgrpName($ekgrp, $cover_error = 0)
     {
+        if (empty(trim($ekgrp))) return "";
         $ekgrp_name = DB::table("sap_t024")->where("ekgrp", $ekgrp)->value("eknam");
         if (isset($ekgrp_name)) return $ekgrp_name;
         $ekgrp_name = self::getData("EKGRP_NAME", $ekgrp);

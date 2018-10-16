@@ -11,6 +11,7 @@ namespace App\Materom;
 use App\Materom\Orders\POrder;
 use App\Materom\Orders\POrderItem;
 use App\Materom\Orders\POrderItemChg;
+use App\Materom\SAP\MasterData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -199,8 +200,8 @@ class Orders
                 $xitem++;
                 $_pitem = new POrderItem($pitem);
                 while ($xitemchg < count($pitemschg)
-                    && (($pitemchg = $pitemschg[$xitem])->ebeln == $pitem->ebeln)
-                    && (($pitemchg = $pitemschg[$xitem])->ebelp == $pitem->ebelp)) {
+                    && (($pitemchg = $pitemschg[$xitemchg])->ebeln == $pitem->ebeln)
+                    && (($pitemchg = $pitemschg[$xitemchg])->ebelp == $pitem->ebelp)) {
                     $xitemchg++;
                     $_pitemchg = new POrderItemChg($pitemchg);
                     $_pitemchg->fill();
@@ -208,7 +209,6 @@ class Orders
                 }
                 $_pitem->fill();
                 $_porder->appendItem($_pitem);
-                $_porder->items[$pitem->ebelp] = $_pitem;
             }
             $_porder->fill();
             $result[$porder->ebeln] = $_porder;
@@ -220,11 +220,57 @@ class Orders
     public static function getOrderList($groupByPO = null) {
 
         if (!isset($groupByPO))
-            $groupByPO = Session::get("groupByPO");
+            $groupByPO = Session::get("groupOrdersBy");
         if (!isset($groupByPO)) $groupByPO = 1;
 
         $result = self::loadFromCache();
 
+        if ($groupByPO == 0) {
+            $orders = array();
+            foreach ($result as $porder) {
+                foreach ($porder->salesorders as $ebelp) {
+                    $vbeln = key($porder->salesorders);
+                    $sorder = isset($orders[$vbeln]) ? $orders[$vbeln] : null;
+                    if (!isset($sorder)) {
+                        $sorder = new \stdClass();
+                        $sorder->info = $porder->info;
+                        $sorder->wtime = $porder->wtime;
+                        $sorder->ctime = $porder->ctime;
+                        $sorder->vbeln = $vbeln;
+                        $pitem = $porder->items[$ebelp];
+                        $sorder->kunnr = $pitem->kunnr;
+                        $sorder->kunnr_name = $pitem->kunnr_name;
+                        $sorder->shipto = $pitem->shipto;
+                        $sorder->shipto_name = $pitem->shipto_name;
+                        $sorder->ctv = $pitem->ctv;
+                        $sorder->ctv_name = $pitem->ctv_name;
+
+                        $sorder->info = 0;     // 0=empty, 1=new order, 2=warning, 3=critical, 4=new message
+                        $sorder->owner = 0;    // 0=no, 1=direct, 2=indirect
+                        $sorder->changed = 0;  // 0=no, 1=direct, 2=indirect
+                        $sorder->accepted = 0; // 0=no, 1=direct, 2=indirect
+                        $sorder->rejected = 0; // 0=no, 1=direct, 2=indirect
+                        $sorder->inquired = 0; // 0=no, 1=tentatively accepted, 2=rejected, 3=simple message
+
+                        // buttons
+                        $sorder->accept = 0;   // 0-no, 1=display
+                        $sorder->reject = 0;   // 0=no, 1=display
+                        $sorder->inquire = 0;  // 0=no
+
+                        $orders[$sorder->vbeln] = $sorder;
+
+                    } else {
+                        if ($porder->info > $sorder->info) $sorder->info = $porder->info;
+                        if ($porder->wtime < $sorder->wtime) $sorder->wtime = $porder->wtime;
+                        if ($porder->ctime < $sorder->ctime) $sorder->ctime = $porder->ctime;
+                    }
+                }
+            }
+
+        } else $orders = $result;
+
+        ksort($orders);
+        return $orders;
     }
 
     public static function getMessageList() {

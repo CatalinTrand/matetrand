@@ -24,7 +24,7 @@ class POrderItemChg
                         // Q-quantity
                         // P-price
                         // D-delivery date
-                        // M-message
+                        // E-message
                         // S-split
     public $stage;      // changing user stage
     public $cuser;      // changing user
@@ -32,6 +32,7 @@ class POrderItemChg
     public $oldval;     // old value
     public $newval;     // new value
     public $reason;     // reason/message text
+    public $acknowledged; // message was acknowledged
 
     public $oebeln;     // originating purchase number (split)
     public $oebelp;     // originating purchase item (split)
@@ -58,6 +59,38 @@ class POrderItemChg
     }
 
     public function fill() {
+
+        switch ($this->ctype) {
+
+
+            case "A":
+                $this->text = __("Accepted");
+                break;
+            case "T":
+                $this->text = __("Accepted after change");
+                break;
+            case "X":
+                $this->text = __("Rejected");
+                break;
+            case "M":
+                $this->text =  __("Material code modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
+                break;
+            case "Q":
+                $this->text = __("Quantity modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
+                break;
+            case "P":
+                $this->text = __("Price modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
+                break;
+            case "D":
+                $this->text = __("Delivery date modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
+                break;
+            case "E":
+                $this->text = $this->reason;
+                break;
+            case "S":
+                $this->text = __("Originating from a split");
+                break;
+        }
 
     }
 

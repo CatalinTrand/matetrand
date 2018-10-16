@@ -9,9 +9,8 @@
     @endguest
     @php
 
-        $groupByPO = 1;
-        $tmp = \Illuminate\Support\Facades\Session::get('groupOrdersBy');
-        if(isset($tmp)) $groupByPO = $tmp == "sales-orders" ? 0 : 1;
+        $groupByPO = \Illuminate\Support\Facades\Session::get('groupOrdersBy');
+        if (!isset($groupByPO)) $groupByPO = 1;
 
         if($groupByPO == 1) {
             $groupBySelPO = " selected";
@@ -132,8 +131,8 @@
                                 <div class="container row" style="display: block; max-width: 100%;">
                                     Afisare dupa:&nbsp;
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="groupOrdersBy" onchange="this.form.submit()">
-                                        <option value="sales-orders"{{$groupBySelSO}}>Comenzi client</option>
-                                        <option value="purch-orders"{{$groupBySelPO}}>Comenzi de aprovizionare</option>
+                                        <option value="0"{{$groupBySelSO}}>Comenzi client</option>
+                                        <option value="1"{{$groupBySelPO}}>Comenzi de aprovizionare</option>
                                     </select>
                                     Filtrare dupa status:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_status" onchange="this.form.submit()">
@@ -312,49 +311,29 @@
                                 $orders = \App\Materom\Data::getOrders($id, $groupByPO == 1, $filter_history, $filter_time_val,
                                      $filter_vbeln, $filter_ebeln, $filter_matnr, $filter_mtext,
                                      $filter_lifnr, $filter_lifnr_name); */
-                                App\Materom\Orders::loadFromCache();
+                                $orders = App\Materom\Orders::getOrderList();
 
                                 $seen = "";
                                 $line_counter = 1;
                                 foreach ($orders as $order) {
 
                                     if ($groupByPO == 1) {
-                                        if(strchr($seen, $order->ebeln) == null)
-                                            $seen.= " $order->ebeln";
-                                        else
-                                            continue;
-                                        $viewebeln = substr($order->ebeln, 0, 10);
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_P$order->ebeln' onclick='loadSub(\"$order->ebeln\",\"purch-order\",this, \"$order->vbeln\"); return false;'>+</button>".
-                                            \App\Materom\SAP::alpha_output($viewebeln);
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_P$order->ebeln' onclick='loadSub2(this); return false;'>+</button> ".
+                                            \App\Materom\SAP::alpha_output($order->ebeln);
                                     } else {
-                                        $lvbeln = $order->vbeln;
-                                        if(strchr($seen, $lvbeln) == null)
-                                            $seen.= " $lvbeln";
-                                        else
-                                            continue;
-                                        $buttname = $lvbeln;
-                                        if (strtoupper($lvbeln) == "!REPLENISH") $buttname = __('Stock');
-                                        elseif (strtoupper(trim($lvbeln)) == "SALESORDER") $buttname = __('Emergency');
-                                        else $buttname = \App\Materom\SAP::alpha_output($lvbeln);
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_S$lvbeln' onclick='loadSub(\"$order->vbeln\",\"sales-order\",this, \"\"); return false;'>+</button> $buttname";
+                                        $buttname = $order->vbeln;
+                                        if (strtoupper($buttname) == "!REPLENISH") $buttname = __('Stock');
+                                        elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
+                                        else $buttname = \App\Materom\SAP::alpha_output($buttname);
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' id='btn_S$order->vbeln' onclick='loadSub2(this); return false;'>+</button> $buttname";
                                     }
 
                                     $line_counter = $line_counter + 1;
                                     if ($line_counter == 2) $line_counter = 0;
 
-                                    if($order->nof)
-                                        $nof = "<image style='height: 1rem;' src='/images/nof.png'>";
-                                    else
-                                        $nof = "";
-
-                                    $now = strtotime(date('Y-m-d H:i:s'));
-                                    $wtime = strtotime($order->wtime);
-                                    $ctime = strtotime($order->ctime);
-
-                                    $status = "<image style='height: 1rem;' src='/images/status.png'>"; //TODO
-                                    $buttonok = "";
-                                    $buttoncancel = "";
-                                    $buttonrequest = "";
+                                    $button_accept = "";
+                                    $button_reject = "";
+                                    $button_inquire = "";
 
                                     if ($groupByPO == 1) {
                                         $oid = "P" . $order->ebeln;
@@ -365,62 +344,86 @@
                                                 "<td class='td02' colspan=3>$order->erdat</td>" .
                                                 "<td class='td02' colspan=2>$order->curr</td>" .
                                                 "<td class='td02' colspan=3>$order->fxrate</td>";
-                                        switch (\App\Materom\Webservice::getGravity($order, "purch-order",$filter_history)){
+
+                                        switch ($order->info) {
                                             case 0:
-                                                $info = "";
-                                            break;
+                                                $info_icon = "";
+                                                break;
                                             case 1:
-                                                $info = "<image style='height: 1.2rem;' src='/images/warning.png'>";
-                                            break;
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                break;
                                             case 2:
-                                                $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
-                                            break;
-                                        }
-                                        switch (\App\Materom\Webservice::getOwner($order,"purch-order", $filter_history)){
-                                            case 0:
-                                                $owner = "";
-                                            break;
-                                            case 1:
-                                                $owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
-                                            break;
-                                            case 2:
-                                                $owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
-                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-                                            break;
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                                                break;
                                             case 3:
-                                                $owner = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
-                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-
-                                            break;
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                                                break;
+                                            case 4:
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                                                break;
+                                        }
+                                        switch ($order->owner) {
+                                            case 0:
+                                                $owner_icon = "";
+                                                break;
+                                            case 1:
+                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                                break;
+                                            case 2:
+                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                                                break;
+                                            case 3:
+                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
+                                                break;
                                         }
 
-                                        $itemchg_table = $filter_history < 2 ? "pitemchg" : "pitemchg_arch";
-                                        $stage = 0;
-                                        if (\Illuminate\Support\Facades\DB::table($itemchg_table)->where('ebeln', $order->ebeln)->exists())
-                                            $stage = 10;
+                                        $changed_icon = "";
+                                        if ($order->changed != 0)
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+                                        $accepted_icon = "";
+                                        if ($order->accepted == 1)
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                        elseif ($order->accepted == 2)
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                        $rejected_icon = "";
+                                        if ($order->rejected == 1)
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                        elseif ($order->rejected == 2)
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                        $inquired_icon = "";
+                                        if ($order->inquired == 1)
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                                        elseif ($order->inquired == 2)
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                                        elseif ($order->inquired == 3)
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
 
-                                        $processed = "";
-                                        if($stage > 0)
-                                            $processed = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
-
-                                        if($filter_history == 2 || $stage > 0) {
-                                            $buttonok = "";
-                                            $buttoncancel = "";
-                                            $buttonrequest = "";
-                                        }
+                                        if ($order->accept == 1)
+                                            $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                        if ($order->reject == 1)
+                                            $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                                        if ($order->inquire == 1)
+                                            $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
 
                                         if ($line_counter == 0)
                                             $style = "background-color:LightYellow;";
                                         else
                                             $style = "background-color:Wheat;";
 
-                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->ebeln, $filter_status_type, 1, $filter_history, null) > 0)
-                                            echo "<tr id='tr_$oid' style='$style'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td class='td01'>$info</td><td class='td01'>$owner</td><td class='td01'>$processed</td><td class='td01'></td><td class='td01'></td><td class='td01'>6</td><td  class='td01' style='padding: 0;'>$buttonok</td><td class='td01' style='padding: 0;'>$buttoncancel</td><td class='td01' style='padding: 0;'>$buttonrequest</td><td colspan='3' class='td02' class='first_color'>$comanda</td>".
-                                            "$data<td colspan='6'></td></tr>";
+                                        echo "<tr id='tr_$oid' style='$style'>" .
+                                             "<td align='center' style='vertical-align: middle;'>".
+                                                "<input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>" .
+                                             "<td class='td01'>$info_icon</td>" .
+                                             "<td class='td01'>$owner_icon</td>" .
+                                             "<td class='td01'>$changed_icon</td>" .
+                                             "<td class='td01'>$accepted_icon</td>" .
+                                             "<td class='td01'>$rejected_icon</td>" .
+                                             "<td class='td01'>$inquired_icon</td>" .
+                                             "<td  class='td01' style='padding: 0;'>$button_accept</td>" .
+                                             "<td class='td01' style='padding: 0;'>$button_reject</td>" .
+                                             "<td class='td01' style='padding: 0;'>$button_inquire</td>" .
+                                             "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
+                                             "$data<td colspan='6'></td></tr>";
                                     }else{
                                         $oid = "S" . $order->vbeln;
                                         if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
@@ -431,7 +434,7 @@
                                                     "<td class='td02' colspan=2>$order->ctv</td>" .
                                                     "<td class='td02' colspan=5>$order->ctv_name</td>".
                                                     "<td></td>";
-                                                } else {
+                                        } else {
                                             $data = "<td class='td02' colspan=2>&nbsp;</td>" .
                                                     "<td class='td02' colspan=5>&nbsp;</td>" .
                                                     "<td class='td02' colspan=2>&nbsp;</td>" .
@@ -439,53 +442,81 @@
                                                     "<td class='td02' colspan=2>&nbsp;</td>" .
                                                     "<td class='td02' colspan=5>&nbsp;</td>".
                                                     "<td></td>";
-                                                }
-                                        switch (\App\Materom\Webservice::getGravity($order, "sales-order", $filter_history)){
-                                            case 0:
-                                                $info = "";
-                                            break;
-                                            case 1:
-                                                $info = "<image style='height: 1.2rem;' src='/images/warning.png'>";
-                                            break;
-                                            case 2:
-                                                $info = "<image style='height: 1.2rem;' src='/images/critical.png'>";
-                                            break;
                                         }
-                                        switch (\App\Materom\Webservice::getOwner($order,"sales-order", $filter_history)){
+
+                                        switch ($order->info) {
                                             case 0:
-                                                $owner = "";
-                                            break;
+                                                $info_icon = "";
+                                                break;
                                             case 1:
-                                                $owner = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
-                                            break;
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                break;
                                             case 2:
-                                                $owner = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
-                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-                                            break;
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                                                break;
                                             case 3:
-                                                $owner = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
-                                                $buttonok = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttoncancel = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
-                                                $buttonrequest = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                                                break;
+                                            case 4:
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                                                break;
+                                        }
+                                        switch ($order->owner) {
+                                            case 0:
+                                                $owner_icon = "";
+                                                break;
+                                            case 1:
+                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                                break;
+                                            case 2:
+                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                                                break;
+                                            case 3:
+                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
                                                 break;
                                         }
 
-                                        if($filter_history == 2){
-                                            $buttonok = "";
-                                            $buttoncancel = "";
-                                            $buttonrequest = "";
-                                        }
+                                        $changed_icon = "";
+                                        if ($order->changed != 0)
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+                                        $accepted_icon = "";
+                                        if ($order->accepted == 1)
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                        elseif ($order->accepted == 2)
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                        $rejected_icon = "";
+                                        if ($order->rejected == 1)
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                        elseif ($order->rejected == 2)
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                        $inquired_icon = "";
+                                        if ($order->inquired == 1)
+                                            $imquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                                        elseif ($order->inquired == 2)
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                                        elseif ($order->inquired == 3)
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
 
-                                        $owner = "";
+                                        if ($order->accept == 1)
+                                            $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                                        if ($order->reject == 1)
+                                            $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                                        if ($order->inquire == 1)
+                                            $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+
                                         if ($line_counter == 0)
                                             $style = "background-color:white;";
                                         else
                                             $style = "background-color:WhiteSmoke;";
-                                        if(\App\Materom\Webservice::getNrOfStatusChildren($order->vbeln, $filter_status_type, 0, $filter_history, null) > 0)
-                                            echo "<tr id='tr_$oid' style='$style' class='td01'><td align='center' style='vertical-align: middle;'><input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td><td>$info</td><td>$owner</td><td colspan='7'></td><td colspan='3' class='td02' class='first_color'>$comanda</td>" .
-                                            "$data<td colspan='5'></td></tr>";
+
+                                        echo "<tr id='tr_$oid' style='$style' class='td01'>" .
+                                             "<td align='center' style='vertical-align: middle;'>" .
+                                             "<input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>" .
+                                             "<td>$info_icon</td>" .
+                                             "<td>$owner_icon</td>" .
+                                             "<td colspan='7'></td>" .
+                                             "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
+                                             "$data<td colspan='5'></td></tr>";
                                     }
                                 }
                             @endphp
