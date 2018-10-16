@@ -56,6 +56,27 @@ class WebserviceController extends Controller
         );
     }
 
+    public function sendAck(){
+        return Webservice::sendAck(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate")
+        );
+    }
+
+    public function replyMsg(){
+        return Webservice::replyMsg(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate"),
+            Input::get("idlnf"),
+            Input::get("lfdat"),
+            Input::get("qty"),
+            Input::get("purch_price"),
+            Input::get("reason")
+        );
+    }
+
     public function changeItemStat(){
         return Webservice::changeItemStat(
             Input::get("column"),

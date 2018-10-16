@@ -40,6 +40,7 @@ Route::post('webservice/getAllItems','WebserviceController@getAllItems');
 Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/changeItemStat','WebserviceController@changeItemStat');
+Route::post('webservice/sendAck','WebserviceController@sendAck');
 
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');
 Route::get('webservice/get_ctv_users','WebserviceController@getCTVUsers');

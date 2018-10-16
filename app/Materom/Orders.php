@@ -230,6 +230,22 @@ class Orders
     public static function getMessageList() {
 
         $result = self::loadFromCache();
+
+        $messages = array();
+
+        foreach ($result as $order){
+            foreach ($order->items as $item){
+                foreach ($item->changes as $item_chg){
+                    if($item_chg->acknowledged == 0){
+                            $item_chg->vbeln = $item->vbeln;
+                            array_push($messages,$item_chg);
+                    }
+                }
+            }
+        }
+
+        return $messages;
+
     }
 
 

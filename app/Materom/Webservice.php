@@ -76,6 +76,49 @@ class Webservice
         return $result;
     }
 
+    static function new_simple_chg($ebeln,$ebelp,$ctype,$stage,$cuser,$cuser_name,$oldval,$newval,$reason){
+        DB::insert("insert into pitemchg (ebeln,ebelp,cdate,internal,ctype,stage,cuser,cuser_name,oldval,newval,reason) values ('$ebeln','$ebelp',NOW(),'0','$ctype','$stage','$cuser','$cuser_name','$oldval','$newval','$reason')");
+    }
+
+    static function replyMsg($ebeln,$ebelp,$cdate,$idnlf,$lfdat,$qty,$purch_price,$reason){
+
+        $oldItem = DB::select("select * from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'")[0];
+
+        $uid = Auth::id();
+        $uname = Auth::user()->username;
+        $stage = (strtoupper($uname))[0];
+        if($stage == 'A') $stage = 'R';
+        $ctype = "M";
+
+        if(strcmp($oldItem->idnlf,$idnlf) != 0){
+            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->idnlf,$idnlf,$reason);
+        }
+
+        if(strcmp($oldItem->lfdat,$lfdat) != 0){
+
+            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->lfdat,$lfdat,$reason);
+        }
+
+        if(strcmp($oldItem->qty,$qty) != 0){
+            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->qty,$qty,$reason);
+        }
+
+        if(strcmp($oldItem->purch_price,$purch_price) != 0){
+            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->purch_price,$purch_price,$reason);
+        }
+
+
+        DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        DB::update("update pitems set idnlf = '$idnlf', lfdat = '$lfdat', qty = '$qty', purch_price = '$purch_price' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+
+        return "";
+    }
+
+    static function sendAck($ebeln,$ebelp,$cdate){
+        DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        return "";
+    }
+
     static function straightAccept($ebeln,$id){
         $links = DB::select("select * from pitemchg where ebeln = '$ebeln' and ebelp = '$id' order by cdate");
 
