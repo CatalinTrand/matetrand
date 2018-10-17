@@ -42,9 +42,9 @@ Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/changeItemStat','WebserviceController@changeItemStat');
 Route::post('webservice/sendAck','WebserviceController@sendAck');
-Route::post('webservice/replyMsg','WebserviceController@replyMsg');
+Route::post('webservice/replymessage','WebserviceController@replyToMessage');
 Route::get('webservice/getsubtree','WebserviceController@getSubTree');
-Route::post('webservice/sortBy','WebserviceController@sortBy');
+Route::post('webservice/sortmessages','WebserviceController@sortMessages');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');

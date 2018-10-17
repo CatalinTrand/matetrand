@@ -64,14 +64,14 @@ class WebserviceController extends Controller
         );
     }
 
-    public function sortBy(){
-        return Webservice::sortBy(
+    public function sortMessages(){
+        return Webservice::sortMessages(
             Input::get("type")
         );
     }
 
-    public function replyMsg(){
-        return Webservice::replyMsg(
+    public function replyToMessage(){
+        return Webservice::replyToMessage(
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("cdate"),

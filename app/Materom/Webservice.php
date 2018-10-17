@@ -116,17 +116,18 @@ class Webservice
         return $result;
     }
 
-    public static function sortBy($type){
-        Session::put("message-filter",$type);
+    public static function sortMessages($type){
+        Session::put("message-sorting", $type);
         return "";
     }
 
-    static function new_simple_chg($ebeln,$ebelp,$ctype,$stage,$cuser,$cuser_name,$oldval,$newval,$reason){
+    static function new_simple_chg($ebeln,$ebelp,$ctype,$stage,$cuser,$cuser_name,$oldval,$newval,$reason)
+    {
         DB::insert("insert into pitemchg (ebeln,ebelp,cdate,internal,ctype,stage,cuser,cuser_name,oldval,newval,reason) values ('$ebeln','$ebelp',NOW(),'0','$ctype','$stage','$cuser','$cuser_name','$oldval','$newval','$reason')");
     }
 
-    public static function replyMsg($ebeln,$ebelp,$cdate,$idnlf,$lfdat,$qty,$purch_price,$reason){
-
+    public static function replyToMessage($ebeln, $ebelp, $cdate, $idnlf, $lfdat, $qty, $purch_price, $reason)
+    {
         //TODO - cand mai mult de una difera, nu mai merge, individual merg toate
 
         $oldItem = DB::select("select * from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'")[0];
