@@ -317,7 +317,7 @@
                                             \App\Materom\SAP::alpha_output($order->ebeln);
                                     } else {
                                         $buttname = $order->vbeln;
-                                        if (strtoupper($buttname) == "!REPLENISH") $buttname = __('Stock');
+                                        if (strtoupper($buttname) == \App\Materom\Orders::stockorder) $buttname = __('Stock');
                                         elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
                                         else $buttname = \App\Materom\SAP::alpha_output($buttname);
                                         $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
@@ -895,11 +895,16 @@
             let porder = "";
             let item = "";
             if (rowtype == 'S') sorder = order;
-            if (rowtype == "I") item = rowid.substr(15, 5);
-            if (rowtype == 'P') {
+            else if (rowtype == "I") {
+                porder = order;
+                item = rowid.substr(15, 5);
+            }
+            else if (rowtype == 'P') {
                 porder = order;
                 @if ($groupByPO == 0)
-                    sorder = $(currentrow).prev().attr("id").substr(4, 10);
+                    let prevRow = $(currentrow).prev();
+                    while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
+                    sorder = $(prevRow).attr("id").substr(4, 10);
                 @endif
             }
 
@@ -925,7 +930,7 @@
             if (_status != "success") return;
             if (_data.length > 0) {
                 if (rowtype == 'S') getSOSubTree(currentrow, sorder, _data);
-                else if (rowtype == 'P') getPOSubTree(currentrow, porder, sorder, _data);
+                else if (rowtype == 'P') getPOSubTree(currentrow, sorder, porder, _data);
                 else if (rowtype == 'I') getPOItemSubTree(currentrow, porder, item, _data);
             }
             thisbtn.innerHTML = '-';
@@ -1026,14 +1031,16 @@
 
                 let button_accept = "";
                 if (porder.accept == 1)
-                    button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
+                    button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                                     "onclick='acceptOrder(this);return false;'/>";
                 let button_reject = "";
                 if (porder.reject == 1)
-                    button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;'/>";
+                    button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
+                                    "onclick='rejectOrder(this);return false;'/>";
                 let button_inquire = "";
                 if (porder.inquire == 1)
-                    button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;'/>";
-
+                    button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                                     "onclick='inquireOrder(this);return false;'/>";
 
                 var newRow = $("<tr>");
                 var cols = "";
@@ -1049,7 +1056,7 @@
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_reject + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_inquire + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
-                cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);\">+</button> " + conv_exit_alpha_output(porder.ebeln) + "</td>";
+                cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " + conv_exit_alpha_output(porder.ebeln) + "</td>";
                 cols += '<td class="td02" colspan="2">' + conv_exit_alpha_output(porder.lifnr) + '</td>';
                 cols += '<td class="td02" colspan="5">' + porder.lifnr_name + '</td>';
                 cols += '<td class="td02" colspan="1">' + porder.ekgrp + '</td>';
@@ -1068,7 +1075,7 @@
             }
         }
 
-        function getPOSubTree(currentrow, order, sorder, _data)
+        function getPOSubTree(currentrow, sorder, order, _data)
         {
             // PO item header
             var newRow = $("<tr>");
@@ -1078,20 +1085,22 @@
             var first_style = "background-color:" + first_color;
             @if ($groupByPO == 0)
                 cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
-            colsafter = 5;
+            colsafter = 4;
             @else
                 cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
-                colsafter = 6;
+                colsafter = 5;
             @endif
             cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="2"><b>{{__("Pozitie")}}</b></td>';
-            cols += '<td class="td02" colspan="2"><b>{{__("Material")}}</b></td>';
+            cols += '<td class="td02" colspan="3"><b>{{__("Material")}}</b></td>';
             cols += '<td class="td02" colspan="5"><b>{{__("Descriere material")}}</b></td>';
-            cols += '<td class="td02" colspan="3"><b>{{__("Cantitate")}}</b></td>';
-            cols += '<td class="td02" colspan="3"><b>{{__("Data livrare")}}</b></td>';
-            cols += '<td class="td02" colspan="4"><b>{{__("Pret achizitie")}}</b></td>';
+            cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Cantitate")}}</b></td>';
+            cols += '<td class="td02" colspan="3" style="padding-left: 0.5rem;"><b>{{__("Data livrare")}}</b></td>';
+            cols += '<td class="td02" colspan="4" style="text-align: right;"><b>{{__("Pret achizitie")}}</b></td>';
             @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                cols += '<td class="td02" colspan="4"><b>{{__("Pret vanzare")}}</b></td>';
+                let sales_price_hdr = '{{__("Pret vanzare")}}';
+                if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
+                cols += '<td class="td02" colspan="4" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
             @else
                 cols += '<td class="td02" colspan="4"><b>&nbsp;</b></td>';
             @endif
@@ -1100,6 +1109,171 @@
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:YellowGreen; vertical-align: middle;");
             newRow.attr('id', "tr_HP" + order);
+
+            // PO Items
+            for (i = 0; i < _data.length; i++) {
+                let prevrow = newRow;
+                let pitem = _data[i];
+
+                let info_icon = "";
+                switch (pitem.info) {
+                    case 0:
+                        info_icon = "";
+                        break;
+                    case 1:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        break;
+                    case 2:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                        break;
+                    case 3:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                        break;
+                    case 4:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                        break;
+                }
+                let owner_icon = "";
+                switch (pitem.owner) {
+                    case 0:
+                        owner_icon = "";
+                        break;
+                    case 1:
+                        owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                        break;
+                    case 2:
+                        owner_icon = "<image style='height: 1.2rem;' src='/images/yellowArrow.png'>";
+                        break;
+                    case 3:
+                        owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
+                        break;
+                }
+
+                let changed_icon = "";
+                if (pitem.changed != 0)
+                    changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+
+                let accepted_icon = "";
+                if (pitem.accepted == 1)
+                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                else if (pitem.accepted == 2)
+                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+
+                let rejected_icon = "";
+                if (pitem.rejected == 1)
+                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                else if (pitem.rejected == 2)
+                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+
+                let inquired_icon = "";
+                if (pitem.inquired == 1)
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                else if (pitem.inquired == 2)
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                else if (pitem.inquired == 3)
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
+
+                let button_accept = "";
+                if (pitem.accept == 1)
+                    button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='acceptItem(this);return false;'/>";
+                let button_reject = "";
+                if (pitem.reject == 1)
+                    button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='rejectItem(this);return false;'/>";
+                let button_inquire = "";
+                if (pitem.inquire == 1)
+                    button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='inquireItem(this);return false;'/>";
+
+                var newRow = $("<tr>");
+                var cols = "";
+                cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + pitem.ebeln + "_" + pitem.ebelp + '" value="I' + pitem.ebeln + "_" + pitem.ebelp + '"></td>';
+                var po_style = "background-color:" + $(currentrow).css("background-color") + ";";
+                var first_color = $(currentrow).find(".first_color").css("background-color");
+                var first_style = "background-color:" + first_color;
+
+                @if ($groupByPO == 0)
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + info_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + changed_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + accepted_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + rejected_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + inquired_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_accept + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_reject + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_inquire + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
+                @else
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + info_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + changed_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + accepted_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + rejected_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + inquired_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_accept + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
+                @endif
+                    cols += '<td class="coloured" style="' + po_style + '"></td>';
+                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " + conv_exit_alpha_output(pitem.ebelp) + "</td>";
+
+                if (pitem.matnr_changeable == 1) {
+                    let matnr_class = "td02h";
+                    if (pitem.matnr_changed == 1) matnr_class += "_c";
+                    cols += '<td class="' + matnr_class + '" colspan="3" onclick="change_matnr(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.idnlf + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="5" onclick="change_matnr(this.previousSibling, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.mtext + '</td>';
+                } else {
+                    let matnr_class = "td02";
+                    if (pitem.matnr_changed == 1) matnr_class += "_c";
+                    cols += '<td class="' + matnr_class + '" colspan="3">' + pitem.idnlf + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="5">' + pitem.mtext + '</td>';
+                }
+
+                if (pitem.quantity_changeable == 1) {
+                    let quantity_class = "td02h";
+                    if (pitem.quantity_changed == 1) quantity_class += "_c";
+                    cols += '<td class="' + quantity_class + '" colspan="3" onclick="change_quantity(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_quantity + '</td>';
+                } else {
+                    let quantity_class = "td02";
+                    if (pitem.quantity_changed == 1) quantity_class += "_c";
+                    cols += '<td class="' + quantity_class + '" colspan="3" style="text-align: right;">' + pitem.x_quantity + '</td>';
+                }
+
+                if (pitem.delivery_date_changeable == 1) {
+                    let delivery_date_class = "td02h";
+                    if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
+                    cols += '<td class="' + delivery_date_class + '" colspan="3" onclick="change_delivery_date(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date + '</td>';
+                } else {
+                    let delivery_date_class = "td02";
+                    if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
+                    cols += '<td class="' + delivery_date_class + '" colspan="3" style="padding-left: 0.5rem;">' + pitem.x_delivery_date + '</td>';
+                }
+
+                if (pitem.price_changeable == 1) {
+                    let price_class = "td02h";
+                    if (pitem.price_changed == 1) price_class += "_c";
+                    cols += '<td class="' + price_class + '" colspan="4" onclick="change_purchase_price(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
+                } else {
+                    let price_class = "td02";
+                    if (pitem.price_changed == 1) price_class += "_c";
+                    cols += '<td class="' + price_class + '" colspan="4" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
+                }
+
+                cols += '<td class="td02" colspan="4" style="text-align: right;">' + pitem.x_sales_price + '</td>';
+                @if ($groupByPO == 1)
+                    cols += '<td colspan="5"></td>';
+                @else
+                    cols += '<td colspan="4"></td>';
+                @endif
+                newRow.append(cols).hide();
+                $(prevrow).after(newRow);
+                if (i % 2 == 0)
+                    newRow.attr('style', "background-color:#A0C0A0; vertical-align: middle;");
+                else
+                    newRow.attr('style', "background-color:#90D090; vertical-align: middle;");
+                newRow.attr('id', "tr_I" + pitem.ebeln + "_" + pitem.ebelp);
+            }
         }
 
         function getPOItemSubTree(currentrow, order, item, _data)
@@ -1130,16 +1304,61 @@
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:#ADD8E6; vertical-align: middle;");
             newRow.attr('id', "tr_HI" + order + "_" + item);
+
+            // PO Item changes
+            for (i = 0; i < _data.length; i++) {
+                let prevrow = newRow;
+                let pitemchg = _data[i];
+
+                newRow = $("<tr>");
+                let cols = "";
+                let pi_style = "background-color:" + $(currentrow).css("background-color") + ";";
+                let color = $(currentrow).closest("tr").find(".coloured").css("background-color");
+                let last_style = "background-color:" + color;
+                let first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
+                let first_style = "background-color:" + first_color;
+                cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                @if ($groupByPO == 0)
+                    let colsreason = "10";
+                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                @else
+                  let colsreason = "11";
+                @endif
+                cols += '<td class="coloured" style="' + last_style + '"></td>';
+                cols += '<td style="' + pi_style + '"></td>';
+                cols += '<td class="td02" colspan="3">' + pitemchg.cdate + '</td>';
+                cols += '<td class="td02" colspan="2">' + pitemchg.cuser + '</td>';
+                cols += '<td class="td02" colspan="4">' + pitemchg.cuser_name + '</td>';
+                cols += '<td class="td02" colspan="8">' + pitemchg.text + '</td>';
+                @if ($groupByPO == 1)
+                    colsreason = colsreason + 1;
+                @endif
+                cols += '<td class="td02" colspan="' + colsreason + '">' + pitemchg.reason + '</td>';
+                newRow.append(cols).hide();
+                $(prevrow).after(newRow);
+                if (i % 2 == 0)
+                    newRow.attr('style', "background-color:Azure; vertical-align: middle;");
+                else
+                    newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
+                newRow.attr('id', "tr_C" + pitemchg.ebeln + "_" + pitemchg.ebelp + "_" + i);
+            }
         }
 
         function hideSubTree(thisbtn)
         {
             var currentrow, nextrow;
-            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').substr(0, 4);
             while (((nextrow = $(currentrow).next()) != null) &&
                    (nextrow !== undefined) &&
-                   (nextrow.length > 0) &&
-                   (nextrow.attr('id').substr(0, 4).toUpperCase() != rowid.substr(0, 4))) {
+                   (nextrow.length > 0)) {
+                let crtid = nextrow.attr('id').substr(0, 4);
+                if (crtid == rowid) break;
+                if (rowid == "tr_P")
+                    if (crtid == "tr_S") break;
+                if (rowid == "tr_I")
+                    if ((crtid == "tr_S") || (crtid == "tr_P")) break;
+                if (rowid == "tr_C")
+                    if ((crtid == "tr_S") || (crtid == "tr_P") || (crtid == "tr_I")) break;
                 nextrow.remove();
             }
             thisbtn.innerHTML = '+';
@@ -1664,6 +1883,13 @@
 
             changeForm = changeDialog.find("form").on("submit", function (event) {
                 event.preventDefault();
+            });
+            $(changeDialog).keydown(function (event) {
+                if (event.keyCode == $.ui.keyCode.ENTER) {
+                    $(this).parent()
+                        .find("button:eq(0)").trigger("click");
+                    return false;
+                }
             });
         });
 

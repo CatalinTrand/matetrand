@@ -24,6 +24,9 @@ class POrder
     public $fxrate;   // EKKO-WKURS
     public $wtime;    // processing warning date
     public $ctime;    // processing critical date
+    // status fields
+    public $changed;  // 0=no, 1=direct, 2=indirect
+    public $status;
 
     // computed/determined fields
     public $lifnr_name;
@@ -33,7 +36,6 @@ class POrder
     // status icons
     public $info;     // 0=empty, 1=new order, 2=warning, 3=critical, 4=new message
     public $owner;    // 0=no, 1=direct, 2=indirect
-    public $changed;  // 0=no, 1=direct, 2=indirect
     public $accepted; // 0=no, 1=direct, 2=indirect
     public $rejected; // 0=no, 1=direct, 2=indirect
     public $inquired; // 0=no, 1=tentatively accepted, 2=rejected, 3=simple message
@@ -59,6 +61,8 @@ class POrder
         $this->nof = $porder->nof;
         $this->wtime = $porder->wtime;
         $this->ctime = $porder->ctime;
+        $this->changed = $porder->changed;
+        $this->status = $porder->status;
         $this->items = array();
     }
 
@@ -77,7 +81,6 @@ class POrder
         }
         $this->info = 0;
         $this->owner = 0;
-        $this->changed = 0;
         $this->accepted = 0;
         $this->rejected = 0;
         $this->inquired = 0;

@@ -219,15 +219,31 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+        .td02_c {
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 2px 2px red;
+        }
         .td02h {
             text-align: left;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
+        .td02h_c {
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 2px 2px red;
+        }
         .td02h:hover {
             color: #0000F0;
             cursor: pointer;
+        }
+        .td02h_c:hover {
+            color: #F000F0;
+            cursor: pointer;
+            text-shadow: 2px 2px red;
         }
 
     </style>

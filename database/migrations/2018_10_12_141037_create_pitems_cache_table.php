@@ -18,6 +18,7 @@ class CreatePitemsCacheTable extends Migration
             $table->string('session', 40);
             $table->string('ebeln', 10);
             $table->string('ebelp', 5);
+            $table->string('vbeln', 10);
             $table->dateTime('cache_date')->default(now());
 
             $table->primary(['session', 'ebeln', 'ebelp']);

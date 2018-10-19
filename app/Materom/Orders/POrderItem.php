@@ -34,10 +34,11 @@ class POrderItem
     public $purch_prun;  // EKPO-PEINH
     public $purch_puom;  // EKPO-BPRME
     public $stage;       // workflow position F/R/C/A-released/D-delivered/X-closed
+    // status fields
+    public $changed;     // 0=no, 1=yes
     public $status;      // A-accepted, X-rejected,
                          // T-tentatively accepted,
                          // R-tentatively rejected
-    public $changed;  // 0=no, 1=yes
 
     // sales order position related information
     public $sales_price; // VBAP-NETPR
@@ -53,6 +54,11 @@ class POrderItem
     public $sorder;      // sales order to be displayed
     public $kunnr_name;
     public $shipto_name;
+    // external representations
+    public $x_quantity;
+    public $x_delivery_date;
+    public $x_purchase_price;
+    public $x_sales_price;
 
     // status icons
     public $info;     // 0=empty, 1=new item, 2=warning, 3=critical, 4=new message
@@ -73,23 +79,21 @@ class POrderItem
                       // 8=
 
     // flags
-    public $can_change_matnr;         // 0=no, 1=yes
+    public $matnr_changeable;         // 0=no, 1=yes
     public $matnr_changed;            // 0=no, 1=yes
-    public $can_change_quantity;      // 0=no, 1=yes
+    public $quantity_changeable;      // 0=no, 1=yes
     public $quantity_changed;         // 0=no, 1=yes
-    public $can_change_price;         // 0=no, 1=yes
+    public $price_changeable;         // 0=no, 1=yes
     public $price_changed;            // 0=no, 1=yes
-    public $can_change_delivery_date; // 0=no, 1=yes
+    public $delivery_date_changeable; // 0=no, 1=yes
     public $delivery_date_changed;    // 0=no, 1=yes
-    public $can_split_position;       // 0=no, 1=yes
+    public $position_splittable;      // 0=no, 1=yes
     public $position_splitted;        // 0=no, 1=yes
 
     function __construct($pitem)
     {
         $this->ebeln = $pitem->ebeln;
         $this->ebelp = $pitem->ebelp;
-        $this->status = $pitem->status;
-        $this->changed = $pitem->changed;
         $this->vbeln = $pitem->vbeln;
         $this->posnr = $pitem->posnr;
         $this->idnlf = $pitem->idnlf;
@@ -110,6 +114,9 @@ class POrderItem
         $this->shipto = $pitem->shipto;
         $this->ctv = $pitem->ctv;
         $this->ctv_name = $pitem->ctv_name;
+        $this->changed = $pitem->changed;
+        $this->stage = $pitem->stage;
+        $this->status = $pitem->status;
         $this->changes = array();
     }
 
@@ -132,7 +139,7 @@ class POrderItem
             $this->shipto_name = "";
             $this->ctv = "";
             $this->ctv_name = "";
-            if (!empty($this->sorder)) $this->sorder = Orders::salesorder;
+            if ($this->sorder != Orders::stockorder) $this->sorder = Orders::salesorder;
         } else {
             $this->kunnr_name = MasterData::getKunnrName($this->kunnr, 2);
             $this->shipto_name = MasterData::getKunnrName($this->shipto, 2);
@@ -146,6 +153,23 @@ class POrderItem
         $this->accept = 1;
         $this->reject = 1;
         $this->inquire = 1;
+
+        $this->matnr_changeable = 1;
+        $this->matnr_changed = 0;
+        $this->quantity_changeable = 1;
+        $this->quantity_changed = 0;
+        $this->price_changeable = 1;
+        $this->price_changed = 0;
+        $this->delivery_date_changeable = 1;
+        $this->delivery_date_changed = 0;
+        $this->position_splittable = 1;
+        $this->position_splitted = 0;
+
+        $this->x_delivery_date = substr($this->lfdat, 0, 10);
+        $this->x_quantity = trim($this->qty) . " " . trim($this->qty_uom);
+        $this->x_purchase_price = trim($this->purch_price) . " " . trim($this->purch_curr);
+        if ((Auth::user()->role == 'Furnizor') || ($this->vbeln == Orders::stockorder)) $this->x_sales_price = "";
+        else $this->x_sales_price = trim($this->sales_price) . " " . trim($this->sales_curr);
     }
 
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Materom\Orders;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 
@@ -45,6 +46,10 @@ class LoginController extends Controller
     {
         Session::put('locale', strtolower(Auth::user()->lang));
         Session::put('materomdbcache', Orders::newCacheToken());
+        DB::beginTransaction();
+        DB::delete("delete from porders_cache");
+        DB::delete("delete from pitems_cache");
+        DB::commit();
         Orders::fillCache();
     }
 

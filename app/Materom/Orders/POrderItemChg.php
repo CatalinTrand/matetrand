@@ -38,14 +38,7 @@ class POrderItemChg
     public $oebelp;     // originating purchase item (split)
 
     // computed/determined fields
-    public $sorder;
     public $text;       // message text
-    public $idnlf;
-    public $purch_price;
-    public $purch_curr;
-    public $qty;
-    public $qty_uom;
-    public $lfdat;
 
     function __construct($pitemchg)
     {
@@ -66,13 +59,6 @@ class POrderItemChg
     }
 
     public function fill($pitem) {
-
-        $this->sorder = $pitem->sorder;
-        $this->idnlf = $pitem->idnlf;
-        $this->purch_price = $pitem->purch_price;
-        $this->purch_curr = $pitem->purch_curr;
-        $this->qty = $pitem->qty;
-        $this->qty_uom = $pitem->qty_uom;
 
         switch ($this->ctype) {
             case "A":

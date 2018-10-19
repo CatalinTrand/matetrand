@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Session;
 class Orders
 {
     public const salesorder = "SALESORDER";
+    public const stockorder = "!REPLENISH";
 
     public static function newCacheToken($length = 40) // after an idea by Scott Arciszewski
     {
@@ -66,10 +67,8 @@ class Orders
         }
     }
 
-    public static function fillCache($filter_history = null)
+    public static function fillCache()
     {
-
-        if (isset($filter_history)) $history = $filter_history;
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
         else $history = intval($history);
@@ -144,7 +143,7 @@ class Orders
         }
 
         // final sql build
-        $sql = "select distinct " . $items_table . ".ebeln, " . $items_table . ".ebelp " .
+        $sql = "select " . $items_table . ".ebeln, " . $items_table . ".ebelp, " . $items_table . ".vbeln " .
                 " from " . $items_table .
                 " join " . $orders_table . " using (ebeln)";
         if (!empty($filter_lifnr_name_sql)) $sql .= " join sap_lfa1 using (lifnr)";
@@ -160,7 +159,7 @@ class Orders
 
         // Order cache
         $psql = "insert into porders_cache (session, ebeln, cache_date) values ";
-        $isql = "insert into pitems_cache (session, ebeln, ebelp, cache_date) values ";
+        $isql = "insert into pitems_cache (session, ebeln, ebelp, vbeln, cache_date) values ";
 
         $prev_ebeln = '$#$#$#$#$#';
         foreach($items as $item) {
@@ -168,7 +167,7 @@ class Orders
                 $prev_ebeln = $item->ebeln;
                 $psql .= " ('$cacheid', '$prev_ebeln', '$cache_date'),";
             }
-            $isql .= " ('$cacheid', '$item->ebeln', '$item->ebelp', '$cache_date'),";
+            $isql .= " ('$cacheid', '$item->ebeln', '$item->ebelp', '$item->vbeln', '$cache_date'),";
         }
 
         DB::insert(substr($psql, 0, -1) . ';');
@@ -176,21 +175,61 @@ class Orders
         DB::commit();
     }
 
-    static public function loadFromCache()
+    static public function loadFromCache($s_order = null, $p_order = null)
     {
         $result = array();
         $cacheid = Session::get('materomdbcache');
         if (!isset($cacheid) || empty($cacheid)) return;
 
-        $porders = DB::select("select porders.* from porders join porders_cache using (ebeln) ".
-                                     "where porders_cache.session = '$cacheid' order by porders.ebeln");
-        if (count($porders) == 0) return $result;
+        $history = Session::get("filter_history");
+        if ($history == null) $history = 1;
+        else $history = intval($history);
 
-        $pitems = DB::select("select pitems.* from pitems join pitems_cache using (ebeln, ebelp) ".
-            "where pitems_cache.session = '$cacheid' order by pitems.ebeln, pitems.ebelp");
+        $orders_table = $history == 1 ? "porders" : "porders_arch";
+        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $itemchanges_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
 
-        $pitemschg = DB::select("select pitemchg.* from pitemchg join pitems_cache using (ebeln, ebelp) " .
-            "where pitems_cache.session = '$cacheid' order by pitemchg.ebeln, pitemchg.ebelp, pitemchg.cdate desc");
+        $porders_sql = "";
+        $pitems_sql = "";
+        if ($p_order != null) {
+            $porders_sql = " and porders_cache.ebeln = '$p_order'";
+            $pitems_sql = " and pitems_cache.ebeln = '$p_order'";
+        }
+        if ($s_order != null) {
+            if ((Auth::user()->role == 'Furnizor') && ($s_order == self::salesorder))
+                $pitems_sql .= " and pitems_cache.vbeln <> '" . self::stockorder. "'";
+            else $pitems_sql .= " and pitems_cache.vbeln = '$s_order'";
+            $pitems = DB::select("select distinct ebeln, ebelp from pitems_cache ".
+                " where session = '$cacheid'" . $pitems_sql . " order by ebeln, ebelp");
+            if (empty($pitems)) return $result;
+            $pitems_sql .= " and (";
+            $porders_sql .= " and (";
+            $prev_ebeln = "";
+            foreach($pitems as $pitem) {
+                if ($prev_ebeln != $pitem->ebeln) {
+                    $prev_ebeln = $pitem->ebeln;
+                    $porders_sql .= "porders_cache.ebeln = '$pitem->ebeln' or ";
+                }
+                $pitems_sql .= "(pitems_cache.ebeln = '$pitem->ebeln' and pitems_cache.ebelp = '$pitem->ebelp') or ";
+            }
+            $porders_sql = substr($porders_sql, 0, -4) . ")";
+            $pitems_sql = substr($pitems_sql, 0, -4) . ")";
+        }
+
+        $porders = DB::select("select $orders_table.* from $orders_table join porders_cache using (ebeln) ".
+                                     "where porders_cache.session = '$cacheid' " . $porders_sql .
+                                     "order by $orders_table.ebeln");
+        if (empty($porders)) return $result;
+
+        $pitems = DB::select("select $items_table.* from $items_table join pitems_cache using (ebeln, ebelp) ".
+            " where pitems_cache.session = '$cacheid'" . $pitems_sql .
+            " order by $items_table.ebeln, $items_table.ebelp");
+        if (empty($pitems)) return $result;
+
+        $pitemschg = DB::select("select $itemchanges_table.* from $itemchanges_table " .
+            "join pitems_cache using (ebeln, ebelp)" .
+            " where pitems_cache.session = '$cacheid'" . $pitems_sql .
+            " order by $itemchanges_table.ebeln, $itemchanges_table.ebelp, $itemchanges_table.cdate desc");
 
         $xitem = 0;
         $xitemchg = 0;
@@ -228,8 +267,7 @@ class Orders
         if ($groupByPO == 0) {
             $orders = array();
             foreach ($result as $porder) {
-                foreach ($porder->salesorders as $ebelp) {
-                    $vbeln = key($porder->salesorders);
+                foreach ($porder->salesorders as $vbeln => $ebelp) {
                     $sorder = isset($orders[$vbeln]) ? $orders[$vbeln] : null;
                     if (!isset($sorder)) {
                         $sorder = new \stdClass();
