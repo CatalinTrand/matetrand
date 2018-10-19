@@ -70,16 +70,19 @@ class WebserviceController extends Controller
         );
     }
 
-    public function replyToMessage(){
-        return Webservice::replyToMessage(
+    public function itemsOfOrder(){
+        return Webservice::itemsOfOrder(
+            Input::get("type"),
+            Input::get("order")
+        );
+    }
+
+    public function replyMessage(){
+        return Webservice::replyMessage(
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("cdate"),
-            Input::get("idnlf"),
-            Input::get("lfdat"),
-            Input::get("qty"),
-            Input::get("purch_price"),
-            Input::get("reason")
+            Input::get("message")
         );
     }
 

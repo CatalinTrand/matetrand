@@ -15,6 +15,7 @@ class POrderItemChg
     public $ebeln;      // purchase order
     public $ebelp;      // purchase order item
     public $cdate;      // change datetime
+    public $vbeln;
 
     public $internal;   // internal change/message
     public $ctype;      // change type
@@ -43,6 +44,7 @@ class POrderItemChg
     function __construct($pitemchg)
     {
         $this->ebeln = $pitemchg->ebeln;
+        $this->vbeln = $pitemchg->vbeln;
         $this->ebelp = $pitemchg->ebelp;
         $this->internal = $pitemchg->internal;
         $this->stage = $pitemchg->stage;

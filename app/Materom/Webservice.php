@@ -134,50 +134,21 @@ class Webservice
         DB::insert("insert into pitemchg (ebeln,ebelp,cdate,internal,ctype,stage,cuser,cuser_name,oldval,newval,reason) values ('$ebeln','$ebelp',NOW(),'0','$ctype','$stage','$cuser','$cuser_name','$oldval','$newval','$reason')");
     }
 
-    public static function replyToMessage($ebeln, $ebelp, $cdate, $idnlf, $lfdat, $qty, $purch_price, $reason)
+    public static function replyMessage($ebeln, $ebelp, $cdate, $message)
     {
-        //TODO - cand mai mult de una difera, nu mai merge, individual merg toate
 
         $oldItem = DB::select("select * from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'")[0];
 
         $uid = Auth::id();
-        $uname = Auth::user()->username;
-        $stage = (strtoupper($uname))[0];
-        if($stage == 'A') $stage = 'R';
-
-
-        if(strcmp($oldItem->idnlf,$idnlf) != 0 && strcmp("",$idnlf) != 0){
-            $ctype = "M";
-            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->idnlf,$idnlf,$reason);
-        } else {
-            $idnlf = $oldItem->idnlf;
-        }
-
-        if(strcmp($oldItem->lfdat,$lfdat ) != 0 && strcmp("",$lfdat) != 0){
-            $ctype = "D";
-            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->lfdat,$lfdat,$reason);
-        } else {
-            $lfdat = $oldItem->lfdat;
-        }
-
-        if(strcmp($oldItem->qty,$qty) != 0 && strcmp("",$qty) != 0){
-            $ctype = "Q";
-            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->qty,$qty,$reason);
-        } else {
-            $qty = $oldItem->qty;
-        }
-
-        if(strcmp($oldItem->purch_price,$purch_price) != 0 && strcmp("",$purch_price) != 0){
-            $ctype = "P";
-            self::new_simple_chg($ebeln,$ebelp,$ctype,$stage,$uid,$uname,$oldItem->purch_price,$purch_price,$reason);
-        } else {
-            $purch_price = $oldItem->purch_price;
-        }
+        $uname = Auth::user()->role;
+        $stage = $uname[0];
+        if($stage == 'F') $stage = 'R';
+        if($stage == 'R') $stage = 'F';
+        if($stage == 'A') $stage = 'F';
 
 
         DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-        DB::update("update pitems set idnlf = '$idnlf', lfdat = '$lfdat', qty = '$qty', purch_price = '$purch_price' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-
+        DB::insert("insert into pitemchg (ebeln, ebelp,stage,ctype,reason) values ('$ebeln','$ebelp','$stage','S','$message')");
         return "";
     }
 
@@ -211,6 +182,14 @@ class Webservice
         DB::update("update pitems set stage = 'X' where ebeln = '$ebeln' and ebelp = '$id'");
         DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp) values ('$ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','$reason','$category')");
         return "";
+    }
+
+    public static function itemsOfOrder($type,$order){
+        if($type == "S"){
+            return DB::select("select * from pitems where vbeln = '$order'");
+        } else {
+            return DB::select("select * from pitems where ebeln = '$order'");
+        }
     }
 
     public static function changeItemStat($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)

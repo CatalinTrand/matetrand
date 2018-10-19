@@ -241,6 +241,7 @@ class Orders
                     && (($pitemchg = $pitemschg[$xitemchg])->ebeln == $pitem->ebeln)
                     && (($pitemchg = $pitemschg[$xitemchg])->ebelp == $pitem->ebelp)) {
                     $xitemchg++;
+                    $pitemchg->vbeln = $_pitem->vbeln;
                     $_pitemchg = new POrderItemChg($pitemchg);
                     $_pitemchg->fill($_pitem);
                     $_pitem->appendChange($_pitemchg);
@@ -332,6 +333,7 @@ class Orders
         foreach ($result as $order){
             foreach ($order->items as $item){
                 foreach ($item->changes as $item_chg){
+                        $item_chg->item = $item;
                         array_push($messages,$item_chg);
                 }
             }

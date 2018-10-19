@@ -88,8 +88,8 @@
                                 {{__("Orders")}}
                                 </p></a>
                         @else
-                            <p style="display: inline-block;" class="card-line first">Messages</p>
-                            <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">Comenzi</p></a>
+                            <p style="display: inline-block;" class="card-line first">{{__('Messages')}}</p>
+                            <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">{{__('Orders')}}</p></a>
                         @endif
                     </div>
 
@@ -126,7 +126,7 @@
                                     <input type="submit"
                                            style="position: absolute; left: -9999px; width: 1px; height: 1px;"
                                            tabindex="-1"/>
-                                    <a href="/users" style="padding-left: 30px;padding-top: 3px">Reset</a>
+                                    <a href="/users" style="padding-left: 30px;padding-top: 3px">{{__('Reset')}}</a>
                                 </div>
                             </form>
                             <table id="user-list-table" class="basicTable table table-striped" style="width:100%;clear:left;">
@@ -137,13 +137,13 @@
                                                 href="/users?sort=role&val=asc">&#x25B2;</a></th>
                                     <th><a href="/users?sort=user&val=desc">&#x25BC;</a>{{trans('strings.username')}}<a
                                                 href="/users?sort=user&val=asc">&#x25B2;</a></th>
-                                    <th><a href="/users?sort=email&val=desc">&#x25BC;</a>Email<a
+                                    <th><a href="/users?sort=email&val=desc">&#x25BC;</a>{{__('Email')}}<a
                                                 href="/users?sort=email&val=asc">&#x25B2;</a></th>
                                     <th>
-                                        Language
+                                        {{__('Language')}}
                                     </th>
                                     <th>
-                                        Status
+                                        {{__('Status')}}
                                     </th>
                                     <th>{{trans('strings.action')}}</th>
                                 </tr>
@@ -188,10 +188,10 @@
                             </table>
                         @elseif (Auth::user() && Auth::user()->role == 'Administrator')
                             {{trans('strings.welcome_msg')}}<br>
-                            <a href="/messages">Messages</a>
+                            <a href="/messages">{{__('Messages')}}</a>
                         @else
                             {{trans('strings.welcome_msg')}}<br>
-                            <a href="/messages">Messages</a>
+                            <a href="/messages">{{__('Messages')}}</a>
                         @endif
                     </div>
                 </div>
@@ -216,12 +216,12 @@
         <form>
             <br>
             <div class="form-group row" style="width: 80%">
-                <label for="new_password" class="col-md-4 col-form-label text-md-left">New Password</label>
+                <label for="new_password" class="col-md-4 col-form-label text-md-left">{{__('New Password')}}</label>
                 <input id="new_password" type="password" name="new_password" size="20" style="width: 200px;"
                        class="form-control col-md-6" required value="">
             </div>
             <div class="form-group row" style="width: 80%">
-                <label for="conf_password" class="col-md-4 col-form-label text-md-left">Confirm Password</label>
+                <label for="conf_password" class="col-md-4 col-form-label text-md-left">{{__('Confirm Password')}}</label>
                 <input id="conf_password" type="password" name="conf_password" size="20" style="width: 200px;"
                        class="form-control col-md-6" required value="">
             </div>
