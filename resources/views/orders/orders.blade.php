@@ -124,7 +124,6 @@
                     </div>
 
                     <div class="card-body" style="padding-bottom: 0px;">
-
                         <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 7.5rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}

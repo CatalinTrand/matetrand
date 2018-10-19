@@ -28,22 +28,44 @@
         if(strcmp($filter,"cuser") == 0)
             $sort_color_cuser = " style='background-color:#99ffcc'";
 
-        $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln_msg");
+        $filter_history = 1;
+        $filter_history_curr = " selected";
+        $filter_history_arch = "";
+        $tmp = \Illuminate\Support\Facades\Session::get('filter_history');
+        if (isset($tmp)) {
+            if (intval($tmp) != 2) {
+                // noi
+                $filter_history = 1;
+                $filter_history_curr = " selected";
+                $filter_history_arch = "";
+            } else {
+                // vechi
+                $filter_history = 2;
+                $filter_history_curr = "";
+                $filter_history_arch = " selected";
+            }
+        }
+
+        $filter_time_val = null;
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_archdate");
+        if(isset($tmp) && $filter_history == 2) $filter_time_val = $tmp;
+
+        $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
 
-        $filter_ebeln = \Illuminate\Support\Facades\Session::get("filter_ebeln_msg");
+        $filter_ebeln = \Illuminate\Support\Facades\Session::get("filter_ebeln");
         if (!isset($filter_ebeln)) $filter_ebeln = "";
 
-        $filter_matnr = \Illuminate\Support\Facades\Session::get("filter_matnr_msg");
+        $filter_matnr = \Illuminate\Support\Facades\Session::get("filter_matnr");
         if (!isset($filter_matnr)) $filter_matnr = "";
 
-        $filter_mtext = \Illuminate\Support\Facades\Session::get("filter_mtext_msg");
+        $filter_mtext = \Illuminate\Support\Facades\Session::get("filter_mtext");
         if (!isset($filter_mtext)) $filter_mtext = "";
 
-        $filter_lifnr = \Illuminate\Support\Facades\Session::get("filter_lifnr_msg");
+        $filter_lifnr = \Illuminate\Support\Facades\Session::get("filter_lifnr");
         if (!isset($filter_lifnr)) $filter_lifnr = "";
 
-        $filter_lifnr_name = \Illuminate\Support\Facades\Session::get("filter_lifnr_name_msg");
+        $filter_lifnr_name = \Illuminate\Support\Facades\Session::get("filter_lifnr_name");
         if (!isset($filter_lifnr_name)) $filter_lifnr_name = "";
 
     @endphp
@@ -92,16 +114,28 @@
                     </div>
 
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 2.5rem;">
+                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 5rem;">
                             <form action="/messages" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
+                                    Filtrare dupa istoric:
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
+                                        <option value="1"{{$filter_history_curr}}>{{__("Neprocesate")}}</option>
+                                        <option value="2"{{$filter_history_arch}}>{{__("Procesate")}}</option>
+                                        @if ($filter_history == 2)
+                                            &nbsp;&nbsp;&nbsp;Documente arhivate de la:
+                                            <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                                   onchange="this.form.submit()">
+                                        @endif
+                                    </select>
+                                    <br><br>
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                                         {{__("Sales order")}}:
                                         <input type="text" class="form-control-sm input-sm"
                                                style="width: 6rem; height: 1.4rem;" name="filter_vbeln"
                                                value="{{$filter_vbeln}}">&nbsp;&nbsp;
                                     @endif
+
                                     {{__("Purchase order")}}:
                                     <input type="text" class="form-control-sm input-sm"
                                            style="width: 6rem; height: 1.4rem;" name="filter_ebeln"
@@ -115,11 +149,11 @@
                                            style="width: 12rem; height: 1.4rem;" name="filter_mtext"
                                            value="{{$filter_mtext}}">&nbsp;&nbsp;
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                                        CUSER:
+                                            {{__("LIFNR")}}:
                                         <input type="text" class="form-control-sm input-sm"
                                                style="width: 6rem; height: 1.4rem;" name="filter_lifnr"
                                                value="{{$filter_lifnr}}">&nbsp;&nbsp;
-                                        CNAME:
+                                            {{__("LIFNR_NAME")}}:
                                         <input type="text" class="form-control-sm input-sm"
                                                style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name"
                                                value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
@@ -220,10 +254,13 @@
                                                      <td colspan='2' $sort_color_cuser>$message->cuser_name</td>
                                                      <td></td>
                                                      <td colspan='1'><button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button></td>
-                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','$item->idnlf','$item->purch_price','$item->qty','$item->lfdat'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+                                                     <td></td>
                                                      <td colspan='26'>$message->text</td></tr>";
 
                                     echo $tablerow;
+
+                                   //<td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','$item->idnlf','$item->purch_price','$item->qty','$item->lfdat'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+
                                 }
                             @endphp
                         </table>
