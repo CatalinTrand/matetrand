@@ -15,6 +15,8 @@ class EditUsers {
         else
             $active = 0;
 
+        if (ctype_digit($lifnr)) $lifnr = str_pad($lifnr, 10, "0", STR_PAD_LEFT);
+
         if($active == 1)
             DB::update("update users set role = '$role', username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser',  lifnr = '$lifnr', ekgrp = '$ekgrp', active = '$active', deleted_at = null where id = '$id'");
         else

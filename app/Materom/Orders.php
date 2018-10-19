@@ -114,8 +114,7 @@ class Orders
             }
             if (!empty($sql)) $sql = "(" . $sql . ")";
             $filter_sql = self::addFilter($filter_sql,
-                self::processFilter($orders_table . ".lifnr", Auth::user()->lifnr, 10),
-                $sql);
+                self::processFilter($orders_table . ".lifnr", Auth::user()->lifnr, 10), $sql);
         } elseif (Auth::user()->role == "Referent") {
             $filter_sql = self::addFilters($filter_sql, self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp));
             $refs = DB::select("select distinct users_ref.id, users.lifnr from users_ref ".
@@ -246,7 +245,7 @@ class Orders
                     $_pitemchg->fill($_pitem);
                     $_pitem->appendChange($_pitemchg);
                 }
-                $_pitem->fill();
+                $_pitem->fill($_porder);
                 $_porder->appendItem($_pitem);
             }
             $_porder->fill();

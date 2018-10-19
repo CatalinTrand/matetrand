@@ -214,7 +214,7 @@
                                                      <td colspan='2' $sort_color_cuser>$message->cuser_name</td>
                                                      <td></td>
                                                      <td colspan='1'><button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button></td>
-                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','$message->idnlf','$message->purch_price','$message->qty','$message->lfdat'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','','','',''); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
                                                      <td colspan='20'>$message->text</td></tr>";
 
                                     echo $tablerow;

@@ -155,7 +155,7 @@
 
                                     <div class="col-md-6">
                                         <input id="lifnr" type="text" name="lifnr" class="form-control"
-                                               value="{{$user->lifnr}}">
+                                               value="{{App\Materom\SAP::alpha_output($user->lifnr)}}">
                                     </div>
                                 </div>
 

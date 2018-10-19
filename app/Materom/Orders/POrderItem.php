@@ -12,6 +12,7 @@ namespace App\Materom\Orders;
 use App\Materom\Orders;
 use App\Materom\SAP\MasterData;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class POrderItem
 {
@@ -125,7 +126,7 @@ class POrderItem
         $this->changes[$pitemchg->cdate] = $pitemchg;
     }
 
-    public function fill()
+    public function fill($porder)
     {
         $this->sorder = $this->vbeln;
         if (Auth::user()->role == 'Furnizor') {
@@ -146,7 +147,28 @@ class POrderItem
         }
 
         $this->info = 0;
+
         $this->owner = 0;
+        if (Auth::user()->role == 'Furnizor') {
+            if ($this->stage == 'F') $this->owner = 1;
+        } elseif (Auth::user()->role == 'Referent') {
+            if ($this->stage == 'R') $this->owner = 1;
+            elseif ($this->stage == 'F') {
+                $suppliers = DB::select("select distinct users.id from users ".
+                    " join users_ref using (id)" .
+                    " where users.role = 'Furnizor' and users.lifnr = '$porder->lifnr' ".
+                    "       and users_ref.refid = '" . Auth::user()->id . "'" .
+                    " order by id");
+                foreach ($suppliers as $supplier) {
+                    $manufacturers = DB::select("select distinct mfrnr from materom_srm.users_sel where id = '$supplier->id'");
+                    if (empty($manufacturers)) {$this->owner = 2; break;}
+                    if (isset(array_flip($manufacturers)[$porder->mfrnr])) {$this->owner = 2; break;}
+                }
+            }
+        } elseif (Auth::user()->role == 'CTV') {
+            if ($this->ctv == Auth::user()->sapuser) $this->owner = 1;
+        }
+
         $this->accepted = 0;
         $this->rejected = 0;
         $this->inquired = 0;
