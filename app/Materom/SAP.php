@@ -90,10 +90,18 @@ class SAP
     }
 
     static public function alpha_output($input) {
-        $output = $input;
+        $output = trim($input);
         if (ctype_digit($output)) {
             $output = ltrim($output, "0");
             if (empty($output)) $output = $input;
+        }
+        return $output;
+    }
+
+    static public function alpha_input($input) {
+        $output = trim($input);
+        if (ctype_digit($output)) {
+            $output = str_pad($input, 10, "0", STR_PAD_LEFT);
         }
         return $output;
     }

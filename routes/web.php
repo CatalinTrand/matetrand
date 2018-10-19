@@ -35,16 +35,13 @@ Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertmanufacturer','WebserviceController@insertManufacturer');
 Route::post('webservice/insertreferenceuser','WebserviceController@insertReferenceUser');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
-Route::post('webservice/getNrOfStatusChildren','WebserviceController@getNrOfStatusChildren');
-Route::post('webservice/getOrderInfo','WebserviceController@getOrderInfo');
-Route::post('webservice/getAllItems','WebserviceController@getAllItems');
 Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/changeItemStat','WebserviceController@changeItemStat');
 Route::post('webservice/sendAck','WebserviceController@sendAck');
-Route::post('webservice/replyMsg','WebserviceController@replyMsg');
+Route::post('webservice/replymessage','WebserviceController@replyToMessage');
 Route::get('webservice/getsubtree','WebserviceController@getSubTree');
-Route::post('webservice/sortBy','WebserviceController@sortBy');
+Route::post('webservice/sortmessages','WebserviceController@sortMessages');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');

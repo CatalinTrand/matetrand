@@ -38,14 +38,12 @@ class POrderItemChg
     public $oebelp;     // originating purchase item (split)
 
     // computed/determined fields
-    public $sorder;
     public $text;       // message text
 
     function __construct($pitemchg)
     {
         $this->ebeln = $pitemchg->ebeln;
         $this->ebelp = $pitemchg->ebelp;
-        $this->sorder = $pitemchg->sorder;
         $this->internal = $pitemchg->internal;
         $this->stage = $pitemchg->stage;
         $this->cdate = $pitemchg->cdate;
@@ -60,11 +58,9 @@ class POrderItemChg
         $this->acknowledged = $pitemchg->acknowledged;
     }
 
-    public function fill() {
+    public function fill($pitem) {
 
         switch ($this->ctype) {
-
-
             case "A":
                 $this->text = __("Accepted");
                 break;

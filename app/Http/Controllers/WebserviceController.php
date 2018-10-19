@@ -64,14 +64,14 @@ class WebserviceController extends Controller
         );
     }
 
-    public function sortBy(){
-        return Webservice::sortBy(
+    public function sortMessages(){
+        return Webservice::sortMessages(
             Input::get("type")
         );
     }
 
-    public function replyMsg(){
-        return Webservice::replyMsg(
+    public function replyToMessage(){
+        return Webservice::replyToMessage(
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("cdate"),
@@ -94,12 +94,6 @@ class WebserviceController extends Controller
         );
     }
 
-    public function getAllItems(){
-        return Webservice::getAllItems(
-            Input::get("history")
-        );
-    }
-
     function insertReferenceUser(){
         return Webservice::insertReferenceUser(
           Input::get("id"),
@@ -110,33 +104,6 @@ class WebserviceController extends Controller
     public function changePassword() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));
-    }
-
-    function getNrOfStatusChildren(){
-        return Webservice::getNrOfStatusChildren(
-            Input::get("id"),
-            Input::get("status"),
-            Input::get("type"),
-            Input::get("history"),
-            null
-        );
-    }
-
-    public function getOrderInfo() {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
-        return Webservice::getOrderInfo(
-            Input::get("order"),
-            Input::get("type"),
-            Input::get("item"),
-            Input::get("history"),
-            Input::get("time_limit"),
-            Input::get("filter_vbeln"),
-            Input::get("filter_ebeln"),
-            Input::get("filter_matnr"),
-            Input::get("filter_mtext"),
-            Input::get("filter_lifnr"),
-            Input::get("filter_lifnr_name")
-        );
     }
 
     public function getSubTree() {

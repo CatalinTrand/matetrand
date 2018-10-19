@@ -66,67 +66,76 @@ class Webservice
 
     public static function getSubTree($type, $sorder, $porder, $item)
     {
-        $data = Orders::loadFromCache();
-        if ($type == 'S') return self::getSOSubTree($sorder, $data);
-        if ($type == 'P') return self::getPOSubTree($porder, $sorder, $data);
-        if ($type == 'I') return self::getPOItemSubTree($porder, $item, $data);
+        $data = Orders::loadFromCache($sorder, $porder);
+        if ($type == 'S') return self::getSOSubTree($data);
+        if ($type == 'P') return self::getPOSubTree($data);
+        if ($type == 'I') return self::getPOItemSubTree($data, $item);
     }
 
-    public static function getSOSubTree($sorderno, $allporders)
+    public static function getSOSubTree($data)
     {
         $porders = array();
-        foreach ($allporders as $porder) {
-            if (isset($porder->salesorders[$sorderno]))
-                $porders[$porder->ebeln] = $porder;
-        }
-        if (empty($porders)) return "{}";
-        $outporders = array();
-        foreach($porders as $porder) {
+        if ($data == null) return json_encode($porders);
+        foreach($data as $porder) {
             $outporder = $porder;
             unset($outporder->items);
             unset($outporder->wtime);
             unset($outporder->ctime);
             unset($outporder->salesorders);
-            $outporders[] = $outporder;
+            $porders[] = $outporder;
         }
-        $json = json_encode($outporders);
-        return $json;
+        return json_encode($porders);
     }
 
-    public static function getPOSubTree($porderno, $sorderno, $allporders)
+    public static function getPOSubTree($data)
     {
-
-    }
-
-    public static function getPOItemSubTree($porderno, $itemno, $allporders)
-    {
-
-    }
-
-    public static function getAllItems($history){
-        $items_table = $history == 1 ? "pitems" : "pitems_arch";
-        $links = DB::select("select * from ". $items_table);
-        $result = "";
-        foreach ($links as $link){
-            if(strcmp($result,"") != 0)
-                $result = "$link->ebeln#$link->ebelp" . "=" . $result;
-            else
-                $result = "$link->ebeln#$link->ebelp";
+        $pitems = array();
+        if ($data == null) return json_encode($pitems);
+        $porder = reset($data);
+        foreach($porder->items as $pitem) {
+            $outpitem = $pitem;
+            unset($outpitem->qty);
+            unset($outpitem->qty_uom);
+            unset($outpitem->lfdat);
+            unset($outpitem->purch_price);
+            unset($outpitem->purch_curr);
+            unset($outpitem->purch_prun);
+            unset($outpitem->purch_puom);
+            unset($outpitem->sales_price);
+            unset($outpitem->sales_curr);
+            unset($outpitem->sales_prun);
+            unset($outpitem->sales_puom);
+            $pitems[] = $outpitem;
         }
-        return $result;
+        return json_encode($pitems);
     }
 
-    public static function sortBy($type){
-        Session::put("message-filter",$type);
+    public static function getPOItemSubTree($data, $itemno)
+    {
+        $pitemchgs = array();
+        if ($data == null) return json_encode($pitemchgs);
+        $pitem = reset($data)->items[$itemno];
+        foreach($pitem->changes as $pitemchg) {
+            if ((Auth::user()->role == 'Furnizor') && ($pitemchg->internal == 1)) continue;
+            $outpitemchg = $pitemchg;
+            unset($outpitemchg->internal);
+            $pitemchgs[] = $outpitemchg;
+        }
+        return json_encode($pitemchgs);
+    }
+
+    public static function sortMessages($type){
+        Session::put("message-sorting", $type);
         return "";
     }
 
-    static function new_simple_chg($ebeln,$ebelp,$ctype,$stage,$cuser,$cuser_name,$oldval,$newval,$reason){
+    static function new_simple_chg($ebeln,$ebelp,$ctype,$stage,$cuser,$cuser_name,$oldval,$newval,$reason)
+    {
         DB::insert("insert into pitemchg (ebeln,ebelp,cdate,internal,ctype,stage,cuser,cuser_name,oldval,newval,reason) values ('$ebeln','$ebelp',NOW(),'0','$ctype','$stage','$cuser','$cuser_name','$oldval','$newval','$reason')");
     }
 
-    public static function replyMsg($ebeln,$ebelp,$cdate,$idnlf,$lfdat,$qty,$purch_price,$reason){
-
+    public static function replyToMessage($ebeln, $ebelp, $cdate, $idnlf, $lfdat, $qty, $purch_price, $reason)
+    {
         //TODO - cand mai mult de una difera, nu mai merge, individual merg toate
 
         $oldItem = DB::select("select * from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'")[0];

@@ -29,4 +29,4 @@ $table->string('ctv_name', 40)->default('');
 $table->dateTime('lfdat')->default(now());
 $table->string('stage', 1)->default('F');
 $table->string('changed', 1)->default('');
-$table->string("status", 1)->default('');
+$table->integer("status")->default(0);

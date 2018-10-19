@@ -8,26 +8,23 @@
         @endphp
     @endguest
     @php
-        if(isset($_GET['del'])){
-            $id_del = $_GET['del'];
-            DB::delete("delete from messages where id = '$id_del'");
-        }
 
-        $filter = \Illuminate\Support\Facades\Session::get('message-filter');
-        if(!isset($filter))
-            $filter = "none";
+        $sorting = \Illuminate\Support\Facades\Session::get('message-sorting');
+        if(!isset($sorting))
+            $sorting = "none";
 
         $sort_color_ebeln = "";
         $sort_color_cdate = "";
         $sort_color_cuser = "";
 
-        if(strcmp($filter,"ebeln") == 0)
+        if($sorting == "ebeln")
             $sort_color_ebeln = " style='background-color:#99ffcc'";
-        if(strcmp($filter,"cdate") == 0)
+        if ($sorting == "cdate")
             $sort_color_cdate = " style='background-color:#99ffcc'";
-        if(strcmp($filter,"cuser") == 0)
+        if ($sorting == "cuser")
             $sort_color_cuser = " style='background-color:#99ffcc'";
 
+<<<<<<< HEAD
         $filter_history = 1;
         $filter_history_curr = " selected";
         $filter_history_arch = "";
@@ -50,6 +47,8 @@
         $tmp = \Illuminate\Support\Facades\Session::get("filter_archdate");
         if(isset($tmp) && $filter_history == 2) $filter_time_val = $tmp;
 
+=======
+>>>>>>> 328bdb066155c46c9b4d12b7724a6406399b9fed
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
 
@@ -78,16 +77,14 @@
                             <a href="/roles">
                                 <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                    class="card-line first">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-administrative-tools-48.png'/>
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-administrative-tools-48.png'/>
                                     {{__("Roles")}}
                                 </p>
                             </a>
                             <a href="/users">
                                 <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                    class="card-line">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-user-account-80.png'/>
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
                                     {{__("Users")}}
                                 </p>
                             </a>
@@ -99,17 +96,22 @@
                             <a href="/orders">
                                 <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                    class="card-line">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-todo-list-96.png'/>
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
                                     {{__("Orders")}}
                                 </p>
                             </a>
                         @else
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                               class="card-line first selector">Messages</p>
+                               class="card-line first selector">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                {{__("Messages")}}
+                            </p>
                             <a href="/orders"><p
                                         style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line">Comenzi</p></a>
+                                        class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                    {{__("Orders")}}
+                                </p></a>
                         @endif
                     </div>
 
@@ -149,6 +151,7 @@
                                            style="width: 12rem; height: 1.4rem;" name="filter_mtext"
                                            value="{{$filter_mtext}}">&nbsp;&nbsp;
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+<<<<<<< HEAD
                                             {{__("LIFNR")}}:
                                         <input type="text" class="form-control-sm input-sm"
                                                style="width: 6rem; height: 1.4rem;" name="filter_lifnr"
@@ -157,6 +160,12 @@
                                         <input type="text" class="form-control-sm input-sm"
                                                style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name"
                                                value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
+=======
+                                        {{__("Supplier")}}:
+                                        <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$filter_lifnr}}">&nbsp;&nbsp;
+                                        {{__("Supplier name")}}:
+                                        <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
+>>>>>>> 328bdb066155c46c9b4d12b7724a6406399b9fed
                                     @endif
                                 </div>
                                 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
@@ -224,7 +233,7 @@
                                 <th></th>
                                 <th colspan="2">Sales Order</th>
                                 <th></th>
-                                <th colspan="2" class="td02h"
+                                <th colspan="3" class="td02h"
                                     onclick="sortBy('cdate'); return false;" {{$sort_color_cdate}}>CDATE
                                 </th>
                                 <th></th>
@@ -234,28 +243,32 @@
                                 <th></th>
                                 <th colspan="1">Acknowledge</th>
                                 <th colspan="1">Reply</th>
-                                <th colspan="22">Text mesaj</th>
+                                <th colspan="20">Text mesaj</th>
                             </tr>
                             @php
 
-                                $messages = App\Materom\Orders::getMessageList($filter);
+                                $messages = App\Materom\Orders::getMessageList($sorting);
 
                                 foreach ($messages as $message){
-                                    $item = DB::select("select * from pitems where ebeln = '$message->ebeln' and ebelp = '$message->ebelp'")[0];
                                     $tablerow = "<tr><td colspan='2' $sort_color_ebeln>$message->ebeln</td>
                                                      <td></td>
                                                      <td colspan='2'>$message->ebelp</td>
                                                      <td></td>
                                                      <td colspan='2'>$message->vbeln</td>
                                                      <td></td>
-                                                     <td colspan='2' $sort_color_cdate>$message->cdate</td>
+                                                     <td colspan='3' $sort_color_cdate>$message->cdate</td>
                                                      <td></td>
                                                      <td colspan='2' $sort_color_cuser>$message->cuser</td>
                                                      <td colspan='2' $sort_color_cuser>$message->cuser_name</td>
                                                      <td></td>
                                                      <td colspan='1'><button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button></td>
+<<<<<<< HEAD
                                                      <td></td>
                                                      <td colspan='26'>$message->text</td></tr>";
+=======
+                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','','','',''); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+                                                     <td colspan='20'>$message->text</td></tr>";
+>>>>>>> 328bdb066155c46c9b4d12b7724a6406399b9fed
 
                                     echo $tablerow;
 
@@ -281,7 +294,7 @@
             });
             jQuery.ajaxSetup({async: false});
 
-            $.post("webservice/sortBy",
+            $.post("webservice/sortmessages",
                 {
                     type: type
                 },
@@ -371,7 +384,7 @@
                         });
                         jQuery.ajaxSetup({async: false});
 
-                        $.post("webservice/replyMsg",
+                        $.post("webservice/replymessage",
                             {
                                 ebeln: _ebeln,
                                 ebelp: _ebelp,
