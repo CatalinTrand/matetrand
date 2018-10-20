@@ -126,7 +126,7 @@
                                     </select>
                                     @if ($filter_history == 2)
                                         &nbsp;{{__('Documents archived since')}}:
-                                        <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                        <input type="text" id="time_search" name="time_search" value="{{$filter_time_val}}"
                                                onchange="this.form.submit()">
                                     @endif
                                     <br><br>
@@ -222,7 +222,7 @@
                                 <th></th>
                                 <th colspan="2">{{__('Sales order')}}</th>
                                 <th></th>
-                                <th colspan="3" class="td02h"
+                                <th colspan="4" class="td02h"
                                     onclick="sortBy('cdate'); return false;" {{$sort_color_cdate}}>{{__('Change date')}}
                                 </th>
                                 <th></th>
@@ -230,8 +230,8 @@
                                     onclick="sortBy('cuser'); return false;" {{$sort_color_cuser}}>{{__('Changed by')}}
                                 </th>
                                 <th></th>
-                                <th colspan="1">{{__('Acknowledge')}}</th>
-                                <th colspan="1">{{__('Reply')}}</th>
+                                <th colspan="1"></th>
+                                <th colspan="2"></th>
                                 <th colspan="20">{{__('Message text')}}</th>
                             </tr>
                             @php
@@ -239,19 +239,21 @@
                                 $messages = App\Materom\Orders::getMessageList($sorting);
 
                                 foreach ($messages as $message){
+                                    $button_ack = $filter_history == 2 ? "" : "<button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button>";
+                                    $button_reply = $filter_history == 2 ? "" : "<button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button>";
                                     $tablerow = "<tr><td colspan='2' $sort_color_ebeln>$message->ebeln</td>
                                                      <td></td>
                                                      <td colspan='2'>$message->ebelp</td>
                                                      <td></td>
                                                      <td colspan='2'>$message->vbeln</td>
                                                      <td></td>
-                                                     <td colspan='3' $sort_color_cdate>$message->cdate</td>
+                                                     <td colspan='4' $sort_color_cdate>$message->cdate</td>
                                                      <td></td>
                                                      <td colspan='2' $sort_color_cuser>$message->cuser</td>
                                                      <td colspan='2' $sort_color_cuser>$message->cuser_name</td>
                                                      <td></td>
-                                                     <td colspan='1'><button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button></td>
-                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+                                                     <td colspan='1'>$button_ack</td>
+                                                     <td colspan='1'>$button_reply</td>
                                                      <td colspan='1'></td>
                                                      <td colspan='20'>$message->text</td></tr>";
 
@@ -265,6 +267,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        $( function() {
+            $( "#time_search" ).datepicker();
+        } );
+    </script>
 
     <script>
         function sortBy(type) {

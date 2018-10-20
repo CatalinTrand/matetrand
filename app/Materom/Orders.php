@@ -99,7 +99,8 @@ class Orders
         $filter_lifnr_sql = self::processFilter($orders_table . ".lifnr", $filter_lifnr, 10);
         $filter_lifnr_name_sql = self::processFilter("sap_lfa1.name1", $filter_lifnr_name);
 
-        $filter_sql = $time_limit === null ? "" : "(archdate >= '$time_limit 00:00:00')";
+        $filter_sql = $time_limit === null ? "" : "$items_table.archdate >= '$time_limit 00:00:00'";
+        if($history != 2) $filter_sql = "";
         $filter_sql = self::addFilters($filter_sql, $filter_ebeln_sql, $filter_lifnr_sql, $filter_lifnr_name_sql);
         $filter_sql = self::addFilters($filter_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql);
 
@@ -181,12 +182,20 @@ class Orders
         if (!isset($cacheid) || empty($cacheid)) return;
 
         $history = Session::get("filter_history");
+        $status = Session::get("filter_status");
+
         if ($history == null) $history = 1;
         else $history = intval($history);
 
         $orders_table = $history == 1 ? "porders" : "porders_arch";
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $itemchanges_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
+        $status_filter = "";
+        if(strcmp($status, 'AP') == 0)
+            $status_filter = " and $items_table.stage = 'A' ";
+        if(strcmp($status, 'RE') == 0)
+            $status_filter = " and $items_table.stage = 'X' ";
 
         if ($history == 1 && $s_order == null && $p_order == null && $refresh_dlv) {
             $items = DB::select("select ebeln, ebelp from pitems_cache where session = '$cacheid'");
@@ -204,7 +213,7 @@ class Orders
                 $pitems_sql .= " and pitems_cache.vbeln <> '" . self::stockorder. "'";
             else $pitems_sql .= " and pitems_cache.vbeln = '$s_order'";
             $pitems = DB::select("select distinct ebeln, ebelp from pitems_cache ".
-                " where session = '$cacheid'" . $pitems_sql . " order by ebeln, ebelp");
+                " where session = '$cacheid'" . $pitems_sql ." order by ebeln, ebelp");
             if (empty($pitems)) return $result;
             $pitems_sql .= " and (";
             $porders_sql .= " and (";
@@ -226,7 +235,7 @@ class Orders
         if (empty($porders)) return $result;
 
         $pitems = DB::select("select $items_table.* from $items_table join pitems_cache using (ebeln, ebelp) ".
-            " where pitems_cache.session = '$cacheid'" . $pitems_sql .
+            " where pitems_cache.session = '$cacheid'" . $pitems_sql . $status_filter .
             " order by $items_table.ebeln, $items_table.ebelp");
         if (empty($pitems)) return $result;
 
