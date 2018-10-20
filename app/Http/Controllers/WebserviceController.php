@@ -162,4 +162,9 @@ class WebserviceController extends Controller
         return Webservice::sapProcessPO(Input::get("ebeln"));
     }
 
+    public function sapRefreshDeliveryStatus() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return SAP::refreshDeliveryStatus();
+    }
+
 }

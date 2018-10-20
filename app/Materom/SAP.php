@@ -18,6 +18,41 @@ use Illuminate\Support\Facades\Log;
 class SAP
 {
 
+    static public function alpha_output($input) {
+        $output = trim($input);
+        if (ctype_digit($output)) {
+            $output = ltrim($output, "0");
+            if (empty($output)) $output = $input;
+        }
+        return $output;
+    }
+
+    static public function alpha_input($input) {
+        $output = trim($input);
+        if (ctype_digit($output)) {
+            $output = str_pad($input, 10, "0", STR_PAD_LEFT);
+        }
+        return $output;
+    }
+
+    static public function date_output($input) {
+        $output = trim($input);
+        if (empty($output)) return null;
+        if (strtolower($output) == "null") return null;
+        return substr($output, 0, 4) . '-' .
+               substr($output, 4, 2) . '-' .
+               substr($output, 6, 2);
+    }
+
+    static public function date_input($input) {
+        $output = trim($input);
+        if (empty($output)) return "00000000";
+        if (strtolower($output) == "null") return "00000000";
+        return substr($output, 0, 4) .
+            substr($output, 5, 2) .
+            substr($output, 8, 2);
+    }
+
     static public function rfcUpdateAPIToken($api_token)
     {
         $globalRFCData = DB::select("select * from global_rfc_config");
@@ -89,21 +124,65 @@ class SAP
         }
     }
 
-    static public function alpha_output($input) {
-        $output = trim($input);
-        if (ctype_digit($output)) {
-            $output = ltrim($output, "0");
-            if (empty($output)) $output = $input;
+    static public function refreshDeliveryStatus($items = null)
+    {
+        if ($items == null)
+            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems order by ebeln, ebelp");
+        else {
+            $sql = "where ";
+            foreach ($items as $item) $sql .= "(ebeln = '$item->ebeln' and ebelp = '$item->ebelp') or ";
+            $sql = substr($sql, 0, -4);
+            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems $sql order by ebeln, ebelp");
         }
-        return $output;
+        $items = SAP::rfcGetDeliveryData($items);
+        DB::beginTransaction();
+        foreach ($items as $item) {
+            db::update("update pitems set" .
+                " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
+                ", delqty = '$item->delqty'" .
+                ", grdate = " . ($item->grdate == null ? "null" : "'$$item->grdate'") .
+                ", grqty = '$item->grqty'" .
+                ", gidate = " . ($item->gidate == null ? "null" : "'$$item->gidate'") .
+                " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
+        }
+        DB::commit();
+        return "OK";
     }
 
-    static public function alpha_input($input) {
-        $output = trim($input);
-        if (ctype_digit($output)) {
-            $output = str_pad($input, 10, "0", STR_PAD_LEFT);
+    static public function rfcGetDeliveryData($items) {
+
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_DELIVERY_STATUS');
+            foreach ($items as $item) {
+                $item->deldate = SAP::date_input($item->deldate);
+                $item->grdate = SAP::date_input($item->grdate);
+                $item->gidate = SAP::date_input($item->gidate);
+            }
+            $items = json_decode(($sapfm->invoke(['P_ITEMS' => json_encode($items)]))["P_ITEMS"]);
+            $sapconn->close();
+            foreach ($items as $item) {
+                $item->ebeln = $item->EBELN; unset($item->EBELN);
+                $item->ebelp = $item->EBELP; unset($item->EBELP);
+                $item->deldate = SAP::date_output($item->DELDATE); unset($item->DELDATE);
+                $item->delqty = $item->DELQTY; unset($item->DELQTY);
+                $item->grdate = SAP::date_output($item->GRDATE); unset($item->GRDATE);
+                $item->grqty = $item->GRQTY; unset($item->GRQTY);
+                $item->gidate = SAP::date_output($item->GIDATE); unset($item->GIDATE);
+            }
+            return $items;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
         }
-        return $output;
     }
 
 };

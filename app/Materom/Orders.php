@@ -174,7 +174,7 @@ class Orders
         DB::commit();
     }
 
-    static public function loadFromCache($s_order = null, $p_order = null)
+    static public function loadFromCache($s_order = null, $p_order = null, $refresh_dlv = false)
     {
         $result = array();
         $cacheid = Session::get('materomdbcache');
@@ -187,6 +187,11 @@ class Orders
         $orders_table = $history == 1 ? "porders" : "porders_arch";
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $itemchanges_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+
+        if ($history == 1 && $s_order == null && $p_order == null && $refresh_dlv) {
+            $items = DB::select("select ebeln, ebelp from pitems_cache where session = '$cacheid'");
+            SAP::refreshDeliveryStatus($items);
+        }
 
         $porders_sql = "";
         $pitems_sql = "";
@@ -261,7 +266,7 @@ class Orders
             $groupByPO = Session::get("groupOrdersBy");
         if (!isset($groupByPO)) $groupByPO = 1;
 
-        $result = self::loadFromCache();
+        $result = self::loadFromCache(null,null,true);
 
         if ($groupByPO == 0) {
             $orders = array();

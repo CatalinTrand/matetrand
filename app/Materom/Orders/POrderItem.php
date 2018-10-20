@@ -50,11 +50,17 @@ class POrderItem
     public $shipto;      // VBPA-KUNNR WE
     public $ctv;         // VBAK-ERNAM
     public $ctv_name;    // just in case it is deleted from USR02
+    public $deldate;    // inbound delivery confirmation date
+    public $delqty;     // inbound qty
+    public $grdate;     // goods receipt date
+    public $grqty;      // goods receipt quantity
+    public $gidate;     // goods issue quantity
 
     // computed/determined fields
     public $sorder;      // sales order to be displayed
     public $kunnr_name;
     public $shipto_name;
+
     // external representations
     public $x_quantity;
     public $x_delivery_date;
@@ -115,6 +121,11 @@ class POrderItem
         $this->shipto = $pitem->shipto;
         $this->ctv = $pitem->ctv;
         $this->ctv_name = $pitem->ctv_name;
+        $this->deldate = $pitem->deldate;
+        $this->delqty = $pitem->delqty;
+        $this->grdate = $pitem->grdate;
+        $this->grqty = $pitem->grqty;
+        $this->gidate = $pitem->gidate;
         $this->changed = $pitem->changed;
         $this->stage = $pitem->stage;
         $this->status = $pitem->status;
