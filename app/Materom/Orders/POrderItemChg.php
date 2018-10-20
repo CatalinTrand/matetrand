@@ -38,6 +38,7 @@ class POrderItemChg
     public $oebelp;     // originating purchase item (split)
 
     // computed/determined fields
+    public $vbeln;
     public $text;       // message text
 
     function __construct($pitemchg)
@@ -58,7 +59,10 @@ class POrderItemChg
         $this->acknowledged = $pitemchg->acknowledged;
     }
 
-    public function fill($pitem) {
+    public function fill($pitem)
+    {
+
+        $this->vbeln = $pitem->vbeln;
 
         switch ($this->ctype) {
             case "A":

@@ -73,6 +73,8 @@ class HomeController extends Controller
         Session::put("filter_mtext", Input::get("filter_mtext"));
         Session::put("filter_lifnr", Input::get("filter_lifnr"));
         Session::put("filter_lifnr_name", Input::get("filter_lifnr_name"));
+        Session::put("filter_history", Input::get("filter_history"));
+        Session::put("filter_archdate", Input::get("time_search"));
         Orders::fillCache();
         return redirect()->back();
     }
