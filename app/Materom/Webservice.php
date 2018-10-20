@@ -184,11 +184,12 @@ class Webservice
         return "";
     }
 
-    public static function itemsOfOrder($type,$order){
+    public static function itemsOfOrder($type,$order,$history){
+        $items_table = $history != 2 ? "pitems" : "pitems_arch";
         if($type == "S"){
-            return DB::select("select * from pitems where vbeln = '$order'");
+            return DB::select("select * from $items_table where vbeln = '$order'");
         } else {
-            return DB::select("select * from pitems where ebeln = '$order'");
+            return DB::select("select * from $items_table where ebeln = '$order'");
         }
     }
 

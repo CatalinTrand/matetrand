@@ -73,7 +73,8 @@ class WebserviceController extends Controller
     public function itemsOfOrder(){
         return Webservice::itemsOfOrder(
             Input::get("type"),
-            Input::get("order")
+            Input::get("order"),
+            Input::get("history")
         );
     }
 

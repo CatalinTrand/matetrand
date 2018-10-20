@@ -83,6 +83,7 @@
 
     @endphp
     <div class="container-fluid">
+        <input type="hidden" id="filter_history" value="{{$filter_history}}">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
@@ -148,7 +149,7 @@
                                     </select>
                                     @if ($filter_history == 2)
                                         &nbsp;{{__('Documents archived since')}}:
-                                        <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                        <input type="text" id="time_search" name="time_search" value="{{$filter_time_val}}"
                                                onchange="this.form.submit()">
                                     @endif
                                 </div><br>
@@ -520,6 +521,13 @@
             </div>
         </div>
     </div>
+
+    <script>
+        $( function() {
+            $( "#time_search" ).datepicker();
+        } );
+    </script>
+
     <script>
 
         @php
@@ -1318,7 +1326,8 @@
             $.get("webservice/itemsOfOrder",
                 {
                     type: rowtype,
-                    order: porder
+                    order: porder,
+                    history: $("filter_history").val()
                 },
                 function (data, status) {
                     _dataAP = data;
@@ -1361,6 +1370,7 @@
                 {
                     type: rowtype,
                     order: porder
+                    history: $("filter_history").val()
                 },
                 function (data, status) {
                     _dataRP = data;
@@ -1441,7 +1451,8 @@
             $.get("webservice/itemsOfOrder",
                 {
                     type: rowtype,
-                    order: sorder
+                    order: sorder,
+                    history: $("filter_history").val()
                 },
                 function (data, status) {
                     _dataAS = data;
@@ -1478,7 +1489,8 @@
             $.get("webservice/itemsOfOrder",
                 {
                     type: rowtype,
-                    order: sorder
+                    order: sorder,
+                    history: $("filter_history").val()
                 },
                 function (data, status) {
                     _dataRS = data;
