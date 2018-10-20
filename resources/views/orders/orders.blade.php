@@ -114,7 +114,7 @@
                         @else
                             <a href="/messages"><p
                                 style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                class="card-line first">Messages</p></a>
+                                class="card-line first">{{__('Messages')}}</p></a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                class="card-line selector">
                                 <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
@@ -124,30 +124,29 @@
                     </div>
 
                     <div class="card-body" style="padding-bottom: 0px;">
-
                         <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 7.5rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
-                                    Afisare dupa:&nbsp;
+                                    {{__('Show by')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="groupOrdersBy" onchange="this.form.submit()">
-                                        <option value="0"{{$groupBySelSO}}>Comenzi client</option>
-                                        <option value="1"{{$groupBySelPO}}>Comenzi de aprovizionare</option>
+                                        <option value="0"{{$groupBySelSO}}>{{__('Client orders')}}</option>
+                                        <option value="1"{{$groupBySelPO}}>{{__('Stock orders')}}</option>
                                     </select>
-                                    Filtrare dupa status:
+                                    {{__('Filter by status')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_status" onchange="this.form.submit()">
-                                        <option value="NA"{{$filter_status_selNA}}>{{__('Toate')}}</option>
-                                        <option value="AP"{{$filter_status_selAP}}>{{__('Aprobate')}}</option>
-                                        <option value="RE"{{$filter_status_selRE}}>{{__('Rejectate')}}</option>
+                                        <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
+                                        <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
+                                        <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
                                     </select>
                                 </div><br>
                                 <div class="container row" style="display: block; max-width: 100%;">
-                                    Filtrare dupa istoric:
+                                    {{__('Filter by history')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
-                                        <option value="1"{{$filter_history_curr}}>{{__("Neprocesate")}}</option>
-                                        <option value="2"{{$filter_history_arch}}>{{__("Procesate")}}</option>
+                                        <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
+                                        <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
                                         @if ($filter_history == 2)
-                                            &nbsp;&nbsp;&nbsp;Documente arhivate de la:
+                                            &nbsp;&nbsp;&nbsp;{{__('Documents archived since')}}:
                                             <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
                                                    onchange="this.form.submit()">
                                         @endif
@@ -395,7 +394,7 @@
                                                              "onclick='acceptPOrder(this);return false;'/>";
                                         if ($order->reject == 1)
                                             $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='rejectPOrder(this);return false;'/>";
+                                                             "onclick='reject_init('P',this);return false;'/>";
                                         if ($order->inquire == 1)
                                             $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
                                                               "onclick='inquirePOrder(this);return false;'/>";
@@ -494,7 +493,7 @@
                                                              "onclick='acceptSOrder(this);return false;' />";
                                         if ($order->reject == 1)
                                             $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='rejectSOrder(this);return false;' />";
+                                                             "onclick='reject_init('S',this);return false;' />";
                                         if ($order->inquire == 1)
                                             $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
                                                               "onclick='inquireSOrder(this);return false;' />";
@@ -655,6 +654,7 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
+                location.reload(true);
                 return;//todo
                 //show new row
                 if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
@@ -727,7 +727,7 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
-                alert("Rejected!");
+                location.reload(true);
                 return;//todo
                 //show new row
                 if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
@@ -810,6 +810,7 @@
         }
 
         function getSubTree(thisbtn) {
+                    alert('');
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1);
@@ -956,7 +957,7 @@
                 let button_reject = "";
                 if (porder.reject == 1)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
-                                    "onclick='rejectPOrder(this);return false;'/>";
+                                    "onclick='reject_init(\"P\",this);return false;'/>";
                 let button_inquire = "";
                 if (porder.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
@@ -1301,15 +1302,46 @@
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
             let porder = rowid.substr(4, 10);
+            let sorder = "";
             @if ($groupByPO == 0)
                 let prevRow = $(currentrow).prev();
                 while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
                 sorder = $(prevRow).attr("id").substr(4, 10);
             @endif
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataAP, _statusAP;
+            $.get("webservice/itemsOfOrder",
+                {
+                    type: rowtype,
+                    order: porder
+                },
+                function (data, status) {
+                    _dataAP = data;
+                    _statusAP = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_statusAP != "success") return;
+            if (_dataAP.length > 0) {
+                for(let i = 0; i < _dataAP.length; i++){
+                    if(isChecked('I'+_dataAP[i].ebelp)){
+                        _unused_acceptItem(porder,_dataAP[i].ebelp,'purch-item');
+                    }
+                }
+                location.reload(true);
+            }
+        }
         }
 
         function rejectPOrder(thisbtn)
         {
+            let category = $("#reject-category").val();
+            let reason = $("#reject-reason").val();
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
@@ -1319,6 +1351,33 @@
                 while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
                 sorder = $(prevRow).attr("id").substr(4, 10);
             @endif
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataRP, _statusRP;
+            $.get("webservice/itemsOfOrder",
+                {
+                    type: rowtype,
+                    order: porder
+                },
+                function (data, status) {
+                    _dataRP = data;
+                    _statusRP = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_statusRP != "success") return;
+            if (_dataRP.length > 0) {
+                for(let i = 0; i < _dataRP.length; i++){
+                    if(isChecked('I'+_dataRP[i].ebelp)){
+                        _unused_rejectItem(porder,_dataRP[i].ebelp,'purch-item',category,reason);
+                    }
+                }
+                location.reload(true);
+            }
         }
 
         function inquirePOrder(thisbtn)
@@ -1341,15 +1400,21 @@
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
+            _unused_acceptItem(porder,item,'purch-item');
+            location.reload(true);
         }
 
         function rejectPItem(thisbtn)
         {
+            let category = $("#reject-category").val();
+            let reason = $("#reject-reason").val();
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
+            _unused_rejectItem(porder,item,'purch-item',category,reason);
+            location.reload(true);
         }
 
         function inquirePItem(thisbtn)
@@ -1368,14 +1433,69 @@
             let rowtype = rowid.substr(3, 1); // S
             let sorder = rowid.substr(4, 10);
 
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataAS, _statusAS;
+            $.get("webservice/itemsOfOrder",
+                {
+                    type: rowtype,
+                    order: sorder
+                },
+                function (data, status) {
+                    _dataAS = data;
+                    _statusAS = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_statusAS != "success") return;
+            if (_dataAS.length > 0) {
+                for(let i = 0; i < _dataAS.length; i++){
+                    if(isChecked('I'+_dataAS[i].ebelp)){
+                        _unused_acceptItem(porder,_dataAS[i].ebelp,'purch-item');
+                    }
+                }
+                location.reload(true);
+            }
         }
 
         function rejectSOrder(thisbtn)
         {
+            let category = $("#reject-category").val();
+            let reason = $("#reject-reason").val();
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // S
             let sorder = rowid.substr(4, 10);
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataRS, _statusRS;
+            $.get("webservice/itemsOfOrder",
+                {
+                    type: rowtype,
+                    order: sorder
+                },
+                function (data, status) {
+                    _dataRS = data;
+                    _statusRS = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_statusRS != "success") return;
+            if (_dataRS.length > 0) {
+                for(let i = 0; i < _dataRS.length; i++){
+                    if(isChecked('I'+_dataRS[i].ebelp)){
+                        _unused_rejectItem(porder,_dataRS[i].ebelp,'purch-item',category,reason);
+                    }
+                }
+                location.reload(true);
+            }
         }
 
         function inquireSOrder(thisbtn)
@@ -1395,12 +1515,19 @@
                     break;
                 case 3:
                     c_string = "qty";
+                    if(!(Math.floor(c_value_hlp) == id && $.isNumeric(c_value_hlp)) || c_value_hlp.startsWith('-'))
+                        return false;
                     break;
                 case 4:
                     c_string = "lfdat";
+                    var d = new Date(c_value_hlp);
+                    if(isNaN(d.valueOf()))
+                        return false;
                     break;
                 case 5:
                     c_string = "purch_price";
+                    if(!($.isNumeric(c_value_hlp)) || c_value_hlp.startsWith('-') || c_value_hlp.match(/,/).length + c_value_hlp.match(/./).length > 1)
+                        return false;
                     break;
             }
 
@@ -1590,7 +1717,7 @@
 
     <script>
 
-        var rejectDialog, rejectForm, _ebelp, _id;
+        var rejectDialog, rejectForm, _type, _this;
         $(function () {
             rejectDialog = $("#init-rejection-dialog").dialog({
                 autoOpen: false,
@@ -1599,9 +1726,20 @@
                 modal: true,
                 buttons: {
                     Add: function (){
-                        if(!($("#reject-category").val() == 2 && $("#reject-reason").val().length == 0 ))
-                            if(reject(_ebelp,_id,'item',$("#reject-category").val(),$("#reject-reason").val()))
-                                rejectDialog.dialog("close");
+                        if(!($("#reject-category").val() == 2 && $("#reject-reason").val().length == 0 )) {
+                            switch (_type) {
+                                case "S":
+                                    rejectSOrder(_this);
+                                    break;
+                                case "P":
+                                    rejectPOrder(_this);
+                                    break;
+                                case "I":
+                                    rejectPItem(_this);
+                                    break;
+                            }
+                            rejectDialog.dialog("close");
+                        }
                     },
                     Cancel: function () {
                         rejectDialog.dialog("close");
@@ -1624,11 +1762,11 @@
             });
         });
 
-        function reject_init(ebelp,id) {
+        function reject_init(type,this0) {
             $("#new_rej_msg").text("");
             $("#init-rejection-dialog").dialog('option', 'title', 'Formular de rejectare');
-            _ebelp = ebelp;
-            _id = id;
+            _type = type;
+            _this = this0;
             rejectDialog.dialog("open");
         }
     </script>

@@ -26,11 +26,11 @@ class MasterData
             $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
-            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_DATA');
-            $result = $sapfm->invoke(['P_CMD' => $command,
-                                      'P_IN' => $in]);
-            $sapconn->close();
+            //$sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            //$sapfm = $sapconn->getFunction('ZSRM_RFC_GET_DATA');
+            //$result = $sapfm->invoke(['P_CMD' => $command,
+            //                          'P_IN' => $in]);
+            //$sapconn->close();
             if (empty($result)) return;
             if (!array_key_exists("P_OUT", $result)) return;
             return $result["P_OUT"];

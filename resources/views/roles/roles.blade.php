@@ -75,7 +75,7 @@
                         <div class="row">
                             <div style="width: 28%;" class="role-card">
                                 <div class="card-header">
-                                    <b>Global RFC Settings</b>
+                                    <b>{{__('Global RFC Settings')}}</b>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST" action="/roles/globalUpdate">
@@ -84,7 +84,7 @@
                                         <div style="height: 12rem;">
                                             <div class="form-group row">
                                                 <label for="rfc_router"
-                                                       class="col-md-6 text-md-left spaced-label">RFC Router</label>
+                                                       class="col-md-6 text-md-left spaced-label">{{__('RFC Router')}}</label>
 
                                                 <div class="col-md-6">
                                                     <input id="rfc_router" type="text" name="rfc_router" class="spaced-input"
@@ -93,7 +93,7 @@
                                             </div>
                                             <div class="form-group row">
                                                 <label for="rfc_server"
-                                                       class="col-md-6 text-md-left spaced-label">RFC Server</label>
+                                                       class="col-md-6 text-md-left spaced-label">{{__('RFC Server')}}</label>
 
                                                 <div class="col-md-6">
                                                     <input id="rfc_server" type="text" name="rfc_server" class="spaced-input" required
@@ -102,7 +102,7 @@
                                             </div>
                                             <div class="form-group row">
                                                 <label for="rfc_sysnr"
-                                                       class="col-md-6 text-md-left spaced-label">RFC SysNr</label>
+                                                       class="col-md-6 text-md-left spaced-label">{{__('RFC SysNr')}}</label>
 
                                                 <div class="col-md-6">
                                                     <input id="rfc_sysnr" type="text" name="rfc_sysnr" class="spaced-input" required
@@ -111,7 +111,7 @@
                                             </div>
                                             <div class="form-group row">
                                                 <label for="rfc_client"
-                                                       class="col-md-6 text-md-left spaced-label">RFC Client</label>
+                                                       class="col-md-6 text-md-left spaced-label">{{__('RFC Client')}}</label>
 
                                                 <div class="col-md-6">
                                                     <input id="rfc_client" type="text" name="rfc_client" class="spaced-input" required
@@ -119,20 +119,20 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <input type="submit" class="background-image-save" value="    Save" style="width: 10rem; height: 32px;">
+                                        <input type="submit" class="background-image-save" value="    {{__('Save')}}" style="width: 10rem; height: 32px;">
                                     </form>
                                 </div>
                             </div>
                             <div style="width: 18%;" class="role-card">
                                 <div class="card-header">
-                                    <b>Administrator</b>
+                                    <b>{{__('Administrator')}}</b>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
                                         <div class="form-group row">
                                             <label for="rfc_user"
-                                                   class="col-md-4 text-md-left spaced-label">RFC User</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC User')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="a_rfc_user" type="text" name="rfc_user" class="spaced-input" required
@@ -141,7 +141,7 @@
                                         </div>
                                         <div class="form-group row">
                                             <label for="rfc_passwd"
-                                                   class="col-md-4 text-md-left spaced-label">RFC Password</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="a_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
@@ -150,10 +150,10 @@
                                         </div>
                                         <button type="button" id="Administrator_test"
                                                 onclick="rfc_ping('a', '{{$oldglobal->rfc_router}}','{{$oldglobal->rfc_server}}','{{$oldglobal->rfc_sysnr}}','{{$oldglobal->rfc_client}}');return false;"
-                                                style="border-top: 4px black;width: 100%;margin-bottom: 10px">Test
+                                                style="border-top: 4px black;width: 100%;margin-bottom: 10px">{{__('Test')}}
                                         </button>
                                         <input type="hidden" name="rfc_role" value="administrator">
-                                        <input type="submit" value="Save"
+                                        <input type="submit" value="{{__('Save')}}"
                                                onclick="return check_rfc_global_data('{{$oldglobal->rfc_router}}','{{$oldglobal->rfc_server}}','{{$oldglobal->rfc_sysnr}}','{{$oldglobal->rfc_client}}');"
                                                style="border-top: 4px black;width: 100%">
                                     </form>
@@ -161,14 +161,14 @@
                             </div>
                             <div style="width: 18%;" class="role-card">
                                 <div class="card-header">
-                                    <b>Furnizor</b>
+                                    <b>{{__('Supplier')}}</b>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
                                         <div class="form-group row">
                                             <label for="rfc_user"
-                                                   class="col-md-4 text-md-left spaced-label">RFC User</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC User')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="f_rfc_user" type="text" name="rfc_user" class="spaced-input" required
@@ -177,7 +177,7 @@
                                         </div>
                                         <div class="form-group row">
                                             <label for="rfc_passwd"
-                                                   class="col-md-4 text-md-left spaced-label">RFC Password</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="f_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
@@ -185,10 +185,10 @@
                                             </div>
                                         </div>
                                         <button id="Furnizor_test"
-                                                style="border-top: 4px black;width: 100%;margin-bottom: 10px">Test
+                                                style="border-top: 4px black;width: 100%;margin-bottom: 10px">{{__('Test')}}
                                         </button>
                                         <input type="hidden" name="rfc_role" value="furnizor">
-                                        <input type="submit" value="Save"
+                                        <input type="submit" value="{{__('Save')}}"
                                                onclick="return check_rfc_global_data('{{$oldglobal->rfc_router}}','{{$oldglobal->rfc_server}}','{{$oldglobal->rfc_sysnr}}','{{$oldglobal->rfc_client}}');"
                                                style="border-top: 4px black;width: 100%">
                                     </form>
@@ -196,14 +196,14 @@
                             </div>
                             <div style="width: 18%;" class="role-card">
                                 <div class="card-header">
-                                    <b>Referent</b>
+                                    <b>{{__('Refferal')}}</b>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
                                         <div class="form-group row">
                                             <label for="rfc_user"
-                                                   class="col-md-4 text-md-left spaced-label">RFC User</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC User')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="r_rfc_user" type="text" name="rfc_user" class="spaced-input" required
@@ -212,7 +212,7 @@
                                         </div>
                                         <div class="form-group row">
                                             <label for="rfc_passwd"
-                                                   class="col-md-4 text-md-left spaced-label">RFC Password</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="r_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
@@ -220,10 +220,10 @@
                                             </div>
                                         </div>
                                         <button id="Referent_test"
-                                                style="border-top: 4px black;width: 100%;margin-bottom: 10px">Test
+                                                style="border-top: 4px black;width: 100%;margin-bottom: 10px">{{__('Test')}}
                                         </button>
                                         <input type="hidden" name="rfc_role" value="referent">
-                                        <input type="submit" value="Save"
+                                        <input type="submit" value="{{__('Save')}}"
                                                onclick="return check_rfc_global_data('{{$oldglobal->rfc_router}}','{{$oldglobal->rfc_server}}','{{$oldglobal->rfc_sysnr}}','{{$oldglobal->rfc_client}}');"
                                                style="border-top: 4px black;width: 100%">
                                     </form>
@@ -231,14 +231,14 @@
                             </div>
                             <div style="width: 18%;" class="role-card">
                                 <div class="card-header">
-                                    <b>CTV</b>
+                                    <b>{{__('CTV')}}</b>
                                 </div>
                                 <div class="card-body">
                                     <form method="POST" action="/roles/roleUpdate">
                                         {{ csrf_field() }}
                                         <div class="form-group row">
                                             <label for="rfc_user"
-                                                   class="col-md-4 text-md-left spaced-label">RFC User</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC User')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="c_rfc_user" type="text" name="rfc_user" class="spaced-input" required
@@ -247,16 +247,16 @@
                                         </div>
                                         <div class="form-group row">
                                             <label for="rfc_password"
-                                                   class="col-md-4 text-md-left spaced-label">RFC Password</label>
+                                                   class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
                                                 <input id="c_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
                                                        value="{{$ctvData->rfc_passwd}}">
                                             </div>
                                         </div>
-                                        <button id="CTV_test" style="border-top: 4px black;width: 100%;margin-bottom: 10px">Test </button>
+                                        <button id="CTV_test" style="border-top: 4px black;width: 100%;margin-bottom: 10px">{{__('Test')}} </button>
                                         <input type="hidden" name="rfc_role" value="ctv">
-                                        <input type="submit" value="Save"
+                                        <input type="submit" value="{{__('Save')}}"
                                                onclick="return check_rfc_global_data('{{$oldglobal->rfc_router}}','{{$oldglobal->rfc_server}}','{{$oldglobal->rfc_sysnr}}','{{$oldglobal->rfc_client}}');"
                                                style="border-top: 4px black;width: 100%">
                                     </form>

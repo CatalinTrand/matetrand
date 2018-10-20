@@ -24,6 +24,30 @@
         if ($sorting == "cuser")
             $sort_color_cuser = " style='background-color:#99ffcc'";
 
+        $filter_history = 1;
+        $filter_history_curr = " selected";
+        $filter_history_arch = "";
+        $tmp = \Illuminate\Support\Facades\Session::get('filter_history');
+        if (isset($tmp)) {
+            if (intval($tmp) != 2) {
+                // noi
+                $filter_history = 1;
+                $filter_history_curr = " selected";
+                $filter_history_arch = "";
+            } else {
+                // vechi
+                $filter_history = 2;
+                $filter_history_curr = "";
+                $filter_history_arch = " selected";
+            }
+        }
+
+        $filter_time_val = null;
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_archdate");
+        if(isset($tmp) && $filter_history == 2) $filter_time_val = $tmp;
+
+
+
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
 
@@ -91,16 +115,28 @@
                     </div>
 
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 2.5rem;">
+                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 5rem;">
                             <form action="/messages" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
+                                    {{__('Filter after history')}}:
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
+                                        <option value="1"{{$filter_history_curr}}>{{__("Neprocesate")}}</option>
+                                        <option value="2"{{$filter_history_arch}}>{{__("Procesate")}}</option>
+                                        @if ($filter_history == 2)
+                                            &nbsp;&nbsp;&nbsp;{{__('Documents archived since')}}:
+                                            <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                                   onchange="this.form.submit()">
+                                        @endif
+                                    </select>
+                                    <br><br>
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                                         {{__("Sales order")}}:
                                         <input type="text" class="form-control-sm input-sm"
                                                style="width: 6rem; height: 1.4rem;" name="filter_vbeln"
                                                value="{{$filter_vbeln}}">&nbsp;&nbsp;
                                     @endif
+
                                     {{__("Purchase order")}}:
                                     <input type="text" class="form-control-sm input-sm"
                                            style="width: 6rem; height: 1.4rem;" name="filter_ebeln"
@@ -114,10 +150,21 @@
                                            style="width: 12rem; height: 1.4rem;" name="filter_mtext"
                                            value="{{$filter_mtext}}">&nbsp;&nbsp;
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+
+                                            {{__("LIFNR")}}:
+                                        <input type="text" class="form-control-sm input-sm"
+                                               style="width: 6rem; height: 1.4rem;" name="filter_lifnr"
+                                               value="{{$filter_lifnr}}">&nbsp;&nbsp;
+                                            {{__("LIFNR_NAME")}}:
+                                        <input type="text" class="form-control-sm input-sm"
+                                               style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name"
+                                               value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
+
                                         {{__("Supplier")}}:
                                         <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$filter_lifnr}}">&nbsp;&nbsp;
                                         {{__("Supplier name")}}:
                                         <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
+
                                     @endif
                                 </div>
                                 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
@@ -178,30 +225,31 @@
                             </colgroup>
                             <tr>
                                 <th colspan="2" class="td02h"
-                                    onclick="sortBy('ebeln'); return false;" {{$sort_color_ebeln}}>EBELN
+                                    onclick="sortBy('ebeln'); return false;" {{$sort_color_ebeln}}>{{__('EBELN')}}
                                 </th>
                                 <th></th>
-                                <th colspan="2">EBELP</th>
+                                <th colspan="2">{{__('EBELP')}}</th>
                                 <th></th>
-                                <th colspan="2">Sales Order</th>
+                                <th colspan="2">{{__('Sales Order')}}</th>
                                 <th></th>
                                 <th colspan="3" class="td02h"
-                                    onclick="sortBy('cdate'); return false;" {{$sort_color_cdate}}>CDATE
+                                    onclick="sortBy('cdate'); return false;" {{$sort_color_cdate}}>{{__('CDATE')}}
                                 </th>
                                 <th></th>
                                 <th colspan="4" class="td02h"
-                                    onclick="sortBy('cuser'); return false;" {{$sort_color_cuser}}>CUSER & CNAME
+                                    onclick="sortBy('cuser'); return false;" {{$sort_color_cuser}}>{{__('CUSER & CNAME')}}
                                 </th>
                                 <th></th>
-                                <th colspan="1">Acknowledge</th>
-                                <th colspan="1">Reply</th>
-                                <th colspan="20">Text mesaj</th>
+                                <th colspan="1">{{__('Acknowledge')}}</th>
+                                <th colspan="1">{{__('Reply')}}</th>
+                                <th colspan="20">{{__('Message text')}}</th>
                             </tr>
                             @php
 
                                 $messages = App\Materom\Orders::getMessageList($sorting);
 
                                 foreach ($messages as $message){
+                                    $item = $message->item;
                                     $tablerow = "<tr><td colspan='2' $sort_color_ebeln>$message->ebeln</td>
                                                      <td></td>
                                                      <td colspan='2'>$message->ebelp</td>
@@ -214,8 +262,10 @@
                                                      <td colspan='2' $sort_color_cuser>$message->cuser_name</td>
                                                      <td></td>
                                                      <td colspan='1'><button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button></td>
-                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','','','',''); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','$item->idnlf','$item->purch_price','$item->qty','$item->lfdat'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+                                                     <td colspan='1'></td>
                                                      <td colspan='20'>$message->text</td></tr>";
+
 
                                     echo $tablerow;
                                 }
@@ -285,25 +335,12 @@
         }
     </script>
 
-    <div id="init-reply-dialog" title="Raspuns la mesaj">
+    <div id="init-reply-dialog" title="{{__('Reply to message')}}">
         <form>
             <br>
             <div class="form-group container-fluid" align="middle">
-                <label for="idnlf" class="col-md-4 col-form-label text-md-left">IDLNF:</label>
-                <input id="idnlf" type="text" name="idnlf" size="20"
-                       class="form-control col-md-12" value="">
-                <label for="purch_price" class="col-md-4 col-form-label text-md-left">Pret:</label>
-                <input id="purch_price" type="text" name="purch_price" size="20"
-                       class="form-control col-md-12" value="">
-                <label for="qty" class="col-md-4 col-form-label text-md-left">Cantitate
-                    :</label>
-                <input id="qty" type="text" name="qty" size="20"
-                       class="form-control col-md-12" value="">
-                <label for="lfdat" class="col-md-4 col-form-label text-md-left">Data limita:</label>
-                <input id="lfdat" type="text" name="lfdat" size="20"
-                       class="form-control col-md-12" value="">
-                <label for="reason" class="col-md-4 col-form-label text-md-left">Motiv:</label>
-                <input id="reason" type="text" name="reason" size="20"
+                <label for="message" class="col-md-12 col-form-label text-md-left">{{__('Message to refferal')}}:</label>
+                <input id="message" type="text" name="message" size="20"
                        class="form-control col-md-12" value="">
             </div>
             <i id="new_reply_msg" style="color: red"></i>
@@ -316,7 +353,7 @@
         $(function () {
             replyDialog = $("#init-reply-dialog").dialog({
                 autoOpen: false,
-                height: 450,
+                height: 200,
                 width: 400,
                 modal: true,
                 buttons: {
@@ -330,14 +367,10 @@
 
                         $.post("webservice/replymessage",
                             {
+                                message: message,
                                 ebeln: _ebeln,
                                 ebelp: _ebelp,
-                                cdate: _cdate,
-                                idnlf: $("#idnlf").val(),
-                                purch_price: $("#purch_price").val(),
-                                qty: $("#qty").val(),
-                                lfdat: $("#lfdat").val(),
-                                reason: $("#reason").val()
+                                cdate: _cdates
                             },
                             function (data, status) {
                                 _data = data;
@@ -346,6 +379,7 @@
                         jQuery.ajaxSetup({async: true});
 
                         if (_status == "success") {
+                            alert('Mesaj trimis!');
                             location.reload(true);
                         }
 
@@ -370,13 +404,8 @@
             });
         });
 
-        function replyMsg(ebeln, ebelp, cdate, idnlf, purch_price, qty, lfdat) {
+        function replyMsg(ebeln, ebelp, cdate) {
             $("#new_reply_msg").text("");
-            $("#idnlf").val(idnlf);
-            $("#purch_price").val(purch_price);
-            $("#qty").val(qty);
-            $("#lfdat").val(lfdat);
-            $("#reason").val("");
             $("#init-reply-dialog").dialog('option', 'title', 'Formular de raspuns la item ' + ebelp);
             _ebeln = ebeln;
             _ebelp = ebelp;
