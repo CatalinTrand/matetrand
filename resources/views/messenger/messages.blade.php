@@ -150,16 +150,6 @@
                                            style="width: 12rem; height: 1.4rem;" name="filter_mtext"
                                            value="{{$filter_mtext}}">&nbsp;&nbsp;
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-
-                                            {{__("LIFNR")}}:
-                                        <input type="text" class="form-control-sm input-sm"
-                                               style="width: 6rem; height: 1.4rem;" name="filter_lifnr"
-                                               value="{{$filter_lifnr}}">&nbsp;&nbsp;
-                                            {{__("LIFNR_NAME")}}:
-                                        <input type="text" class="form-control-sm input-sm"
-                                               style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name"
-                                               value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
-
                                         {{__("Supplier")}}:
                                         <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$filter_lifnr}}">&nbsp;&nbsp;
                                         {{__("Supplier name")}}:
@@ -249,7 +239,6 @@
                                 $messages = App\Materom\Orders::getMessageList($sorting);
 
                                 foreach ($messages as $message){
-                                    $item = $message->item;
                                     $tablerow = "<tr><td colspan='2' $sort_color_ebeln>$message->ebeln</td>
                                                      <td></td>
                                                      <td colspan='2'>$message->ebelp</td>
@@ -262,7 +251,7 @@
                                                      <td colspan='2' $sort_color_cuser>$message->cuser_name</td>
                                                      <td></td>
                                                      <td colspan='1'><button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button></td>
-                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate','$item->idnlf','$item->purch_price','$item->qty','$item->lfdat'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
+                                                     <td colspan='1'><button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button></td>
                                                      <td colspan='1'></td>
                                                      <td colspan='20'>$message->text</td></tr>";
 

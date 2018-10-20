@@ -245,34 +245,6 @@ class Webservice
         return $result;
     }
 
-    static public function isMyReference($id, $ebeln, $orders_table) {
-        $lifnr = self::getLIFNROfItem($ebeln, $orders_table);
-        $users = DB::select("select distinct id from users where role='Furnizor' and lifnr='$lifnr'");
-        if (count($users) == 0) return false;
-        foreach ($users as $user) {
-            $brands = DB::select("select * from users_sel where id ='$user->id'");
-            $xsql = "";
-            foreach($brands as $brand) {
-                $sel1 = "";
-                if (empty(trim($brand->mfrnr))) continue;
-                $sel1 = "mfrnr = '$brand->mfrnr'";
-                $sel1 = "(". $sel1 . ")";
-                if (empty($sql)) $xsql = $sel1;
-                else $xsql .= ' or ' . $sel1;
-            }
-            if (!empty($xsql)) $xsql = " and (" . $xsql . ")";
-            $result = DB::select("select * from $orders_table where ebeln='$ebeln' and lifnr='$lifnr' $xsql");
-            if(count($result) == 0) continue;
-            $result = DB::select("select * from users_ref where id = '$user->id' and refid = '$id'");
-            if(count($result) > 0) return true;
-        }
-        return false;
-    }
-
-    static public function getLIFNROfItem($ebeln, $orders_table) {
-        return DB::select("select * from $orders_table where ebeln = '$ebeln'")[0]->lifnr;
-    }
-
     static public function sapActivateUser($id)
     {
         $users = DB::select("select * from users where id ='$id'");
