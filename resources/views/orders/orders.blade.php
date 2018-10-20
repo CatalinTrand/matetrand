@@ -130,8 +130,8 @@
                                 <div class="container row" style="display: block; max-width: 100%;">
                                     {{__('Show by')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="groupOrdersBy" onchange="this.form.submit()">
-                                        <option value="0"{{$groupBySelSO}}>{{__('Client orders')}}</option>
-                                        <option value="1"{{$groupBySelPO}}>{{__('Stock orders')}}</option>
+                                        <option value="0"{{$groupBySelSO}}>{{__('Client/stock orders')}}</option>
+                                        <option value="1"{{$groupBySelPO}}>{{__('Purchase orders')}}</option>
                                     </select>
                                     {{__('Filter by status')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_status" onchange="this.form.submit()">
@@ -141,16 +141,16 @@
                                     </select>
                                 </div><br>
                                 <div class="container row" style="display: block; max-width: 100%;">
-                                    {{__('Filter by history')}}:
+                                    {{__('Displayed orders')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
                                         <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
                                         <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
-                                        @if ($filter_history == 2)
-                                            &nbsp;&nbsp;&nbsp;{{__('Documents archived since')}}:
-                                            <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
-                                                   onchange="this.form.submit()">
-                                        @endif
                                     </select>
+                                    @if ($filter_history == 2)
+                                        &nbsp;{{__('Documents archived since')}}:
+                                        <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                               onchange="this.form.submit()">
+                                    @endif
                                 </div><br>
                                 <div class="container row" style="display: block; max-width: 100%;">
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
@@ -255,7 +255,7 @@
                                 </th>
                                 @php
                                     if ($groupByPO == 1) {
-                                        echo '<th class="td02" colspan="3">' . __('Comanda aprovizionare') . '</th>';
+                                        echo '<th class="td02" colspan="3">' . __('Purchase order') . '</th>';
                                         $th1 = __("Supplier");
                                         $th2 = ""; // "Nume";
                                         $th3 = __("Referent");
@@ -264,7 +264,7 @@
                                         $th6 = __("Moneda");
                                         $th7 = __("Rata schimb");
                                     } else {
-                                        echo '<th class="td02" colspan="3">' . __('Comanda client') . '</th>';
+                                        echo '<th class="td02" colspan="3">' . __('Sales order') . '</th>';
                                         if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
                                             $th1 = __("Client");
                                             $th2 = ""; // "Nume";
@@ -394,7 +394,7 @@
                                                              "onclick='acceptPOrder(this);return false;'/>";
                                         if ($order->reject == 1)
                                             $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='reject_init('P',this);return false;'/>";
+                                                             "onclick='reject_init('P', this);return false;'/>";
                                         if ($order->inquire == 1)
                                             $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
                                                               "onclick='inquirePOrder(this);return false;'/>";
@@ -493,7 +493,7 @@
                                                              "onclick='acceptSOrder(this);return false;' />";
                                         if ($order->reject == 1)
                                             $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='reject_init('S',this);return false;' />";
+                                                             "onclick='reject_init('S', this);return false;' />";
                                         if ($order->inquire == 1)
                                             $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
                                                               "onclick='inquireSOrder(this);return false;' />";
@@ -810,7 +810,6 @@
         }
 
         function getSubTree(thisbtn) {
-                    alert('');
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1);
@@ -1335,7 +1334,6 @@
                 }
                 location.reload(true);
             }
-        }
         }
 
         function rejectPOrder(thisbtn)

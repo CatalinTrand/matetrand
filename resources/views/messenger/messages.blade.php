@@ -119,16 +119,16 @@
                             <form action="/messages" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
-                                    {{__('Filter after history')}}:
+                                    {{__('Displayed messages')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
-                                        <option value="1"{{$filter_history_curr}}>{{__("Neprocesate")}}</option>
-                                        <option value="2"{{$filter_history_arch}}>{{__("Procesate")}}</option>
-                                        @if ($filter_history == 2)
-                                            &nbsp;&nbsp;&nbsp;{{__('Documents archived since')}}:
-                                            <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
-                                                   onchange="this.form.submit()">
-                                        @endif
+                                        <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
+                                        <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
                                     </select>
+                                    @if ($filter_history == 2)
+                                        &nbsp;{{__('Documents archived since')}}:
+                                        <input type="date" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                               onchange="this.form.submit()">
+                                    @endif
                                     <br><br>
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                                         {{__("Sales order")}}:
@@ -215,19 +215,19 @@
                             </colgroup>
                             <tr>
                                 <th colspan="2" class="td02h"
-                                    onclick="sortBy('ebeln'); return false;" {{$sort_color_ebeln}}>{{__('EBELN')}}
+                                    onclick="sortBy('ebeln'); return false;" {{$sort_color_ebeln}}>{{__('Purchase order')}}
                                 </th>
                                 <th></th>
-                                <th colspan="2">{{__('EBELP')}}</th>
+                                <th colspan="2">{{__('Item')}}</th>
                                 <th></th>
-                                <th colspan="2">{{__('Sales Order')}}</th>
+                                <th colspan="2">{{__('Sales order')}}</th>
                                 <th></th>
                                 <th colspan="3" class="td02h"
-                                    onclick="sortBy('cdate'); return false;" {{$sort_color_cdate}}>{{__('CDATE')}}
+                                    onclick="sortBy('cdate'); return false;" {{$sort_color_cdate}}>{{__('Change date')}}
                                 </th>
                                 <th></th>
                                 <th colspan="4" class="td02h"
-                                    onclick="sortBy('cuser'); return false;" {{$sort_color_cuser}}>{{__('CUSER & CNAME')}}
+                                    onclick="sortBy('cuser'); return false;" {{$sort_color_cuser}}>{{__('Changed by')}}
                                 </th>
                                 <th></th>
                                 <th colspan="1">{{__('Acknowledge')}}</th>
