@@ -39,6 +39,7 @@ class SAP
         $output = trim($input);
         if (empty($output)) return null;
         if (strtolower($output) == "null") return null;
+        if ($output == "00000000") return null;
         return substr($output, 0, 4) . '-' .
                substr($output, 4, 2) . '-' .
                substr($output, 6, 2);
@@ -140,9 +141,9 @@ class SAP
             db::update("update pitems set" .
                 " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
                 ", delqty = '$item->delqty'" .
-                ", grdate = " . ($item->grdate == null ? "null" : "'$$item->grdate'") .
+                ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
                 ", grqty = '$item->grqty'" .
-                ", gidate = " . ($item->gidate == null ? "null" : "'$$item->gidate'") .
+                ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
                 " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
         }
         DB::commit();

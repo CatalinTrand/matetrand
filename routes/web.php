@@ -53,7 +53,6 @@ Route::get('webservice/sap_create_user','WebserviceController@sapCreateUser');
 Route::get('webservice/sap_delete_user','WebserviceController@sapDeleteUser');
 Route::get('webservice/sap_reset_password','WebserviceController@changePassword');
 Route::get('webservice/sap_process_po','WebserviceController@sapProcessPO');
-Route::get('webservice/sap_refresh_delivery_status','WebserviceController@sapRefreshDeliveryStatus');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');
