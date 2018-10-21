@@ -1768,5 +1768,7 @@
             rejectDialog.dialog("open");
         }
     </script>
-    
+
+    @include("extra_orders")
+
 @endsection
