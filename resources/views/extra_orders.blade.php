@@ -168,6 +168,7 @@
                 _data = data;
                 _status = status;
             }, "json");
+
         jQuery.ajaxSetup({async: true});
         if (_status != "success") return;
         if (_data.length > 0) {
