@@ -785,38 +785,6 @@
             } else alert('Error processing operation!');
         }
 
-        function _unused_accept (ebeln, id, type) {
-            if (checkedList.length > 0) {
-                // apply to all
-                split.forEach(function (_ord) { // getAllItems
-                    let _ebeln = _ord.split('#')[0];
-                    let _id = _ord.split('#')[1];
-                    if(isChecked("I" + _ebeln + "_" + _id))
-                        _unused_acceptItem(_ebeln,_id,'item-purch');
-                });
-            } else {
-                // apply individually
-                _unused_acceptItem(ebeln, id, 'item-purch');
-            }
-        }
-
-        function _unused_reject(ebeln, id, type, category, reason) {
-            if (checkedList.length > 0) {
-                //apply to all
-                split.forEach(function (_ord) { // getAllItems
-                    let _ebeln = _ord.split('#')[0];
-                    let _id = _ord.split('#')[1];
-                    if(isChecked("I" + _ebeln + "_" + _id))
-                        _unused_rejectItem(_ebeln,_id,'item-purch',category,reason);
-                });
-            } else {
-                //apply individually
-                _unused_rejectItem(ebeln, id, 'item-purch', category,reason);
-                return true;
-            }
-            return false;
-        }
-
         function getSubTree(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
@@ -879,7 +847,7 @@
             var cols = "";
             var so_style = "background-color:" + $(currentrow).css("background-color") + ";";
             cols += '<td class="first_color" style="' + so_style + '" colspan="11"></td>';
-            cols += '<td colspan="3"><b>{{__("Comanda aprovizionare")}}</b></td>';
+            cols += '<td colspan="3"><b>{{__("Purchase order")}}</b></td>';
             cols += '<td colspan="2"><b>{{__("Supplier")}}</b></td>';
             cols += '<td colspan="5"><b>&nbsp;</b></td>';
             cols += '<td colspan="2"><b>{{__("Referent")}}</b></td>';
@@ -1013,25 +981,30 @@
             var first_style = "background-color:" + first_color;
             @if ($groupByPO == 0)
                 cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
-            colsafter = 4;
+            colsafter = 2;
             @else
                 cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
-                colsafter = 5;
+                colsafter = 3;
             @endif
             cols += '<td style="' + po_style + '"></td>';
-            cols += '<td class="td02" colspan="2"><b>{{__("Pozitie")}}</b></td>';
-            cols += '<td class="td02" colspan="3"><b>{{__("Material")}}</b></td>';
-            cols += '<td class="td02" colspan="5"><b>{{__("Descriere material")}}</b></td>';
-            cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Cantitate")}}</b></td>';
-            cols += '<td class="td02" colspan="3" style="padding-left: 0.5rem;"><b>{{__("Data livrare")}}</b></td>';
-            cols += '<td class="td02" colspan="4" style="text-align: right;"><b>{{__("Pret achizitie")}}</b></td>';
+            cols += '<td class="td02" colspan="2"><b>{{__("Position")}}</b></td>';
+            cols += '<td class="td02" colspan="2"><b>{{__("Material")}}</b></td>';
+            cols += '<td class="td02" colspan="4"><b>{{__("Material description")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="padding-left: 0.5rem;"><b>{{__("Delivery date")}}</b></td>';
+            cols += '<td class="td02" colspan="4" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
             @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                let sales_price_hdr = '{{__("Pret vanzare")}}';
-                if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
-                cols += '<td class="td02" colspan="4" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
+                let sales_price_hdr = '{{__("Sale price")}}';
+            if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
+                cols += '<td class="td02" colspan="2" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
             @else
-                cols += '<td class="td02" colspan="4"><b>&nbsp;</b></td>';
+                cols += '<td class="td02" colspan="2"><b>&nbsp;</b></td>';
             @endif
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivery date")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivery quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Receipt Date")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Receipt Quantity")}}</b></td>';
+
             cols += '<td class="td02" colspan="' + colsafter + '"></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
@@ -1131,7 +1104,7 @@
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                 @else
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + info_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + owner_icon + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + changed_icon + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + accepted_icon + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + rejected_icon + '</td>';
@@ -1146,33 +1119,33 @@
                 if (pitem.matnr_changeable == 1) {
                     let matnr_class = "td02h";
                     if (pitem.matnr_changed == 1) matnr_class += "_c";
-                    cols += '<td class="' + matnr_class + '" colspan="3" onclick="change_matnr(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.idnlf + '</td>';
-                    cols += '<td class="' + matnr_class + '" colspan="5" onclick="change_matnr(this.previousSibling, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.mtext + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="2" onclick="change_matnr(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.idnlf + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="4" onclick="change_matnr(this.previousSibling, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.mtext + '</td>';
                 } else {
                     let matnr_class = "td02";
                     if (pitem.matnr_changed == 1) matnr_class += "_c";
-                    cols += '<td class="' + matnr_class + '" colspan="3">' + pitem.idnlf + '</td>';
-                    cols += '<td class="' + matnr_class + '" colspan="5">' + pitem.mtext + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="2">' + pitem.idnlf + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="4">' + pitem.mtext + '</td>';
                 }
 
                 if (pitem.quantity_changeable == 1) {
                     let quantity_class = "td02h";
                     if (pitem.quantity_changed == 1) quantity_class += "_c";
-                    cols += '<td class="' + quantity_class + '" colspan="3" onclick="change_quantity(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_quantity + '</td>';
+                    cols += '<td class="' + quantity_class + '" colspan="2" onclick="change_quantity(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_quantity + '</td>';
                 } else {
                     let quantity_class = "td02";
                     if (pitem.quantity_changed == 1) quantity_class += "_c";
-                    cols += '<td class="' + quantity_class + '" colspan="3" style="text-align: right;">' + pitem.x_quantity + '</td>';
+                    cols += '<td class="' + quantity_class + '" colspan="2" style="text-align: right;">' + pitem.x_quantity + '</td>';
                 }
 
                 if (pitem.delivery_date_changeable == 1) {
                     let delivery_date_class = "td02h";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
-                    cols += '<td class="' + delivery_date_class + '" colspan="3" onclick="change_delivery_date(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date + '</td>';
+                    cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="change_delivery_date(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 } else {
                     let delivery_date_class = "td02";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
-                    cols += '<td class="' + delivery_date_class + '" colspan="3" style="padding-left: 0.5rem;">' + pitem.x_delivery_date + '</td>';
+                    cols += '<td class="' + delivery_date_class + '" colspan="2" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 }
 
                 if (pitem.price_changeable == 1) {
@@ -1185,11 +1158,26 @@
                     cols += '<td class="' + price_class + '" colspan="4" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
                 }
 
-                cols += '<td class="td02" colspan="4" style="text-align: right;">' + pitem.x_sales_price + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.x_sales_price + '</td>';
+
+                let deldate = "";
+                if(pitem.deldate != null)
+                    deldate = pitem.deldate.split(' ')[0];
+
+                let grdate = "";
+                if(pitem.grdate != null)
+                    grdate = pitem.grdaate.split(' ')[0];
+
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' +  + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.delqty + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' + grdate + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
+
+
                 @if ($groupByPO == 1)
-                    cols += '<td colspan="5"></td>';
+                    cols += '<td colspan="2"></td>';
                 @else
-                    cols += '<td colspan="4"></td>';
+                    cols += '<td colspan="1"></td>';
                 @endif
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
@@ -1369,7 +1357,7 @@
             $.get("webservice/itemsOfOrder",
                 {
                     type: rowtype,
-                    order: porder
+                    order: porder,
                     history: $("filter_history").val()
                 },
                 function (data, status) {
@@ -1780,4 +1768,5 @@
             rejectDialog.dialog("open");
         }
     </script>
+    
 @endsection
