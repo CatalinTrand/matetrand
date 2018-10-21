@@ -9,7 +9,8 @@ use App\Materom\SAP;
 
 class WebserviceController extends Controller
 {
-    public function tryAuthAPIToken(){
+    public function tryAuthAPIToken()
+    {
         if (Auth::user() == null){
             if(Input::get("api_token") != null ){
                 $token = Input::get("api_token");
@@ -38,7 +39,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function acceptItemCHG(){
+    public function acceptItemCHG()
+    {
         return Webservice::acceptItemCHG(
             Input::get("ebeln"),
             Input::get("id"),
@@ -46,7 +48,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function cancelItem(){
+    public function cancelItem()
+    {
         return Webservice::cancelItem(
             Input::get("ebeln"),
             Input::get("id"),
@@ -56,7 +59,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function sendAck(){
+    public function sendAck()
+    {
         return Webservice::sendAck(
             Input::get("ebeln"),
             Input::get("ebelp"),
@@ -64,7 +68,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function sortMessages(){
+    public function sortMessages()
+    {
         return Webservice::sortMessages(
             Input::get("type")
         );
@@ -78,7 +83,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function replyMessage(){
+    public function replyMessage()
+    {
         return Webservice::replyMessage(
             Input::get("ebeln"),
             Input::get("ebelp"),
@@ -87,7 +93,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function changeItemStat(){
+    public function changeItemStat()
+    {
         return Webservice::changeItemStat(
             Input::get("column"),
             Input::get("value"),
@@ -98,7 +105,8 @@ class WebserviceController extends Controller
         );
     }
 
-    function insertReferenceUser(){
+    function insertReferenceUser()
+    {
         return Webservice::insertReferenceUser(
           Input::get("id"),
           Input::get("refid")
@@ -110,7 +118,8 @@ class WebserviceController extends Controller
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));
     }
 
-    public function getSubTree() {
+    public function getSubTree()
+    {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::getSubTree(
             Input::get("type"),
@@ -120,7 +129,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function getVendorUsers(){
+    public function getVendorUsers()
+    {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::getVendorUsers(Input::get("lifnr"));
     }
@@ -130,17 +140,20 @@ class WebserviceController extends Controller
         return Webservice::getCTVUsers();
     }
 
-    public function sapActivateUser(){
+    public function sapActivateUser()
+    {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapActivateUser(Input::get("id"));
     }
 
-    public function sapDeactivateUser() {
+    public function sapDeactivateUser()
+    {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapDeactivateUser(Input::get("id"));
     }
 
-    public function sapCreateUser() {
+    public function sapCreateUser()
+    {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapCreateUser(
             Input::get("id"),
@@ -153,14 +166,26 @@ class WebserviceController extends Controller
         );
     }
 
-    public function sapDeleteUser() {
+    public function sapDeleteUser()
+    {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapDeleteUser(Input::get("id"));
     }
 
-    public function sapProcessPO() {
+    public function sapProcessPO()
+    {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapProcessPO(Input::get("ebeln"));
     }
 
+    public function readInforecords() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return SAP::readInforecords(
+            Input::get("lifnr"),
+            Input::get("lifnr_name"),
+            Input::get("idnlf"),
+            Input::get("mtext"),
+            Input::get("matnr")
+            );
+    }
 }
