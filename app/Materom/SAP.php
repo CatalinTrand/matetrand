@@ -186,4 +186,60 @@ class SAP
         }
     }
 
+    static public function readInforecords($lifnr, $lifnr_name, $idnlf, $mtext, $matnr)
+    {
+
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+//            \SAPNWRFC\Connection::setTraceLevel(3);
+//            \SAPNWRFC\Connection::setTraceDir("/home/srm.materom.ro/public/storage/logs");
+//            \SAPNWRFC\Connection::setTraceDir("C:/Users/Radu/Apache24/htdocs/matetrand/storage/logs");
+            if ($lifnr == null) $lifnr = "20786";
+            if ($lifnr_name == null) $lifnr_name = "";
+            if ($idnlf == null) $idnlf = "";
+            if ($mtext == null) $mtext = "";
+            if ($matnr == null) $matnr = "";
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_INFORECORDS');
+            // $records = json_decode(($sapfm->invoke(['I_LIFNR' => $lifnr,
+            //                                        'I_LIFNR_NAME' => $lifnr_name,
+            //                                        'I_IDNLF' => $idnlf,
+            //                                        'I_MTEXT' => $mtext,
+            //                                        'I_MATNR' => $matnr
+            //                                       ]))["INFORECORDS"]);
+            $records = ($sapfm->invoke(['I_LIFNR' => $lifnr,
+                                                    'I_LIFNR_NAME' => $lifnr_name,
+                                                    'I_IDNLF' => $idnlf,
+                                                    'I_MTEXT' => $mtext,
+                                                    'I_MATNR' => $matnr
+                                       ]))["INFORECORDS"];
+            $sapconn->close();
+            $inforecords = array();
+            foreach($records AS $record) {
+                $inforecord = new \stdClass();
+                $inforecord->lifnr = SAP::alpha_output($record["LIFNR"]);
+                $inforecord->lifnr_name = trim($record["NAME1"]);
+                $inforecord->idnlf = trim($record["IDNLF"]);
+                $inforecord->mtext = trim($record["TXZ01"]);
+                $inforecord->matnr = SAP::alpha_output($record["MATNR"]);
+                $inforecord->price = $record["NETPR"];
+                $inforecord->curr = trim($record["WAERS"]);
+                $inforecords[] = $inforecord;
+            }
+            return $inforecords;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+
+    }
+
+
 };
