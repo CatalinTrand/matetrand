@@ -64,46 +64,47 @@
         <hr>
     </form>
 
-    <table id="inforecord_table">
-        <colgroup>
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-            <col width="5%">
-        </colgroup>
-        <tr>
-            <th></th>
-            <th colspan="1">{{__('Supplier')}}</th>
-            <th colspan="2">{{__('Supplier name')}}</th>
-            <th colspan="2">{{__('Vendor material')}}</th>
-            <th colspan="8">{{__('Description')}}</th>
-            <th colspan="2">{{__('Material')}}</th>
-            <th colspan="3">{{__('Price')}}</th>
-            <th colspan="2"></th>
-        </tr>
-    </table>
+    <div style="display: block; overflow-y: scroll; max-height: 350px">
+        <table id="inforecord_table" class="table-striped">
+            <colgroup>
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+                <col width="5%">
+            </colgroup>
+            <tr>
+                <th colspan="1">{{__('Supplier')}}</th>
+                <th colspan="5">{{__('Supplier name')}}</th>
+                <th colspan="2">{{__('Vendor material')}}</th>
+                <th colspan="7">{{__('Description')}}</th>
+                <th colspan="2">{{__('Material')}}</th>
+                <th colspan="3">{{__('Price')}}</th>
+            </tr>
+        </table>
+    </div>
 
 </div>
 
 <script>
 
-    var inforecordDialog, inforecordForm;
+    var inforecordDialog, inforecordForm, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
+        result_price, result_currency;
     $(function () {
         inforecordDialog = $("#inforecord-dialog").dialog({
             autoOpen: false,
@@ -111,32 +112,35 @@
             width: 960,
             modal: true,
             buttons: {
-                {{__("Use")}}: function () {
-                    for(let i = 0; i < checkedList_extra.length; i++){
-                        let current_row = checkedList_extra[i].parent().parent();
-                        let lifnr = current_row.cell(1).html();
-                        let lifnr_name = current_row.cell(2).html();
-                        let idnlf = current_row.cell(3).html();
-                        let mtext = current_row.cell(4).html();
-                        let matnr = current_row.cell(5).html();
+                Use: function () {
+                    if (last_selected_line != null) {
+                        let current_row = last_selected_line;
+                        result_lifnr = current_row.cells[0].innerHTML;
+                        result_lifnr_name = current_row.cells[1].innerHTML;
+                        result_idnlf = current_row.cells[2].innerHTML;
+                        result_mtext = current_row.cells[3].innerHTML;
+                        result_matnr = current_row.cells[4].innerHTML;
+                        result_price = current_row.cells[5].innerHTML.split(' ')[0];
+                        result_currency = current_row.cells[5].innerHTML.split(' ')[1];
+                        onselect_Inforecord(result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency);
+                        inforecordDialog.dialog("close");
                     }
                 },
                 Cancel: function () {
-                    let lifnr = null;
-                    let lifnr_name = null;
-                    let idnlf = null;
-                    let mtext = null;
-                    let matnr = null;
                     inforecordDialog.dialog("close");
                 }
             },
             close: function () {
                 inforecordForm[0].reset();
             },
+            open: function () {
+                $('#inforecord-dialog').css('overflow', 'hidden');
+                last_selected_line = null;
+            },
             position: {
                 my: "center",
-                at: "center",
-                of: window
+                at:"center",
+                of:window
             }
         });
 
@@ -147,6 +151,7 @@
 
     function read_inforecords() {
         $("#inforecord_msg").text("");
+        $("#inforecord_table").find("tr:gt(0)").remove();
         $("#inforecord-dialog").dialog('option', 'title', 'Inforecords');
         inforecordDialog.dialog("open");
     }
@@ -160,6 +165,11 @@
         idnlf = $("#inforecord-idnlf").val();
         mtext = $("#inforecord-mat-description").val();
         matnr = $("#inforecord-material").val();
+
+        if (lifnr.length + lifnr_name.length + idnlf.length + mtext.length + matnr.length == 0) {
+            alert("{{__('Please check at least one selection condition')}}");
+            return;
+        }
 
         $.ajaxSetup({
             headers: {
@@ -184,51 +194,32 @@
         if (_status != "success") return;
         if (_data.length > 0) {
             $("#inforecord_table").find("tr:gt(0)").remove();
-            for (let i = 0; i < _data.length; i++){
+            for (let i = 0; i < _data.length; i++) {
                 var newRow = $("<tr>");
-                var cols = "<td><input type='checkbox' onclick='boxCheck_extra(this)'></td>" +
-                           "<td>" + _data[i].lifnr + "</td>" +
-                           "<td>" + _data[i].lifnr_name + "</td>" +
-                           "<td>" + _data[i].idnlf + "</td>" +
-                           "<td>" + _data[i].mtext + "</td>" +
-                           "<td>" + _data[i].matnr + "</td>" +
-                           "<td>" + _data[i].price + " " + _data[i].curr + "</td>";
+                var cols = "<td colspan='1'>" + _data[i].lifnr + "</td>" +
+                    "<td colspan='5'>" + _data[i].lifnr_name + "</td>" +
+                    "<td colspan='2'>" + _data[i].idnlf + "</td>" +
+                    "<td colspan='7'>" + _data[i].mtext + "</td>" +
+                    "<td colspan='2'>" + _data[i].matnr + "</td>" +
+                    "<td colspan='3'>" + _data[i].price + " " + _data[i].curr + "</td>";
                 newRow.append(cols); // .hide();
                 $("#inforecord_table").append(newRow);
-                newRow.attr('id', "tr_R" + _data[i].lifnr + "_" + _data[i].idnlf + "_" + i);
-                if (i == 50) break;
+                newRow.attr('onclick', 'line_select(this);return false;');
+                newRow.attr('style', 'height: 30px');
             }
         }
     }
 
-    var checkedList_extra = [];
+    var last_selected_line;
+    var last_color;
 
-    function isChecked_extra(id) {
+    function line_select(_this) {
+        if (last_selected_line != null)
+            $(last_selected_line).css("background-color", last_color);
 
-        if ($.inArray(id, checkedList) > -1)
-            return true;
+        last_color = $(_this).css("background-color");
+        last_selected_line = _this;
 
-        return false;
-
-    }
-
-    function boxCheck_extra(_this) {
-        if (!isChecked_extra(_this)) {
-            addToChecked_extra(_this);
-        } else {
-            removeFromChecked_extra(_this);
-            removeFromChecked_extra(_this);
-        }
-    }
-
-    function addToChecked_extra(id) {
-        if ($.inArray(id, checkedList_extra) <= -1) {
-            checkedList_extra.push(id);
-        }
-    }
-
-    function removeFromChecked_extra(id) {
-        if ($.inArray(id, checkedList_extra) > -1)
-            checkedList_extra.splice($.inArray(id, checkedList_extra), 1);
+        $(_this).css("background-color", "#ffcccc");
     }
 </script>
