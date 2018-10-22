@@ -220,8 +220,7 @@
                                 <col width="2%">
                                 <col width="2%">
                                 <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
+                                <col width="4%">
                             </colgroup>
                             <tr>
                                 <th colspan="1" class="td01">
@@ -521,6 +520,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function onselect_Inforecord(result_lifnr,result_lifnr_name,result_idnlf,result_mtext,result_matnr,result_price,result_currency){
+            alert(result_lifnr + " " + result_lifnr_name + " " + result_lifnr + " " + result_mtext + " " + result_matnr + " " + result_price + " " + result_currency);
+        }
+    </script>
 
     <script>
         $( function() {
