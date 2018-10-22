@@ -179,7 +179,7 @@
                     <br>
 
                     <div class="card-body orders-table-div" style="height: 70vh; padding-top: 0rem;">
-
+                        <button onclick="read_inforecords(); return false;">Inforecords</button>
                         <table style="border: 2px solid black; table-layout: fixed;" class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="2%">
@@ -529,10 +529,6 @@
     </script>
 
     <script>
-
-        @php
-            echo 'let testvar = "' . (\Illuminate\Support\Facades\Auth::user()->role). '";';
-        @endphp
 
         var checkedList = [];
         var unCheckedList = [];
@@ -981,29 +977,29 @@
             var first_style = "background-color:" + first_color;
             @if ($groupByPO == 0)
                 cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
-            colsafter = 2;
+                colsafter = 1;
             @else
                 cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
-                colsafter = 3;
+                colsafter = 2;
             @endif
             cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="2"><b>{{__("Position")}}</b></td>';
-            cols += '<td class="td02" colspan="2"><b>{{__("Material")}}</b></td>';
+            cols += '<td class="td02" colspan="3"><b>{{__("Material")}}</b></td>';
             cols += '<td class="td02" colspan="4"><b>{{__("Material description")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Quantity")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="padding-left: 0.5rem;"><b>{{__("Delivery date")}}</b></td>';
             cols += '<td class="td02" colspan="4" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
             @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                let sales_price_hdr = '{{__("Sale price")}}';
+                let sales_price_hdr = '{{__("Sales price")}}';
             if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
                 cols += '<td class="td02" colspan="2" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
             @else
                 cols += '<td class="td02" colspan="2"><b>&nbsp;</b></td>';
             @endif
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivery date")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivery quantity")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Receipt Date")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Receipt Quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered on")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt date")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
 
             cols += '<td class="td02" colspan="' + colsafter + '"></td>';
             newRow.append(cols).hide();
@@ -1113,18 +1109,18 @@
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
                 @endif
-                    cols += '<td class="coloured" style="' + po_style + '"></td>';
+                cols += '<td class="coloured" style="' + po_style + '"></td>';
                 cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " + conv_exit_alpha_output(pitem.ebelp) + "</td>";
 
                 if (pitem.matnr_changeable == 1) {
                     let matnr_class = "td02h";
                     if (pitem.matnr_changed == 1) matnr_class += "_c";
-                    cols += '<td class="' + matnr_class + '" colspan="2" onclick="change_matnr(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.idnlf + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="3" onclick="change_matnr(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.idnlf + '</td>';
                     cols += '<td class="' + matnr_class + '" colspan="4" onclick="change_matnr(this.previousSibling, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');return false;">' + pitem.mtext + '</td>';
                 } else {
                     let matnr_class = "td02";
                     if (pitem.matnr_changed == 1) matnr_class += "_c";
-                    cols += '<td class="' + matnr_class + '" colspan="2">' + pitem.idnlf + '</td>';
+                    cols += '<td class="' + matnr_class + '" colspan="3">' + pitem.idnlf + '</td>';
                     cols += '<td class="' + matnr_class + '" colspan="4">' + pitem.mtext + '</td>';
                 }
 
@@ -1161,14 +1157,14 @@
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.x_sales_price + '</td>';
 
                 let deldate = "";
-                if(pitem.deldate != null)
+                if (pitem.deldate != null)
                     deldate = pitem.deldate.split(' ')[0];
 
                 let grdate = "";
-                if(pitem.grdate != null)
-                    grdate = pitem.grdaate.split(' ')[0];
+                if (pitem.grdate != null)
+                    grdate = pitem.grdate.split(' ')[0];
 
-                cols += '<td class="td02" colspan="2" style="text-align: right;">' +  + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' + deldate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.delqty + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + grdate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
@@ -1769,6 +1765,6 @@
         }
     </script>
 
-    @include("extra_orders")
+    @include("orders.read_inforecords")
 
 @endsection
