@@ -58,9 +58,10 @@ class Data
         $norder->ebeln = $ebeln;
         $norder->lifnr = $saphdr["LIFNR"];
         $norder->ekgrp = $saphdr["EKGRP"];
-        if (!DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->exists())
-            if (!DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1])->exists())
-                return "OK";
+        $userid = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->value("id");
+        if ($userid == null)
+            DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1])->value("id");
+        if ($userid == null) return "OK";
         $erdat->hour = $now->hour;
         $erdat->minute = $now->minute;
         $erdat->second = $now->second;
@@ -81,7 +82,7 @@ class Data
         if (is_null($order)) {
             $sql = "insert into porders (ebeln, nof, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate, changed, status) values " .
                 "('$norder->ebeln', '$norder->nof', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
-                "'$norder->ekgrp', $norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
+                "'$norder->ekgrp', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
             DB::insert($sql);
         } else {
             $sql = "update porders set nof = '$norder->nof', " .
@@ -118,7 +119,6 @@ class Data
             $lfdat->day = substr($nitem->lfdat, 6, 2);
             $nitem->lfdat = $lfdat->toDateTimeString();
             $nitem->mfrnr = $sapitm["MFRNR"];
-            $nitem->mfrnr_name = $sapitm["MFRNR_NAME"];
             $nitem->purch_price = $sapitm["PURCH_PRICE"];
             $nitem->purch_curr = $sapitm["PURCH_CURR"];
             $nitem->purch_prun = $sapitm["PURCH_PRUN"];
@@ -141,13 +141,13 @@ class Data
             $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
             if (count($users) > 0) $nitem->ctv = $users[0]->id;
             if (is_null($citem)) {
-                $sql = "insert into pitems (ebeln, ebelp, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, mfrnr_name,".
+                $sql = "insert into pitems (ebeln, ebelp, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, ".
                                            "purch_price, purch_curr, purch_prun, purch_puom, ".
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
                                            "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed, status ".
                                            ") values (".
                        "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 35) . "',$nitem->qty, '$nitem->qty_uom', ".
-                       "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
+                       "'$nitem->lfdat', '$nitem->mfrnr', ".
                        "'$nitem->purch_price', '$nitem->purch_curr', ".
                        "$nitem->purch_prun, '$nitem->purch_puom', ".
                        "'$nitem->sales_price', '$nitem->sales_curr', $nitem->sales_prun, ".
@@ -180,7 +180,7 @@ class Data
         foreach($sapitms as $sapitm) {
             SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
         }
-        Mailservice::sendNotification($norder->lifnr,$ebeln);
+        Mailservice::sendNotification($userid, $ebeln);
         return "OK";
     }
 
