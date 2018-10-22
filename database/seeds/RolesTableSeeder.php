@@ -15,5 +15,11 @@ class RolesTableSeeder extends Seeder
         DB::delete("delete from roles");
         DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
             " values ('Administrator','cont-test','PusulaC')");
+        DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
+            " values ('Furnizor','cont-test','PusulaC')");
+        DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
+            " values ('Referent','cont-test','PusulaC')");
+        DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
+            " values ('CTV','cont-test','PusulaC')");
     }
 }

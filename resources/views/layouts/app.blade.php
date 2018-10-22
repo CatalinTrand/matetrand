@@ -223,7 +223,7 @@
             text-align: left;
             overflow: hidden;
             text-overflow: ellipsis;
-            text-shadow: 2px 2px red;
+            text-shadow: 1px 1px red;
         }
         .td02h {
             text-align: left;

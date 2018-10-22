@@ -34,4 +34,4 @@ $table->string('grqty', 20)->default('');
 $table->dateTime('gidate')->nullable()->default(null);
 $table->string('stage', 1)->default('F');
 $table->string('changed', 1)->default('');
-$table->string("status", 1)->default('N');
+$table->string("status", 1)->default('');

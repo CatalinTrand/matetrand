@@ -214,11 +214,11 @@
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="2%">
+                                <col width="3%">
                                 <col width="2%">
                                 <col width="2%">
                                 <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
+                                <col width="1%">
                                 <col width="2%">
                                 <col width="4%">
                             </colgroup>
@@ -982,10 +982,10 @@
             var first_style = "background-color:" + first_color;
             @if ($groupByPO == 0)
                 cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
-                colsafter = 1;
+                colsafter = 0;
             @else
                 cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
-                colsafter = 2;
+                colsafter = 1;
             @endif
             cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="2"><b>{{__("Position")}}</b></td>';
@@ -1001,12 +1001,12 @@
             @else
                 cols += '<td class="td02" colspan="2"><b>&nbsp;</b></td>';
             @endif
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered on")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt date")}}</b></td>';
+            cols += '<td class="td02" colspan="3" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
-
-            cols += '<td class="td02" colspan="' + colsafter + '"></td>';
+            if (colsafter > 0)
+                cols += '<td class="td02" colspan="' + colsafter + '"></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:YellowGreen; vertical-align: middle;");
@@ -1169,15 +1169,13 @@
                 if (pitem.grdate != null)
                     grdate = pitem.grdate.split(' ')[0];
 
-                cols += '<td class="td02" colspan="2" style="text-align: right;">' + deldate + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + deldate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.delqty + '</td>';
-                cols += '<td class="td02" colspan="2" style="text-align: right;">' + grdate + '</td>';
+                cols += '<td class="td02" colspan="3" style="text-align: left;">' + grdate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
 
 
                 @if ($groupByPO == 1)
-                    cols += '<td colspan="2"></td>';
-                @else
                     cols += '<td colspan="1"></td>';
                 @endif
                 newRow.append(cols).hide();

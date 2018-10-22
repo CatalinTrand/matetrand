@@ -69,17 +69,19 @@ class Data
         $norder->curr = $saphdr["CURR"];
         $norder->fxrate = $saphdr["FXRATE"];
         $norder->nof = true;
-        $now->addHours(24);
+        $now->addHours(12);
         $norder->wtime = $now->toDateTimeString();
         $now->addHours(24);
         $norder->ctime = $now->toDateTimeString();
+        $norder->changed = '0';
+        $norder->status = '';
 
         DB::beginTransaction();
 
         if (is_null($order)) {
-            $sql = "insert into porders (ebeln, nof, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate) values " .
+            $sql = "insert into porders (ebeln, nof, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate, changed, status) values " .
                 "('$norder->ebeln', '$norder->nof', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
-                "'$norder->ekgrp', $norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate')";
+                "'$norder->ekgrp', $norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
             DB::insert($sql);
         } else {
             $sql = "update porders set nof = '$norder->nof', " .
@@ -134,6 +136,7 @@ class Data
             $nitem->ctv_name = $sapitm["CTV_NAME"];
             $nitem->stage = 'F';
             $nitem->changed = false;
+            $nitem->status = '';
 
             $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
             if (count($users) > 0) $nitem->ctv = $users[0]->id;
@@ -141,7 +144,7 @@ class Data
                 $sql = "insert into pitems (ebeln, ebelp, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, mfrnr_name,".
                                            "purch_price, purch_curr, purch_prun, purch_puom, ".
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
-                                           "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed ".
+                                           "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed, status ".
                                            ") values (".
                        "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 35) . "',$nitem->qty, '$nitem->qty_uom', ".
                        "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->mfrnr_name',".
@@ -150,7 +153,7 @@ class Data
                        "'$nitem->sales_price', '$nitem->sales_curr', $nitem->sales_prun, ".
                        "'$nitem->sales_puom', '$nitem->vbeln', '$nitem->posnr', '$nitem->kunnr', ".
                        "'$nitem->shipto', '$nitem->ctv', '$nitem->ctv_name', ".
-                       "'$nitem->stage', 0)";
+                       "'$nitem->stage', 0, '$nitem->status')";
 
                 DB::insert($sql);
 

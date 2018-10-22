@@ -88,7 +88,7 @@
                 <col width="5%">
                 <col width="5%">
             </colgroup>
-            <tr>
+            <tr style='height: 1.5rem;'>
                 <th colspan="1">{{__('Supplier')}}</th>
                 <th colspan="5">{{__('Supplier name')}}</th>
                 <th colspan="2">{{__('Vendor material')}}</th>
@@ -176,6 +176,8 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+        $("#inforecord_table").find("tr:gt(0)").remove();
+        $('body').addClass('ajaxloading');
         jQuery.ajaxSetup({async: false});
         var _data, _status;
         $.get("webservice/read_inforecords",
@@ -191,11 +193,14 @@
                 _status = status;
             }, "json");
         jQuery.ajaxSetup({async: true});
-        if (_status != "success") return;
+        if (_status != "success") {
+            $('body').removeClass('ajaxloading');
+            return;
+        }
         if (_data.length > 0) {
-            $("#inforecord_table").find("tr:gt(0)").remove();
+            let table = $("#inforecord_table");
             for (let i = 0; i < _data.length; i++) {
-                var newRow = $("<tr>");
+                var newRow = $("<tr style='height: 1.5rem;' onclick='line_select(this);return false;'>");
                 var cols = "<td colspan='1'>" + _data[i].lifnr + "</td>" +
                     "<td colspan='5'>" + _data[i].lifnr_name + "</td>" +
                     "<td colspan='2'>" + _data[i].idnlf + "</td>" +
@@ -203,11 +208,10 @@
                     "<td colspan='2'>" + _data[i].matnr + "</td>" +
                     "<td colspan='3'>" + _data[i].price + " " + _data[i].curr + "</td>";
                 newRow.append(cols); // .hide();
-                $("#inforecord_table").append(newRow);
-                newRow.attr('onclick', 'line_select(this);return false;');
-                newRow.attr('style', 'height: 30px');
+                table.append(newRow);
             }
         }
+        $('body').removeClass('ajaxloading');
     }
 
     var last_selected_line;
