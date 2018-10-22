@@ -129,26 +129,17 @@ class Webservice
         return "";
     }
 
-    static function new_simple_chg($ebeln,$ebelp,$ctype,$stage,$cuser,$cuser_name,$oldval,$newval,$reason)
-    {
-        DB::insert("insert into pitemchg (ebeln,ebelp,cdate,internal,ctype,stage,cuser,cuser_name,oldval,newval,reason) values ('$ebeln','$ebelp',NOW(),'0','$ctype','$stage','$cuser','$cuser_name','$oldval','$newval','$reason')");
-    }
-
     public static function replyMessage($ebeln, $ebelp, $cdate, $message)
     {
 
-        $oldItem = DB::select("select * from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'")[0];
-
-        $uid = Auth::id();
-        $uname = Auth::user()->role;
-        $stage = $uname[0];
-        if($stage == 'F') $stage = 'R';
-        if($stage == 'R') $stage = 'F';
-        if($stage == 'A') $stage = 'F';
-
+        $stage = (Auth::user()->role)[0];
+        if ($stage == 'F') $stage = 'R';
+        if ($stage == 'R') $stage = 'F';
+        if ($stage == 'C') $stage = 'R';
 
         DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-        DB::insert("insert into pitemchg (ebeln, ebelp,stage,ctype,reason) values ('$ebeln','$ebelp','$stage','S','$message')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, stage, ctype, reason, cuser, cuser_name) values " .
+            "('$ebeln','$ebelp','$stage','S','$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "')");
         return "";
     }
 
@@ -157,23 +148,23 @@ class Webservice
         return "";
     }
 
-    static function straightAccept($ebeln,$id){
-        $links = DB::select("select * from pitemchg where ebeln = '$ebeln' and ebelp = '$id' order by cdate");
-
-        if(count($links) == 0 || strcmp($links[count($links) - 1]->cuser,Auth::user()->id) != 0)
-            return true;
-
-        return false;
-    }
-
-    public static function acceptItemCHG($ebeln, $id, $type)
+    public static function acceptItemCHG($ebeln, $ebelp, $type)
     {
-        if(self::straightAccept($ebeln,$id))
-            DB::update("update pitems set stage = 'A' where ebeln = '$ebeln' and ebelp = '$id'");
-        else
-            DB::update("update pitems set stage = 'T' where ebeln = '$ebeln' and ebelp = '$id'");
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason) values ('$ebeln','$id','A',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','')");
-        SAP::acknowledgePOItem($ebeln, $id, " ");
+        $item_changed = DB::table("pitems")->where("ebeln", $ebeln)->where("ebelp", $ebelp)->value(changed) == "1";
+        if (!$item_changed || Auth::user()->role != "Furnizor") {
+            DB::update("update pitems set stage = 'A', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            SAP::acknowledgePOItem($ebeln, $ebelp, " ");
+        } else {
+            DB::update("update pitems set stage = 'T' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        }
+
+        $stage = (Auth::user()->role)[0];
+        if ($stage == 'F') $stage = 'R';
+        if ($stage == 'R') $stage = 'R';
+        if ($stage == 'C') $stage = 'R';
+
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                          "('$ebeln','$ebelp','A', '$stage', CURRENT_TIMESTAMP, '" . Auth::user()->id . "','" . Auth::user()->username . "','')");
         return "";
     }
 

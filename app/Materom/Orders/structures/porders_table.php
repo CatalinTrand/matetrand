@@ -17,5 +17,5 @@ $table->string('ernam', 30)->default('');
 $table->string('curr', 3)->default('');
 $table->string('fxrate', 10)->default('');
 $table->string('changed', 1)->default('');
-$table->integer("status")->default(0);
+$table->string("status", 1)->default("N");
 

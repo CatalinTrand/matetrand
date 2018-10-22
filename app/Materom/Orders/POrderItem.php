@@ -11,8 +11,10 @@ namespace App\Materom\Orders;
 
 use App\Materom\Orders;
 use App\Materom\SAP\MasterData;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class POrderItem
 {
@@ -34,12 +36,13 @@ class POrderItem
     public $purch_curr;  // EKPO-WAERS
     public $purch_prun;  // EKPO-PEINH
     public $purch_puom;  // EKPO-BPRME
-    public $stage;       // workflow position F/R/C/A-released/D-delivered/X-closed
+    public $stage;       // workflow position F/R/C/Z=out of flow
     // status fields
     public $changed;     // 0=no, 1=yes
     public $status;      // A-accepted, X-rejected,
                          // T-tentatively accepted,
                          // R-tentatively rejected
+                         // N-new
 
     // sales order position related information
     public $sales_price; // VBAP-NETPR
@@ -50,16 +53,18 @@ class POrderItem
     public $shipto;      // VBPA-KUNNR WE
     public $ctv;         // VBAK-ERNAM
     public $ctv_name;    // just in case it is deleted from USR02
-    public $deldate;    // inbound delivery confirmation date
-    public $delqty;     // inbound qty
-    public $grdate;     // goods receipt date
-    public $grqty;      // goods receipt quantity
-    public $gidate;     // goods issue quantity
+    public $deldate;     // inbound delivery confirmation date
+    public $delqty;      // inbound qty
+    public $grdate;      // goods receipt date
+    public $grqty;       // goods receipt quantity
+    public $gidate;      // goods issue quantity
 
     // computed/determined fields
     public $sorder;      // sales order to be displayed
     public $kunnr_name;
     public $shipto_name;
+    public $wtime;    // processing warning date
+    public $ctime;    // processing critical date
 
     // external representations
     public $x_quantity;
@@ -70,7 +75,7 @@ class POrderItem
     // status icons
     public $info;     // 0=empty, 1=new item, 2=warning, 3=critical, 4=new message
     public $owner;    // 0=no, 1=direct, 2=indirect
-    // changed:  $this->changed
+                      // changed:  $this->changed
     public $accepted; // $this->status = A
     public $rejected; // $this->status = X
     public $inquired; // 0=no, 1=tentatively accepted, 2=rejected, 3=simple message
@@ -139,6 +144,11 @@ class POrderItem
 
     public function fill($porder)
     {
+
+        $history = Session::get("filter_history");
+        if (!isset($history)) $history = 1;
+        else $history = intval($history);
+
         $this->sorder = $this->vbeln;
         if (Auth::user()->role == 'Furnizor') {
             $this->sales_price = "";
@@ -156,8 +166,13 @@ class POrderItem
             $this->kunnr_name = MasterData::getKunnrName($this->kunnr, 2);
             $this->shipto_name = MasterData::getKunnrName($this->shipto, 2);
         }
+        $this->wtime = $porder->wtime;
+        $this->ctime = $porder->ctime;
 
         $this->info = 0;
+        if ($this->status == 'N') $this->info = 1;
+        if ($this->wtime < Carbon::now()) $this->info = 2;
+        if ($this->ctime < Carbon::now()) $this->info = 3;
 
         $this->owner = 0;
         if (Auth::user()->role == 'Furnizor') {
@@ -181,22 +196,77 @@ class POrderItem
         }
 
         $this->accepted = 0;
+        if ($this->status == 'A' ) $this->accepted = 1;
+
         $this->rejected = 0;
+        if (Auth::user()->role == 'Furnizor') {
+            if ($this->status == 'X' || $this->status == 'R') $this->rejected = 1;
+        } else {
+            if ($this->status == 'X') $this->rejected = 1;
+        }
+
         $this->inquired = 0;
-        $this->accept = 1;
-        $this->reject = 1;
+        $this->matnr_changed = 0;
+        $this->quantity_changed = 0;
+        $this->price_changed = 0;
+        $this->delivery_date_changed = 0;
+        $this->position_splitted = 0;
+
+
+        foreach ($this->changes as $itemchg) {
+            if (($itemchg->stage == Auth::user()->role[0]) && ($itemchg->acknowledged == 0)) {
+                $this->inquired = 1;
+            }
+            if ($itemchg->ctype == "M") $this->matnr_changed = 1;
+            if ($itemchg->ctype == "Q") $this->quantity_changed = 1;
+            if ($itemchg->ctype == "P") $this->price_changed = 1;
+            if ($itemchg->ctype == "D") $this->delivery_date_changed = 1;
+            if ($itemchg->ctype == "T") $this->position_splitted = 1;
+        }
+
+        $this->accept = 0;
+        $this->reject = 0;
         $this->inquire = 1;
 
-        $this->matnr_changeable = 1;
-        $this->matnr_changed = 0;
-        $this->quantity_changeable = 1;
-        $this->quantity_changed = 0;
-        $this->price_changeable = 1;
-        $this->price_changed = 0;
-        $this->delivery_date_changeable = 1;
-        $this->delivery_date_changed = 0;
-        $this->position_splittable = 1;
-        $this->position_splitted = 0;
+        $this->matnr_changeable = 0;
+        $this->quantity_changeable = 0;
+        $this->price_changeable = 0;
+        $this->delivery_date_changeable = 0;
+        $this->position_splittable = 0;
+        if ($history == 1) {
+            if (Auth::user()->role == 'Furnizor') {
+                if ($this->stage == "F" && ($this->owner == 1) && empty($this->status)) {
+                    $this->matnr_changeable = 1;
+                    $this->quantity_changeable = 1;
+                    $this->price_changeable = 1;
+                    $this->delivery_date_changeable = 1;
+                    $this->position_splittable = 1;
+                    $this->accept = 1;
+                    $this->reject = 1;
+                }
+
+            } elseif (Auth::user()->role == 'Referent') {
+                if ($this->stage == "R" && (($this->owner == 1) || ($this->owner == 2))
+                    && (empty($this->status) || ($this->status == 'T'))) {
+                    $this->matnr_changeable = 0;
+                    $this->quantity_changeable = 0;
+                    $this->price_changeable = 0;
+                    $this->delivery_date_changeable = 0;
+                    $this->position_splittable = 0;
+                }
+            } elseif (Auth::user()->role == 'Administrator') {
+                if (empty($this->status) || ($this->status == 'T')) {
+                    $this->matnr_changeable = 0;
+                    $this->quantity_changeable = 0;
+                    $this->price_changeable = 0;
+                    $this->delivery_date_changeable = 0;
+                    $this->position_splittable = 0;
+                }
+            }
+        } elseif (($history == 1) && (Auth::user()->role == 'Administrator')) {
+            if ($this->status == 'A')
+                $this->matnr_changeable = 1;
+        }
 
         $this->x_delivery_date = substr($this->lfdat, 0, 10);
         $this->x_quantity = trim($this->qty) . " " . trim($this->qty_uom);
