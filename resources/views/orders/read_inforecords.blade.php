@@ -1,5 +1,5 @@
 <div id="inforecord-dialog" title="{{__('Inforecords')}}">
-    <form>
+    <form action="POST" onsubmit="get_inforecords(this); return false;">
         <table style="border: none; padding: 1rem;" width="100%">
             <colgroup>
                 <col width="9%">

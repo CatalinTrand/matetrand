@@ -202,7 +202,7 @@ class SAP
 //            \SAPNWRFC\Connection::setTraceLevel(3);
 //            \SAPNWRFC\Connection::setTraceDir("/home/srm.materom.ro/public/storage/logs");
 //            \SAPNWRFC\Connection::setTraceDir("C:/Users/Radu/Apache24/htdocs/matetrand/storage/logs");
-            if ($lifnr == null) $lifnr = "20786";
+            if ($lifnr == null) $lifnr = "";
             if ($lifnr_name == null) $lifnr_name = "";
             if ($idnlf == null) $idnlf = "";
             if ($mtext == null) $mtext = "";
