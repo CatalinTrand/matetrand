@@ -113,8 +113,9 @@
             modal: true,
             buttons: {
                 Use: function () {
-                    if (last_selected_line != null) {
-                        let current_row = last_selected_line;
+                    if (inforecord_last_selected_line != null) {
+                        let current_row = inforecord_last_selected_line;
+                        result_infnr = current_row.id;
                         result_lifnr = current_row.cells[0].innerHTML;
                         result_lifnr_name = current_row.cells[1].innerHTML;
                         result_idnlf = current_row.cells[2].innerHTML;
@@ -122,8 +123,8 @@
                         result_matnr = current_row.cells[4].innerHTML;
                         result_price = current_row.cells[5].innerHTML.split(' ')[0];
                         result_currency = current_row.cells[5].innerHTML.split(' ')[1];
-                        onselect_Inforecord(result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency);
                         inforecordDialog.dialog("close");
+                        onselect_Inforecord(result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency);
                     }
                 },
                 Cancel: function () {
@@ -135,7 +136,7 @@
             },
             open: function () {
                 $('#inforecord-dialog').css('overflow', 'hidden');
-                last_selected_line = null;
+                inforecord_last_selected_line = null;
             },
             position: {
                 my: "center",
@@ -200,7 +201,7 @@
         if (_data.length > 0) {
             let table = $("#inforecord_table");
             for (let i = 0; i < _data.length; i++) {
-                var newRow = $("<tr style='height: 1.5rem;' onclick='line_select(this);return false;'>");
+                var newRow = $("<tr id='" + _data[i].infnr + "' style='height: 1.5rem;' onclick='inforecord_selected(this);return false;'>");
                 var cols = "<td colspan='1'>" + _data[i].lifnr + "</td>" +
                     "<td colspan='5'>" + _data[i].lifnr_name + "</td>" +
                     "<td colspan='2'>" + _data[i].idnlf + "</td>" +
@@ -214,16 +215,15 @@
         $('body').removeClass('ajaxloading');
     }
 
-    var last_selected_line;
-    var last_color;
+    var inforecord_last_selected_line;
+    var inforecord_last_color;
+    function inforecord_selected(_this) {
+        if (inforecord_last_selected_line != null)
+            $(inforecord_last_selected_line).css("background-color", inforecord_last_color);
 
-    function line_select(_this) {
-        if (last_selected_line != null)
-            $(last_selected_line).css("background-color", last_color);
+        inforecord_last_color = $(_this).css("background-color");
+        inforecord_last_selected_line = _this;
 
-        last_color = $(_this).css("background-color");
-        last_selected_line = _this;
-
-        $(_this).css("background-color", "#ffcccc");
+        $(_this).css("background-color", "#ccccff");
     }
 </script>

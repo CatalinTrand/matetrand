@@ -39,6 +39,7 @@ class POrder
     public $accepted; // 0=no, 1=direct, 2=indirect
     public $rejected; // 0=no, 1=direct, 2=indirect
     public $inquired; // 0=no, 1=tentatively accepted, 2=rejected, 3=simple message
+    public $inq_reply; // 0=no reply, 1=with reply
 
     // buttons
     public $accept;   // 0-no, 1=display

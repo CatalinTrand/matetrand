@@ -234,7 +234,7 @@
             text-align: left;
             overflow: hidden;
             text-overflow: ellipsis;
-            text-shadow: 2px 2px red;
+            text-shadow: 1px 1px red;
         }
         .td02h:hover {
             color: #0000F0;
@@ -243,7 +243,15 @@
         .td02h_c:hover {
             color: #F000F0;
             cursor: pointer;
-            text-shadow: 2px 2px red;
+            text-shadow: 1px 1px red;
+        }
+        .resetfilters:hover {
+            color: #8080FF;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .cursorpointer:hover {
+            cursor: pointer;
         }
 
     </style>

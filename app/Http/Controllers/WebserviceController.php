@@ -96,10 +96,10 @@ class WebserviceController extends Controller
     public function refilter(){
         if(Input::get("type") == 'S'){
             Session::put("filter_vbeln",Input::get("order"));
-            Session::put("groupOrdersBy",0);
+            // Session::put("groupOrdersBy", 0);
         } else {
             Session::put("filter_ebeln",Input::get("order"));
-            Session::put("groupOrdersBy",1);
+            // Session::put("groupOrdersBy", 1);
         }
         Orders::fillCache();
     }

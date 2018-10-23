@@ -136,17 +136,19 @@ class SAP
             $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems $sql order by ebeln, ebelp");
         }
         $items = SAP::rfcGetDeliveryData($items);
-        DB::beginTransaction();
-        foreach ($items as $item) {
-            db::update("update pitems set" .
-                " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
-                ", delqty = '$item->delqty'" .
-                ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
-                ", grqty = '$item->grqty'" .
-                ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
-                " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
+        if ($items != null) {
+            DB::beginTransaction();
+            foreach ($items as $item) {
+                db::update("update pitems set" .
+                    " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
+                    ", delqty = '$item->delqty'" .
+                    ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
+                    ", grqty = '$item->grqty'" .
+                    ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
+                    " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
+            }
+            DB::commit();
         }
-        DB::commit();
         return "OK";
     }
 
@@ -182,7 +184,8 @@ class SAP
             return $items;
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            // check $e->getErrorInfo();
+            return null;
         }
     }
 
@@ -231,6 +234,7 @@ class SAP
                 $inforecord->matnr = SAP::alpha_output($record["MATNR"]);
                 $inforecord->price = $record["NETPR"];
                 $inforecord->curr = trim($record["WAERS"]);
+                $inforecord->infnr = trim($record["INFNR"]);
                 $inforecords[] = $inforecord;
             }
             return $inforecords;

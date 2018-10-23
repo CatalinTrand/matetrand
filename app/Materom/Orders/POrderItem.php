@@ -37,6 +37,7 @@ class POrderItem
     public $purch_prun;  // EKPO-PEINH
     public $purch_puom;  // EKPO-BPRME
     public $stage;       // workflow position F/R/C/Z=out of flow
+    public $pstage;      // previous workflow position F/R/C/Z=out of flow
     // status fields
     public $changed;     // 0=no, 1=yes
     public $status;      // A-accepted, X-rejected,
@@ -78,7 +79,8 @@ class POrderItem
                       // changed:  $this->changed
     public $accepted; // $this->status = A
     public $rejected; // $this->status = X
-    public $inquired; // 0=no, 1=tentatively accepted, 2=rejected, 3=simple message
+    public $inquired; // 0=no, 1=tentatively accepted, 2=tentatively rejected, 3=simple message
+    public $inq_reply; // 0=no reply, 1=with reply
 
     // buttons
     public $accept;   // 0-no, 1=display
@@ -133,6 +135,7 @@ class POrderItem
         $this->gidate = $pitem->gidate;
         $this->changed = $pitem->changed;
         $this->stage = $pitem->stage;
+//        $this->pstage = $pitem->pstage;
         $this->status = $pitem->status;
         $this->changes = array();
     }
@@ -246,24 +249,25 @@ class POrderItem
                 }
 
             } elseif (Auth::user()->role == 'Referent') {
-                if ($this->stage == "R" && (($this->owner == 1) || ($this->owner == 2))
+                if ((($this->stage == "R") && ($this->owner == 1)) ||
+                    (($this->stage == "F") && ($this->owner == 2))
                     && (empty($this->status) || ($this->status == 'T'))) {
-                    $this->matnr_changeable = 0;
-                    $this->quantity_changeable = 0;
-                    $this->price_changeable = 0;
-                    $this->delivery_date_changeable = 0;
-                    $this->position_splittable = 0;
+                    $this->matnr_changeable = 1;
+                    $this->quantity_changeable = 1;
+                    $this->price_changeable = 1;
+                    $this->delivery_date_changeable = 1;
+                    $this->position_splittable = 1;
                 }
             } elseif (Auth::user()->role == 'Administrator') {
                 if (empty($this->status) || ($this->status == 'T')) {
-                    $this->matnr_changeable = 0;
-                    $this->quantity_changeable = 0;
-                    $this->price_changeable = 0;
-                    $this->delivery_date_changeable = 0;
-                    $this->position_splittable = 0;
+                    $this->matnr_changeable = 1;
+                    $this->quantity_changeable = 1;
+                    $this->price_changeable = 1;
+                    $this->delivery_date_changeable = 1;
+                    $this->position_splittable = 1;
                 }
             }
-        } elseif (($history == 1) && (Auth::user()->role == 'Administrator')) {
+        } elseif (($history == 2) && (Auth::user()->role == 'Administrator')) {
             if ($this->status == 'A')
                 $this->matnr_changeable = 1;
         }

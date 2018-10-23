@@ -125,7 +125,6 @@
                     </div>
                     <div class="card-body" style="padding-bottom: 0px;">
                         <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 8rem;">
-                            <button style="margin-left: 90%;" onclick="reset_filters();return false;">{{__('Reset')}}</button>
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
@@ -171,6 +170,7 @@
                                         {{__("Supplier name")}}:
                                         <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
                                     @endif
+                                    <button style="margin-left: 15%; height: 1.5rem; " onclick="reset_filters();return false;">{{__('Reset')}}</button>
 
                                 </div>
 
@@ -315,13 +315,13 @@
                                 foreach ($orders as $order) {
 
                                     if ($groupByPO == 1) {
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' onmouseover=\"this.style.textDecoration='underline';this.style.color='blue';\" onmouseout=\"this.style.textDecoration='none';this.style.color='black';\">" .
-                                            \App\Materom\SAP::alpha_output($order->ebeln) . "<p>";
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters'>" .
+                                            \App\Materom\SAP::alpha_output($order->ebeln) . "</p>";
                                     } else {
                                         $buttname = $order->vbeln;
                                         if (strtoupper($buttname) == \App\Materom\Orders::stockorder) $buttname = __('Stock');
                                         elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
-                                        else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' onmouseover=\"this.style.textDecoration='underline';this.style.color='blue';\" onmouseout=\"this.style.textDecoration='none';this.style.color='black';\">" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
+                                        else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' class='resetfilters'>" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
                                         $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
                                     }
 
@@ -384,13 +384,16 @@
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                                         elseif ($order->rejected == 2)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+
+                                        $inq_onclick = "";
+                                        if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
                                         $inquired_icon = "";
                                         if ($order->inquired == 1)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' $inq_onclick/>";
                                         elseif ($order->inquired == 2)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
                                         elseif ($order->inquired == 3)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' $inq_onclick/>";
 
                                         if ($order->accept == 1)
                                             $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
@@ -483,13 +486,15 @@
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                                         elseif ($order->rejected == 2)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                        $inq_onclick = "";
+                                        if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
                                         $inquired_icon = "";
                                         if ($order->inquired == 1)
-                                            $imquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                                            $imquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' $inq_onclick/>";
                                         elseif ($order->inquired == 2)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
                                         elseif ($order->inquired == 3)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' $inq_onclick/>";
 
                                         if ($order->accept == 1)
                                             $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
@@ -552,6 +557,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
+            order = conv_exit_alpha_output(order);
             jQuery.ajaxSetup({async: false});
             var rf_data, rf_status;
             $.post("webservice/refilter",
@@ -591,8 +597,8 @@
     </script>
 
     <script>
-        function onselect_Inforecord(result_lifnr,result_lifnr_name,result_idnlf,result_mtext,result_matnr,result_price,result_currency){
-            alert(result_lifnr + " " + result_lifnr_name + " " + result_lifnr + " " + result_mtext + " " + result_matnr + " " + result_price + " " + result_currency);
+        function onselect_Inforecord(result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency){
+            alert(result_infnr + " " + result_lifnr + " " + result_lifnr_name + " " + result_idnlf + " " + result_mtext + " " + result_matnr + " " + result_price + " " + result_currency);
         }
     </script>
 
@@ -985,15 +991,18 @@
                     if (porder.rejected == 2)
                         rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
 
+
+                let inq_onclick = "";
+                if (porder.inq_reply == 1) inq_onclick = "onclick='inquireReply(this, " + porder.inquired + ");return false;' class='cursorpointer'";
                 let inquired_icon = "";
                 if (porder.inquired == 1)
-                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' " + inq_onclick + "/>";
                 else
                     if (porder.inquired == 2)
-                        inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                        inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' " + inq_onclick + "/>";
                     else
                         if (porder.inquired == 3)
-                            inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
+                            inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' " + inq_onclick + "/>";
 
                 let button_accept = "";
                 if (porder.accept == 1)
@@ -1133,13 +1142,15 @@
                 else if (pitem.rejected == 2)
                     rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
 
+                let inq_onclick = "";
+                if (pitem.inq_reply == 1) inq_onclick = "onclick='inquireReply(this, " + pitem.inquired + ");return false;' class='cursorpointer'";
                 let inquired_icon = "";
                 if (pitem.inquired == 1)
-                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png'/>";
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' " + inq_onclick + "/>";
                 else if (pitem.inquired == 2)
-                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png'/>";
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' " + inq_onclick + "/>";
                 else if (pitem.inquired == 3)
-                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png'/>";
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' " + inq_onclick + "/>";
 
                 let button_accept = "";
                 if (pitem.accept == 1)
@@ -1838,5 +1849,6 @@
     </script>
 
     @include("orders.read_inforecords")
+    @include("orders.updaterow")
 
 @endsection
