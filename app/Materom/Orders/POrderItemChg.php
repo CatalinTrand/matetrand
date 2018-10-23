@@ -77,7 +77,7 @@ class POrderItemChg
                 $this->text = __("Accepted after change");
                 break;
             case "X":
-                $this->text = __("Rejected") . " (" . $texts[intval($this->oldval)] . ")";
+                $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
                 break;
             case "M":
                 $this->text =  __("Material code modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;

@@ -73,6 +73,7 @@ class RegisterController extends Controller
         if (is_null($ekgrp) || !isset($ekgrp)) $ekgrp = "";
         $lifnr = $data['lifnr'];
         if (is_null($lifnr) || !isset($lifnr)) $lifnr = "";
+        if (ctype_digit($lifnr)) $lifnr = str_pad($lifnr, 10, "0", STR_PAD_LEFT);
 
         return User::create([
             'id' => $data['id'],
