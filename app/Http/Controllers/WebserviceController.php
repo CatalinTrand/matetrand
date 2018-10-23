@@ -58,7 +58,7 @@ class WebserviceController extends Controller
             Input::get("ebeln"),
             Input::get("item"),
             Input::get("category"),
-            Input::get("reason").
+            Input::get("reason"),
             Input::get("new_status"),
             Input::get("new_stage")
         );

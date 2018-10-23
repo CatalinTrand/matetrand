@@ -170,12 +170,16 @@ class Webservice
 
     public static function cancelItem($ebeln, $item, $category, $reason, $new_status, $new_stage)
     {
-        $old_stage = DB::table("pitems")->where('ebeln', '$ebeln')->where('ebelp', '$ebelp')->value('stage');
+        $old_stage = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $item]])->value('stage');
         DB::beginTransaction();
         DB::update("update pitems set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
         DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, reason) values ".
-                          "('$ebeln','$item','X', CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','$reason','$category')");
+                          "('$ebeln','$item','X', CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "', '$category', '$reason')");
         DB::commit();
+        if ($new_status = 'X') {
+            SAP::acknowledgePOItem($ebeln, $item, " ");
+            SAP::rejectPOItem($ebeln, $item);
+        }
         return "";
     }
 
@@ -190,17 +194,16 @@ class Webservice
 
     public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)
     {
-        DB::update("update pitems set $column = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        if($column[0]== 'i')
-            $type = 'M';
-        if($column[0]== 'q')
-            $type = 'Q';
-        if($column[0]== 'l')
-            $type = 'D';
-        if($column[0]== 'p')
-            $type = 'P';
+        DB::beginTransaction();
+        DB::update("update pitems set $column = '$value', changed = '1' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::update("update porders set changed = '1' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        if ($column == 'idnlf') $type = 'M';
+        if ($column == 'qty') $type = 'Q';
+        if ($column == 'lfdat') $type = 'D';
+        if ($column == 'purch_price') $type = 'P';
         $newval = trim($value . " " . $valuehlp);
         DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        DB::commit();
         return "";
     }
 

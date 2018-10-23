@@ -302,6 +302,7 @@ class Orders
                         $sorder->accepted = 0; // 0=no, 1=direct, 2=indirect
                         $sorder->rejected = 0; // 0=no, 1=direct, 2=indirect
                         $sorder->inquired = 0; // 0=no, 1=tentatively accepted, 2=rejected, 3=simple message
+                        $sorder->inq_reply = 0;
 
                         // buttons
                         $sorder->accept = 0;   // 0-no, 1=display

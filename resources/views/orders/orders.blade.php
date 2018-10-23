@@ -115,7 +115,10 @@
                         @else
                             <a href="/messages"><p
                                 style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                class="card-line first">{{__('Messages')}}</p></a>
+                                class="card-line first">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                {{__('Messages')}}
+                            </p></a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                class="card-line selector">
                                 <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
@@ -149,7 +152,7 @@
                                     </select>
                                     @if ($filter_history == 2)
                                         &nbsp;{{__('Documents archived since')}}:
-                                        <input type="text" id="time_search" name="time_search" value="{{$filter_time_val}}"
+                                        <input type="text" id="time_search" class="form-control-sm" style="height:1.6rem; width: 6rem;" name="time_search" value="{{$filter_time_val}}"
                                                onchange="this.form.submit()">
                                     @endif
                                 </div><br>
@@ -210,7 +213,7 @@
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
-                                <col width="3%">
+                                <col width="2%">
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
@@ -219,11 +222,11 @@
                                 <col width="2%">
                                 <col width="3%">
                                 <col width="2%">
-                                <col width="2%">
+                                <col width="3%">
                                 <col width="2%">
                                 <col width="1%">
-                                <col width="2%">
-                                <col width="4%">
+                                <col width="3%">
+                                <col width="3%">
                             </colgroup>
                             <tr>
                                 <th colspan="1" class="td01">
@@ -236,7 +239,7 @@
                                     <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>
                                 </th>
                                 <th colspan="1" class="td01">
                                     <image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>
@@ -373,17 +376,17 @@
 
                                         $changed_icon = "";
                                         if ($order->changed != 0)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
                                         $accepted_icon = "";
                                         if ($order->accepted == 1)
                                             $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                                         elseif ($order->accepted == 2)
-                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
                                         $rejected_icon = "";
                                         if ($order->rejected == 1)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                                         elseif ($order->rejected == 2)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
 
                                         $inq_onclick = "";
                                         if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
@@ -393,7 +396,7 @@
                                         elseif ($order->inquired == 2)
                                             $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
                                         elseif ($order->inquired == 3)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' $inq_onclick/>";
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' $inq_onclick/>";
 
                                         if ($order->accept == 1)
                                             $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
@@ -475,17 +478,17 @@
 
                                         $changed_icon = "";
                                         if ($order->changed != 0)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
                                         $accepted_icon = "";
                                         if ($order->accepted == 1)
                                             $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                                         elseif ($order->accepted == 2)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
                                         $rejected_icon = "";
                                         if ($order->rejected == 1)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                                         elseif ($order->rejected == 2)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
                                         $inq_onclick = "";
                                         if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
                                         $inquired_icon = "";
@@ -494,7 +497,7 @@
                                         elseif ($order->inquired == 2)
                                             $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
                                         elseif ($order->inquired == 3)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' $inq_onclick/>";
+                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' $inq_onclick/>";
 
                                         if ($order->accept == 1)
                                             $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
@@ -610,7 +613,7 @@
 
     <script>
         $( function() {
-            $( "#time_search" ).datepicker();
+            $( "#time_search" ).datepicker({dateFormat: "yy-mm-dd"});
         } );
     </script>
 
@@ -818,10 +821,7 @@
                     _status = status;
                 });
             jQuery.ajaxSetup({async: true});
-            if (_status == "success") {
-                location.reload(true);
-                // show new row and update item & order
-            };
+            return _status == "success";
         }
 
         function getSubTree(thisbtn) {
@@ -938,21 +938,21 @@
 
                 let changed_icon = "";
                 if (porder.changed != 0)
-                    changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+                    changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
 
                 let accepted_icon = "";
                 if (porder.accepted == 1)
                     accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                 else
                     if (porder.accepted == 2)
-                        accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                        accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
 
                 let rejected_icon = "";
                 if (porder.rejected == 1)
                     rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                 else
                     if (porder.rejected == 2)
-                        rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                        rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
 
 
                 let inq_onclick = "";
@@ -965,7 +965,7 @@
                         inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' " + inq_onclick + "/>";
                     else
                         if (porder.inquired == 3)
-                            inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' " + inq_onclick + "/>";
+                            inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' " + inq_onclick + "/>";
 
                 let button_accept = "";
                 if (porder.accept == 1)
@@ -1034,7 +1034,7 @@
             cols += '<td class="td02" colspan="4"><b>{{__("Material description")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Quantity")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="padding-left: 0.5rem;"><b>{{__("Delivery date")}}</b></td>';
-            cols += '<td class="td02" colspan="4" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
+            cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
             @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                 let sales_price_hdr = '{{__("Sales price")}}';
             if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
@@ -1045,7 +1045,7 @@
             cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
             cols += '<td class="td02" colspan="3" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
             if (colsafter > 0)
                 cols += '<td class="td02" colspan="' + colsafter + '"></td>';
             newRow.append(cols).hide();
@@ -1091,19 +1091,19 @@
 
                 let changed_icon = "";
                 if (pitem.changed != 0)
-                    changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-circled-thin-50.png'/>";
+                    changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
 
                 let accepted_icon = "";
                 if (pitem.accepted == 1)
                     accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                 else if (pitem.accepted == 2)
-                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
 
                 let rejected_icon = "";
                 if (pitem.rejected == 1)
                     rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                 else if (pitem.rejected == 2)
-                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
 
                 let inq_onclick = "";
                 if (pitem.inq_reply == 1) inq_onclick = "onclick='inquireReply(this, " + pitem.inquired + ");return false;' class='cursorpointer'";
@@ -1113,7 +1113,7 @@
                 else if (pitem.inquired == 2)
                     inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' " + inq_onclick + "/>";
                 else if (pitem.inquired == 3)
-                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-blue.png' " + inq_onclick + "/>";
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' " + inq_onclick + "/>";
 
                 let button_accept = "";
                 if (pitem.accept == 1)
@@ -1195,11 +1195,11 @@
                 if (pitem.price_changeable == 1) {
                     let price_class = "td02h";
                     if (pitem.price_changed == 1) price_class += "_c";
-                    cols += '<td class="' + price_class + '" colspan="4" onclick="change_purchase_price(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
+                    cols += '<td class="' + price_class + '" colspan="3" onclick="change_purchase_price(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
                 } else {
                     let price_class = "td02";
                     if (pitem.price_changed == 1) price_class += "_c";
-                    cols += '<td class="' + price_class + '" colspan="4" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
+                    cols += '<td class="' + price_class + '" colspan="3" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
                 }
 
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.x_sales_price + '</td>';
@@ -1215,7 +1215,7 @@
                 cols += '<td class="td02" colspan="2" style="text-align: left;">' + deldate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.delqty + '</td>';
                 cols += '<td class="td02" colspan="3" style="text-align: left;">' + grdate + '</td>';
-                cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
+                cols += '<td class="td02" colspan="3" style="text-align: right;">' + pitem.grqty + '</td>';
 
 
                 @if ($groupByPO == 1)
@@ -1503,11 +1503,11 @@
             let item = rowid.substr(15, 5);
             doRejectItem(porder, item, category, reason,
             @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                'R'
+                'R', 'R'
             @else
-                'X'
+                'X', 'Z'
             @endif
-            ,'R');
+            );
             location.reload(true);
         }
 
@@ -1564,6 +1564,20 @@
             let sorder = rowid.substr(4, 10);
         }
 
+        function inquireReply(thisbtn, $mode)
+        {
+            var currentrow;
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            let rowtype = rowid.substr(3, 1); // P sau I
+            let porder = rowid.substr(4, 10);
+            let item = rowid.substr(15, 5);
+
+            if (rowtype == 'I') {
+                // if ($mode == 1) apelezi primul dialog
+                // if ($mode == 2) apelezi al doilea dialog
+            }
+        }
+
         function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp)
         {
             var c_string = "";
@@ -1617,7 +1631,7 @@
             return false;
         }
 
-        var change_cell, change_type, change_value, type_string, change_ebeln, change_ebelp, changeDialog, changeForm;
+        var change_cell, change_type, type_string, change_ebeln, change_ebelp, changeDialog, changeForm;
 
         $(function () {
             changeDialog = $("#change-dialog").dialog({
@@ -1746,7 +1760,7 @@
         </form>
     </div>
 
-    <div id="init-rejection-dialog" title="Rejectare pozitie" >
+    <div id="init-rejection-dialog" title="{{__("Reject item")}}" >
         <form>
             <br>
             <div class="form-group container" align="left">

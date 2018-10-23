@@ -210,6 +210,13 @@ class POrderItem
         }
 
         $this->inquired = 0;
+        if (Auth::user()->role == 'Furnizor') {
+            // message = yellow
+        } else {
+            if ($this->status == 'T') $this->inquired = 1;
+            if ($this->status == 'R') $this->inquired = 2;
+        }
+
         $this->matnr_changed = 0;
         $this->quantity_changed = 0;
         $this->price_changed = 0;
@@ -251,15 +258,21 @@ class POrderItem
 
             } elseif (Auth::user()->role == 'Referent') {
                 if ((($this->stage == "R") && ($this->owner == 1)) ||
-                    (($this->stage == "F") && ($this->owner == 2))
-                    && (empty($this->status) || ($this->status == 'T'))) {
-                    $this->matnr_changeable = 1;
-                    $this->quantity_changeable = 1;
-                    $this->price_changeable = 1;
-                    $this->delivery_date_changeable = 1;
-                    $this->position_splittable = 1;
-                    $this->accept = 1;
-                    $this->reject = 1;
+                     (($this->stage == "F") && ($this->owner == 2))) {
+                    if ((empty($this->status) || ($this->status == 'T'))) {
+                        $this->matnr_changeable = 1;
+                        $this->quantity_changeable = 1;
+                        $this->price_changeable = 1;
+                        $this->delivery_date_changeable = 1;
+                        $this->position_splittable = 1;
+                        $this->accept = 1;
+                        $this->reject = 1;
+                        $this->inq_reply = 1;
+                    } elseif ($this->status == 'R') {
+                        $this->accept = 0;
+                        $this->reject = 1;
+                        $this->inq_reply = 1;
+                    }
                 }
             } elseif (Auth::user()->role == 'Administrator') {
                 if (empty($this->status) || ($this->status == 'T')) {
@@ -270,7 +283,14 @@ class POrderItem
                     $this->position_splittable = 1;
                     $this->accept = 1;
                     $this->reject = 1;
+                    $this->inq_reply = 1;
+                } elseif ($this->status == 'R') {
+                    $this->accept = 0;
+                    $this->reject = 1;
+                    $this->inq_reply = 1;
                 }
+            }  elseif (Auth::user()->role == 'CTV') {
+
             }
         } elseif (($history == 2) && (Auth::user()->role == 'Administrator')) {
             if ($this->status == 'A')
