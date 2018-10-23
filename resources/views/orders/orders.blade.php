@@ -123,9 +123,9 @@
                             </p>
                         @endif
                     </div>
-
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 7.5rem;">
+                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 8rem;">
+                            <button style="margin-left: 90%;" onclick="reset_filters();return false;">{{__('Reset')}}</button>
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
@@ -140,6 +140,7 @@
                                         <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
                                         <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
                                     </select>
+
                                 </div><br>
                                 <div class="container row" style="display: block; max-width: 100%;">
                                     {{__('Displayed orders')}}:
@@ -170,7 +171,9 @@
                                         {{__("Supplier name")}}:
                                         <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
                                     @endif
+
                                 </div>
+
                                 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1">
                             </form>
                         </div>
@@ -312,13 +315,13 @@
                                 foreach ($orders as $order) {
 
                                     if ($groupByPO == 1) {
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> ".
-                                            \App\Materom\SAP::alpha_output($order->ebeln);
+                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' onmouseover=\"this.style.textDecoration='underline';this.style.color='blue';\" onmouseout=\"this.style.textDecoration='none';this.style.color='black';\">" .
+                                            \App\Materom\SAP::alpha_output($order->ebeln) . "<p>";
                                     } else {
                                         $buttname = $order->vbeln;
                                         if (strtoupper($buttname) == \App\Materom\Orders::stockorder) $buttname = __('Stock');
                                         elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
-                                        else $buttname = \App\Materom\SAP::alpha_output($buttname);
+                                        else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' onmouseover=\"this.style.textDecoration='underline';this.style.color='blue';\" onmouseout=\"this.style.textDecoration='none';this.style.color='black';\">" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
                                         $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
                                     }
 
@@ -520,6 +523,72 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function delete_filters(){
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var df_data, df_status;
+            $.post("webservice/deletefilters",
+                {
+                  empty : null
+                },
+                function (data, status) {
+                    df_data = data;
+                    df_status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+        }
+
+        function re_filter(type,order){
+            delete_filters();
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var rf_data, rf_status;
+            $.post("webservice/refilter",
+                {
+                    type: type,
+                    order: order
+                },
+                function (data, status) {
+                    rf_data = data;
+                    rf_status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            location.reload();
+        }
+
+        function reset_filters(){
+            delete_filters();
+            //reload cache
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var rsf_data, rsf_status;
+            $.post("webservice/reloadcache",
+                {
+                    empty : null
+                },
+                function (data, status) {
+                    rsf_data = data;
+                    rsf_status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            location.reload();
+        }
+    </script>
 
     <script>
         function onselect_Inforecord(result_lifnr,result_lifnr_name,result_idnlf,result_mtext,result_matnr,result_price,result_currency){

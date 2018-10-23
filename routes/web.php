@@ -43,6 +43,9 @@ Route::post('webservice/replymessage','WebserviceController@replyMessage');
 Route::get('webservice/getsubtree','WebserviceController@getSubTree');
 Route::post('webservice/sortmessages','WebserviceController@sortMessages');
 Route::post('webservice/itemsOfOrder','WebserviceController@itemsOfOrder');
+Route::post('webservice/refilter','WebserviceController@refilter');
+Route::post('webservice/deletefilters','WebserviceController@deletefilters');
+Route::post('webservice/reloadcache','WebserviceController@reloadcache');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');

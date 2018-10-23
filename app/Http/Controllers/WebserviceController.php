@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Materom\Orders;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\Materom\Webservice;
 use App\Materom\SAP;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
 
 class WebserviceController extends Controller
 {
@@ -66,6 +70,38 @@ class WebserviceController extends Controller
             Input::get("ebelp"),
             Input::get("cdate")
         );
+    }
+
+    public function reloadcache(){
+        DB::beginTransaction();
+        DB::delete("delete from porders_cache");
+        DB::delete("delete from pitems_cache");
+        DB::commit();
+        Orders::fillCache();
+    }
+
+    public function deletefilters(){
+        Session::forget('filter_status');
+        Session::forget('filter_history');
+        Session::forget("filter_archdate");
+        Session::forget("filter_vbeln");
+        Session::forget("filter_ebeln");
+        Session::forget("filter_matnr");
+        Session::forget("filter_mtext");
+        Session::forget("filter_lifnr");
+        Session::forget("filter_lifnr_name");
+        Orders::fillCache();
+    }
+
+    public function refilter(){
+        if(Input::get("type") == 'S'){
+            Session::put("filter_vbeln",Input::get("order"));
+            Session::put("groupOrdersBy",0);
+        } else {
+            Session::put("filter_ebeln",Input::get("order"));
+            Session::put("groupOrdersBy",1);
+        }
+        Orders::fillCache();
     }
 
     public function sortMessages()
