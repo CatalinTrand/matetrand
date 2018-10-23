@@ -37,7 +37,7 @@ Route::post('webservice/insertreferenceuser','WebserviceController@insertReferen
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
-Route::post('webservice/changeItemStat','WebserviceController@changeItemStat');
+Route::post('webservice/dochangeitem','WebserviceController@doChangeItem');
 Route::post('webservice/sendAck','WebserviceController@sendAck');
 Route::post('webservice/replymessage','WebserviceController@replyMessage');
 Route::get('webservice/getsubtree','WebserviceController@getSubTree');

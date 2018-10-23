@@ -56,10 +56,11 @@ class WebserviceController extends Controller
     {
         return Webservice::cancelItem(
             Input::get("ebeln"),
-            Input::get("id"),
-            Input::get("type"),
+            Input::get("item"),
             Input::get("category"),
-            Input::get("reason")
+            Input::get("reason").
+            Input::get("new_status"),
+            Input::get("new_stage")
         );
     }
 
@@ -129,9 +130,9 @@ class WebserviceController extends Controller
         );
     }
 
-    public function changeItemStat()
+    public function doChangeItem()
     {
-        return Webservice::changeItemStat(
+        return Webservice::doChangeItem(
             Input::get("column"),
             Input::get("value"),
             Input::get("valuehlp"),

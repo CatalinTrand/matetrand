@@ -44,6 +44,7 @@ class POrderItem
                          // T-tentatively accepted,
                          // R-tentatively rejected
                          // N-new
+                         // C-closed
 
     // sales order position related information
     public $sales_price; // VBAP-NETPR
@@ -135,7 +136,7 @@ class POrderItem
         $this->gidate = $pitem->gidate;
         $this->changed = $pitem->changed;
         $this->stage = $pitem->stage;
-//        $this->pstage = $pitem->pstage;
+        $this->pstage = $pitem->pstage;
         $this->status = $pitem->status;
         $this->changes = array();
     }
@@ -257,6 +258,8 @@ class POrderItem
                     $this->price_changeable = 1;
                     $this->delivery_date_changeable = 1;
                     $this->position_splittable = 1;
+                    $this->accept = 1;
+                    $this->reject = 1;
                 }
             } elseif (Auth::user()->role == 'Administrator') {
                 if (empty($this->status) || ($this->status == 'T')) {
@@ -265,6 +268,8 @@ class POrderItem
                     $this->price_changeable = 1;
                     $this->delivery_date_changeable = 1;
                     $this->position_splittable = 1;
+                    $this->accept = 1;
+                    $this->reject = 1;
                 }
             }
         } elseif (($history == 2) && (Auth::user()->role == 'Administrator')) {

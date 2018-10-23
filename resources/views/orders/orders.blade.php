@@ -170,7 +170,7 @@
                                         {{__("Supplier name")}}:
                                         <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
                                     @endif
-                                    <button style="margin-left: 15%; height: 1.5rem; " onclick="reset_filters();return false;">{{__('Reset')}}</button>
+                                    <button type="button" style="margin-left: 15%; height: 1.5rem; " onclick="reset_filters();return false;">{{__('Reset')}}</button>
 
                                 </div>
 
@@ -400,7 +400,7 @@
                                                              "onclick='acceptPOrder(this);return false;'/>";
                                         if ($order->reject == 1)
                                             $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='reject_init('P', this);return false;'/>";
+                                                             "onclick='rejectPOrder(this, 0, null);return false;'/>";
                                         if ($order->inquire == 1)
                                             $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
                                                               "onclick='inquirePOrder(this);return false;'/>";
@@ -501,7 +501,7 @@
                                                              "onclick='acceptSOrder(this);return false;' />";
                                         if ($order->reject == 1)
                                             $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='reject_init('S', this);return false;' />";
+                                                             "onclick='rejectSOrder(this, 0, null);return false;' />";
                                         if ($order->inquire == 1)
                                             $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
                                                               "onclick='inquireSOrder(this);return false;' />";
@@ -641,10 +641,11 @@
                 return false;
 
             @if ($groupByPO == 1)
-                if (id.startsWith('S') || id.startsWith('P')) {
+                if (id.startsWith('S') || id.startsWith('P'))
             @else
-                if (id.startsWith('S')) {
+                if (id.startsWith('S'))
             @endif
+            {
                 return false;
             }
 
@@ -788,7 +789,7 @@
             } else alert('Error processing operation!');
         }
 
-        function _unused_rejectItem(ebeln, id, type, category, reason) {
+        function doRejectItem(ebeln, item, category, reason, new_status, new_stage) {
             var _data, _status = "";
             $.ajaxSetup({
                 headers: {
@@ -800,10 +801,11 @@
             $.post("webservice/cancelItem",
                 {
                     ebeln: ebeln,
-                    id: id,
-                    type: type,
+                    item: item,
                     category: category,
-                    reason: reason
+                    reason: reason,
+                    new_status: new_status,
+                    new_stage: new_stage,
                 },
                 function (data, status) {
                     _data = data;
@@ -812,53 +814,8 @@
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
                 location.reload(true);
-                return;//todo
-                //show new row
-                if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
-                    var date = new Date();
-                    var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                    var cuser = "{{\Illuminate\Support\Facades\Auth::user()->id}}";
-                    var cuser_name = "{{\Illuminate\Support\Facades\Auth::user()->username}}";
-                    var ctext = "{{__("Rejectare")}}";
-                    var creason = "";
-                    if (chdate != null) {
-                        var newRow = $("<tr>");
-                        var cols = "";
-                        var pi_style = "background-color:" + $(_this).css("background-color") + ";";
-                        var color = $(_this).closest("tr").find(".coloured").css("background-color");
-                        var last_style = "background-color:" + color;
-                        var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
-                        var first_style = "background-color:" + first_color;
-                        cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        @if ($groupByPO == 0)
-                            let colsafter = "12";
-                            cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        @else
-                            let colsafter = "12";
-                        @endif
-                        cols += '<td class="coloured" style="' + last_style + '"></td>';
-                        cols += '<td style="' + pi_style + '"></td>';
-                        cols += "<td colspan='3'>" + chdate + "</td>";
-                        cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
-                        cols += '<td colspan="6">' + ctext + '</td>';
-                        cols += '<td colspan="2">' + creason + '</td>';
-                        cols += "<td colspan=" + colsafter + "></td>";
-                        @if ($groupByPO == 1)
-                            cols += '<td></td>';
-                        @endif
-                        cols += '<td colspan="4"></td>';
-                        newRow.append(cols);
-                        newRow.insertAfter($(_this).closest("tr"));
-                        if (line_counter == 0)
-                            newRow.attr('style', "background-color:Azure; vertical-align: middle;");
-                        else
-                            newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
-                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
-                            chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
-                    }
-                }
-                alert("Rejected!");
-            } else alert('Error processing operation!');
+                // show new row and update item & order
+            };
         }
 
         function getSubTree(thisbtn) {
@@ -1011,7 +968,7 @@
                 let button_reject = "";
                 if (porder.reject == 1)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
-                                    "onclick='reject_init(\"P\",this);return false;'/>";
+                                    "onclick='rejectPOrder(this, 0, null);return false;'/>";
                 let button_inquire = "";
                 if (porder.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
@@ -1159,7 +1116,7 @@
                 let button_reject = "";
                 if (pitem.reject == 1)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
-                        "onclick='rejectPItem(this);return false;'/>";
+                        "onclick='rejectPItem(this, 0, null);return false;'/>";
                 let button_inquire = "";
                 if (pitem.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
@@ -1412,49 +1369,6 @@
             }
         }
 
-        function rejectPOrder(thisbtn)
-        {
-            let category = $("#reject-category").val();
-            let reason = $("#reject-reason").val();
-            var currentrow;
-            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
-            let rowtype = rowid.substr(3, 1); // P
-            let porder = rowid.substr(4, 10);
-            @if ($groupByPO == 0)
-                let prevRow = $(currentrow).prev();
-                while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
-                sorder = $(prevRow).attr("id").substr(4, 10);
-            @endif
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            jQuery.ajaxSetup({async: false});
-            var _dataRP, _statusRP;
-            $.get("webservice/itemsOfOrder",
-                {
-                    type: rowtype,
-                    order: porder,
-                    history: $("filter_history").val()
-                },
-                function (data, status) {
-                    _dataRP = data;
-                    _statusRP = status;
-                }, "json");
-            jQuery.ajaxSetup({async: true});
-            if (_statusRP != "success") return;
-            if (_dataRP.length > 0) {
-                for(let i = 0; i < _dataRP.length; i++){
-                    if(isChecked('I'+_dataRP[i].ebelp)){
-                        _unused_rejectItem(porder,_dataRP[i].ebelp,'purch-item',category,reason);
-                    }
-                }
-                location.reload(true);
-            }
-        }
-
         function inquirePOrder(thisbtn)
         {
             var currentrow;
@@ -1479,16 +1393,115 @@
             location.reload(true);
         }
 
-        function rejectPItem(thisbtn)
+        function rejectSOrder(thisbtn, category, reason)
         {
-            let category = $("#reject-category").val();
-            let reason = $("#reject-reason").val();
+            if (category == 0 || reason == null) {
+                reject_init("S", thisbtn, "{{__('Reject sales order')}}");
+                return;
+            }
+
+            var currentrow;
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            let rowtype = rowid.substr(3, 1); // S
+            let sorder = rowid.substr(4, 10);
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataRS, _statusRS;
+            $.get("webservice/itemsOfOrder",
+                {
+                    type: rowtype,
+                    order: sorder,
+                    history: $("filter_history").val()
+                },
+                function (data, status) {
+                    _dataRS = data;
+                    _statusRS = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_statusRS != "success") return;
+            if (_dataRS.length > 0) {
+                for(let i = 0; i < _dataRS.length; i++){
+                    if(isChecked('I'+_dataRS[i].ebelp)){
+                        doRejectItem(porder, _dataRS[i].ebelp, category, reason, 'X', 'Z');
+                    }
+                }
+                location.reload(true);
+            }
+        }
+
+        function rejectPOrder(thisbtn, category, reason)
+        {
+            if (category == 0 || reason == null) {
+                reject_init("P", thisbtn, "{{__('Reject purchase order')}}");
+                return;
+            }
+            var currentrow;
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            let rowtype = rowid.substr(3, 1); // P
+            let porder = rowid.substr(4, 10);
+            @if ($groupByPO == 0)
+                let prevRow = $(currentrow).prev();
+                while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
+                sorder = $(prevRow).attr("id").substr(4, 10);
+            @endif
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataRP, _statusRP;
+            $.get("webservice/itemsOfOrder",
+                {
+                    type: rowtype,
+                    order: porder,
+                    history: $("filter_history").val()
+                },
+                function (data, status) {
+                    _dataRP = data;
+                    _statusRP = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_statusRP != "success") return;
+            if (_dataRP.length > 0) {
+                for(let i = 0; i < _dataRP.length; i++){
+                    if(isChecked('I' + _dataRP[i].ebelp)) {
+                        doRejectItem(porder, _dataRP[i].ebelp, category, reason,
+                            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                                'R', 'R'
+                            @else
+                                'X', 'Z'
+                            @endif
+                        );
+                    }
+                }
+                location.reload(true);
+            }
+        }
+
+        function rejectPItem(thisbtn, category, reason)
+        {
+            if (category == 0 || reason == null) {
+                reject_init("I", thisbtn, "{{__('Reject item')}}");
+                return;
+            }
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
-            _unused_rejectItem(porder,item,'purch-item',category,reason);
+            doRejectItem(porder, item, category, reason,
+            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                'R'
+            @else
+                'X'
+            @endif
+            ,'R');
             location.reload(true);
         }
 
@@ -1537,44 +1550,6 @@
             }
         }
 
-        function rejectSOrder(thisbtn)
-        {
-            let category = $("#reject-category").val();
-            let reason = $("#reject-reason").val();
-            var currentrow;
-            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
-            let rowtype = rowid.substr(3, 1); // S
-            let sorder = rowid.substr(4, 10);
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            jQuery.ajaxSetup({async: false});
-            var _dataRS, _statusRS;
-            $.get("webservice/itemsOfOrder",
-                {
-                    type: rowtype,
-                    order: sorder,
-                    history: $("filter_history").val()
-                },
-                function (data, status) {
-                    _dataRS = data;
-                    _statusRS = status;
-                }, "json");
-            jQuery.ajaxSetup({async: true});
-            if (_statusRS != "success") return;
-            if (_dataRS.length > 0) {
-                for(let i = 0; i < _dataRS.length; i++){
-                    if(isChecked('I'+_dataRS[i].ebelp)){
-                        _unused_rejectItem(porder,_dataRS[i].ebelp,'purch-item',category,reason);
-                    }
-                }
-                location.reload(true);
-            }
-        }
-
         function inquireSOrder(thisbtn)
         {
             var currentrow;
@@ -1583,7 +1558,7 @@
             let sorder = rowid.substr(4, 10);
         }
 
-        function changeItemStat(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp)
+        function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp)
         {
             var c_string = "";
             switch (c_type) {
@@ -1592,18 +1567,18 @@
                     break;
                 case 3:
                     c_string = "qty";
-                    if(!(Math.floor(c_value_hlp) == id && $.isNumeric(c_value_hlp)) || c_value_hlp.startsWith('-'))
+                    if(!(Math.floor(c_value) == c_value && $.isNumeric(c_value)) || c_value.startsWith('-'))
                         return false;
                     break;
                 case 4:
                     c_string = "lfdat";
-                    var d = new Date(c_value_hlp);
+                    var d = new Date(c_value);
                     if(isNaN(d.valueOf()))
                         return false;
                     break;
                 case 5:
                     c_string = "purch_price";
-                    if(!($.isNumeric(c_value_hlp)) || c_value_hlp.startsWith('-') || c_value_hlp.match(/,/).length + c_value_hlp.match(/./).length > 1)
+                    if(!($.isNumeric(c_value)) || c_value.startsWith('-') || c_value.match(/,/).length + c_value.match(/./).length > 1)
                         return false;
                     break;
             }
@@ -1616,7 +1591,7 @@
             });
             var _dataC, _statusC;
             jQuery.ajaxSetup({async: false});
-            $.post("webservice/changeItemStat",
+            $.post("webservice/dochangeitem",
                 {
                     column: c_string,
                     value: c_value,
@@ -1646,7 +1621,7 @@
                 modal: true,
                 buttons: {
                     Change: function (){
-                        if(changeItemStat(change_type, $("#new_chg_val").val(), $("#new_val_hlp").text(),
+                        if(doChangeItem(change_type, $("#new_chg_val").val(), $("#new_val_hlp").text(),
                             change_cell.innerHTML,change_ebeln,change_ebelp)) {
                             change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
                             $("#new_chg_val").text("");
@@ -1768,15 +1743,21 @@
     <div id="init-rejection-dialog" title="Rejectare pozitie" >
         <form>
             <br>
-            <div class="form-group container-fluid" align="middle">
-                <select id="reject-category" name="reject-category" onchange="rejectCategoryChange(this);return false;">
-                    <option value="1" selected>Diverse</option>
-                    <option value="2">Altele</option>
-                </select>
+            <div class="form-group container" align="left">
+                <div class="row">
+                    <label for="reject-category" class="col-md-2 col-form-label text-md-left">{{__("Reason")}}</label>&nbsp;&nbsp;
+                    <select id="reject-category" name="reject-category" class="form-control col-md-9" onchange="rejectCategoryChange(this);return false;">
+                        <option value="1" selected>{{__("Reason 1")}}</option>
+                        <option value="2">{{__("Reason 2")}}</option>
+                        <option value="3">{{__("Miscellaneous")}}</option>
+                        <option value="4">{{__("Other")}}</option>
+                    </select>
+                </div>
                 <br>
-                <label for="reject-reason" class="col-md-4 col-form-label text-md-left">Reason:</label>
-                <input id="reject-reason" type="text" name="reject-reason" size="20"
-                       class="form-control col-md-12" value="">
+                <div class="row">
+                    <label for="reject-reason" class="col-md-2 col-form-label text-md-left">{{__("Explanations")}}</label>&nbsp;&nbsp;
+                    <textarea id="reject-reason" type="text" name="reject-reason" class="form-control col-md-9" style="word-break: break-word; height: 4rem;" maxlength="100" value=""></textarea>
+                </div>
             </div>
 
             <i id="new_rej_msg" style="color: red"></i>
@@ -1784,41 +1765,39 @@
     </div>
 
     <script>
+        var rejectDialog, rejectForm, _reject_type, _reject_this;
+
         function rejectCategoryChange(_this){
-            if(_this.value == 2)
-                $("#reject-reason").attr('required', '');
+            if(_this.value == 4)
+                $("#reject-reason").attr('required', 'true');
             else
-                $("#reject-reason").attr('required', '');
+                $("#reject-reason").removeAttr('required');
         }
-    </script>
 
-    <script>
-
-        var rejectDialog, rejectForm, _type, _this;
         $(function () {
             rejectDialog = $("#init-rejection-dialog").dialog({
                 autoOpen: false,
-                height: 200,
-                width: 400,
+                height: 320,
+                width: 480,
                 modal: true,
                 buttons: {
-                    Add: function (){
-                        if(!($("#reject-category").val() == 2 && $("#reject-reason").val().length == 0 )) {
-                            switch (_type) {
+                    {{__("Reject")}}: function (){
+                        if(!($("#reject-category").val() == 4 && $("#reject-reason").val().length == 0 )) {
+                            switch (_reject_type) {
                                 case "S":
-                                    rejectSOrder(_this);
+                                    rejectSOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
                                     break;
                                 case "P":
-                                    rejectPOrder(_this);
+                                    rejectPOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
                                     break;
                                 case "I":
-                                    rejectPItem(_this);
+                                    rejectPItem(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
                                     break;
                             }
                             rejectDialog.dialog("close");
                         }
                     },
-                    Cancel: function () {
+                    {{__("Cancel")}}: function () {
                         rejectDialog.dialog("close");
                     }
                 },
@@ -1839,11 +1818,12 @@
             });
         });
 
-        function reject_init(type,this0) {
+        function reject_init(type, this0, title) {
             $("#new_rej_msg").text("");
-            $("#init-rejection-dialog").dialog('option', 'title', 'Formular de rejectare');
-            _type = type;
-            _this = this0;
+            $("#reject-reason").val("");
+            $("#init-rejection-dialog").dialog('option', 'title', title);
+            _reject_type = type;
+            _reject_this = this0;
             rejectDialog.dialog("open");
         }
     </script>

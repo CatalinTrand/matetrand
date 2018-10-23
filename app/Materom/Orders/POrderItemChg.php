@@ -63,6 +63,11 @@ class POrderItemChg
     {
 
         $this->vbeln = $pitem->vbeln;
+        $texts = array();
+        $texts[] = __("Reason 1");
+        $texts[] = __("Reason 2");
+        $texts[] = __("Miscellaneous");
+        $texts[] = __("Other");
 
         switch ($this->ctype) {
             case "A":
@@ -72,7 +77,7 @@ class POrderItemChg
                 $this->text = __("Accepted after change");
                 break;
             case "X":
-                $this->text = __("Rejected");
+                $this->text = __("Rejected") . " (" . $texts[intval($this->oldval)] . ")";
                 break;
             case "M":
                 $this->text =  __("Material code modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;

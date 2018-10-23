@@ -15,7 +15,7 @@ $table->string('cuser')->default('');
 $table->string('cuser_name', 35)->default('');
 $table->string('oldval', 80)->default('');
 $table->string('newval', 80)->default('');
-$table->string('oebeln', 16)->default('');
+$table->string('oebeln', 10)->default('');
 $table->string('oebelp', 5)->default('');
 $table->string('reason', 120)->default('');
 $table->integer('acknowledged')->default(0);

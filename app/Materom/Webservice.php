@@ -168,10 +168,14 @@ class Webservice
         return "";
     }
 
-    public static function cancelItem($ebeln, $id, $type, $category, $reason)
+    public static function cancelItem($ebeln, $item, $category, $reason, $new_status, $new_stage)
     {
-        DB::update("update pitems set stage = 'X' where ebeln = '$ebeln' and ebelp = '$id'");
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp) values ('$ebeln','$id','X',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','$reason','$category')");
+        $old_stage = DB::table("pitems")->where('ebeln', '$ebeln')->where('ebelp', '$ebelp')->value('stage');
+        DB::beginTransaction();
+        DB::update("update pitems set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, cdate, cuser, cuser_name, oldval, reason) values ".
+                          "('$ebeln','$item','X', CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','$reason','$category')");
+        DB::commit();
         return "";
     }
 
@@ -184,7 +188,7 @@ class Webservice
         }
     }
 
-    public static function changeItemStat($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)
+    public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)
     {
         DB::update("update pitems set $column = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
         if($column[0]== 'i')
