@@ -1558,6 +1558,20 @@
             let sorder = rowid.substr(4, 10);
         }
 
+        function inquireReply(thisbtn, $mode)
+        {
+            var currentrow;
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            let rowtype = rowid.substr(3, 1); // P sau I
+            let porder = rowid.substr(4, 10);
+            let item = rowid.substr(15, 5);
+
+            if (rowtype == 'I') {
+                // if ($mode == 1) apelezi primul dialog
+                // if ($mode == 2) apelezi al doilea dialog
+            }
+        }
+
         function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp)
         {
             var c_string = "";
