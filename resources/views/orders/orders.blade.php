@@ -598,7 +598,13 @@
 
     <script>
         function onselect_Inforecord(result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency){
-            alert(result_infnr + " " + result_lifnr + " " + result_lifnr_name + " " + result_idnlf + " " + result_mtext + " " + result_matnr + " " + result_price + " " + result_currency);
+            if($("#accept-reject-dialog").dialog('isOpen') == true){
+                $("ar-lifnr-text").val(result_lifnr);
+                $("ar-idnlf-text").val(result_idnlf);
+                $("ar-matnr-text").val(result_matnr);
+                $("ar-price-text").val(result_price);
+                $("ar-currency-text").val(result_currency);
+            }
         }
     </script>
 
@@ -1830,5 +1836,6 @@
 
     @include("orders.read_inforecords")
     @include("orders.updaterow")
+    @include("orders.accept-reject")
 
 @endsection
