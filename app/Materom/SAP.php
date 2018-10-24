@@ -150,6 +150,46 @@ class SAP
         }
     }
 
+    static public function savePOItem($ebeln, $ebelp) {
+
+        $new_idnlf = "";
+        $new_menge = "";
+        $new_price = "";
+        $new_eindt = "";
+
+        $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->get()[0];
+        if ($item->idnlf != $item->orig_idnlf) $new_idnlf = $item->idnlf;
+        if ($item->qty != $item->orig_qty) $new_menge = $item->qty;
+        if ($item->purch_price != $item->orig_purch_price) $new_price = $item->purch_price;
+        if ($item->lfdat != $item->orig_lfdat) $new_eindt = $item->lfdat;
+
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_CHANGE_ITEM');
+            $result = $sapfm->invoke(['I_EBELN' => $ebeln,
+                                      'I_EBELP' => $ebelp,
+                                      'I_IDNLF' => $new_idnlf,
+                                      'I_MENGE' => $new_menge,
+                                      'I_PRICE' => $new_price,
+                                      'I_EINDT' => $new_eindt,
+                                      'I_ACKFLAG' => 'N' ]);
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+    }
+
+
     static public function refreshDeliveryStatus($items = null)
     {
         if ($items == null)

@@ -124,7 +124,7 @@
                         result_price = current_row.cells[5].innerHTML.split(' ')[0];
                         result_currency = current_row.cells[5].innerHTML.split(' ')[1];
                         inforecordDialog.dialog("close");
-                        onselect_Inforecord(result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency);
+                        onselect_Inforecord(1, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency);
                     }
                 },
                 Cancel: function () {

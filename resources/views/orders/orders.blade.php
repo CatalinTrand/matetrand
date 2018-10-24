@@ -600,13 +600,13 @@
     </script>
 
     <script>
-        function onselect_Inforecord(result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency){
-            if($("#accept-reject-dialog").dialog('isOpen') == true){
-                $("ar-lifnr-text").val(result_lifnr);
-                $("ar-idnlf-text").val(result_idnlf);
-                $("ar-matnr-text").val(result_matnr);
-                $("ar-price-text").val(result_price);
-                $("ar-currency-text").val(result_currency);
+        function onselect_Inforecord(mode, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency){
+            if(mode == 1) {
+                $("#ar-lifnr-text").val(result_lifnr);
+                $("#ar-idnlf-text").val(result_idnlf);
+                $("#ar-matnr-text").val(result_matnr);
+                $("#ar-price-text").val(result_price);
+                $("#ar-currency-text").val(result_currency);
             }
         }
     </script>
@@ -994,7 +994,9 @@
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_reject + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_inquire + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
-                cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " + conv_exit_alpha_output(porder.ebeln) + "</td>";
+                cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " +
+                    "<p onclick='re_filter(\"P\",\"" + porder.ebeln + "\")' style='display:inline' class='resetfilters'>" + conv_exit_alpha_output(porder.ebeln) + "</p>"
+                    + "</td>";
                 cols += '<td class="td02" colspan="2">' + conv_exit_alpha_output(porder.lifnr) + '</td>';
                 cols += '<td class="td02" colspan="5">' + porder.lifnr_name + '</td>';
                 cols += '<td class="td02" colspan="1">' + porder.ekgrp + '</td>';
@@ -1573,8 +1575,12 @@
             let item = rowid.substr(15, 5);
 
             if (rowtype == 'I') {
-                // if ($mode == 1) apelezi primul dialog
-                // if ($mode == 2) apelezi al doilea dialog
+                if ($mode == 1) {
+                    accept_reject_complex(2, thisbtn, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate");
+                }
+                if ($mode == 2) {
+                    accept_reject_complex(1, thisbtn, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie");
+                }
             }
         }
 
@@ -1598,8 +1604,11 @@
                     break;
                 case 5:
                     c_string = "purch_price";
-                    if(!($.isNumeric(c_value)) || c_value.startsWith('-') || c_value.match(/,/).length + c_value.match(/./).length > 1)
+                    let comma_count = 0; if (c_value.indexOf(",") >= 0) comma_count = 1;
+                    let dot_count = 0; if (c_value.indexOf(".") >= 0) dot_count = 1;
+                    if(!($.isNumeric(c_value)) || c_value.startsWith('-') || (comma_count + dot_count) > 1)
                         return false;
+                    if (comma_count == 1) c_value = c_value.replace(/,/g, '.');
                     break;
             }
 
@@ -1647,6 +1656,7 @@
                             $("#new_chg_val").text("");
                             $("#new_val_hlp").text("");
                             changeDialog.dialog("close");
+                            location.reload();
                         }
                     },
                     Cancel: function () {
@@ -1686,6 +1696,7 @@
 
 
             $("#old_chg_val").text("Codul existent: " + old_value);
+            $("#new_chg_val").val("");
             $("#new_val_txt").text("Introduceti noul cod:");
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare cod material pozitia ' + ebelp);
@@ -1703,6 +1714,7 @@
 
             type_string = "QTY";
             $("#old_chg_val").text("Cantitatea existenta: " + old_value);
+            $("#new_chg_val").val("");
             $("#new_val_txt").text("Introduceti noua cantitate:");
             $("#new_val_hlp").text(values[1]);
             $("#change-dialog").dialog('option', 'title', 'Modificare cantitate pozitia ' + ebelp);
@@ -1719,6 +1731,7 @@
 
             type_string = "LFDAT";
             $("#old_chg_val").text("Data de livrare existenta: " + old_value);
+            $("#new_chg_val").val("");
             $("#new_val_txt").text("Introduceti noua data de livrare:");
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare data livrare pentru pozitia ' + ebelp);
@@ -1736,6 +1749,7 @@
 
             type_string = "PURCH_PRICE";
             $("#old_chg_val").text("Pretul existent: " + old_value);
+            $("#new_chg_val").val("");
             $("#new_val_txt").text("Introduceti noul pret de achizitie:");
             $("#new_val_hlp").text(values[1]);
             $("#change-dialog").dialog('option', 'title', 'Modificare pret achizitie pentru pozitia ' + ebelp);

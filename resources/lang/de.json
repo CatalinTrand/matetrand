@@ -30,8 +30,8 @@
   "Price modified from": "Preis geändert von",
   "Delivery date modified from": "Lieferdatum geändert von",
   "Material code modified from": "Materialnummer geändert von",
-  "Message from supplier": "Nachricht vom Lieferanten",
-  "Message to supplier": "Nachricht an den Lieferanten",
+  "Message from supplier": "Nachricht vom Lieferant",
+  "Message to supplier": "Nachricht an den Lieferant",
   "Originating from a split": "Aus einer Spaltung hervorgehen",
   "Filter after history": "Filter after history",
   "Documents archived since": "Dokumente archiviert seit",
@@ -70,10 +70,10 @@
   "Material description": "Materialbeschreibung",
   "Quantity": "Menge",
   "Delivery date": "Lieferdatum",
-  "Purchase price": "Kaufpreis",
+  "Purchase price": "EK-Preis",
   "Sales price": "Verkaufspreis",
   "Delivered on": "Geliefert am",
-  "Delivered quantity": "Gelief.-menge",
+  "Delivered quantity": "Gelf.-menge",
   "Goods receipt date": "WE-Datum",
   "Goods receipt quantity": "WE-Menge",
   "Inforecords": "Inforecords",
@@ -111,5 +111,5 @@
   "w": "w",
   "x": "x",
   "y": "y",
-  "to": "nach"
+  "to": "auf"
 }

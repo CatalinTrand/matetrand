@@ -36,3 +36,8 @@ $table->string('stage', 1)->default('F');
 $table->string('pstage', 1)->default('');
 $table->string('changed', 1)->default('');
 $table->string("status", 1)->default('');
+$table->string('orig_idnlf', 35)->default('');
+$table->string('orig_purch_price', 15)->default('');
+$table->string('orig_qty', 10)->default('');
+$table->dateTime('orig_lfdat')->default(now());
+

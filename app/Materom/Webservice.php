@@ -150,12 +150,17 @@ class Webservice
 
     public static function acceptItemCHG($ebeln, $ebelp, $type)
     {
-        $item_changed = DB::table("pitems")->where("ebeln", $ebeln)->where("ebelp", $ebelp)->value(changed) == "1";
-        if (!$item_changed || Auth::user()->role != "Furnizor") {
-            DB::update("update pitems set stage = 'A', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        $item_changed = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->value('changed') == "1";
+        if (!$item_changed) {
+            DB::update("update pitems set stage = 'Z', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             SAP::acknowledgePOItem($ebeln, $ebelp, " ");
         } else {
-            DB::update("update pitems set stage = 'T' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            if (Auth::user()->role == "Furnizor") {
+                DB::update("update pitems set stage = 'R', status = 'T' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            } else {
+                DB::update("update pitems set stage = 'Z', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                SAP::savePOItem($ebeln, $ebelp);
+            }
         }
 
         $stage = (Auth::user()->role)[0];
@@ -163,8 +168,8 @@ class Webservice
         if ($stage == 'R') $stage = 'R';
         if ($stage == 'C') $stage = 'R';
 
-        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
-                          "('$ebeln','$ebelp','A', '$stage', CURRENT_TIMESTAMP, '" . Auth::user()->id . "','" . Auth::user()->username . "','')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                          "('$ebeln','$ebelp','A', '$stage', CURRENT_TIMESTAMP, '" . Auth::user()->id . "','" . Auth::user()->username . "')");
         return "";
     }
 
@@ -196,7 +201,7 @@ class Webservice
     {
         DB::beginTransaction();
         DB::update("update pitems set $column = '$value', changed = '1' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::update("update porders set changed = '1' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::update("update porders set changed = '1' where ebeln = '$ebeln'");
         if ($column == 'idnlf') $type = 'M';
         if ($column == 'qty') $type = 'Q';
         if ($column == 'lfdat') $type = 'D';

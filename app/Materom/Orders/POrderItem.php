@@ -211,10 +211,17 @@ class POrderItem
 
         $this->inquired = 0;
         if (Auth::user()->role == 'Furnizor') {
+            if ($this->status == 'T') $this->inquired = 1;
             // message = yellow
         } else {
-            if ($this->status == 'T') $this->inquired = 1;
-            if ($this->status == 'R') $this->inquired = 2;
+            if ($this->status == 'T') {
+                $this->inquired = 1;
+                if (($this->owner != 0) || (Auth::user()->role == "Administrator")) $this->inq_reply = 1;
+            }
+            if ($this->status == 'R') {
+                $this->inquired = 2;
+                if (($this->owner != 0) || (Auth::user()->role == "Administrator")) $this->inq_reply = 1;
+            }
         }
 
         $this->matnr_changed = 0;
@@ -226,7 +233,7 @@ class POrderItem
 
         foreach ($this->changes as $itemchg) {
             if (($itemchg->stage == Auth::user()->role[0]) && ($itemchg->acknowledged == 0)) {
-                $this->inquired = 1;
+                // $this->inquired = 3;
             }
             if ($itemchg->ctype == "M") $this->matnr_changed = 1;
             if ($itemchg->ctype == "Q") $this->quantity_changed = 1;
@@ -259,12 +266,14 @@ class POrderItem
             } elseif (Auth::user()->role == 'Referent') {
                 if ((($this->stage == "R") && ($this->owner == 1)) ||
                      (($this->stage == "F") && ($this->owner == 2))) {
-                    if ((empty($this->status) || ($this->status == 'T'))) {
+                    if (empty($this->status)) {
                         $this->matnr_changeable = 1;
                         $this->quantity_changeable = 1;
                         $this->price_changeable = 1;
                         $this->delivery_date_changeable = 1;
                         $this->position_splittable = 1;
+                    }
+                    if ((empty($this->status) || ($this->status == 'T'))) {
                         $this->accept = 1;
                         $this->reject = 1;
                         $this->inq_reply = 1;
@@ -275,12 +284,14 @@ class POrderItem
                     }
                 }
             } elseif (Auth::user()->role == 'Administrator') {
-                if (empty($this->status) || ($this->status == 'T')) {
+                if (empty($this->status)) {
                     $this->matnr_changeable = 1;
                     $this->quantity_changeable = 1;
                     $this->price_changeable = 1;
                     $this->delivery_date_changeable = 1;
                     $this->position_splittable = 1;
+                }
+                if (empty($this->status) || ($this->status == 'T')) {
                     $this->accept = 1;
                     $this->reject = 1;
                     $this->inq_reply = 1;
