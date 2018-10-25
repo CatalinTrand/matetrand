@@ -212,6 +212,11 @@ class Webservice
         return "";
     }
 
+    public static function createPurchReq($lifnr, $idnlf, $mtext, $matnr, $qty, $unit, $price, $curr, $deldate, $infnr)
+    {
+        return SAP::createPurchReq($lifnr, $idnlf, $mtext, $matnr, $qty, $unit, $price, $curr, $deldate, $infnr);
+    }
+
     static public function getVendorUsers($lifnr)
     {
         $users = DB::select("select * from users where role = 'Furnizor' and lifnr ='$lifnr'");

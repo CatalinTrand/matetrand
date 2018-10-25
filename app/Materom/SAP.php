@@ -189,6 +189,37 @@ class SAP
         }
     }
 
+    static public function createPurchReq($lifnr, $idnlf, $mtext, $matnr, $qty, $unit, $price, $curr, $deldate, $infnr)
+    {
+
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_PR_CREATE');
+            $result = $sapfm->invoke(['I_LIFNR' => $lifnr,
+                                      'I_MATNR' => $matnr,
+                                      'I_MTEXT' => $mtext,
+                                      'I_IDNLF' => $idnlf,
+                                      'I_PRICE' => $price,
+                                      'I_CURR' => $curr,
+                                      'I_MENGE' => $qty,
+                                      'I_MEINS' => $unit,
+                                      'I_DELDATE' => $deldate,
+                                      'I_INFNR' => $infnr ]);
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+    }
 
     static public function refreshDeliveryStatus($items = null)
     {

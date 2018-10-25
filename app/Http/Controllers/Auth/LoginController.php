@@ -46,10 +46,10 @@ class LoginController extends Controller
     {
         Session::put('locale', strtolower(Auth::user()->lang));
         Session::put('materomdbcache', Orders::newCacheToken());
-        DB::beginTransaction();
-        DB::delete("delete from porders_cache");
-        DB::delete("delete from pitems_cache");
-        DB::commit();
+//        DB::beginTransaction();
+//        DB::delete("delete from porders_cache");
+//        DB::delete("delete from pitems_cache");
+//        DB::commit();
         Orders::fillCache();
     }
 

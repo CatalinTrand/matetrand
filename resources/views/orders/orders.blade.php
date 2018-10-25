@@ -185,7 +185,7 @@
                     <br>
 
                     <div class="card-body orders-table-div" style="height: 70vh; padding-top: 0rem;">
-                        <button onclick="read_inforecords(); return false;">Inforecords</button>
+                        <!-- <button onclick="read_inforecords(); return false;">Inforecords</button> -->
                         <table style="border: 2px solid black; table-layout: fixed;" class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="2%">
@@ -381,7 +381,7 @@
                                         if ($order->accepted == 1)
                                             $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                                         elseif ($order->accepted == 2)
-                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
+                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
                                         $rejected_icon = "";
                                         if ($order->rejected == 1)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
@@ -483,7 +483,7 @@
                                         if ($order->accepted == 1)
                                             $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                                         elseif ($order->accepted == 2)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
+                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
                                         $rejected_icon = "";
                                         if ($order->rejected == 1)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
@@ -578,6 +578,7 @@
 
         function reset_filters(){
             delete_filters();
+            /*
             //reload cache
             $.ajaxSetup({
                 headers: {
@@ -596,6 +597,7 @@
                 });
             jQuery.ajaxSetup({async: true});
             location.reload();
+            */
         }
     </script>
 
@@ -945,7 +947,7 @@
                     accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                 else
                     if (porder.accepted == 2)
-                        accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
+                        accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
 
                 let rejected_icon = "";
                 if (porder.rejected == 1)
@@ -1099,7 +1101,7 @@
                 if (pitem.accepted == 1)
                     accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
                 else if (pitem.accepted == 2)
-                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-48.png'/>";
+                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
 
                 let rejected_icon = "";
                 if (pitem.rejected == 1)

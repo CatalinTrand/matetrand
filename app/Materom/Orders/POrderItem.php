@@ -190,7 +190,7 @@ class POrderItem
                     "       and users_ref.refid = '" . Auth::user()->id . "'" .
                     " order by id");
                 foreach ($suppliers as $supplier) {
-                    $manufacturers = DB::select("select distinct mfrnr from materom_srm.users_sel where id = '$supplier->id'");
+                    $manufacturers = DB::select("select distinct mfrnr from users_sel where id = '$supplier->id'");
                     if (empty($manufacturers)) {$this->owner = 2; break;}
                     if (isset(array_flip($manufacturers)[$porder->mfrnr])) {$this->owner = 2; break;}
                 }
