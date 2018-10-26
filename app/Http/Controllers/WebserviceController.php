@@ -177,6 +177,15 @@ class WebserviceController extends Controller
         );
     }
 
+    public function readAllProposals()
+    {
+        return Webservice::readAllProposals(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate")
+        );
+    }
+
     function insertReferenceUser()
     {
         return Webservice::insertReferenceUser(

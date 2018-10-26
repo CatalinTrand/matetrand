@@ -173,6 +173,11 @@ class Webservice
         }
     }
 
+    public static function readAllProposals($ebeln, $ebelp, $cdate){
+        $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        return $proposals;
+    }
+
     public static function acceptItemCHG($ebeln, $ebelp, $type)
     {
         $item_changed = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->value('changed') == "1";

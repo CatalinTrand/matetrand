@@ -478,7 +478,7 @@
         $('body').addClass('ajaxloading');
         jQuery.ajaxSetup({async: false});
         var _data, _status;
-        $.get("webservice/readAllProposals",
+        $.post("webservice/readAllProposals",
             {
                 ebeln: ebeln,
                 ebelp: ebelp,
