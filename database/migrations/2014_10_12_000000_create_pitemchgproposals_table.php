@@ -19,6 +19,7 @@ class CreatePitemchgproposalsTable extends Migration
             $table->dateTime('cdate')->default(now());
             $table->integer('pos');
             $table->string('lifnr', 10);
+            $table->string('idnlf', 10);
             $table->string('matnr', 10)->default('');
             $table->string('mtext', 35)->default('');
             $table->string('qty', 10)->default('');
@@ -27,9 +28,9 @@ class CreatePitemchgproposalsTable extends Migration
             $table->string('purch_curr', 3)->default('');
             $table->string('sales_price', 15)->default('');
             $table->string('sales_curr', 3)->default('');
-            $table->string('infnr', 10);
-            $table->string('source', 1);
-            $table->string('accepted', 1);
+            $table->string('infnr', 10)->default('');
+            $table->string('source', 1)->default('');
+            $table->string('accepted', 1)->default('');
         });
     }
 

@@ -19,8 +19,9 @@
                 <label class="col-md-2 col-form-label text-md-left">{{__("New proposal")}}</label>&nbsp;
                 <button type="button" onclick="add_edit_proposal(1,this);return false;">{{__('New')}}</button>
             </div>
-            <div id="extra-fields" style="display: none;height: 100%">
-                <div style="overflow-y: scroll">
+            <br>
+            <div id="extra-fields" style="height: 150px" class="table-info">
+                <div style="overflow-y: scroll; overflow-x: hidden">
                 <table id="proposals_table">
                     <colgroup>
                         <col width="10%">
@@ -48,30 +49,6 @@
                         <th></th>
                         <th></th>
                     </tr>
-
-                    @php
-                        $editButton = "<button type='button' onclick='add_edit_proposal(0,this);return false;'>Edit</button>";
-                        $deleteButton = "<button type='button' onclick='deleteProposal(this);return false;'>Delete</button>";
-
-                        $proposals = \App\Materom\Orders::getProposalsList();
-
-                        foreach ($proposals as $proposal){
-                            $lifnr_name = \App\User::all()->find($proposal->lifnr)->username;
-                            $new_row = "<tr id='$proposal->ebeln-$proposal->ebelp-$proposal->cdate-$proposal->pos'>
-                                        <td>$proposal->lifnr</td>
-                                        <td>$lifnr_name</td>
-                                        <td>$proposal->idnlf</td>
-                                        <td>$proposal->mtext</td>
-                                        <td>$proposal->matnr</td>
-                                        <td>$proposal->purch_price</td>
-                                        <td>$proposal->purch_curr</td>
-                                        <td>$proposal->sales_price</td>
-                                        <td>$proposal->sales_curr</td>
-                                        <td>$editButton</td>
-                                        <td>$deleteButton</td>
-                                        </tr>";
-                        }
-                    @endphp
                 </table>
                 </div>
             </div>
@@ -99,7 +76,7 @@
         arDialog = $("#accept-reject-dialog").dialog({
             autoOpen: false,
             height: 480,
-            width: 480,
+            width: 680,
             modal: true,
             buttons: {
         Save: function (){
@@ -127,6 +104,56 @@
     },
         close: function () {
             arForm[0].reset();
+        },
+        open: function () {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $("#accept-reject-dialog").find("tr:gt(0)").remove();
+            $('body').addClass('ajaxloading');
+            jQuery.ajaxSetup({async: false});
+            var _data, _status;
+
+            let ar_d_ebeln = _ar_this.parentElement.parentElement.id.split('_')[1].substring(1);
+            let ar_d_ebelp = _ar_this.parentElement.parentElement.id.split('_')[2];
+            let ar_d_cdate = "2018-10-10 10:10:10";
+
+            $.post("webservice/readAllProposals",
+                {
+                    ebeln: ar_d_ebeln,
+                    ebelp: ar_d_ebelp,
+                    cdate: ar_d_cdate
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_status != "success") {
+                $('body').removeClass('ajaxloading');
+                arDialog.dialog("close");
+                return;
+            }
+            if (_data.length > 0) {
+                let table = $("#proposals_table");
+                for (let i = 0; i < _data.length; i++) {
+                    var newRow = $("<tr id='" + _data[i].ebeln + "-" + _data[i].ebelp + "-" + _data[i].cdate + "' style='height: 1.5rem;'>");
+                    var cols = "<td colspan='1'>" + _data[i].lifnr + "</td>" +
+                        "<td colspan='1'>" + _data[i].lifnr_name + "</td>" +
+                        "<td colspan='1'>" + _data[i].idnlf + "</td>" +
+                        "<td colspan='1'>" + _data[i].mtext + "</td>" +
+                        "<td colspan='1'>" + _data[i].matnr + "</td>" +
+                        "<td colspan='1'>" + _data[i].purch_price + " " + _data[i].purch_curr + "</td>"+
+                        "<td colspan='1'>" + _data[i].sales_price + " " + _data[i].sales_curr + "</td>"+
+                        "<td colspan='1'><button type='button' onclick='add_edit_proposal(0,this);return false;'>Edit</button></td>" +
+                        "<td colspan='1'><button type='button' onclick='deleteProposal(this);return false;'>Delete</button></td>";
+                    newRow.append(cols); // .hide();
+                    table.append(newRow);
+                }
+            }
+            $('body').removeClass('ajaxloading');
         },
         position: {
             my: "center",
@@ -211,11 +238,11 @@
 </script>
 
 <div id="add-edit-proposal" title="Add/edit proposal">
-    //TODO
     <div class="row">
         <label for="ar-lifnr-text" class="col-md-3 col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
         <input id="ar-lifnr-text" type="text" name="ar-lifnr-text" class="form-control col-md-5" value="">
     </div>
+    <br>
     <div class="row">
         <label for="ar-lifnr-name-text" class="col-md-3 col-form-label text-md-left">{{__('Vendor Name')}}</label>&nbsp;&nbsp;
         <input id="ar-lifnr-name-text" type="text" name="ar-lifnr-name-text" class="form-control col-md-5" value="">
@@ -263,15 +290,15 @@
     $(function () {
         add_edit_Dialog = $("#add-edit-proposal").dialog({
             autoOpen: false,
-            height: 250,
-            width: 550,
+            height: 520,
+            width: 750,
             modal: true,
             buttons: {
                 Save: function () {
-                    let ebeln = add_edit_this.innerHTML == "New" ? "" : add_edit_this.parent().parent().id.split('-')[0];
-                    let ebelp = add_edit_this.innerHTML == "New" ? "" : add_edit_this.parent().parent().id.split('-')[1];
-                    let cdate = add_edit_this.innerHTML == "New" ? "" : add_edit_this.parent().parent().id.split('-')[2];
-                    let pos = add_edit_this.parent().parent().id.split('-')[3];
+                    let ebeln = _ar_this.parentElement.parentElement.id.split('_')[1].substring(1);
+                    let ebelp = _ar_this.parentElement.parentElement.id.split('_')[2];
+                    let cdate = add_edit_this == null ? "2018-10-10 10:10:10" : add_edit_this.parentElement.parentElement.id.split('-')[2];//TODO-de unde il iau
+                    let pos =   add_edit_this == null ? "-1" : add_edit_this.parentElement.parentElement.id.split('-')[3];
 
                     let lifnr = $("#ar-lifnr-text").val();
                     let lifnr_name = $("#ar-lifnr-name-text").val();
@@ -279,9 +306,9 @@
                     let mtext = $("#ar-mtext-text").val();
                     let matnr = $("#ar-matnr-text").val();
                     let purch_price = $("#ar-purch-price-text").val();
-                    let purch_curr = $("#ar-purch-curr-text").val();
+                    let purch_curr = $("#ar-purch-currency-text").val();
                     let sales_price = $("#ar-sales-price-text").val();
-                    let sales_curr = $("#ar-sales-curr-text").val();
+                    let sales_curr = $("#ar-sales-currency-text").val();
 
                     $.ajaxSetup({
                         headers: {
@@ -310,19 +337,16 @@
                         function (data, status) {
                             _data = data;
                             _status = status;
-                        }, "json");
+                        });
                     jQuery.ajaxSetup({async: true});
                     $('body').removeClass('ajaxloading');
-                    if (_status != "success") {
+                    if (_status == "success") {
                         add_edit_Dialog.dialog("close");
                     } else alert('Error processing request!');
                 },
                 Cancel: function () {
                     add_edit_Dialog.dialog("close");
                 }
-            },
-            close: function () {
-                add_edit_Form[0].reset();
             },
             position: {
                 my: "center",
@@ -376,7 +400,11 @@
         }
 
         $("#add-edit-proposal").dialog('option', 'title', title);
-        add_edit_this = this0;
+        if(mode != 1)
+            add_edit_this = this0;
+        else
+            add_edit_this = null;
+        $('#add-edit-proposal').css('overflow', 'hidden');
         add_edit_Dialog.dialog("open");
     }
 

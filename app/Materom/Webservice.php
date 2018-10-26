@@ -155,7 +155,6 @@ class Webservice
             //edit existing
             DB::update("update pitemchg_proposals set 
                                     lifnr = '$lifnr',
-                                    lifnr_name = '$lifnr_name',  
                                     idnlf = '$idnlf',
                                     mtext = '$mtext',
                                     matnr = '$matnr',
@@ -168,8 +167,8 @@ class Webservice
             //add new
             $lastFind = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
             $pos = count($lastFind) + 1;
-            DB::insert("insert into pitemchg_proposals (ebeln,ebelp,cdate,pos,lifnr,lifnr_name,idnlf,mtext,matnr,purch_price,purch_curr,sales_price,sales_curr) values 
-                              ('$ebeln','$ebelp','$cdate','$pos','$lifnr','$lifnr_name','$idnlf','$mtext','$matnr','$purch_price','$purch_curr','$sales_price','$sales_curr')");
+            DB::insert("insert into pitemchg_proposals (  ebeln,   ebelp,   cdate,   pos,   lifnr,   idnlf,   mtext,   matnr,   purch_price,   purch_curr,  sales_price,    sales_curr) values 
+                                                             ('$ebeln','$ebelp','$cdate','$pos','$lifnr','$idnlf','$mtext','$matnr','$purch_price','$purch_curr','$sales_price','$sales_curr')");
         }
     }
 

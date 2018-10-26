@@ -175,6 +175,7 @@ class WebserviceController extends Controller
             Input::get("sales_price"),
             Input::get("sales_curr")
         );
+        return "";
     }
 
     public function readAllProposals()
