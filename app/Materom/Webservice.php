@@ -174,6 +174,9 @@ class Webservice
 
     public static function readAllProposals($ebeln, $ebelp, $cdate){
         $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        foreach ($proposals as $proposal){
+            $proposal->lifnr_name = "";//TODO - User::all()->find($proposal->lifnr)->first()->username;
+        }
         return $proposals;
     }
 
