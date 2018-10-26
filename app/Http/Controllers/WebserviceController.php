@@ -158,6 +158,25 @@ class WebserviceController extends Controller
         );
     }
 
+    public function modifyProposals()
+    {
+        Webservice::modifyProposals(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate"),
+            Input::get("pos"),
+            Input::get("lifnr"),
+            Input::get("lifnr_name"),
+            Input::get("idnlf"),
+            Input::get("mtext"),
+            Input::get("matnr"),
+            Input::get("purch_price"),
+            Input::get("purch_curr"),
+            Input::get("sales_price"),
+            Input::get("sales_curr")
+        );
+    }
+
     function insertReferenceUser()
     {
         return Webservice::insertReferenceUser(

@@ -148,6 +148,31 @@ class Webservice
         return "";
     }
 
+    public static function modifyProposals($ebeln,$ebelp,$cdate,$pos,$lifnr,$lifnr_name,$idnlf,$mtext,$matnr,$purch_price,$purch_curr,$sales_price,$sales_curr){
+        $maybe = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and pos = '$pos'");
+
+        if(count($maybe) > 0){
+            //edit existing
+            DB::update("update pitemchg_proposals set 
+                                    lifnr = '$lifnr',
+                                    lifnr_name = '$lifnr_name',  
+                                    idnlf = '$idnlf',
+                                    mtext = '$mtext',
+                                    matnr = '$matnr',
+                                    purch_price = '$purch_price',
+                                    purch_curr = '$purch_curr',
+                                    sales_price = '$sales_price',
+                                    sales_curr = '$sales_curr',
+                                    where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and pos = '$pos'");
+        } else {
+            //add new
+            $lastFind = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+            $pos = count($lastFind) + 1;
+            DB::insert("insert into pitemchg_proposals (ebeln,ebelp,cdate,pos,lifnr,lifnr_name,idnlf,mtext,matnr,purch_price,purch_curr,sales_price,sales_curr) values 
+                              ('$ebeln','$ebelp','$cdate','$pos','$lifnr','$lifnr_name','$idnlf','$mtext','$matnr','$purch_price','$purch_curr','$sales_price','$sales_curr')");
+        }
+    }
+
     public static function acceptItemCHG($ebeln, $ebelp, $type)
     {
         $item_changed = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->value('changed') == "1";
