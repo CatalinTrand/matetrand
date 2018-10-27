@@ -129,7 +129,7 @@
                                     <a href="/users" style="padding-left: 30px;padding-top: 3px">{{__('Reset')}}</a>
                                 </div>
                             </form>
-                            <table id="user-list-table" class="basicTable table table-striped" style="width:100%;clear:left;">
+                            <table id="user-list-table" class="table-striped" style="width:100%; clear:left; line-height: 1.4rem;">
                                 <tr>
                                     <th><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a href="/users?sort=ID&val=asc">&#x25B2;</a>
                                     </th>
@@ -180,7 +180,10 @@
                                         if($user->active == 0)
                                             $active = "Inactive";
 
-                                        $table .= "<tr style='line-height: 35px'><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td><td><button style='margin-right:40px;margin-left:-80px' id='new-password-button' type='button' onclick='change_user_password(\"$id\");return false;'>Change Password</button><a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' class='edit edit_user_button'></a><a href='/users?del=$id'><img src='images/delete.png' class='delete'></a></td></tr>";
+                                        $table .= "<tr><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td>".
+                                        "<td><a href=''><img id='edit_button_$id' onclick='change_user_password(\"$id\");return false;' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></a>".
+                                        "<a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></a>".
+                                        "<a href='/users?del=$id'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></a></td></tr>";
                                     }
 
                                     echo $table;

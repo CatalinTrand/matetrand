@@ -96,5 +96,8 @@
   "Miscellaneous": "Miscellaneous",
   "Other": "Other",
   "Filter by status": "Filter by status",
-  "to": "auf"
+  "to": "auf",
+  "Change password": "Change password",
+  "Change user data": "Change user date",
+  "Delete user": "Delete user"
 }

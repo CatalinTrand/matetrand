@@ -1,12 +1,13 @@
 {
-  "Login": "Logare",
-  "User ID": "ID Utilizator",
-  "Password": "Parola",
-  "Remember Me": "Pastreaza-ma logat",
+  "Administrator": "Administrator",
   "Forgot Your Password?": "Ai uitat parola?",
+  "Login": "Logare",
   "Manufacturer": "Producator",
   "Manufacturers": "Producatori",
   "Manufacturer name": "Nume Producator",
+  "Password": "Parola",
+  "Remember Me": "Pastreaza-ma logat",
+  "User ID": "ID Utilizator",
   "Refferal": "Referent",
   "Refferals": "Referenti",
   "Refferal Name": "Nume Referent",
@@ -56,7 +57,6 @@
   "Toggle navigation": "Mod navigatie",
   "Language": "Limba",
   "Status": "Status",
-  "Administrator": "Administrator",
   "CTV": "CTV",
   "Global RFC Settings": "Setari RFC Globale",
   "RFC Router": "Router RFC",
@@ -95,5 +95,8 @@
   "Miscellaneous": "Diverse",
   "Other": "Altele",
   "Filter by status": "Filtrare dupa stare",
-  "to": "la"
+  "to": "la",
+  "Change password": "Schimbare parola",
+  "Change user data": "Modificare date utilizator",
+  "Delete user": "Stergere utilizator"
 }

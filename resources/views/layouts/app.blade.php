@@ -349,14 +349,14 @@
 <div class="ajaxloadermodal"><!-- ajaxload.info  --></div>
 <script>
     $(function() {
-        $body = $("body");
-
         /*
+        $body = $("body");
         $(document).on({
             ajaxStart: function() {$body.addClass("ajaxloading");},
             ajaxStop: function() {$body.removeClass("ajaxloading"); }
         });
         */
+        $(document).tooltip();
     });
 </script>
 </body>
