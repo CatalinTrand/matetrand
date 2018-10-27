@@ -602,13 +602,17 @@
     </script>
 
     <script>
-        function onselect_Inforecord(mode, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_price, result_currency){
+        function onselect_Inforecord(mode, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency, result_sales_price, result_sales_currency){
             if(mode == 1) {
                 $("#ar-lifnr-text").val(result_lifnr);
+                $("#ar-lifnr-name-text").val(result_lifnr_name);
                 $("#ar-idnlf-text").val(result_idnlf);
+                $("#ar-mtext-text").val(result_mtext);
                 $("#ar-matnr-text").val(result_matnr);
-                $("#ar-price-text").val(result_price);
-                $("#ar-currency-text").val(result_currency);
+                $("#ar-purch-price-text").val(result_purch_price);
+                $("#ar-purch-curr-text").val(result_purch_currency);
+                $("#ar-sales-price-text").val(result_sales_price);
+                $("#ar-sales-curr-text").val(result_sales_currency);
             }
         }
     </script>
@@ -1568,7 +1572,7 @@
             let sorder = rowid.substr(4, 10);
         }
 
-        function inquireReply(thisbtn, $mode)
+        function inquireReply(thisbtn, mode)
         {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
@@ -1577,10 +1581,10 @@
             let item = rowid.substr(15, 5);
 
             if (rowtype == 'I') {
-                if ($mode == 1) {
+                if (mode == 1) {
                     accept_reject_complex(2, thisbtn, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate");
                 }
-                if ($mode == 2) {
+                if (mode == 2) {
                     accept_reject_complex(1, thisbtn, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie");
                 }
             }

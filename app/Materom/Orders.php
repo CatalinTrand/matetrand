@@ -363,5 +363,9 @@ class Orders
 
     }
 
-
+    public static function getProposalsList(){
+        //TODO - filtrari?
+        $proposals = DB::select("select * from pitemchg_proposals");
+        return $proposals;
+    }
 }
