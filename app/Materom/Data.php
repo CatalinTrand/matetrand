@@ -108,6 +108,7 @@ class Data
             $nitem->ebeln = $sapitm["EBELN"];
             if ($ebeln != $nitem->ebeln) return "Wrong purchase order items";
             $nitem->ebelp = $sapitm["EBELP"];
+            $nitem->matnr = $sapitm["MATNR"];
             $nitem->idnlf = $sapitm["IDNLF"];
             $nitem->mtext = $sapitm["MTEXT"];
             $nitem->qty = $sapitm["MENGE"];
@@ -141,12 +142,12 @@ class Data
             $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
             if (count($users) > 0) $nitem->ctv = $users[0]->id;
             if (is_null($citem)) {
-                $sql = "insert into pitems (ebeln, ebelp, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, ".
+                $sql = "insert into pitems (ebeln, ebelp, matnr, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, ".
                                            "purch_price, purch_curr, purch_prun, purch_puom, ".
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
                                            "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed, status, ".
                                            "orig_idnlf, orig_purch_price, orig_qty, orig_lfdat) values (".
-                       "'$nitem->ebeln', '$nitem->ebelp', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 35) . "',$nitem->qty, '$nitem->qty_uom', ".
+                       "'$nitem->ebeln', '$nitem->ebelp', '$nitem->matnr', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 35) . "',$nitem->qty, '$nitem->qty_uom', ".
                        "'$nitem->lfdat', '$nitem->mfrnr', ".
                        "'$nitem->purch_price', '$nitem->purch_curr', ".
                        "$nitem->purch_prun, '$nitem->purch_puom', ".

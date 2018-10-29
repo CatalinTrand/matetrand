@@ -94,8 +94,7 @@
                 <th colspan="2">{{__('Vendor material')}}</th>
                 <th colspan="7">{{__('Description')}}</th>
                 <th colspan="2">{{__('Material')}}</th>
-                <th colspan="3">{{__('Purchase Price')}}</th>
-                <th colspan="3">{{__('Sales Price')}}</th>
+                <th colspan="3" style="text-align: right;">{{__('Purchase Price')}}</th>
             </tr>
         </table>
     </div>
@@ -104,8 +103,9 @@
 
 <script>
 
-    var inforecordDialog, inforecordForm, result_infnr,result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
-        result_purch_price, result_purch_currency,result_sales_price,result_sales_currency;
+    var inforecordDialog, inforecordForm, inforecordCaller;
+    var result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
+        result_purch_price, result_purch_currency;
     $(function () {
         inforecordDialog = $("#inforecord-dialog").dialog({
             autoOpen: false,
@@ -113,7 +113,7 @@
             width: 960,
             modal: true,
             buttons: {
-                Use: function () {
+                "Take over": function () {
                     if (inforecord_last_selected_line != null) {
                         let current_row = inforecord_last_selected_line;
                         result_infnr = current_row.id;
@@ -124,10 +124,8 @@
                         result_matnr = current_row.cells[4].innerHTML;
                         result_purch_price = current_row.cells[5].innerHTML.split(' ')[0];
                         result_purch_currency = current_row.cells[5].innerHTML.split(' ')[1];
-                        result_sales_price = current_row.cells[6].innerHTML.split(' ')[0];
-                        result_sales_currency = current_row.cells[6].innerHTML.split(' ')[1];
                         inforecordDialog.dialog("close");
-                        onselect_Inforecord(1, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency,result_sales_price,result_sales_currency);
+                        onselect_Inforecord(inforecordCaller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency);
                     }
                 },
                 Cancel: function () {
@@ -153,10 +151,18 @@
         });
     });
 
-    function read_inforecords() {
+    function read_inforecords(caller, lifnr, idnlf) {
         $("#inforecord_msg").text("");
         $("#inforecord_table").find("tr:gt(0)").remove();
         $("#inforecord-dialog").dialog('option', 'title', 'Inforecords');
+        $("#inforecord-lifnr").val("");
+        $("#inforecord-lifnr-name").val("");
+        $("#inforecord-idnlf").val("");
+        $("#inforecord-mat-description").val("");
+        $("#inforecord-material").val("");
+        if (lifnr != null) $("#inforecord-lifnr").val(lifnr);
+        if (idnlf != null) $("#inforecord-idnlf").val(idnlf);
+        inforecordCaller = caller;
         inforecordDialog.dialog("open");
     }
 
@@ -210,8 +216,7 @@
                     "<td colspan='2'>" + _data[i].idnlf + "</td>" +
                     "<td colspan='7'>" + _data[i].mtext + "</td>" +
                     "<td colspan='2'>" + _data[i].matnr + "</td>" +
-                    "<td colspan='3'>" + _data[i].purch_price + " " + _data[i].purch_curr + "</td>"+
-                    "<td colspan='3'>" + _data[i].sales_price + " " + _data[i].sales_curr + "</td>";//TODO campuri noi  needed
+                    "<td colspan='3' style='text-align: right;'>" + _data[i].purch_price + " " + _data[i].purch_curr + "</td>";
                 newRow.append(cols); // .hide();
                 table.append(newRow);
             }

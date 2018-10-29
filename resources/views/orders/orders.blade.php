@@ -185,7 +185,6 @@
                     <br>
 
                     <div class="card-body orders-table-div" style="height: 70vh; padding-top: 0rem;">
-                        <!-- <button onclick="read_inforecords(); return false;">Inforecords</button> -->
                         <table style="border: 2px solid black; table-layout: fixed;" class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="2%">
@@ -578,41 +577,27 @@
 
         function reset_filters(){
             delete_filters();
-            /*
-            //reload cache
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            jQuery.ajaxSetup({async: false});
-            var rsf_data, rsf_status;
-            $.post("webservice/reloadcache",
-                {
-                    empty : null
-                },
-                function (data, status) {
-                    rsf_data = data;
-                    rsf_status = status;
-                });
-            jQuery.ajaxSetup({async: true});
             location.reload();
-            */
         }
     </script>
 
     <script>
-        function onselect_Inforecord(mode, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency, result_sales_price, result_sales_currency){
-            if(mode == 1) {
-                $("#ar-lifnr-text").val(result_lifnr);
-                $("#ar-lifnr-name-text").val(result_lifnr_name);
-                $("#ar-idnlf-text").val(result_idnlf);
-                $("#ar-mtext-text").val(result_mtext);
-                $("#ar-matnr-text").val(result_matnr);
-                $("#ar-purch-price-text").val(result_purch_price);
-                $("#ar-purch-curr-text").val(result_purch_currency);
-                $("#ar-sales-price-text").val(result_sales_price);
-                $("#ar-sales-curr-text").val(result_sales_currency);
+        function onselect_Inforecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency, result_sales_price, result_sales_currency){
+            if (caller == 1) {
+                $("#ar-immed-lifnr").val(result_lifnr);
+                $("#ar-immed-idnlf").val(result_idnlf);
+                $("#ar-immed-mtext").val(result_mtext);
+                $("#ar-immed-matnr").val(result_matnr);
+                $("#ar-immed-purch-price").val(result_purch_price);
+                $("#ar-immed-purch-curr").val(result_purch_currency);
+            }
+            if (caller == 2) {
+                $("#aep-lifnr").val(result_lifnr);
+                $("#aep-idnlf").val(result_idnlf);
+                $("#aep-mtext").val(result_mtext);
+                $("#aep-matnr").val(result_matnr);
+                $("#aep-purch-price").val(result_purch_price);
+                $("#aep-purch-curr").val(result_purch_currency);
             }
         }
     </script>
@@ -1403,7 +1388,7 @@
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
-            _unused_acceptItem(porder,item,'purch-item');
+            _unused_acceptItem(porder, item, 'purch-item');
             location.reload(true);
         }
 
@@ -1580,12 +1565,31 @@
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
 
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataIR, _statusIR;
+            $.get("webservice/readpitem",
+                {
+                    order: porder,
+                    item: item
+                },
+                function (data, status) {
+                    _dataIR = data;
+                    _statusIR = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_statusIR != "success") return;
+
             if (rowtype == 'I') {
                 if (mode == 1) {
-                    accept_reject_complex(2, thisbtn, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate");
+                    accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
                 }
                 if (mode == 2) {
-                    accept_reject_complex(1, thisbtn, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie");
+                    accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
             }
         }
@@ -1865,6 +1869,28 @@
             _reject_type = type;
             _reject_this = this0;
             rejectDialog.dialog("open");
+        }
+
+        function readLifnrName(lifnr)
+        {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _dataLN, _statusLN;
+            $.get("webservice/readlifnrname",
+                {
+                    lifnr: lifnr
+                },
+                function (data, status) {
+                    _dataLN = data;
+                    _statusLN = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_statusLN != "success") return;
+            return _dataLN;
         }
     </script>
 

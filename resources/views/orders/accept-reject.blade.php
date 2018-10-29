@@ -1,77 +1,100 @@
 <div id="accept-reject-dialog" title="Accept/reject">
-    <form>
-        <br>
-        <div class="form-group container" align="left">
-            <div class="row" style="width: 95%; text-align: left;">
-                <p id="initial-text" type="text" name="initial-text" width="100%" value=""></p>
-            </div>
-            <div class="row">
-                <label for="accept-reject-category"
-                       class="col-md-2 col-form-label text-md-left">{{__("Action")}}</label>&nbsp;&nbsp;
-                <select id="accept-reject-category" name="accept-reject-category" class="form-control col-md-9"
-                        onchange="acceptRejectCategoryChange(this);return false;">
-                    <option value="1" selected>Accept as-is</option>
-                    <option value="2">Reject</option>
-                    <option value="3">New proposal</option>
-                </select>
-            </div>
-            <br>
-            <br>
-            <div class="row">
-                <label class="col-md-2 col-form-label text-md-left">{{__("New proposal")}}</label>&nbsp;
-                <button type="button" onclick="add_edit_proposal(1,this);return false;">{{__('New')}}</button>
-            </div>
+    <p id="initial-text" type="text" style="margin-top: 0.5rem; font-weight: bold; color: darkred;" name="initial-text" width="95%" value=""></p>
+    <input type="checkbox" id="require_sr_approval" onchange="ar_switchProposalMode(this); return false;">
+    <label for="require_sr_approval">{{__("Require SR approval")}}</label>
+    <br><br>
+    <div id="ar-proposals-immed" width="95%" style="margin-right: 0.5rem;">
+        <div class="row">
+            <label for="ar-immed-lifnr" class="col-md-2 col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-lifnr" type="text" name="ar-immediate-lifnr" class="form-control col-md-2" value="">
         </div>
-        <br>
-        <input type="checkbox" id="require_ctv_approval"> Require CTV approval
-        <br>
-        <i id="new_acc_rej_msg" style="color: red"></i>
-    </form>
-
-    <br>
-
-    <div id="proposal_list" style="overflow-y: scroll; display: block; max-height: 300px">
-        <table class="table-striped" id="proposals_table_l">
-            <colgroup>
-                <col width="10%">
-                <col width="15%">
-                <col width="10%">
-                <col width="20%">
-                <col width="5%">
-                <col width="15%">
-                <col width="5%">
-                <col width="10%">
-                <col width="5%">
-                <col width="2.5%">
-                <col width="2.5%">
-            </colgroup>
-            <tr>
-                <th>{{__('Vendor')}}</th>
-                <th>{{__('Vendor Name')}}</th>
-                <th>{{__('Material')}}</th>
-                <th>{{__('Material description')}}</th>
-                <th>{{__('Material group')}}</th>
-                <th>{{__('Purchase price')}}</th>
-                <th>{{__('Purchase currency')}}</th>
-                <th>{{__('Sales price')}}</th>
-                <th>{{__('Sales currency')}}</th>
-                <th></th>
-                <th></th>
-            </tr>
-        </table>
+        <div class="row" style="padding-top: 3px;">
+            <label for="ar-immed-idnlf" class="col-md-2 col-form-label text-md-left">{{__('Vendor mat.')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-idnlf" type="text" name="ar-immed-idnlf" class="form-control col-md-2" value="">
+        </div>
+        <div class="row" style="padding-top: 3px;">
+            <label for="ar-immed-mtext" class="col-md-2 col-form-label text-md-left">{{__('Material description')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-mtext" type="text" name="ar-immed-mtext" class="form-control col-md-2" value="">
+        </div>
+        <div class="row" style="padding-top: 3px;">
+            <label for="ar-immed-matnr" class="col-md-2 col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-matnr" type="text" name="ar-immed-matnr" class="form-control col-md-2" value="">
+        </div>
+        <div class="row" style="padding-top: 3px;">
+            <label for="ar-immed-quantity" class="col-md-2 col-form-label text-md-left">{{__('Quantity')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-quantity" type="text" name="ar-quantity" class="form-control col-md-2" value="">&nbsp;
+            <input id="ar-immed-quantity-unit" type="text" name="ar-immed-quantity-unit" class="form-control col-md-1"
+                   value="">
+        </div>
+        <div class="row" style="padding-top: 3px;">
+            <label for="ar-immed-purch-price" class="col-md-2 col-form-label text-md-left">{{__('Purchase price')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-purch-price" type="text" name="ar-immed-purch-price" class="form-control col-md-2" value="">&nbsp;
+            <input id="ar-immed-purch-curr" type="text" name="ar-immed-purch-curr" class="form-control col-md-1" value="">
+        </div>
+        <div class="row" style="padding-top: 3px;">
+            <label for="ar-immed-sales-price" class="col-md-2 col-form-label text-md-left">{{__('Sales price')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-sales-price" type="text" name="ar-immed-sales-price" class="form-control col-md-2" value="">&nbsp;
+            <input id="ar-immed-sales-curr" type="text" name="ar-immed-sales-curr" class="form-control col-md-1" value="">
+        </div>
+        <div class="row" style="padding-top: 0.5rem;">
+            <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                    onclick="get_infnr(1);return false;">{{__('Inforecord')}}</button>
+            <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                    onclick="get_zpret(1);return false;">{{__('ZPRET')}}</button>
+        </div>
     </div>
+    <div id="ar-proposals-approval" width="95%" style="margin-right: 0.5rem;">
+        <div id="ar-proposals-table-1" style="overflow-y: scroll; min-height: 17rem;" width="95%">
+            <table id="proposals-table-1" class="table-striped" width="100%">
+                <colgroup>
+                    <col width="8%">
+                    <col width="17%">
+                    <col width="12%">
+                    <col width="24%">
+                    <col width="7%">
+                    <col width="8%">
+                    <col width="3%">
+                    <col width="9%">
+                    <col width="3%">
+                    <col width="9%">
+                    <col width="3%">
+                </colgroup>
+                <tr>
+                    <th>{{__('Vendor')}}</th>
+                    <th>{{__('Vendor Name')}}</th>
+                    <th>{{__('Vendor mat.')}}</th>
+                    <th>{{__('Material description')}}</th>
+                    <th>{{__('Material')}}</th>
+                    <th colspan="2" style="text-align: right;">{{__('Quantity')}}</th>
+                    <th colspan="2" style="text-align: right;">{{__('Purchase price')}}</th>
+                    <th colspan="2" style="text-align: right;">{{__('Sales price')}}</th>
+                </tr>
+            </table>
+        </div>
+        <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                onclick="add_edit_proposal(1, 1);return false;">{{__('New proposal')}}</button>
+        <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                onclick="add_edit_proposal(1, 2);return false;">{{__('Edit proposal')}}</button>
+        <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                onclick="delete_proposal(1);return false;">{{__('Delete proposal')}}</button>
+    </div>
+    <i id="new_acc_rej_msg" style="color: red"></i>
+    <br>
 </div>
 
 <script>
-    var arDialog, arForm, _ar_type, _ar_this, ar_last_value = 1;
 
-    function acceptRejectCategoryChange(select) {
-        return;
-        ar_last_value = select.value;
-        if (ar_last_value == 3) {
-            $("#extra-fields").attr("style", "display: block");
+    var arDialog, arForm, _ar_type, _ar_this, _ar_itemdata;
+    var proposal_last_selected_line;
+    var proposal_last_color;
+
+    function ar_switchProposalMode(_this) {
+        if ($(_this).is(":checked")) {
+            $("#ar-proposals-immed").attr("style", "display: none; margin-right: 0.5rem;")
+            $("#ar-proposals-approval").attr("style", "display: block; margin-right: 0.5rem;")
         } else {
-            $("#extra-fields").attr("style", "display: none");
+            $("#ar-proposals-immed").attr("style", "display: block; margin-right: 0.5rem;")
+            $("#ar-proposals-approval").attr("style", "display: none; margin-right: 0.5rem;")
         }
     }
 
@@ -79,86 +102,70 @@
         arDialog = $("#accept-reject-dialog").dialog({
             autoOpen: false,
             height: 480,
-            width: 680,
+            width: 920,
             modal: true,
             buttons: {
-                Save: function () {
-                    if (ar_last_value == 3)
-                        if ($('#proposals_table_l').rows.length < 2) //no entries, only first row (thead row)
-                            return;
-                    if (_ar_type == 2) {
-                        arDialog.dialog("close");
-                        acceptPItem(_ar_this);
-                        if (ar_last_value == 3)
-                        /* createPurchReq(_ar_this, $("#ar-lifnr-text").val()); */
-                            return;
+                '{{__("Send proposal")}}': function () {
+                    var result = new Object();
+                    result.type = _ar_type;
+                    result.itemdata = _ar_itemdata;
+                    if ($("#require_sr_approval").is(":checked")) {
+                        let tablerows = $('#proposals-table-1 tr');
+                        let n = tablerows.length;
+                        if (n < 2) return;
+                        result.items = [];
+                        for (i = 1; i < n; i++) {
+                            row = tablerows[i];
+                            let item = new Object();
+                            item.lifnr = row.cells[0].textContent;
+                            item.idnlf = row.cells[2].textContent;
+                            item.mtext = row.cells[3].textContent;
+                            item.matnr = row.cells[4].textContent;
+                            item.quantity = row.cells[5].textContent.split(" ")[0];
+                            item.quantity_unit = row.cells[5].textContent.split(" ")[1];
+                            item.purch_price = row.cells[6].textContent.split(" ")[0] ;
+                            item.purch_curr = row.cells[6].textContent.split(" ")[1];
+                            item.sales_price = row.cells[7].textContent.split(" ")[0];
+                            item.sales_curr = row.cells[7].textContent.split(" ")[1];
+                            result.items.push(item);
+                        }
+                    } else {
+                        result.lifnr = $("#ar-immed-lifnr").val().trim();
+                        result.idnlf = $("#ar-immed-idnlf").val().trim();
+                        result.mtext = $("#ar-immed-mtext").val().trim();
+                        result.matnr = $("#ar-immed-matnr").val().trim();
+                        result.quantity = $("#ar-immed-quantity").val().trim();
+                        result.quantity_unit = $("#ar-immed-quantity-unit").val().trim();
+                        result.purch_price = $("#ar-immed-purch-price").val().trim();
+                        result.purch_curr = $("#ar-immed-purch-curr").val().trim();
+                        result.sales_price = $("#ar-immed-sales-price").val().trim();
+                        result.sales_curr = $("#ar-immed-sales-curr").val().trim();
                     }
-                    if (_ar_type == 1) {
-                        arDialog.dialog("close");
-                        rejectPItem(_ar_this, 3, "");
-                        if (ar_last_value == 3)
-                        /* createPurchReq(_ar_this); */
-                            return;
-                    }
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+                    jQuery.ajaxSetup({async: false});
+                    var _dataPP, _statusPP;
+                    $.get("webservice/processproposal",
+                        {
+                            proposal: JSON.stringify(result)
+                        },
+                        function (data, status) {
+                            _dataPP = data;
+                            _statusPP = status;
+                        }, "json");
+                    jQuery.ajaxSetup({async: true});
                 },
                 Cancel: function () {
                     arDialog.dialog("close");
                 }
             },
             close: function () {
-                arForm[0].reset();
+                // arForm[0].reset();
             },
             open: function () {
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-                $("#accept-reject-dialog").find("tr:gt(0)").remove();
-                $('body').addClass('ajaxloading');
-                jQuery.ajaxSetup({async: false});
-                var _data, _status;
-
-                let ar_d_ebeln = _ar_this.parentElement.parentElement.id.split('_')[1].substring(1);
-                let ar_d_ebelp = _ar_this.parentElement.parentElement.id.split('_')[2];
-                let ar_d_cdate = "2018-10-10 10:10:10";
-
-                $.post("webservice/readAllProposals",
-                    {
-                        ebeln: ar_d_ebeln,
-                        ebelp: ar_d_ebelp,
-                        cdate: ar_d_cdate
-                    },
-                    function (data, status) {
-                        _data = data;
-                        _status = status;
-                    }, "json");
-                jQuery.ajaxSetup({async: true});
-                if (_status != "success") {
-                    $('body').removeClass('ajaxloading');
-                    arDialog.dialog("close");
-                    return;
-                }
-                if (_data.length > 0) {
-                    let table = $("#proposals_table_l");//TODO???????????????????????
-                    for (let i = 0; i < _data.length; i++) {
-                        var newRow = $("<tr id='" + _data[i].ebeln + "-" + _data[i].ebelp + "-" + _data[i].cdate + "' style='height: 1.5rem;'>");
-                        var cols = "<td>" + _data[i].lifnr + "</td>" +
-                            "<td>" + _data[i].lifnr_name + "</td>" +
-                            "<td>" + _data[i].idnlf + "</td>" +
-                            "<td>" + _data[i].mtext + "</td>" +
-                            "<td>" + _data[i].matnr + "</td>" +
-                            "<td>" + _data[i].purch_price + "</td>" +
-                            "<td>" + _data[i].purch_curr + "</td>" +
-                            "<td>" + _data[i].sales_price + "</td>" +
-                            "<td>" + _data[i].sales_curr + "</td>" +
-                            "<td><button type='button' onclick='add_edit_proposal(0,this);return false;'>Edit</button></td>" +
-                            "<td><button type='button' onclick='deleteProposal(this);return false;'>Delete</button></td>";
-                        newRow.append(cols); // .hide();
-                        table.append(newRow);
-                    }
-                }
-                $('body').removeClass('ajaxloading');
             },
             position: {
                 my: "center",
@@ -171,22 +178,41 @@
         });
     });
 
-    function accept_reject_complex(type, this0, title, initial_text) {
+    function accept_reject_dialog(type, this0, itemdata, title, initial_text) {
         $("#new_rej_msg").text("");
         $("#initial-text").text(initial_text);
-        $("#extra-fields").attr("style", "display: none");
-        if (type == 1) {
-            $('option[value="1"]', $('#accept-reject-category')).remove();
-            $('#accept-reject-category').val(2);
-        } else {
-            if ($('#accept-reject-category option').size < 3) {
-                $('#accept-reject-category').eq(0).before($('', {value: 1, text: 'Accept as-is'}));
-                $('#accept-reject-category').val(1);
-            }
-        }
+        $("#require_sr_approval").prop("checked", false);
+        $("#proposals-table-1").find("tr:gt(0)").remove();
+        $("#ar-proposals-immed").attr("style", "display: block; margin-right: 0.5rem;");
+        $("#ar-proposals-approval").attr("style", "display: none; margin-right: 0.5rem;");
         $("#accept-reject-dialog").dialog('option', 'title', title);
         _ar_type = type;
         _ar_this = this0;
+        _ar_itemdata = itemdata;
+        if (type == 1) {
+            $("#ar-immed-lifnr").val(conv_exit_alpha_output(itemdata.lifnr));
+            $("#ar-immed-idnlf").val(itemdata.idnlf);
+            $("#ar-immed-mtext").val(itemdata.mtext);
+            $("#ar-immed-matnr").val(itemdata.matnr);
+            $("#ar-immed-quantity").val(itemdata.qty);
+            $("#ar-immed-quantity-unit").val(itemdata.qty_uom);
+            $("#ar-immed-purch-price").val(itemdata.purch_price);
+            $("#ar-immed-purch-curr").val(itemdata.purch_curr);
+            $("#ar-immed-sales-price").val(itemdata.sales_price);
+            $("#ar-immed-sales-curr").val(itemdata.sales_curr);
+
+            var newRow = $("<tr style='height: 1.2rem;' onclick='proposal_selected(this);return false;'>");
+            var cols = "<td>" + conv_exit_alpha_output(itemdata.lifnr) + "</td>" +
+                "<td>" + itemdata.lifnr_name + "</td>" +
+                "<td>" + itemdata.idnlf + "</td>" +
+                "<td>" + itemdata.mtext + "</td>" +
+                "<td>" + itemdata.matnr + "</td>" +
+                "<td colspan='2' style='text-align: right;'>" + itemdata.qty + " " + itemdata.qty_uom + "</td>" +
+                "<td colspan='2' style='text-align: right;'>" + itemdata.purch_price + " " + itemdata.purch_curr + "</td>" +
+                "<td colspan='2' style='text-align: right;'>" + itemdata.sales_price + " " + itemdata.sales_curr + "</td>";
+            newRow.append(cols);
+            $("#proposals-table-1").append(newRow);
+        }
         arDialog.dialog("open");
     }
 </script>
@@ -245,114 +271,92 @@
 
 <div id="add-edit-proposal" title="Add/edit proposal">
     <div class="row">
-        <label for="ar-lifnr-text" class="col-md-3 col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
-        <input id="ar-lifnr-text" type="text" name="ar-lifnr-text" class="form-control col-md-5" value="">
+        <label for="aep-lifnr" class="col-md-3 col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
+        <input id="aep-lifnr" type="text" name="aep-lifnr" class="form-control col-md-3" value="">
     </div>
-    <br>
-    <div class="row">
-        <label for="ar-lifnr-name-text" class="col-md-3 col-form-label text-md-left">{{__('Vendor Name')}}</label>&nbsp;&nbsp;
-        <input id="ar-lifnr-name-text" type="text" name="ar-lifnr-name-text" class="form-control col-md-5" value="">
+    <div class="row" style="padding-top: 3px;">
+        <label for="aep-idnlf" class="col-md-3 col-form-label text-md-left">{{__('Vendor mat.')}}</label>&nbsp;&nbsp;
+        <input id="aep-idnlf" type="text" name="aep-idnlf" class="form-control col-md-3" value="">
     </div>
-    <br>
-    <div class="row">
-        <label for="ar-idnlf-text" class="col-md-3 col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
-        <input id="ar-idnlf-text" type="text" name="ar-idnlf-text" class="form-control col-md-8" value="">
+    <div class="row" style="padding-top: 3px;">
+        <label for="aep-mtext" class="col-md-3 col-form-label text-md-left">{{__('Material description')}}</label>&nbsp;&nbsp;
+        <input id="aep-mtext" type="text" name="aep-mtext" class="form-control col-md-6" value="">
     </div>
-    <br>
-    <div class="row">
-        <label for="ar-mtext-text" class="col-md-3 col-form-label text-md-left">{{__('Material description')}}</label>&nbsp;&nbsp;
-        <input id="ar-mtext-text" type="text" name="ar-mtext-text" class="form-control col-md-8" value="">
+    <div class="row" style="padding-top: 3px;">
+        <label for="aep-matnr" class="col-md-3 col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
+        <input id="aep-matnr" type="text" name="aep-matnr" class="form-control col-md-3" value="">
     </div>
-    <br>
-    <div class="row">
-        <label for="ar-matnr-text" class="col-md-3 col-form-label text-md-left">{{__('Material group')}}</label>&nbsp;&nbsp;
-        <input id="ar-matnr-text" type="text" name="ar-matnr-text" class="form-control col-md-8" value="">
-    </div>
-    <br>
-    <div class="row">
-        <label for="ar-purch-price-text" class="col-md-3 col-form-label text-md-left">{{__('Purchase price')}}</label>&nbsp;&nbsp;
-        <input id="ar-purch-price-text" type="text" name="ar-purch-price-text" class="form-control col-md-4" value="">
-    </div>
-    <br>
-    <div class="row">
-        <label for="ar-purch-currency-text"
-               class="col-md-3 col-form-label text-md-left">{{__('Purchase currency')}}</label>&nbsp;&nbsp;
-        <input id="ar-purch-currency-text" type="text" name="ar-purch-currency-text" class="form-control col-md-2"
+    <div class="row" style="padding-top: 3px;">
+        <label for="aep-quantity" class="col-md-3 col-form-label text-md-left">{{__('Quantity')}}</label>&nbsp;&nbsp;
+        <input id="aep-quantity" type="text" name="aep-quantity" class="form-control col-md-4" value="">&nbsp;
+        <input id="aep-quantity-unit" type="text" name="aep-quantity-unit" class="form-control col-md-1"
                value="">
     </div>
-    <br>
-    <div class="row">
-        <label for="ar-sales-price-text" class="col-md-3 col-form-label text-md-left">{{__('Sales price')}}</label>&nbsp;&nbsp;
-        <input id="ar-sales-price-text" type="text" name="ar-sales-price-text" class="form-control col-md-4" value="">
+    <div class="row" style="padding-top: 3px;">
+        <label for="aep-purch-price" class="col-md-3 col-form-label text-md-left">{{__('Purchase price')}}</label>&nbsp;&nbsp;
+        <input id="aep-purch-price" type="text" name="aep-purch-price" class="form-control col-md-4" value="">&nbsp;
+        <input id="aep-purch-curr" type="text" name="aep-purch-curr" class="form-control col-md-1" value="">
     </div>
-    <br>
-    <div class="row">
-        <label for="ar-sales-currency-text"
-               class="col-md-3 col-form-label text-md-left">{{__('Sales currency')}}</label>&nbsp;&nbsp;
-        <input id="ar-sales-currency-text" type="text" name="ar-currency-text" class="form-sales-control col-md-2"
-               value="">
+    <div class="row" style="padding-top: 3px;">
+        <label for="aep-sales-price" class="col-md-3 col-form-label text-md-left">{{__('Sales price')}}</label>&nbsp;&nbsp;
+        <input id="aep-sales-price" type="text" name="aep-sales-price" class="form-control col-md-4" value="">&nbsp;
+        <input id="aep-sales-curr" type="text" name="aep-sales-curr" class="form-control col-md-1" value="">
+    </div>
+    <div class="row" style="padding-top: 0.5rem;">
+        <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                onclick="get_infnr(2);return false;">{{__('Inforecord')}}</button>
+        <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                onclick="get_zpret(2);return false;">{{__('ZPRET')}}</button>
     </div>
 </div>
 
 <script>
-    var add_edit_Dialog, add_edit_Form, add_edit_this;
+    var add_edit_Dialog, add_edit_Form, add_edit_current_row, add_edit_caller;
 
     $(function () {
         add_edit_Dialog = $("#add-edit-proposal").dialog({
             autoOpen: false,
-            height: 520,
-            width: 750,
+            height: 400,
+            width: 640,
             modal: true,
             buttons: {
                 Save: function () {
-                    let ebeln = _ar_this.parentElement.parentElement.id.split('_')[1].substring(1);
-                    let ebelp = _ar_this.parentElement.parentElement.id.split('_')[2];
-                    let cdate = add_edit_this == null ? "2018-10-10 10:10:10" : add_edit_this.parentElement.parentElement.id.split('-')[2];//TODO-de unde il iau
-                    let pos = add_edit_this == null ? "-1" : add_edit_this.parentElement.parentElement.id.split('-')[3];
-
-                    let lifnr = $("#ar-lifnr-text").val();
-                    let lifnr_name = $("#ar-lifnr-name-text").val();
-                    let idnlf = $("#ar-idnlf-text").val();
-                    let mtext = $("#ar-mtext-text").val();
-                    let matnr = $("#ar-matnr-text").val();
-                    let purch_price = $("#ar-purch-price-text").val();
-                    let purch_curr = $("#ar-purch-currency-text").val();
-                    let sales_price = $("#ar-sales-price-text").val();
-                    let sales_curr = $("#ar-sales-currency-text").val();
-
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    let lifnr = $("#aep-lifnr").val();
+                    let idnlf = $("#aep-idnlf").val();
+                    let mtext = $("#aep-mtext").val();
+                    let matnr = $("#aep-matnr").val();
+                    let quantity = $("#aep-quantity").val();
+                    let quantity_uom = $("#aep-quantity-unit").val();
+                    let purch_price = $("#aep-purch-price").val();
+                    let purch_curr = $("#aep-purch-curr").val();
+                    let sales_price = $("#aep-sales-price").val();
+                    let sales_curr = $("#aep-sales-curr").val();
+                    if (add_edit_caller == 1) {
+                        if (add_edit_current_row != null) {
+                            add_edit_current_row.cells[0].innerHTML = lifnr;
+                            add_edit_current_row.cells[1].innerHTML = readLifnrName(lifnr);
+                            add_edit_current_row.cells[2].innerHTML = idnlf;
+                            add_edit_current_row.cells[3].innerHTML = mtext;
+                            add_edit_current_row.cells[4].innerHTML = matnr;
+                            add_edit_current_row.cells[5].innerHTML = quantity + " " + quantity_uom;
+                            add_edit_current_row.cells[6].innerHTML = purch_price + " " + purch_curr;
+                            add_edit_current_row.cells[7].innerHTML = sales_price + " " + sales_curr;
+                            add_edit_Dialog.dialog("close");
+                        } else {
+                            var newRow = $("<tr style='height: 1.2rem;' onclick='proposal_selected(this);return false;'>");
+                            var cols = "<td>" + lifnr + "</td>" +
+                                "<td>" + readLifnrName(lifnr) + "</td>" +
+                                "<td>" + idnlf + "</td>" +
+                                "<td>" + mtext + "</td>" +
+                                "<td>" + matnr + "</td>" +
+                                "<td colspan='2' style='text-align: right;'>" + quantity + " " + quantity_uom + "</td>" +
+                                "<td colspan='2' style='text-align: right;'>" + purch_price + " " + purch_curr + "</td>" +
+                                "<td colspan='2' style='text-align: right;'>" + sales_price + " " + sales_curr + "</td>";
+                            newRow.append(cols);
+                            $("#proposals-table-1").append(newRow);
+                            add_edit_Dialog.dialog("close");
                         }
-                    });
-                    $('body').addClass('ajaxloading');
-                    jQuery.ajaxSetup({async: false});
-                    var _data, _status;
-                    $.post("webservice/modifyProposals",
-                        {
-                            ebeln: ebeln,
-                            ebelp: ebelp,
-                            cdate: cdate,
-                            pos: pos,
-                            lifnr: lifnr,
-                            lifnr_name: lifnr_name,
-                            idnlf: idnlf,
-                            mtext: mtext,
-                            matnr: matnr,
-                            purch_price: purch_price,
-                            purch_curr: purch_curr,
-                            sales_price: sales_price,
-                            sales_curr: sales_curr
-                        },
-                        function (data, status) {
-                            _data = data;
-                            _status = status;
-                        });
-                    jQuery.ajaxSetup({async: true});
-                    $('body').removeClass('ajaxloading');
-                    if (_status == "success") {
-                        add_edit_Dialog.dialog("close");
-                    } else alert('Error processing request!');
+                    }
                 },
                 Cancel: function () {
                     add_edit_Dialog.dialog("close");
@@ -369,51 +373,58 @@
         });
     });
 
-    function add_edit_proposal(mode, this0) {
+    function add_edit_proposal(caller, mode) {
+
+        add_edit_caller = caller;
         let title = "";
+        let lifnr = "";
+        let idnlf = "";
+        let mtext = "";
+        let matnr = "";
+        let quantity = "";
+        let quantity_unit = "";
+        let purch_price = "";
+        let purch_curr = "";
+        let sales_price = "";
+        let sales_curr = "";
 
-        if (mode == 1) {
-            title = "Add new proposal";
-            $("#ar-lifnr-text").val("");
-            $("#ar-lifnr-name-text").val("");
-            $("#ar-idnlf-text").val("");
-            $("#ar-mtext-text").val("");
-            $("#ar-matnr-text").val("");
-            $("#ar-purch-price-text").val("");
-            $("#ar-purch-currency-text").val("");
-            $("#ar-sales-price-text").val("");
-            $("#ar-sales-currency-text").val("");
-        } else {
-            title = "Edit existing proposal";
-
-            let current_row = this0.parentElement.parentElement;
-
-            let lifnr = current_row.cells[0].innerHTML;
-            let lifnr_name = current_row.cells[1].innerHTML;
-            let idnlf = current_row.cells[2].innerHTML;
-            let mtext = current_row.cells[3].innerHTML;
-            let matnr = current_row.cells[4].innerHTML;
-            let purch_price = current_row.cells[5].innerHTML;
-            let purch_curr = current_row.cells[6].innerHTML;
-            let sales_price = current_row.cells[7].innerHTML;
-            let sales_curr = current_row.cells[8].innerHTML;
-
-            $("#ar-lifnr-text").val(lifnr);
-            $("#ar-lifnr-name-text").val(lifnr_name);
-            $("#ar-idnlf-text").val(idnlf);
-            $("#ar-mtext-text").val(mtext);
-            $("#ar-matnr-text").val(matnr);
-            $("#ar-purch-price-text").val(purch_price);
-            $("#ar-purch-currency-text").val(purch_curr);
-            $("#ar-sales-price-text").val(sales_price);
-            $("#ar-sales-currency-text").val(sales_curr);
+        if (caller == 1) {
+            if (mode == 1) {
+                add_edit_current_row = null;
+                title = "Add new proposal";
+                idnlf = $("#ar-immed-idnlf").val();
+                mtext = $("#ar-immed-mtext").val();
+                quantity  = $("#ar-immed-quantity").val();
+                quantity_unit = $("#ar-immed-quantity-unit").val();
+            } else {
+                title = "Edit existing proposal";
+                let current_row = proposal_last_selected_line;
+                add_edit_current_row = proposal_last_selected_line;
+                lifnr = current_row.cells[0].innerHTML;
+                idnlf = current_row.cells[2].innerHTML;
+                mtext = current_row.cells[3].innerHTML;
+                matnr = current_row.cells[4].innerHTML;
+                quantity = current_row.cells[5].innerHTML.split(" ")[0];
+                quantity_unit = current_row.cells[5].innerHTML.split(" ")[1];
+                purch_price = current_row.cells[6].innerHTML.split(" ")[0];
+                purch_curr = current_row.cells[6].innerHTML.split(" ")[1];
+                sales_price = current_row.cells[7].innerHTML.split(" ")[0];
+                sales_curr = current_row.cells[7].innerHTML.split(" ")[1];
+            }
         }
 
+        $("#aep-lifnr").val(lifnr);
+        $("#aep-idnlf").val(idnlf);
+        $("#aep-mtext").val(mtext);
+        $("#aep-matnr").val(matnr);
+        $("#aep-quantity").val(quantity);
+        $("#aep-quantity-unit").val(quantity_unit);
+        $("#aep-purch-price").val(purch_price);
+        $("#aep-purch-curr").val(purch_curr);
+        $("#aep-sales-price").val(sales_price);
+        $("#aep-sales-curr").val(sales_curr);
+
         $("#add-edit-proposal").dialog('option', 'title', title);
-        if (mode != 1)
-            add_edit_this = this0;
-        else
-            add_edit_this = null;
         $('#add-edit-proposal').css('overflow', 'hidden');
         add_edit_Dialog.dialog("open");
     }
@@ -424,37 +435,35 @@
     <form>
         <br>
         <div class="form-group container" align="left">
-            <div id="extra-fields" style="display: none;height: 100%">
-                <div style="overflow-y: scroll">
-                    <table id="proposals_table">
-                        <colgroup>
-                            <col width="10%">
-                            <col width="15%">
-                            <col width="10%">
-                            <col width="20%">
-                            <col width="5%">
-                            <col width="15%">
-                            <col width="5%">
-                            <col width="10%">
-                            <col width="5%">
-                            <col width="2.5%">
-                            <col width="2.5%">
-                        </colgroup>
-                        <tr>
-                            <th>{{__('Vendor')}}</th>
-                            <th>{{__('Vendor Name')}}</th>
-                            <th>{{__('Material')}}</th>
-                            <th>{{__('Material description')}}</th>
-                            <th>{{__('Material group')}}</th>
-                            <th>{{__('Purchase price')}}</th>
-                            <th>{{__('Purchase currency')}}</th>
-                            <th>{{__('Sales price')}}</th>
-                            <th>{{__('Sales currency')}}</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </table>
-                </div>
+            <div style="overflow-y: scroll">
+                <table id="proposals_table">
+                    <colgroup>
+                        <col width="10%">
+                        <col width="15%">
+                        <col width="10%">
+                        <col width="20%">
+                        <col width="5%">
+                        <col width="15%">
+                        <col width="5%">
+                        <col width="10%">
+                        <col width="5%">
+                        <col width="2.5%">
+                        <col width="2.5%">
+                    </colgroup>
+                    <tr>
+                        <th>{{__('Vendor')}}</th>
+                        <th>{{__('Vendor Name')}}</th>
+                        <th>{{__('Material')}}</th>
+                        <th>{{__('Material description')}}</th>
+                        <th>{{__('Material group')}}</th>
+                        <th>{{__('Purchase price')}}</th>
+                        <th>{{__('Purchase currency')}}</th>
+                        <th>{{__('Sales price')}}</th>
+                        <th>{{__('Sales currency')}}</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </table>
             </div>
         </div>
     </form>
@@ -464,7 +473,7 @@
 
     var select_proposal_dialog, select_proposal_form;
     $(function () {
-        select_proposal_dialog = $("#inforecord-dialog").dialog({
+        select_proposal_dialog = $("#select-proposal-dialog").dialog({
             autoOpen: false,
             height: 600,
             width: 960,
@@ -516,7 +525,7 @@
         $('body').addClass('ajaxloading');
         jQuery.ajaxSetup({async: false});
         var _data, _status;
-        $.post("webservice/readAllProposals",
+        $.post("webservice/readproposals",
             {
                 ebeln: ebeln,
                 ebelp: ebelp,
@@ -552,9 +561,6 @@
         select_proposal_dialog.dialog("open");
     }
 
-    var proposal_last_selected_line;
-    var proposal_last_color;
-
     function proposal_selected(_this) {
         if (proposal_last_selected_line != null)
             $(proposal_last_selected_line).css("background-color", proposal_last_color);
@@ -562,6 +568,34 @@
         proposal_last_color = $(_this).css("background-color");
         proposal_last_selected_line = _this;
 
-        $(_this).css("background-color", "#55bb55");
+        $(_this).css("background-color", "#77FF77");
     }
+
+    function get_infnr(caller)
+    {
+        let lifnr = null;
+        let idnlf = null;
+        if (caller == 1) {
+            lifnr = $("#ar-immed-lifnr").val();
+            idnlf = $("#ar-immed-idnlf").val();
+        }
+        if (caller == 2) {
+            lifnr = $("#aep-lifnr").val();
+            idnlf = $("#aep-idnlf").val();
+        }
+        read_inforecords(caller, lifnr, idnlf);
+    }
+
+    function get_zpret(mode)
+    {
+
+    }
+
+    function delete_proposal(mode)
+    {
+        if (proposal_last_selected_line != null)
+            $(proposal_last_selected_line).remove();
+    }
+
+
 </script>

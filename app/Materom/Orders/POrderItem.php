@@ -43,8 +43,6 @@ class POrderItem
     public $status;      // A-accepted, X-rejected,
                          // T-tentatively accepted,
                          // R-tentatively rejected
-                         // N-new
-                         // C-closed
 
     // sales order position related information
     public $sales_price; // VBAP-NETPR
@@ -174,9 +172,11 @@ class POrderItem
         $this->ctime = $porder->ctime;
 
         $this->info = 0;
-        if ($this->status == 'N') $this->info = 1;
-        if ($this->wtime < Carbon::now()) $this->info = 2;
-        if ($this->ctime < Carbon::now()) $this->info = 3;
+        if (empty($this->status)) $this->info = 1;
+        if (($this->status != 'A') && ($this->status != 'X')) {
+            if ($this->wtime < Carbon::now()) $this->info = 2;
+            if ($this->ctime < Carbon::now()) $this->info = 3;
+        }
 
         $this->owner = 0;
         if (Auth::user()->role == 'Furnizor') {
@@ -239,7 +239,7 @@ class POrderItem
             if ($itemchg->ctype == "Q") $this->quantity_changed = 1;
             if ($itemchg->ctype == "P") $this->price_changed = 1;
             if ($itemchg->ctype == "D") $this->delivery_date_changed = 1;
-            if ($itemchg->ctype == "T") $this->position_splitted = 1;
+            if ($itemchg->ctype == "L") $this->position_splitted = 1;
         }
 
         $this->accept = 0;

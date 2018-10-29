@@ -150,6 +150,10 @@ class SAP
         }
     }
 
+    static public function savePOItemWithChange($data) {
+
+    }
+
     static public function savePOItem($ebeln, $ebelp) {
 
         $new_idnlf = "";
@@ -157,7 +161,7 @@ class SAP
         $new_price = "";
         $new_eindt = "";
 
-        $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->get()[0];
+        $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         if ($item->idnlf != $item->orig_idnlf) $new_idnlf = $item->idnlf;
         if ($item->qty != $item->orig_qty) $new_menge = $item->qty;
         if ($item->purch_price != $item->orig_purch_price) $new_price = $item->purch_price;
@@ -328,8 +332,8 @@ class SAP
                 $inforecord->idnlf = trim($record["IDNLF"]);
                 $inforecord->mtext = trim($record["TXZ01"]);
                 $inforecord->matnr = SAP::alpha_output($record["MATNR"]);
-                $inforecord->price = $record["NETPR"];
-                $inforecord->curr = trim($record["WAERS"]);
+                $inforecord->purch_price = $record["NETPR"];
+                $inforecord->purch_curr = trim($record["WAERS"]);
                 $inforecord->infnr = trim($record["INFNR"]);
                 $inforecords[] = $inforecord;
             }

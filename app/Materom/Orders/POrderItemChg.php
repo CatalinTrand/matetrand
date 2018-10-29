@@ -101,16 +101,4 @@ class POrderItemChg
 
     }
 
-    public function changed()
-    {
-        if ((($this->stage == 'F') ||
-             ($this->stage == 'R'))
-            &&
-            (($this->ctype == 'M') ||
-             ($this->ctype == 'Q') ||
-             ($this->ctype == 'P') ||
-             ($this->ctype == 'D') ||
-             ($this->ctype == 'S'))) return 1;
-        return 0;
-    }
 }

@@ -98,5 +98,7 @@
   "to": "la",
   "Change password": "Schimbare parola",
   "Change user data": "Modificare date utilizator",
-  "Delete user": "Stergere utilizator"
+  "Delete user": "Stergere utilizator",
+  "Send proposal": "Trimitere propunere",
+  "Require SR approval": "E necesara aprobarea CTV"
 }

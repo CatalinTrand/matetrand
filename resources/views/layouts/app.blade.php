@@ -253,7 +253,6 @@
         .cursorpointer:hover {
             cursor: pointer;
         }
-
     </style>
 </head>
 <body style="font-size: 12px">

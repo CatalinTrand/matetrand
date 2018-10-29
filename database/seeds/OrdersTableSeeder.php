@@ -15,7 +15,7 @@ class OrdersTableSeeder extends Seeder
         DB::delete("delete from pitemchg");
         DB::delete("delete from pitems");
         DB::delete("delete from porders");
-
+        return;
         DB::insert("INSERT INTO porders (ebeln, nof, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate) VALUES ('4500357474', 1, '2018-10-12 08:45:03', '2018-10-13 08:45:03', '0000020571', 'B03', '2018-10-11 08:45:03', 'REF-APR     ', 'EUR', '4.5552');");
         DB::insert("INSERT INTO porders (ebeln, nof, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate) VALUES ('4500374587', 1, '2018-10-12 06:43:27', '2018-10-13 06:43:27', '0000020315', 'A09', '2018-10-11 06:43:27', 'MA-APR      ', 'EUR', '4.5975');");
         DB::insert("INSERT INTO porders (ebeln, nof, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate) VALUES ('4500374747', 1, '2018-10-11 14:12:03', '2018-10-12 14:12:03', '0000016098', 'A11', '2018-10-10 14:12:03', 'MB-APR      ', 'RON', '1');");

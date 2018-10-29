@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Materom\Orders;
+use App\Materom\SAP\MasterData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
@@ -158,33 +159,31 @@ class WebserviceController extends Controller
         );
     }
 
-    public function modifyProposals()
+    public function readPOItem()
     {
-        Webservice::modifyProposals(
-            Input::get("ebeln"),
-            Input::get("ebelp"),
-            Input::get("cdate"),
-            Input::get("pos"),
-            Input::get("lifnr"),
-            Input::get("lifnr_name"),
-            Input::get("idnlf"),
-            Input::get("mtext"),
-            Input::get("matnr"),
-            Input::get("purch_price"),
-            Input::get("purch_curr"),
-            Input::get("sales_price"),
-            Input::get("sales_curr")
+        return Webservice::readPOItem(
+            Input::get("order"),
+            Input::get("item")
         );
-        return "";
     }
 
-    public function readAllProposals()
+    public function readLifnrName()
     {
-        return Webservice::readAllProposals(
+        return MasterData::getLifnrName(SAP::alpha_input(Input::get("lifnr")));
+    }
+
+    public function readProposals()
+    {
+        return Webservice::readProposals(
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("cdate")
         );
+    }
+
+    public function processProposal()
+    {
+        return Webservice::processProposal(json_decode(Input::get("proposal")));
     }
 
     function insertReferenceUser()

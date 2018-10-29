@@ -46,8 +46,10 @@ Route::post('webservice/itemsOfOrder','WebserviceController@itemsOfOrder');
 Route::post('webservice/refilter','WebserviceController@refilter');
 Route::post('webservice/deletefilters','WebserviceController@deletefilters');
 Route::post('webservice/reloadcache','WebserviceController@reloadcache');
-Route::post('webservice/modifyProposals','WebserviceController@modifyProposals');
-Route::post('webservice/readAllProposals','WebserviceController@readAllProposals');
+Route::post('webservice/readproposals','WebserviceController@readProposals');
+Route::get('webservice/readpitem','WebserviceController@readPOItem');
+Route::get('webservice/processproposal','WebserviceController@processProposal');
+Route::get('webservice/readlifnrname','WebserviceController@readLifnrName');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');

@@ -7,6 +7,7 @@
  */
 $table->string('ebeln', 10);
 $table->string('ebelp', 5);
+$table->string('matnr', 18)->default('');
 $table->string('vbeln', 10)->default('');
 $table->string('posnr', 6)->default('');
 $table->string('idnlf', 35)->default('');

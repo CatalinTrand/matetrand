@@ -2,6 +2,7 @@
 
 namespace App\Materom;
 
+use App\Materom\SAP\MasterData;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -139,8 +140,17 @@ class Webservice
 
         DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         DB::insert("insert into pitemchg (ebeln, ebelp, stage, ctype, reason, cuser, cuser_name) values " .
-            "('$ebeln','$ebelp','$stage','S','$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "')");
+            "('$ebeln','$ebelp','$stage','R','$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "')");
         return "";
+    }
+
+    static function readPOItem($order, $item)
+    {
+        $porder = DB::table("porders")->where("ebeln", $order)->first();
+        $pitem = DB::table("pitems")->where([["ebeln", '=', $order], ["ebelp", '=', $item]])->first();
+        $pitem->lifnr = $porder->lifnr;
+        $pitem->lifnr_name = MasterData::getLifnrName($porder->lifnr);
+        return json_encode($pitem);
     }
 
     static function sendAck($ebeln,$ebelp,$cdate){
@@ -148,31 +158,7 @@ class Webservice
         return "";
     }
 
-    public static function modifyProposals($ebeln,$ebelp,$cdate,$pos,$lifnr,$lifnr_name,$idnlf,$mtext,$matnr,$purch_price,$purch_curr,$sales_price,$sales_curr){
-        $maybe = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and pos = '$pos'");
-
-        if(count($maybe) > 0){
-            //edit existing
-            DB::update("update pitemchg_proposals set 
-                                    lifnr = '$lifnr',
-                                    idnlf = '$idnlf',
-                                    mtext = '$mtext',
-                                    matnr = '$matnr',
-                                    purch_price = '$purch_price',
-                                    purch_curr = '$purch_curr',
-                                    sales_price = '$sales_price',
-                                    sales_curr = '$sales_curr',
-                                    where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and pos = '$pos'");
-        } else {
-            //add new
-            $lastFind = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-            $pos = count($lastFind) + 1;
-            DB::insert("insert into pitemchg_proposals (  ebeln,   ebelp,   cdate,   pos,   lifnr,   idnlf,   mtext,   matnr,   purch_price,   purch_curr,  sales_price,    sales_curr) values 
-                                                             ('$ebeln','$ebelp','$cdate','$pos','$lifnr','$idnlf','$mtext','$matnr','$purch_price','$purch_curr','$sales_price','$sales_curr')");
-        }
-    }
-
-    public static function readAllProposals($ebeln, $ebelp, $cdate){
+    public static function readProposals($ebeln, $ebelp, $cdate){
         $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         foreach ($proposals as $proposal){
             $proposal->lifnr_name = "";//TODO - User::all()->find($proposal->lifnr)->first()->username;
@@ -182,12 +168,13 @@ class Webservice
 
     public static function acceptItemCHG($ebeln, $ebelp, $type)
     {
-        $item_changed = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->value('changed') == "1";
+        $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        $item_changed = $item->changed == "1";
         if (!$item_changed) {
             DB::update("update pitems set stage = 'Z', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             SAP::acknowledgePOItem($ebeln, $ebelp, " ");
         } else {
-            if (Auth::user()->role == "Furnizor") {
+            if ($item->stage == 'F') {
                 DB::update("update pitems set stage = 'R', status = 'T' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             } else {
                 DB::update("update pitems set stage = 'Z', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
@@ -195,13 +182,8 @@ class Webservice
             }
         }
 
-        $stage = (Auth::user()->role)[0];
-        if ($stage == 'F') $stage = 'R';
-        if ($stage == 'R') $stage = 'R';
-        if ($stage == 'C') $stage = 'R';
-
         DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
-                          "('$ebeln','$ebelp','A', '$stage', CURRENT_TIMESTAMP, '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                          "('$ebeln','$ebelp','A', 'R', CURRENT_TIMESTAMP, '" . Auth::user()->id . "','" . Auth::user()->username . "')");
         return "";
     }
 
@@ -345,4 +327,64 @@ class Webservice
         return Data::processPOdata($ebeln, $data);
     }
 
+    static public function processProposal($proposal)
+    {
+        $result = new \stdClass();
+        $cdate = \Illuminate\Support\Carbon::now();
+        $stage = $proposal->itemdata->stage;
+        $ebeln = $proposal->itemdata->ebeln;
+        $ebelp = $proposal->itemdata->ebelp;
+        if (isset($proposal->items)) {
+            DB::beginTransaction();
+            DB::update("update pitems set stage = 'C', pstage = '$stage' ".
+                       "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values ".
+                        "('$ebeln', '$ebelp', '$cdate', 1, 'O', 'C', '".
+                        Auth::user()->id . "', '" . Auth::user()->username . "')");
+            $counter = 0;
+            foreach($proposal->items as $propitem) {
+                DB::insert("insert into pitemchg_proposals (ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, ".
+                    "mtext, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values (".
+                    "'$ebeln', '$ebelp', '$cdate', $counter, ".
+                    "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', " .
+                    "'$propitem->qty', '$propitem->qty_uom', '$propitem->purch_price', '$propitem->purch_curr', " .
+                    "'$propitem->sales_price', '$propitem->sales_curr', '')");
+                $counter++;
+            }
+            DB::commit();
+        } else {
+            $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
+            if ($proposal->lifnr == $proposal->itemdata->lifnr) {
+                // keeping the same supplier, just update PO
+                DB::beginTransaction();
+                $tmp_idnlf = $proposal->idnlf;
+                $tmp_mtext = $proposal->mtext;
+                $tmp_matnr = $proposal->matnr;
+                $tmp_purch_price = $proposal->purch_price;
+                $tmp_purch_curr = $proposal->purch_curr;
+                DB::update("update pitems set stage = 'Z', pstage = '$stage', status = 'A', ".
+                    "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', " .
+                    "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr' " .
+                    "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values ".
+                    "('$ebeln', '$ebelp', '$cdate', 1, 'A', 'Z', '".
+                    Auth::user()->id . "', '" . Auth::user()->username . "')");
+                DB::commit();
+                SAP::savePOItem($ebeln, $ebelp);
+            } else {
+                // change supplier
+                DB::beginTransaction();
+                DB::update("update pitems set stage = 'Z', pstage = '$proposal->itemdata->stage', status = 'X', ".
+                    "idnlf = '$proposal->orig_idnlf', purch_price = '$proposal->orig_purch_price', " .
+                    "qty = '$proposal->orig_qty', lfdat = '$proposal->orig_lfdat' " .
+                    "where ebeln = '$proposal->itemdata->ebeln' and ebelp = '$proposal->itemdata->ebelp'");
+                DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values ".
+                    "('$proposal->itemdata->ebeln', '$proposal->itemdata->ebelp', '$cdate', 0, 'X', 'Z', '".
+                    Auth::user()->id . "', '" . Auth::user()->username . "')");
+                DB::commit();
+                rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
+            }
+        }
+        return json_encode($result);
+    }
 }

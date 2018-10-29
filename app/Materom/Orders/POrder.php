@@ -30,7 +30,7 @@ class POrder
     public $ctime;    // processing critical date
     // status fields
     public $changed;  // 0=no, 1=direct, 2=indirect
-    public $status;
+    public $status;   // empty/Z
 
     // computed/determined fields
     public $lifnr_name;
@@ -85,9 +85,11 @@ class POrder
             $this->salesorders[$item->sorder] = $item->ebelp;
         }
         $this->info = 0;
-        if ($this->status == 'N') $this->info = 1;
-        if ($this->wtime < Carbon::now()) $this->info = 2;
-        if ($this->ctime < Carbon::now()) $this->info = 3;
+        if (empty($this->status)) $this->info = 1;
+        if (($this->status != 'A') && ($this->status != 'X') && ($this->status != 'Z')) {
+            if ($this->wtime < Carbon::now()) $this->info = 2;
+            if ($this->ctime < Carbon::now()) $this->info = 3;
+        }
 
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
