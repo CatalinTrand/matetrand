@@ -489,9 +489,10 @@
         $(function () {
             newVendorDialog = $("#new-vendor-dialog").dialog({
                 autoOpen: false,
-                height: 260,
+                height: 160,
                 width: 400,
                 modal: true,
+                dialogClass: 'extra-detail',
                 buttons: {
                     Add: function () {
                         $.ajaxSetup({
@@ -569,7 +570,7 @@
         $(function () {
             newRefferalDialog = $("#new-refferal-dialog").dialog({
                 autoOpen: false,
-                height: 260,
+                height: 160,
                 width: 400,
                 modal: true,
                 buttons: {
@@ -648,7 +649,7 @@
         $(function () {
             newAgentDialog = $("#new-agent-dialog").dialog({
                 autoOpen: false,
-                height: 260,
+                height: 160,
                 width: 400,
                 modal: true,
                 buttons: {
