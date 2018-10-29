@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Materom\Orders;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 
@@ -31,6 +32,28 @@ class HomeController extends Controller
 
     public function editUser()
     {
+
+        //vendor::delete
+        if(isset($_GET['mfrnrDEL'])){
+            $id = $_GET['id'];
+            $mfrnr = $_GET['mfrnrDEL'];
+            DB::delete("delete from users_sel where id = '$id' and mfrnr = '$mfrnr'");
+        }
+
+        //refferal delete
+        if(isset($_GET['refidDEL'])){
+            $id = $_GET['id'];
+            $refID = $_GET['refidDEL'];
+            DB::delete("delete from users_ref where id = '$id' and refid = '$refID'");
+        }
+
+        //agent delete
+        if(isset($_GET['agentDEL'])){
+            $id = $_GET['id'];
+            $agentDEL = $_GET['agentDEL'];
+            DB::delete("delete from users_agent where id = '$id' and agent = '$agentDEL'");
+        }
+
         return view('users.editUser');
     }
 

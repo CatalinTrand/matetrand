@@ -34,6 +34,7 @@ Route::post('/editUser/edit','EditUserController@editUsers');
 Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertmanufacturer','WebserviceController@insertManufacturer');
 Route::post('webservice/insertreferenceuser','WebserviceController@insertReferenceUser');
+Route::post('webservice/insertagent','WebserviceController@insertAgent');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
