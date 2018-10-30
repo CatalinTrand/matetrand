@@ -64,6 +64,7 @@ Route::get('webservice/sap_delete_user','WebserviceController@sapDeleteUser');
 Route::get('webservice/sap_reset_password','WebserviceController@changePassword');
 Route::get('webservice/sap_process_po','WebserviceController@sapProcessPO');
 Route::get('webservice/read_inforecords','WebserviceController@readInforecords');
+Route::get('webservice/read_zpretrecords','WebserviceController@readZPRETrecords');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');

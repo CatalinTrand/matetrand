@@ -294,4 +294,16 @@ class WebserviceController extends Controller
             Input::get("matnr")
             );
     }
+
+    public function readZPRETrecords() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return SAP::readZPRETrecords(
+            Input::get("lifnr"),
+            Input::get("lifnr_name"),
+            Input::get("idnlf"),
+            Input::get("mtext"),
+            Input::get("matnr")
+        );
+    }
+
 }

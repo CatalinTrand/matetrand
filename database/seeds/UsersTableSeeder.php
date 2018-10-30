@@ -33,6 +33,24 @@ class UsersTableSeeder extends Seeder
             'created_at' => Carbon::now()->getTimestamp()
         ]);
         User::create([
+            'id'       => "f11325",
+            'username' => "Robert Bosch GmbH",
+            'role'     => 'Furnizor',
+            'lifnr'    => '0000011325',
+            'email'    => "robert@materom.ro",
+            'password' => Hash::make('materom'),
+            'created_at' => Carbon::now()->getTimestamp()
+        ]);
+        User::create([
+            'id'       => "f20310",
+            'username' => "EFA Autoteilewelt Frankfurt",
+            'role'     => 'Furnizor',
+            'lifnr'    => '0000020310',
+            'email'    => "efa@materom.ro",
+            'password' => Hash::make('materom'),
+            'created_at' => Carbon::now()->getTimestamp()
+        ]);
+        User::create([
             'id'       => "f16098",
             'username' => "TENET SRL",
             'role'     => 'Furnizor',
@@ -64,6 +82,24 @@ class UsersTableSeeder extends Seeder
             'username' => "Referent A02",
             'role'     => 'Referent',
             'ekgrp'    => 'A02',
+            'email'    => "dummy@mail.com",
+            'password' => Hash::make('materom'),
+            'created_at' => Carbon::now()->getTimestamp()
+        ]);
+        User::create([
+            'id'       => "rc02",
+            'username' => "Referent C02",
+            'role'     => 'Referent',
+            'ekgrp'    => 'C02',
+            'email'    => "dummy@mail.com",
+            'password' => Hash::make('materom'),
+            'created_at' => Carbon::now()->getTimestamp()
+        ]);
+        User::create([
+            'id'       => "rc03",
+            'username' => "Referent C03",
+            'role'     => 'Referent',
+            'ekgrp'    => 'C03',
             'email'    => "dummy@mail.com",
             'password' => Hash::make('materom'),
             'created_at' => Carbon::now()->getTimestamp()

@@ -347,5 +347,55 @@ class SAP
 
     }
 
+    static public function readZPRETrecords($lifnr, $lifnr_name, $idnlf, $mtext, $matnr)
+    {
+
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+//            \SAPNWRFC\Connection::setTraceLevel(3);
+//            \SAPNWRFC\Connection::setTraceDir("/home/srm.materom.ro/public/storage/logs");
+//            \SAPNWRFC\Connection::setTraceDir("C:/Users/Radu/Apache24/htdocs/matetrand/storage/logs");
+            if ($lifnr == null) $lifnr = "";
+            if ($lifnr_name == null) $lifnr_name = "";
+            if ($idnlf == null) $idnlf = "";
+            if ($mtext == null) $mtext = "";
+            if ($matnr == null) $matnr = "";
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_ZPRET');
+            $records = ($sapfm->invoke(['I_LIFNR' => $lifnr,
+                                        'I_LIFNR_NAME' => $lifnr_name,
+                                        'I_IDNLF' => $idnlf,
+                                        'I_MTEXT' => $mtext,
+                                        'I_MATNR' => $matnr
+            ]))["ZPRETRECORDS"];
+            $sapconn->close();
+            $zpretrecords = array();
+            foreach($records AS $record) {
+                $zpretrecord = new \stdClass();
+                $zpretrecord->lifnr = SAP::alpha_output($record["LIFNR"]);
+                $zpretrecord->lifnr_name = trim($record["NAME1"]);
+                $zpretrecord->idnlf = trim($record["IDNLF"]);
+                $zpretrecord->mtext = trim($record["TXZ01"]);
+                $zpretrecord->matnr = SAP::alpha_output($record["MATNR"]);
+                $zpretrecord->purch_price = $record["PURCH_PRICE"];
+                $zpretrecord->purch_curr = trim($record["PURCH_CURR"]);
+                $zpretrecord->sales_price = $record["SALES_PRICE"];
+                $zpretrecord->sales_curr = trim($record["SALES_CURR"]);
+                $zpretrecords[] = $zpretrecord;
+            }
+            return $zpretrecords;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+
+    }
 
 };
