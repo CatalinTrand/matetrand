@@ -254,18 +254,12 @@
             cursor: pointer;
         }
 
-        .ui-widget.extra-detail {
-            font-family: Verdana,Arial,sans-serif;
-            font-size: 0.9em;
-        }
-
-        .ui-widget-content.extra-detail {
+        .ui-widget-content {
             background: #F9F9F9;
-            border: 1px solid #90d93f;
             color: #222222;
         }
 
-        .ui-dialog.extra-detail {
+        .ui-dialog {
             left: 0;
             outline: 0 none;
             padding: 0 !important;
@@ -273,32 +267,44 @@
             top: 0;
         }
 
-        #success.extra-detail {
-            padding: 0;
-            margin: 0;
-        }
-
-        .ui-dialog.ui-dialog-content.extra-detail {
+        .ui-dialog .ui-dialog-content{
             background: none repeat scroll 0 0 transparent;
             border: 0 none;
             overflow: auto;
             position: relative;
-            padding: 0 !important;
+            padding: 15px !important;
         }
 
-        .ui-widget-header.extra-detail {
+        .cancelBtn {
+            background: #ff6666;
+        }
+
+        .cancelBtn:hover{
+            background: #ff3333;
+        }
+
+        .addBtn {
+            background: #b0de78;
+        }
+
+        .addBtn:hover{
+            background: #93d246;
+        }
+
+        .ui-widget-header {
             background: #b0de78;
             border: 0;
-            color: #b0de78;
+            color: black;
             font-weight: normal;
         }
 
-        .ui-dialog .ui-dialog-titlebar.extra-detail {
+        .ui-dialog.ui-dialog-titlebar {
             padding: 0.1em .5em;
             position: relative;
             font-size: 1em;
             background-color: #b0de78;
         }
+
     </style>
 </head>
 <body style="font-size: 12px">

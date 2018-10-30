@@ -521,7 +521,7 @@
                     },
                     Cancel: function () {
                         newVendorDialog.dialog("close");
-                    }
+                    },
                 },
                 close: function () {
                     newVendorForm[0].reset();
@@ -546,6 +546,8 @@
             $("#new-vendor-dialog").dialog('option', 'title', 'Define new manufacturer selection for ' + userid);
             vendorForUser = userid;
             newVendorDialog.dialog("open");
+            $(":button:contains('Cancel')").addClass("cancelBtn");
+            $(":button:contains('Add')").addClass("addBtn");
         }
     </script>
 
@@ -626,6 +628,8 @@
             $("#new-refferal-dialog").dialog('option', 'title', 'Define new reference user for ' + userid);
             refferalForUser = userid;
             newRefferalDialog.dialog("open");
+            $(":button:contains('Cancel')").addClass("cancelBtn");
+            $(":button:contains('Add')").addClass("addBtn");
         }
     </script>
 
@@ -705,6 +709,8 @@
             $("#new-agent-dialog").dialog('option', 'title', 'Define new agent for ' + userid);
             agentForUser = userid;
             newAgentDialog.dialog("open");
+            $(":button:contains('Cancel')").addClass("cancelBtn");
+            $(":button:contains('Add')").addClass("addBtn");
         }
     </script>
 
