@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Materom\Orders;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
@@ -23,10 +24,18 @@ class HomeController extends Controller
     /**
      * Show the application dashboard.
      *
-     * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
+
     public function index()
     {
+        if(isset($_GET['del'])){
+            $id_del = $_GET['del'];
+            $user = User::all()->find($id_del);
+            if($user != null)
+                $user->delete();
+        }
+
         return view('users.users');
     }
 
