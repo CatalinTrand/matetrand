@@ -20,9 +20,9 @@ class EditUsers {
         if (ctype_digit($lifnr)) $lifnr = str_pad($lifnr, 10, "0", STR_PAD_LEFT);
 
         if($active == 1)
-            DB::update("update users set role = '$role', username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser',  lifnr = '$lifnr', ekgrp = '$ekgrp', active = '$active', deleted_at = null where id = '$id'");
+            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser',  lifnr = '$lifnr', ekgrp = '$ekgrp', active = '$active', deleted_at = null where id = '$id'");
         else
-            DB::update("update users set role = '$role', username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser', active = '$active', deleted_at = NOW() where id = '$id'");
+            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser', active = '$active', deleted_at = NOW() where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");
         if ($role == "Administrator" && $prevdata->api_token != $token && !empty($token)) {

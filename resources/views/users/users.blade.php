@@ -175,8 +175,8 @@
                                             $active = "Inactive";
 
                                         $table .= "<tr><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td>".
-                                        "<td><a href=''><img id='edit_button_$id' onclick='change_user_password(\"$id\");return false;' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></a>".
-                                        "<a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></a>".
+                                        "<td><button type='button' onclick='change_user_password(\"$id\");return false;'><img id='edit_button_$id' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></button>".
+                                        "<button type='button' onclick='editUser(\"$id\");return false;'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></button>".
                                         "<button type='button' onclick='deleteUser(\"$id\");return false;'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button></td></tr>";
                                     }
 
@@ -198,9 +198,13 @@
 
     <script>
         function deleteUser(id){
-            if (confirm("Are you sure do you want to delete " + id + "?")) {
+            if (confirm("{{__('Are you sure do you want to delete')}}" + id + "?")) {
                 location.replace(location.pathname + '?del=' + id);
             } else {}
+        }
+
+        function editUser(id){
+            location.replace('/editUser?id=' + id);
         }
     </script>
 
