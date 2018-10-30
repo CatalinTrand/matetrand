@@ -1,7 +1,7 @@
 <div id="accept-reject-dialog" title="Accept/reject">
     <p id="initial-text" type="text" style="margin-top: 0.5rem; font-weight: bold; color: darkred;" name="initial-text" width="95%" value=""></p>
     <input type="checkbox" id="require_sr_approval" onchange="ar_switchProposalMode(this); return false;">
-    <label for="require_sr_approval">{{__("Require SR approval")}}</label>
+    <label id="label_require_sr_approval" for="require_sr_approval">{{__("Require SR approval")}}</label>
     <br><br>
     <div id="ar-proposals-immed" width="95%" style="margin-right: 0.5rem;">
         <div class="row">
@@ -21,6 +21,10 @@
             <input id="ar-immed-matnr" type="text" name="ar-immed-matnr" class="form-control col-md-2" value="">
         </div>
         <div class="row" style="padding-top: 3px;">
+            <label for="ar-immed-lfdat" class="col-md-2 col-form-label text-md-left">{{__('Delivery date')}}</label>&nbsp;&nbsp;
+            <input id="ar-immed-lfdat" type="text" name="ar-immed-lfdat" class="form-control col-md-2" value="">
+        </div>
+        <div class="row" style="padding-top: 3px;">
             <label for="ar-immed-quantity" class="col-md-2 col-form-label text-md-left">{{__('Quantity')}}</label>&nbsp;&nbsp;
             <input id="ar-immed-quantity" type="text" name="ar-quantity" class="form-control col-md-2" value="">&nbsp;
             <input id="ar-immed-quantity-unit" type="text" name="ar-immed-quantity-unit" class="form-control col-md-1"
@@ -32,14 +36,14 @@
             <input id="ar-immed-purch-curr" type="text" name="ar-immed-purch-curr" class="form-control col-md-1" value="">
         </div>
         <div class="row" style="padding-top: 3px;">
-            <label for="ar-immed-sales-price" class="col-md-2 col-form-label text-md-left">{{__('Sales price')}}</label>&nbsp;&nbsp;
+            <label id="label-ar-immed-sales-price" for="ar-immed-sales-price" class="col-md-2 col-form-label text-md-left">{{__('Sales price')}}</label>&nbsp;&nbsp;
             <input id="ar-immed-sales-price" type="text" name="ar-immed-sales-price" class="form-control col-md-2" value="">&nbsp;
             <input id="ar-immed-sales-curr" type="text" name="ar-immed-sales-curr" class="form-control col-md-1" value="">
         </div>
         <div class="row" style="padding-top: 0.5rem;">
             <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
                     onclick="get_infnr(1);return false;">{{__('Inforecord')}}</button>
-            <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+            <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget" id="accept-reject-zpret"
                     onclick="get_zpret(1);return false;">{{__('ZPRET')}}</button>
         </div>
     </div>
@@ -104,68 +108,95 @@
             height: 480,
             width: 920,
             modal: true,
-            buttons: {
-                '{{__("Send proposal")}}': function () {
-                    var result = new Object();
-                    result.type = _ar_type;
-                    result.itemdata = _ar_itemdata;
-                    if ($("#require_sr_approval").is(":checked")) {
-                        let tablerows = $('#proposals-table-1 tr');
-                        let n = tablerows.length;
-                        if (n < 2) return;
-                        result.items = [];
-                        for (i = 1; i < n; i++) {
-                            row = tablerows[i];
+            buttons: [
+                {
+                    text: '{{__("Send proposal")}}',
+                    id: "accept-reject-ok-button",
+                    click: function () {
+                        var result = new Object();
+                        result.type = _ar_type;
+                        result.itemdata = _ar_itemdata;
+                        if ($("#require_sr_approval").is(":checked")) {
+                            let tablerows = $('#proposals-table-1 tr');
+                            let n = tablerows.length;
+                            if (n < 2) return;
+                            result.items = [];
+                            for (i = 1; i < n; i++) {
+                                row = tablerows[i];
+                                item.lifnr = row.cells[0].textContent.trim();
+                                item.idnlf = row.cells[2].textContent.trim();
+                                item.mtext = row.cells[3].textContent.trim();
+                                item.matnr = row.cells[4].textContent.trim();
+                                item.lfdat = row.cells[5].textContent.trim();
+                                item.quantity = row.cells[6].textContent.split(" ")[0];
+                                item.quantity_unit = row.cells[6].textContent.split(" ")[1];
+                                item.purch_price = row.cells[7].textContent.split(" ")[0] ;
+                                item.purch_curr = row.cells[7].textContent.split(" ")[1];
+                                item.sales_price = row.cells[8].textContent.split(" ")[0];
+                                item.sales_curr = row.cells[8].textContent.split(" ")[1];
+                                result.items.push(item);
+                            }
+                        } else {
                             let item = new Object();
-                            item.lifnr = row.cells[0].textContent;
-                            item.idnlf = row.cells[2].textContent;
-                            item.mtext = row.cells[3].textContent;
-                            item.matnr = row.cells[4].textContent;
-                            item.quantity = row.cells[5].textContent.split(" ")[0];
-                            item.quantity_unit = row.cells[5].textContent.split(" ")[1];
-                            item.purch_price = row.cells[6].textContent.split(" ")[0] ;
-                            item.purch_curr = row.cells[6].textContent.split(" ")[1];
-                            item.sales_price = row.cells[7].textContent.split(" ")[0];
-                            item.sales_curr = row.cells[7].textContent.split(" ")[1];
-                            result.items.push(item);
+                            result.lifnr = $("#ar-immed-lifnr").val().trim();
+                            result.idnlf = $("#ar-immed-idnlf").val().trim();
+                            result.mtext = $("#ar-immed-mtext").val().trim();
+                            result.matnr = $("#ar-immed-matnr").val().trim();
+                            result.lfdat = $("#ar-immed-lfdat").val().trim();
+                            result.quantity = $("#ar-immed-quantity").val().trim();
+                            result.quantity_unit = $("#ar-immed-quantity-unit").val().trim();
+                            result.purch_price = $("#ar-immed-purch-price").val().trim();
+                            result.purch_curr = $("#ar-immed-purch-curr").val().trim();
+                            result.sales_price = $("#ar-immed-sales-price").val().trim();
+                            result.sales_curr = $("#ar-immed-sales-curr").val().trim();
                         }
-                    } else {
-                        result.lifnr = $("#ar-immed-lifnr").val().trim();
-                        result.idnlf = $("#ar-immed-idnlf").val().trim();
-                        result.mtext = $("#ar-immed-mtext").val().trim();
-                        result.matnr = $("#ar-immed-matnr").val().trim();
-                        result.quantity = $("#ar-immed-quantity").val().trim();
-                        result.quantity_unit = $("#ar-immed-quantity-unit").val().trim();
-                        result.purch_price = $("#ar-immed-purch-price").val().trim();
-                        result.purch_curr = $("#ar-immed-purch-curr").val().trim();
-                        result.sales_price = $("#ar-immed-sales-price").val().trim();
-                        result.sales_curr = $("#ar-immed-sales-curr").val().trim();
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        var _dataPP, _statusPP;
+                        $.get("webservice/processproposal",
+                            {
+                                proposal: JSON.stringify(result)
+                            },
+                            function (data, status) {
+                                _dataPP = data;
+                                _statusPP = status;
+                            }, "json");
+                        jQuery.ajaxSetup({async: true});
+                        arDialog.dialog("close");
                     }
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        }
-                    });
-                    jQuery.ajaxSetup({async: false});
-                    var _dataPP, _statusPP;
-                    $.get("webservice/processproposal",
-                        {
-                            proposal: JSON.stringify(result)
-                        },
-                        function (data, status) {
-                            _dataPP = data;
-                            _statusPP = status;
-                        }, "json");
-                    jQuery.ajaxSetup({async: true});
                 },
-                Cancel: function () {
-                    arDialog.dialog("close");
+                {
+                    text: '{{__("Cancel")}}',
+                    click: function () {
+                        arDialog.dialog("close");
+                    }
                 }
-            },
+            ],
             close: function () {
                 // arForm[0].reset();
             },
             open: function () {
+                if (_ar_itemdata.vbeln == "!REPLENISH") {
+                    $("#require_sr_approval").hide();
+                    $("#label_require_sr_approval").hide();
+                    $("#label-ar-immed-sales-price").hide();
+                    $("#ar-immed-sales-price").hide();
+                    $("#ar-immed-sales-curr").hide();
+                    $("#accept-reject-zpret").hide();
+                    $("#accept-reject-ok-button").text("{{__('Modificare comanda')}}");
+                } else {
+                    $("#require_sr_approval").show();
+                    $("#label_require_sr_approval").show();
+                    $("#label-ar-immed-sales-price").show();
+                    $("#ar-immed-sales-price").show();
+                    $("#ar-immed-sales-curr").show();
+                    $("#accept-reject-zpret").show();
+                    $("#accept-reject-ok-button").text("{{__('Send proposal')}}");
+                }
             },
             position: {
                 my: "center",
@@ -176,6 +207,7 @@
         arForm = arDialog.find("form").on("submit", function (event) {
             event.preventDefault();
         });
+        $("#ar-immed-lfdat").datepicker({dateFormat: "yy-mm-dd"});
     });
 
     function accept_reject_dialog(type, this0, itemdata, title, initial_text) {
@@ -194,6 +226,7 @@
             $("#ar-immed-idnlf").val(itemdata.idnlf);
             $("#ar-immed-mtext").val(itemdata.mtext);
             $("#ar-immed-matnr").val(itemdata.matnr);
+            $("#ar-immed-lfdat").val(itemdata.lfdat.substring(0, 10));
             $("#ar-immed-quantity").val(itemdata.qty);
             $("#ar-immed-quantity-unit").val(itemdata.qty_uom);
             $("#ar-immed-purch-price").val(itemdata.purch_price);
@@ -207,6 +240,7 @@
                 "<td>" + itemdata.idnlf + "</td>" +
                 "<td>" + itemdata.mtext + "</td>" +
                 "<td>" + itemdata.matnr + "</td>" +
+                "<td>" + itemdata.lfdat.substring(0, 10) + "</td>" +
                 "<td colspan='2' style='text-align: right;'>" + itemdata.qty + " " + itemdata.qty_uom + "</td>" +
                 "<td colspan='2' style='text-align: right;'>" + itemdata.purch_price + " " + itemdata.purch_curr + "</td>" +
                 "<td colspan='2' style='text-align: right;'>" + itemdata.sales_price + " " + itemdata.sales_curr + "</td>";
@@ -263,10 +297,6 @@
         ar_simple_Dialog.dialog("open");
     }
 
-    function createPurchReq(_this, _lifnr, _idnlf, _mtext, _matnr, _price, _curr, _infnr) {
-
-    }
-
 </script>
 
 <div id="add-edit-proposal" title="Add/edit proposal">
@@ -285,6 +315,10 @@
     <div class="row" style="padding-top: 3px;">
         <label for="aep-matnr" class="col-md-3 col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
         <input id="aep-matnr" type="text" name="aep-matnr" class="form-control col-md-3" value="">
+    </div>
+    <div class="row" style="padding-top: 3px;">
+        <label for="aep-lfdat" class="col-md-3 col-form-label text-md-left">{{__('Delivery date')}}</label>&nbsp;&nbsp;
+        <input id="aep-lfdat" type="text" name="aep-lfdat" class="form-control col-md-3" value="">
     </div>
     <div class="row" style="padding-top: 3px;">
         <label for="aep-quantity" class="col-md-3 col-form-label text-md-left">{{__('Quantity')}}</label>&nbsp;&nbsp;
@@ -321,16 +355,17 @@
             modal: true,
             buttons: {
                 Save: function () {
-                    let lifnr = $("#aep-lifnr").val();
-                    let idnlf = $("#aep-idnlf").val();
-                    let mtext = $("#aep-mtext").val();
-                    let matnr = $("#aep-matnr").val();
-                    let quantity = $("#aep-quantity").val();
-                    let quantity_uom = $("#aep-quantity-unit").val();
-                    let purch_price = $("#aep-purch-price").val();
-                    let purch_curr = $("#aep-purch-curr").val();
-                    let sales_price = $("#aep-sales-price").val();
-                    let sales_curr = $("#aep-sales-curr").val();
+                    let lifnr = $("#aep-lifnr").val().trim();
+                    let idnlf = $("#aep-idnlf").val().trim();
+                    let mtext = $("#aep-mtext").val().trim();
+                    let matnr = $("#aep-matnr").val().trim();
+                    let lfdat = $("#aep-lfdat").val().trim();
+                    let quantity = $("#aep-quantity").val().trim();
+                    let quantity_uom = $("#aep-quantity-unit").val().trim();
+                    let purch_price = $("#aep-purch-price").val().trim();
+                    let purch_curr = $("#aep-purch-curr").val().trim();
+                    let sales_price = $("#aep-sales-price").val().trim();
+                    let sales_curr = $("#aep-sales-curr").val().trim();
                     if (add_edit_caller == 1) {
                         if (add_edit_current_row != null) {
                             add_edit_current_row.cells[0].innerHTML = lifnr;
@@ -338,9 +373,10 @@
                             add_edit_current_row.cells[2].innerHTML = idnlf;
                             add_edit_current_row.cells[3].innerHTML = mtext;
                             add_edit_current_row.cells[4].innerHTML = matnr;
-                            add_edit_current_row.cells[5].innerHTML = quantity + " " + quantity_uom;
-                            add_edit_current_row.cells[6].innerHTML = purch_price + " " + purch_curr;
-                            add_edit_current_row.cells[7].innerHTML = sales_price + " " + sales_curr;
+                            add_edit_current_row.cells[5].innerHTML = lfdat;
+                            add_edit_current_row.cells[6].innerHTML = quantity + " " + quantity_uom;
+                            add_edit_current_row.cells[7].innerHTML = purch_price + " " + purch_curr;
+                            add_edit_current_row.cells[8].innerHTML = sales_price + " " + sales_curr;
                             add_edit_Dialog.dialog("close");
                         } else {
                             var newRow = $("<tr style='height: 1.2rem;' onclick='proposal_selected(this);return false;'>");
@@ -349,6 +385,7 @@
                                 "<td>" + idnlf + "</td>" +
                                 "<td>" + mtext + "</td>" +
                                 "<td>" + matnr + "</td>" +
+                                "<td>" + lfdat + "</td>" +
                                 "<td colspan='2' style='text-align: right;'>" + quantity + " " + quantity_uom + "</td>" +
                                 "<td colspan='2' style='text-align: right;'>" + purch_price + " " + purch_curr + "</td>" +
                                 "<td colspan='2' style='text-align: right;'>" + sales_price + " " + sales_curr + "</td>";
@@ -371,6 +408,7 @@
         add_edit_Form = add_edit_Dialog.find("form").on("submit", function (event) {
             event.preventDefault();
         });
+        $("#aep-lfdat").datepicker({dateFormat: "yy-mm-dd"});
     });
 
     function add_edit_proposal(caller, mode) {
@@ -381,6 +419,7 @@
         let idnlf = "";
         let mtext = "";
         let matnr = "";
+        let lfdat = "";
         let quantity = "";
         let quantity_unit = "";
         let purch_price = "";
@@ -404,12 +443,13 @@
                 idnlf = current_row.cells[2].innerHTML;
                 mtext = current_row.cells[3].innerHTML;
                 matnr = current_row.cells[4].innerHTML;
-                quantity = current_row.cells[5].innerHTML.split(" ")[0];
-                quantity_unit = current_row.cells[5].innerHTML.split(" ")[1];
-                purch_price = current_row.cells[6].innerHTML.split(" ")[0];
-                purch_curr = current_row.cells[6].innerHTML.split(" ")[1];
-                sales_price = current_row.cells[7].innerHTML.split(" ")[0];
-                sales_curr = current_row.cells[7].innerHTML.split(" ")[1];
+                lfdat = current_row.cells[5].innerHTML;
+                quantity = current_row.cells[6].innerHTML.split(" ")[0];
+                quantity_unit = current_row.cells[6].innerHTML.split(" ")[1];
+                purch_price = current_row.cells[7].innerHTML.split(" ")[0];
+                purch_curr = current_row.cells[7].innerHTML.split(" ")[1];
+                sales_price = current_row.cells[8].innerHTML.split(" ")[0];
+                sales_curr = current_row.cells[8].innerHTML.split(" ")[1];
             }
         }
 
@@ -417,6 +457,7 @@
         $("#aep-idnlf").val(idnlf);
         $("#aep-mtext").val(mtext);
         $("#aep-matnr").val(matnr);
+        $("#aep-lfdat").val(lfdat);
         $("#aep-quantity").val(quantity);
         $("#aep-quantity-unit").val(quantity_unit);
         $("#aep-purch-price").val(purch_price);
@@ -432,54 +473,50 @@
 </script>
 
 <div id="select-proposal-dialog" title="Select a proposal">
-    <form>
-        <br>
-        <div class="form-group container" align="left">
-            <div style="overflow-y: scroll">
-                <table id="proposals_table">
-                    <colgroup>
-                        <col width="10%">
-                        <col width="15%">
-                        <col width="10%">
-                        <col width="20%">
-                        <col width="5%">
-                        <col width="15%">
-                        <col width="5%">
-                        <col width="10%">
-                        <col width="5%">
-                        <col width="2.5%">
-                        <col width="2.5%">
-                    </colgroup>
-                    <tr>
-                        <th>{{__('Vendor')}}</th>
-                        <th>{{__('Vendor Name')}}</th>
-                        <th>{{__('Material')}}</th>
-                        <th>{{__('Material description')}}</th>
-                        <th>{{__('Material group')}}</th>
-                        <th>{{__('Purchase price')}}</th>
-                        <th>{{__('Purchase currency')}}</th>
-                        <th>{{__('Sales price')}}</th>
-                        <th>{{__('Sales currency')}}</th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </form>
+    <p id="sel-proposal-initial-text" type="text" style="margin-top: 0.5rem; font-weight: bold; color: darkred;" name="initial-text" width="95%" value=""></p>
+    <div id="sel-proposal-container" width="95%" style="margin-right: 0.5rem; overflow-y: scroll; min-height: 17rem;">
+        <table id="sel-proposal-table" class="table-striped" width="100%">
+            <colgroup>
+                <col width="8%">
+                <col width="17%">
+                <col width="12%">
+                <col width="24%">
+                <col width="7%">
+                <col width="8%">
+                <col width="3%">
+                <col width="9%">
+                <col width="3%">
+                <col width="9%">
+                <col width="3%">
+            </colgroup>
+            <tr>
+                <th>{{__('Vendor')}}</th>
+                <th>{{__('Vendor Name')}}</th>
+                <th>{{__('Vendor mat.')}}</th>
+                <th>{{__('Material description')}}</th>
+                <th>{{__('Material')}}</th>
+                <th colspan="2" style="text-align: right;">{{__('Quantity')}}</th>
+                <th colspan="2" style="text-align: right;">{{__('Purchase price')}}</th>
+                <th colspan="2" style="text-align: right;">{{__('Sales price')}}</th>
+            </tr>
+        </table>
+    </div>
+    <i id="sel-prop-msg" style="color: red"></i>
+    <br>
 </div>
 
 <script>
 
-    var select_proposal_dialog, select_proposal_form;
+    var select_proposal_dialog;
+    var _sp_type, _sp_this, _sp_itemdata;
     $(function () {
         select_proposal_dialog = $("#select-proposal-dialog").dialog({
             autoOpen: false,
-            height: 600,
+            height: 400,
             width: 960,
             modal: true,
             buttons: {
-                Use: function () {
+                Select: function () {
                     if (proposal_last_selected_line != null) {
                         let current_row = proposal_last_selected_line;
                         let result_set = current_row.id;
@@ -496,10 +533,10 @@
                 }
             },
             close: function () {
-                select_proposal_form[0].reset();
+                // select_proposal_form[0].reset();
             },
             open: function () {
-                $('#inforecord-dialog').css('overflow', 'hidden');
+                $('#select-proposal-dialog').css('overflow', 'hidden');
                 proposal_last_selected_line = null;
             },
             position: {
@@ -508,67 +545,62 @@
                 of: window
             }
         });
-
-        select_proposal_form = select_proposal_dialog.find("form").on("submit", function (event) {
-            event.preventDefault();
-        });
     });
 
-    function acceptVariantDlg(ebeln, ebelp, cdate) {
+    function select_proposal(type, this0, itemdata, title, initial_text) {
+
+        $("#sel-prop-msg").text("");
+        $("#sel-proposal-initial-text").text(initial_text);
+        $("#sel-proposal-table").find("tr:gt(0)").remove();
+        $("#select-proposal-dialog").dialog('option', 'title', title);
+        _sp_type = type;
+        _sp_this = this0;
+        _sp_itemdata = itemdata;
 
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        $("#select-proposal-dialog").find("tr:gt(0)").remove();
-        $('body').addClass('ajaxloading');
         jQuery.ajaxSetup({async: false});
         var _data, _status;
         $.post("webservice/readproposals",
             {
-                ebeln: ebeln,
-                ebelp: ebelp,
-                cdate: cdate
+                ebeln: itemdata.ebeln,
+                ebelp: itemdata.ebelp
             },
             function (data, status) {
                 _data = data;
                 _status = status;
             }, "json");
         jQuery.ajaxSetup({async: true});
-        if (_status != "success") {
-            $('body').removeClass('ajaxloading');
-            return;
-        }
+        if (_status != "success") return;
         if (_data.length > 0) {
-            let table = $("#select-proposal-dialog");
+            let table = $("#sel-proposal-table");
             for (let i = 0; i < _data.length; i++) {
-                var newRow = $("<tr id='" + _data[i].infnr + "' style='height: 1.5rem;' onclick='proposal_selected(this);return false;'>");
-                var cols = "<td colspan='1'>" + _data[i].lifnr + "</td>" +
-                    "<td colspan='5'>" + _data[i].lifnr_name + "</td>" +
-                    "<td colspan='2'>" + _data[i].idnlf + "</td>" +
-                    "<td colspan='7'>" + _data[i].mtext + "</td>" +
-                    "<td colspan='2'>" + _data[i].matnr + "</td>" +
-                    "<td colspan='3'>" + _data[i].purch_price + " " + _data[i].purch_curr + "</td>" +
-                    "<td colspan='3'>" + _data[i].sales_price + " " + _data[i].sales_curr + "</td>";
-                newRow.append(cols); // .hide();
+                var newRow = $("<tr style='height: 1.2rem;' id='PROP_" + _data[i].ebeln + '_' + _data[i].ebelp + '_' +_data[i].pos + "' onclick='proposal_selected(this);return false;'>");
+                var cols = "<td>" + conv_exit_alpha_output(_data[i].lifnr) + "</td>" +
+                    "<td>" + _data[i].lifnr_name + "</td>" +
+                    "<td>" + _data[i].idnlf + "</td>" +
+                    "<td>" + _data[i].mtext + "</td>" +
+                    "<td>" + _data[i].matnr + "</td>" +
+                    "<td>" + _data[i].lfdat.substring(0, 10) + "</td>" +
+                    "<td colspan='2' style='text-align: right;'>" + _data[i].qty + " " + _data[i].qty_uom + "</td>" +
+                    "<td colspan='2' style='text-align: right;'>" + _data[i].purch_price + " " + _data[i].purch_curr + "</td>" +
+                    "<td colspan='2' style='text-align: right;'>" + _data[i].sales_price + " " + _data[i].sales_curr + "</td>";
+                newRow.append(cols);
                 table.append(newRow);
             }
         }
-        $('body').removeClass('ajaxloading');
-
-        $("#select-proposal-dialog-dialog").dialog('option', 'title', 'Select a proposal');
         select_proposal_dialog.dialog("open");
     }
 
     function proposal_selected(_this) {
         if (proposal_last_selected_line != null)
             $(proposal_last_selected_line).css("background-color", proposal_last_color);
-
         proposal_last_color = $(_this).css("background-color");
         proposal_last_selected_line = _this;
-
-        $(_this).css("background-color", "#77FF77");
+        $(_this).css("background-color", "#AACCAA");
     }
 
     function get_infnr(caller)

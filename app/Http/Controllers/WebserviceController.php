@@ -176,8 +176,7 @@ class WebserviceController extends Controller
     {
         return Webservice::readProposals(
             Input::get("ebeln"),
-            Input::get("ebelp"),
-            Input::get("cdate")
+            Input::get("ebelp")
         );
     }
 

@@ -350,6 +350,7 @@
                                                 break;
                                             case 1:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                $info_icon = "";
                                                 break;
                                             case 2:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
@@ -452,6 +453,7 @@
                                                 break;
                                             case 1:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                $info_icon = "";
                                                 break;
                                             case 2:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
@@ -903,6 +905,7 @@
                         break;
                     case 1:
                         info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        info_icon = "";
                         break;
                     case 2:
                         info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
@@ -1058,6 +1061,7 @@
                         break;
                     case 1:
                         info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        info_icon = "";
                         break;
                     case 2:
                         info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
@@ -1584,6 +1588,7 @@
             jQuery.ajaxSetup({async: true});
             if (_statusIR != "success") return;
 
+            @if (\Illuminate\Support\Facades\Auth::user()->role != "CTV")
             if (rowtype == 'I') {
                 if (mode == 1) {
                     accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
@@ -1592,17 +1597,25 @@
                     accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
             }
+            @else
+                select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+            @endif
         }
 
         function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp)
         {
             var c_string = "";
+            let comma_count = 0;
+            let dot_count = 0;
+            if (c_value.indexOf(",") >= 0) comma_count = 1;
+            if (c_value.indexOf(".") >= 0) dot_count = 1;
             switch (c_type) {
                 case 1:
                     c_string = "idnlf";
                     break;
                 case 3:
                     c_string = "qty";
+                    if ((comma_count + dot_count) > 1) return false;
                     if(!(Math.floor(c_value) == c_value && $.isNumeric(c_value)) || c_value.startsWith('-'))
                         return false;
                     break;
@@ -1614,11 +1627,10 @@
                     break;
                 case 5:
                     c_string = "purch_price";
-                    let comma_count = 0; if (c_value.indexOf(",") >= 0) comma_count = 1;
-                    let dot_count = 0; if (c_value.indexOf(".") >= 0) dot_count = 1;
-                    if(!($.isNumeric(c_value)) || c_value.startsWith('-') || (comma_count + dot_count) > 1)
-                        return false;
+                    if ((comma_count + dot_count) > 1) return false;
                     if (comma_count == 1) c_value = c_value.replace(/,/g, '.');
+                    if (!($.isNumeric(c_value)) || c_value.startsWith('-'))
+                        return false;
                     break;
             }
 
@@ -1674,6 +1686,7 @@
                     }
                 },
                 close: function () {
+                    $("#new_chg_val").datepicker("destroy");
                     changeForm[0].reset();
                 },
                 position: {
@@ -1742,6 +1755,7 @@
             type_string = "LFDAT";
             $("#old_chg_val").text("Data de livrare existenta: " + old_value);
             $("#new_chg_val").val("");
+            $("#new_chg_val").datepicker({dateFormat: "yy-mm-dd"});
             $("#new_val_txt").text("Introduceti noua data de livrare:");
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare data livrare pentru pozitia ' + ebelp);
