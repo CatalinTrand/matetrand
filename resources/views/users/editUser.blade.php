@@ -14,6 +14,7 @@
 
         use Illuminate\Support\Facades\DB;
 
+        $id = "";
         if(isset($_POST['id']))
             $id = $_POST['id'];
         else
@@ -83,20 +84,6 @@
             break;
         }
 
-        //vendor::delete
-        if(isset($_GET['mfrnrDEL'])){
-            $mfrnr = $_GET['mfrnrDEL'];
-            DB::delete("delete from users_sel where id = '$id' and mfrnr = '$mfrnr'");
-            $msg_sel = "Manufacturer deleted!";
-        }
-
-        //refferal delete
-        if(isset($_GET['refidDEL'])){
-            $myID = $_GET['id'];
-            $refID = $_GET['refidDEL'];
-            DB::delete("delete from users_ref where id = '$id' and refid = '$refID'");
-            $msg_sel = "Reference user deleted!";
-        }
     @endphp
     <div class="container-fluid">
         <div class="container" style="width: 40%;">
@@ -111,20 +98,6 @@
                             <form method="POST" action="/editUser/edit" aria-label="Edit User">
                                 @csrf
                                 <font color='green'>{{$msg}}</font>
-                                <div class="form-group row">
-                                    <label for="role"
-                                           class="col-md-4 col-form-label text-md-left">{{ __('User Type') }}</label>
-
-                                    <div class="col-md-6" style="margin-left: -3vw;">
-                                        <select id="role" type="text" class="form-control" name="role" required
-                                                autofocus onchange="selectCheck(this);">
-                                            <option {{$selectedAdmin}}>Administrator</option>
-                                            <option {{$selectedFurnizor}}>Furnizor</option>
-                                            <option {{$selectedReferent}}>Referent</option>
-                                            <option {{$selectedCTV}}>CTV</option>
-                                        </select>
-                                    </div>
-                                </div>
 
                                 <div class="form-group row">
                                     <label for="username"
@@ -146,7 +119,9 @@
                                                    value="{{$user->api_token}}">
                                         </div>
                                     </div>
-                                    <button type="button" style="height: 30px" onclick="generateNew(); return false;">Generate new</button>
+                                    <button type="button" style="height: 30px" onclick="generateNew(); return false;">
+                                        Generate new
+                                    </button>
                                 </div>
 
                                 <div class="form-group row" id="lifnr_div" style="display: none;">
@@ -244,47 +219,101 @@
 
         <div class="container" style="display: inline-block; float: left; margin-left: 7%">
 
-        <div class="container" id="vendor_div" style="display: none; margin-left: 25%; width: 100%">
+            <div class="container" id="vendor_div" style="display: none; margin-left: 25%; width: 100%">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card" style="height: 250px">
+                            <div class="card-header">
+                                <table width="100%">
+                                    <tr>
+                                        <td width="90%">{{__('Manufacturers')}}</td>
+                                        <td align="right">
+                                            <button id="new-vendor-button" type="button"
+                                                    onclick="new_vendor_id('{{$id}}');return false;">New
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="vendor-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                                <form method="POST" action="/editUser" aria-label="Edit Vendors"
+                                      style="margin-top: -20px">
+                                    @csrf
+                                </form>
+                                <br>
+                                <table class="basicTable table table-striped">
+                                    <tr>
+                                        <th>
+                                            {{ __('Manufacturer') }}
+                                        </th>
+                                        <th>
+                                            {{ __('Manufacturer name') }}
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                    @php
+                                        $mySELs = \App\Materom\EditUsers::getSel($id);
+                                        $table = "";
+                                        foreach ($mySELs as $aSEL){
+                                                $mfrnr = $aSEL->mfrnr;
+                                                if ($mfrnr != '0000000000' && ctype_digit($mfrnr))
+                                                    while (substr($mfrnr, 0, 1) == '0') $mfrnr = substr($mfrnr, 1, 10);
+                                                $table .= "<tr style='line-height: 20px'><td>$mfrnr</td><td>$aSEL->mfrnr_name</td><td><a href='/editUser?id=$id&mfrnrDEL=$aSEL->mfrnr'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                        }
+                                        echo $table;
+                                    @endphp
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" id="ref_div" style="display: none; width: 60%">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card" style="height: 250px">
                         <div class="card-header">
                             <table width="100%">
                                 <tr>
-                                    <td width="90%">{{__('Manufacturers')}}</td>
+                                    <td width="90%">{{__('Referenti')}}</td>
                                     <td align="right">
                                         <button id="new-vendor-button" type="button"
-                                                onclick="new_vendor_id('{{$id}}');return false;">New
+                                                onclick="new_refferal_id('{{$id}}');return false;">New
                                         </button>
                                     </td>
                                 </tr>
                             </table>
                         </div>
-                        <div id="vendor-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
-                            <form method="POST" action="/editUser" aria-label="Edit Vendors" style="margin-top: -20px">
+                        <div id="refferal-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                            <form method="POST" action="/editUser" aria-label="Edit Refferals"
+                                  style="margin-top: -20px">
                                 @csrf
                             </form>
                             <br>
                             <table class="basicTable table table-striped">
                                 <tr>
                                     <th>
-                                        {{ __('Manufacturer') }}
+                                        {{ __('Referent') }}
                                     </th>
                                     <th>
-                                        {{ __('Manufacturer name') }}
+                                        {{ __('Nume referent') }}
                                     </th>
                                     <th>
                                         Action
                                     </th>
                                 </tr>
                                 @php
-                                    $mySELs = DB::select("select * from users_sel where id='$id'");
+                                    use App\User;
+                                    $myREFs = \App\Materom\EditUsers::getRefs($id);
                                     $table = "";
-                                    foreach ($mySELs as $aSEL){
-                                            $mfrnr = $aSEL->mfrnr;
-                                            if ($mfrnr != '0000000000' && ctype_digit($mfrnr))
-                                                while (substr($mfrnr, 0, 1) == '0') $mfrnr = substr($mfrnr, 1, 10);
-                                            $table .= "<tr style='line-height: 20px'><td>$mfrnr</td><td>$aSEL->mfrnr_name</td><td><a href='/editUser?id=$id&mfrnrDEL=$aSEL->mfrnr'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                    foreach ($myREFs as $aREF){
+                                            $id_in_ref = $aREF->refid;
+                                            $ref_name = User::where('id','=',$id_in_ref)->get()[0]->username;
+                                            $table .= "<tr style='line-height: 20px'><td>$id_in_ref</td><td>$ref_name</td><td><a href='/editUser?id=$id&refidDEL=$aREF->refid'><img src='/images/delete.png' class='delete'></a></td></tr>";
                                     }
                                     echo $table;
                                 @endphp
@@ -294,59 +323,59 @@
                 </div>
             </div>
         </div>
-    </div>
+        <div class="container" style="display: inline-block; margin-left: 20.3%" align="middle">
 
-    <div class="container" id="ref_div" style="display: none; width: 60%">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card" style="height: 250px">
-                    <div class="card-header">
-                        <table width="100%">
-                            <tr>
-                                <td width="90%">{{__('Referenti')}}</td>
-                                <td align="right">
-                                    <button id="new-vendor-button" type="button"
-                                            onclick="new_refferal_id('{{$id}}');return false;">New
-                                    </button>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div id="refferal-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
-                        <form method="POST" action="/editUser" aria-label="Edit Refferals" style="margin-top: -20px">
-                            @csrf
-                        </form>
-                        <br>
-                        <table class="basicTable table table-striped">
-                            <tr>
-                                <th>
-                                    {{ __('Referent') }}
-                                </th>
-                                <th>
-                                    {{ __('Nume referent') }}
-                                </th>
-                                <th>
-                                    Action
-                                </th>
-                            </tr>
-                            @php
-                                use App\User;
-                                $myREFs = DB::select("select * from users_ref where id='$id'");
-                                $table = "";
-                                foreach ($myREFs as $aREF){
-                                        $id_in_ref = $aREF->refid;
-                                        $ref_name = User::where('id','=',$id_in_ref)->get()[0]->username;
-                                        $table .= "<tr style='line-height: 20px'><td>$id_in_ref</td><td>$ref_name</td><td><a href='/editUser?id=$id&refidDEL=$aREF->refid'><img src='/images/delete.png' class='delete'></a></td></tr>";
-                                }
-                                echo $table;
-                            @endphp
-                        </table>
+            <div class="container" id="agent_div" style="display: none; margin-left: 25%; width: 100%">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card" style="height: 250px">
+                            <div class="card-header">
+                                <table width="100%">
+                                    <tr>
+                                        <td width="90%">{{__('Agents')}}</td>
+                                        <td align="right">
+                                            <button id="new-agent-button" type="button"
+                                                    onclick="new_agent_id('{{$id}}');return false;">New
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="agent-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                                <form method="POST" action="/editUser" aria-label="Edit Agents"
+                                      style="margin-top: -20px">
+                                    @csrf
+                                </form>
+                                <br>
+                                <table class="basicTable table table-striped">
+                                    <tr>
+                                        <th>
+                                            {{ __('Agent') }}
+                                        </th>
+                                        <th>
+                                            {{ __('Agent name') }}
+                                        </th>
+                                        <th>
+                                            Action
+                                        </th>
+                                    </tr>
+                                    @php
+                                        $myAGENTs = \App\Materom\EditUsers::getAgents($id);
+                                        $table = "";
+                                        foreach ($myAGENTs as $aAGENT){
+                                                $agent = $aAGENT->agent;
+                                                $agent_name = \App\User::all()->find($agent)->username;
+                                                $table .= "<tr style='line-height: 20px'><td>$agent</td><td>$agent_name</td><td><a href='/editUser?id=$id&agentDEL=$agent'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                        }
+                                        echo $table;
+                                    @endphp
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
     </div>
 
     </div>
@@ -359,17 +388,28 @@
     </script>
 
     <script>
+        $( document ).ready(function() {
+            selectCheck('{{$user->role}}');
+        });
+    </script>
+
+    <script>
+
         function selectCheck(nameSelect) {
+            if(nameSelect == null)
+                return;
+
             var lifnr_div = document.getElementById("lifnr_div");
             var ref_div = document.getElementById("ref_div");
             var ekgrp_div = document.getElementById("ekgrp_div");
             var vendor_div = document.getElementById("vendor_div");
             var token_div = document.getElementById("token_div");
             var sapuser_div = document.getElementById("sapuser_div");
+            var agent_div = document.getElementById("agent_div");
 
             if (nameSelect) {
-                if (nameSelect.value == "Referent" || nameSelect.value == "Furnizor") {
-                    if (nameSelect.value == "Referent") {
+                if (nameSelect == "Referent" || nameSelect == "Furnizor") {
+                    if (nameSelect == "Referent") {
                         ekgrp_div.style.display = "";
                         ref_div.style.display = "none";
                         lifnr_div.style.display = "none";
@@ -383,6 +423,7 @@
                         sapuser_div.style.display = "none";
                     }
                     token_div.style.display = "none";
+                    agent_div.style.display = "none";
                 }
                 else {
                     ref_div.style.display = "none";
@@ -390,16 +431,18 @@
                     ekgrp_div.style.display = "none";
                     vendor_div.style.display = "none";
 
-                    if (nameSelect.value == "Administrator") {
+                    if (nameSelect == "Administrator") {
                         token_div.style.display = "";
                     } else {
                         token_div.style.display = "none";
                     }
 
-                    if (nameSelect.value == "CTV") {
+                    if (nameSelect == "CTV") {
                         sapuser_div.style.display = "";
+                        agent_div.style.display = "";
                     } else {
                         sapuser_div.style.display = "none";
+                        agent_div.style.display = "none";
                     }
                 }
             }
@@ -446,9 +489,10 @@
         $(function () {
             newVendorDialog = $("#new-vendor-dialog").dialog({
                 autoOpen: false,
-                height: 260,
+                height: 160,
                 width: 400,
                 modal: true,
+                dialogClass: 'extra-detail',
                 buttons: {
                     Add: function () {
                         $.ajaxSetup({
@@ -477,7 +521,7 @@
                     },
                     Cancel: function () {
                         newVendorDialog.dialog("close");
-                    }
+                    },
                 },
                 close: function () {
                     newVendorForm[0].reset();
@@ -502,6 +546,8 @@
             $("#new-vendor-dialog").dialog('option', 'title', 'Define new manufacturer selection for ' + userid);
             vendorForUser = userid;
             newVendorDialog.dialog("open");
+            $(":button:contains('Cancel')").addClass("cancelBtn");
+            $(":button:contains('Add')").addClass("addBtn");
         }
     </script>
 
@@ -526,7 +572,7 @@
         $(function () {
             newRefferalDialog = $("#new-refferal-dialog").dialog({
                 autoOpen: false,
-                height: 260,
+                height: 160,
                 width: 400,
                 modal: true,
                 buttons: {
@@ -582,6 +628,89 @@
             $("#new-refferal-dialog").dialog('option', 'title', 'Define new reference user for ' + userid);
             refferalForUser = userid;
             newRefferalDialog.dialog("open");
+            $(":button:contains('Cancel')").addClass("cancelBtn");
+            $(":button:contains('Add')").addClass("addBtn");
+        }
+    </script>
+
+    <div id="new-agent-dialog" title="Define new agent for CTV user">
+        <form>
+            <br>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_agent" class="col-md-4 col-form-label text-md-left">Agent</label>
+                <input id="new_agent" type="text" name="new_agent" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <i id="new_agent_msg" style="color: red"></i>
+        </form>
+    </div>
+
+
+    <script>
+
+        var agentForUser, newAgentDialog, newAgentForm;
+        var agentData, agentStatus;
+        $(function () {
+            newAgentDialog = $("#new-agent-dialog").dialog({
+                autoOpen: false,
+                height: 160,
+                width: 400,
+                modal: true,
+                buttons: {
+                    Add: function () {
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        $.post("webservice/insertagent",
+                            {
+                                userid: agentForUser,
+                                agent: $("#new_agent").val()
+                            },
+                            function (data, status) {
+                                agentData = data;
+                                agentStatus = status;
+                            });
+                        jQuery.ajaxSetup({async: true});
+                        if (agentStatus == "success" && agentData == "") {
+                            newAgentDialog.dialog("close");
+                        } else {
+                            if (agentData != "")
+                                $("#new_agent_msg").text(agentData);
+                            else $("#new_agent_msg").text("An error occured checking/creating the agent selections");
+                        }
+                    },
+                    Cancel: function () {
+                        newAgentDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    newAgentForm[0].reset();
+                    location.replace(location.pathname + "?id=" + agentForUser);
+                },
+                position: {
+                    my: 'top',
+                    at: 'middle',
+                    of: $('#agent-ids-card-body')
+                }
+            });
+            $("#new_agent").on('input', function () {
+                if ($("#new_agent_msg").text() != "") $("#new_agent_msg").text("");
+            });
+            newAgentForm = newAgentDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
+        function new_agent_id(userid) {
+            $("#new_agent_msg").text("");
+            $("#new-agent-dialog").dialog('option', 'title', 'Define new agent for ' + userid);
+            agentForUser = userid;
+            newAgentDialog.dialog("open");
+            $(":button:contains('Cancel')").addClass("cancelBtn");
+            $(":button:contains('Add')").addClass("addBtn");
         }
     </script>
 

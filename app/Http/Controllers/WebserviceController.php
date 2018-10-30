@@ -193,6 +193,13 @@ class WebserviceController extends Controller
         );
     }
 
+    function insertAgent(){
+        return Webservice::insertAgent(
+            Input::get("userid"),
+            Input::get("agent")
+        );
+    }
+
     public function changePassword() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));

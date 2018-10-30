@@ -253,6 +253,58 @@
         .cursorpointer:hover {
             cursor: pointer;
         }
+
+        .ui-widget-content {
+            background: #F9F9F9;
+            color: #222222;
+        }
+
+        .ui-dialog {
+            left: 0;
+            outline: 0 none;
+            padding: 0 !important;
+            position: absolute;
+            top: 0;
+        }
+
+        .ui-dialog .ui-dialog-content{
+            background: none repeat scroll 0 0 transparent;
+            border: 0 none;
+            overflow: auto;
+            position: relative;
+            padding: 15px !important;
+        }
+
+        .cancelBtn {
+            background: #ff6666;
+        }
+
+        .cancelBtn:hover{
+            background: #ff3333;
+        }
+
+        .addBtn {
+            background: #b0de78;
+        }
+
+        .addBtn:hover{
+            background: #93d246;
+        }
+
+        .ui-widget-header {
+            background: #b0de78;
+            border: 0;
+            color: black;
+            font-weight: normal;
+        }
+
+        .ui-dialog.ui-dialog-titlebar {
+            padding: 0.1em .5em;
+            position: relative;
+            font-size: 1em;
+            background-color: #b0de78;
+        }
+
     </style>
 </head>
 <body style="font-size: 12px">

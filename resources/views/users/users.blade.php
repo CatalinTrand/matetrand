@@ -8,12 +8,6 @@
         @endphp
     @endif
     @php
-        if(isset($_GET['del'])){
-            $id_del = $_GET['del'];
-            $user = App\User::all()->find($id_del);
-            $user->delete();
-        }
-
         if(isset($_GET['sort']) && isset($_GET['val'])){
                 $sort = $_GET['sort'];
                 $val = $_GET['val'];
@@ -183,7 +177,7 @@
                                         $table .= "<tr><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td>".
                                         "<td><a href=''><img id='edit_button_$id' onclick='change_user_password(\"$id\");return false;' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></a>".
                                         "<a href='/editUser?id=$id'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></a>".
-                                        "<a href='/users?del=$id'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></a></td></tr>";
+                                        "<button type='button' onclick='deleteUser(\"$id\");return false;'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button></td></tr>";
                                     }
 
                                     echo $table;
@@ -201,6 +195,14 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function deleteUser(id){
+            if (confirm("Are you sure do you want to delete " + id + "?")) {
+                location.replace(location.pathname + '?del=' + id);
+            } else {}
+        }
+    </script>
 
     <script>
         // Register ENTER as popup default button

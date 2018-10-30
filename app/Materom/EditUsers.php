@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Materom;
+use App\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class EditUsers {
@@ -30,5 +32,17 @@ class EditUsers {
 
         return redirect()->route("users");
 
+    }
+
+    static function getSel($id){
+        return DB::select("select * from users_sel where id='$id'");
+    }
+
+    static function getRefs($id){
+        return DB::select("select * from users_ref where id='$id'");
+    }
+
+    static function getAgents($id){
+        return DB::select("select * from users_agent where id='$id'");
     }
 }

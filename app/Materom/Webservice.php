@@ -47,6 +47,19 @@ class Webservice
         } else return __("Reference user already exists");
     }
 
+    static public function insertAgent($userid,$agent){
+        $find = DB::select("select * from users where id = '$agent'");
+        if (count($find) == 0) {
+            return "No such user!";
+        }
+
+        $find = DB::select("select * from users_agent where id = '$userid' and agent = '$agent'");
+        if (count($find) == 0) {
+            DB::insert("insert into users_agent (id, agent) values ('$userid','$agent')");
+            return "";
+        } else return __("This agent is already set for user");
+    }
+
     static public function changePassword($userid, $newPass)
     {
         $hash = Hash::make($newPass);
