@@ -185,6 +185,25 @@ class WebserviceController extends Controller
         return Webservice::processProposal(json_decode(Input::get("proposal")));
     }
 
+    public function acceptProposal()
+    {
+        return Webservice::acceptProposal(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate"),
+            Input::get("pos")
+            );
+    }
+
+    public function rejectProposal()
+    {
+        return Webservice::rejectProposal(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate")
+        );
+    }
+
     function insertReferenceUser()
     {
         return Webservice::insertReferenceUser(

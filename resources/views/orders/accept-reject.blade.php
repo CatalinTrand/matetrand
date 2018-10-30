@@ -509,6 +509,7 @@
 
     var select_proposal_dialog;
     var _sp_type, _sp_this, _sp_itemdata;
+    var _sp_ebeln, _sp_ebelp, _sp_cdate;
     $(function () {
         select_proposal_dialog = $("#select-proposal-dialog").dialog({
             autoOpen: false,
@@ -520,13 +521,49 @@
                     if (proposal_last_selected_line != null) {
                         let current_row = proposal_last_selected_line;
                         let result_set = current_row.id;
-                        let ebeln = result_set.split('-')[0];
-                        let ebelp = result_set.split('-')[1];
-                        let cdate = result_set.split('-')[2];
-                        let pos = result_set.split('-')[3];
-                        acceptedVariant(ebeln, ebelp, cdate, pos);
+                        let _sp_pos = result_set.split('_')[4];
                         select_proposal_dialog.dialog("close");
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        var _data, _status;
+                        $.get("webservice/acceptproposal",
+                            {
+                                ebeln: _sp_ebeln,
+                                ebelp: _sp_ebelp,
+                                cdate: _sp_cdate,
+                                pos: _sp_pos
+                            },
+                            function (data, status) {
+                                _data = data;
+                                _status = status;
+                            }, "json");
+                        jQuery.ajaxSetup({async: true});
                     }
+                },
+                Reject: function () {
+                    select_proposal_dialog.dialog("close");
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+                    jQuery.ajaxSetup({async: false});
+                    var _data, _status;
+                    $.get("webservice/rejectproposal",
+                        {
+                            ebeln: _sp_ebeln,
+                            ebelp: _sp_ebelp,
+                            cdate: _sp_cdate
+                        },
+                        function (data, status) {
+                            _data = data;
+                            _status = status;
+                        }, "json");
+                    jQuery.ajaxSetup({async: true});
                 },
                 Cancel: function () {
                     select_proposal_dialog.dialog("close");
@@ -578,7 +615,12 @@
         if (_data.length > 0) {
             let table = $("#sel-proposal-table");
             for (let i = 0; i < _data.length; i++) {
-                var newRow = $("<tr style='height: 1.2rem;' id='PROP_" + _data[i].ebeln + '_' + _data[i].ebelp + '_' +_data[i].pos + "' onclick='proposal_selected(this);return false;'>");
+                if (i == 0) {
+                    _sp_ebeln = _data[i].ebeln;
+                    _sp_ebelp = _data[i].ebelp;
+                    _sp_cdate = _data[i].cdate;
+                }
+                var newRow = $("<tr style='height: 1.2rem;' id='PROP_" + _data[i].ebeln + '_' + _data[i].ebelp + '_' +_data[i].cdate.substring(0, 10) + _data[i].cdate.substring(11, 8) + '_' +_data[i].pos + "' onclick='proposal_selected(this);return false;'>");
                 var cols = "<td>" + conv_exit_alpha_output(_data[i].lifnr) + "</td>" +
                     "<td>" + _data[i].lifnr_name + "</td>" +
                     "<td>" + _data[i].idnlf + "</td>" +
