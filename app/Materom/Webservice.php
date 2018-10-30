@@ -158,12 +158,13 @@ class Webservice
         return "";
     }
 
-    public static function readProposals($ebeln, $ebelp, $cdate){
-        $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+    public static function readProposals($ebeln, $ebelp) {
+        $proposal = DB::table("pitemchg")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", 'O']])->orderBy("cdate", "desc")->first();
+        $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$proposal->ebeln' and ebelp = '$proposal->ebelp' and cdate = '$proposal->cdate'");
         foreach ($proposals as $proposal){
-            $proposal->lifnr_name = "";//TODO - User::all()->find($proposal->lifnr)->first()->username;
+            $proposal->lifnr_name = MasterData::getLifnrName($proposal->lifnr);
         }
-        return $proposals;
+        return json_encode($proposals);
     }
 
     public static function acceptItemCHG($ebeln, $ebelp, $type)
@@ -343,11 +344,12 @@ class Webservice
                         Auth::user()->id . "', '" . Auth::user()->username . "')");
             $counter = 0;
             foreach($proposal->items as $propitem) {
+                $propitem->lifnr = SAP::alpha_input($propitem->lifnr);
                 DB::insert("insert into pitemchg_proposals (ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, ".
-                    "mtext, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values (".
+                    "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values (".
                     "'$ebeln', '$ebelp', '$cdate', $counter, ".
-                    "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', " .
-                    "'$propitem->qty', '$propitem->qty_uom', '$propitem->purch_price', '$propitem->purch_curr', " .
+                    "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
+                    "'$propitem->quantity', '$propitem->quantity_unit', '$propitem->purch_price', '$propitem->purch_curr', " .
                     "'$propitem->sales_price', '$propitem->sales_curr', '')");
                 $counter++;
             }
@@ -360,10 +362,11 @@ class Webservice
                 $tmp_idnlf = $proposal->idnlf;
                 $tmp_mtext = $proposal->mtext;
                 $tmp_matnr = $proposal->matnr;
+                $tmp_lfdat = $proposal->lfdat;
                 $tmp_purch_price = $proposal->purch_price;
                 $tmp_purch_curr = $proposal->purch_curr;
                 DB::update("update pitems set stage = 'Z', pstage = '$stage', status = 'A', ".
-                    "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', " .
+                    "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
                     "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr' " .
                     "where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values ".
@@ -373,6 +376,10 @@ class Webservice
                 SAP::savePOItem($ebeln, $ebelp);
             } else {
                 // change supplier
+                SAP::rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
+                SAP::createPurchReq($proposal->lifnr, $proposal->idnlf, $proposal->mtext, $proposal->matnr,
+                    $proposal->quantity, $proposal->quantity_unit,
+                    $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat, $proposal->infnr);
                 DB::beginTransaction();
                 DB::update("update pitems set stage = 'Z', pstage = '$proposal->itemdata->stage', status = 'X', ".
                     "idnlf = '$proposal->orig_idnlf', purch_price = '$proposal->orig_purch_price', " .
@@ -382,7 +389,6 @@ class Webservice
                     "('$proposal->itemdata->ebeln', '$proposal->itemdata->ebelp', '$cdate', 0, 'X', 'Z', '".
                     Auth::user()->id . "', '" . Auth::user()->username . "')");
                 DB::commit();
-                rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
             }
         }
         return json_encode($result);

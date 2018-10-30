@@ -193,7 +193,8 @@ class SAP
         }
     }
 
-    static public function createPurchReq($lifnr, $idnlf, $mtext, $matnr, $qty, $unit, $price, $curr, $deldate, $infnr)
+    static public function createPurchReq($lifnr, $idnlf, $mtext, $matnr,
+                                          $qty, $unit, $price, $curr, $deldate, $infnr)
     {
 
         $globalRFCData = DB::select("select * from global_rfc_config");
@@ -211,6 +212,7 @@ class SAP
                                       'I_MATNR' => $matnr,
                                       'I_MTEXT' => $mtext,
                                       'I_IDNLF' => $idnlf,
+                                      'I_LFDAT' => $lfdat,
                                       'I_PRICE' => $price,
                                       'I_CURR' => $curr,
                                       'I_MENGE' => $qty,
