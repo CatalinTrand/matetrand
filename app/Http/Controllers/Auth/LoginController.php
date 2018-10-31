@@ -49,8 +49,12 @@ class LoginController extends Controller
         Session::put('materomdbcache', Orders::newCacheToken());
         Orders::fillCache();
         if (Auth::user()->role == "CTV") {
-//          DB::delete("delete from user_agent_clients where id = '" . Auth::user()->id . "'");
+            $id = Auth::user()->id;
+            DB::delete("delete from user_agent_clients where id = '$id'");
             $clients = SAP::getAgentClients(Auth::user()->id);
+            foreach ($clients as $client){
+                DB::insert("insert into user_agent_clients (id, kunnr) values ('$id','$client')");
+            }
         }
     }
 

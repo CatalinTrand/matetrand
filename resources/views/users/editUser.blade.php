@@ -512,6 +512,7 @@
                             });
                         jQuery.ajaxSetup({async: true});
                         if (vendorStatus == "success" && vendorData == "") {
+                            location.reload();
                             newVendorDialog.dialog("close");
                         } else {
                             if (vendorData != "")
@@ -594,6 +595,7 @@
                             });
                         jQuery.ajaxSetup({async: true});
                         if (refferalStatus == "success" && refferalData == "") {
+                            location.reload();
                             newRefferalDialog.dialog("close");
                         } else {
                             if (refferalData != "")
@@ -675,6 +677,7 @@
                             });
                         jQuery.ajaxSetup({async: true});
                         if (agentStatus == "success" && agentData == "") {
+                            location.reload();
                             newAgentDialog.dialog("close");
                         } else {
                             if (agentData != "")
