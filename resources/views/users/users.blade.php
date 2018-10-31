@@ -65,25 +65,41 @@
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
                         @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
-                            <a href="/roles"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-administrative-tools-48.png'/>
-                                {{__("Roles")}}
-                                </p></a>
-                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line selector">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
+                            <a href="/roles">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                   class="card-line first">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                           src='/images/icons8-administrative-tools-48.png'/>
+                                    {{__("Roles")}}
+                                </p>
+                            </a>
+                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                               class="card-line selector">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                       src='/images/icons8-user-account-80.png'/>
                                 {{__("Users")}}
                             </p>
-                            <a href="/messages"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
-                                {{__("Messages")}}
-                                </p></a>
-                            <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
-                                {{__("Orders")}}
-                                </p></a>
+                            <a href="/messages">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                   class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                           src='/images/icons8-chat-80.png'/>
+                                    {{__("Messages")}}
+                                </p>
+                            </a>
+                            <a href="/orders">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                   class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                           src='/images/icons8-todo-list-96.png'/>
+                                    {{__("Orders")}}
+                                </p>
+                            </a>
                         @else
                             <p style="display: inline-block;" class="card-line first">{{__('Messages')}}</p>
-                            <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">{{__('Orders')}}</p></a>
+                            <a href="/orders"><p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line">{{__('Orders')}}</p></a>
                         @endif
                     </div>
 
@@ -105,15 +121,18 @@
                                     </div>
                                     <div class="form-group col-xs-2 input-group-sm">
                                         <input type="text" class="form-control input-sm" name="role" placeholder=""
-                                               value="" style="border-radius: 2px; border-color: black;margin-left: 10px">
+                                               value=""
+                                               style="border-radius: 2px; border-color: black;margin-left: 10px">
                                     </div>
                                     <div class="form-group col-sm-2 input-group-sm">
                                         <input type="text" class="form-control input-sm" name="user" placeholder=""
-                                               value="" style="border-radius: 2px; border-color: black; margin-left: 20px">
+                                               value=""
+                                               style="border-radius: 2px; border-color: black; margin-left: 20px">
                                     </div>
                                     <div class="form-group col-xs-3 input-group-sm">
                                         <input type="text" class="form-control input-sm" name="email" placeholder=""
-                                               value="" style="border-radius: 2px; border-color: black; margin-left: 25px">
+                                               value=""
+                                               style="border-radius: 2px; border-color: black; margin-left: 25px">
                                     </div>
                                     <input type="hidden" name="sort" value="{{$sort}}">
                                     <input type="hidden" name="val" value="{{$val}}">
@@ -127,7 +146,8 @@
                                    style="width:100%; clear:left; line-height: 1.4rem;">
                                 <thead class="thead-light">
                                 <tr>
-                                    <th><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a href="/users?sort=ID&val=asc">&#x25B2;</a>
+                                    <th><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a
+                                                href="/users?sort=ID&val=asc">&#x25B2;</a>
                                     </th>
                                     <th><a href="/users?sort=role&val=desc">&#x25BC;</a>{{trans('strings.role')}}<a
                                                 href="/users?sort=role&val=asc">&#x25B2;</a></th>
@@ -206,13 +226,33 @@
     </div>
 
     <script>
-        function deleteUser(id){
-            if (confirm("{{__('Are you sure do you want to delete')}}" + id + "?")) {
+        function deleteUser2(id){
+            /*
+            var content = document.createElement('div');
+            content.innerHTML = "Are you sure that you want to delete <u><b>" + id + "</b></u> ?";
+            swal({
+                title: "Delete User",
+                content: content,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true
+            }).then((isConfirm) =>{
+                if(isConfirm)
+                    location.replace(location.pathname + '?del=' + id);
+            });
+            */
+        }
+    </script>
+
+    <script>
+        function deleteUser(id) {
+            if (confirm("{{__('Are you sure do you want to delete ')}}" + id + "?")) {
                 location.replace(location.pathname + '?del=' + id);
-            } else {}
+            } else {
+            }
         }
 
-        function editUser(id){
+        function editUser(id) {
             location.replace('/editUser?id=' + id);
         }
     </script>
@@ -239,7 +279,8 @@
                        class="form-control col-md-6" required value="">
             </div>
             <div class="form-group row" style="width: 80%">
-                <label for="conf_password" class="col-md-4 col-form-label text-md-left">{{__('Confirm Password')}}</label>
+                <label for="conf_password"
+                       class="col-md-4 col-form-label text-md-left">{{__('Confirm Password')}}</label>
                 <input id="conf_password" type="password" name="conf_password" size="20" style="width: 200px;"
                        class="form-control col-md-6" required value="">
             </div>
