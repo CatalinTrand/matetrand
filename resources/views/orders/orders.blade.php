@@ -605,6 +605,32 @@
     </script>
 
     <script>
+        function onselect_zpretrecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
+                                      result_purch_price, result_purch_currency, result_sales_price, result_sales_currency){
+            if (caller == 1) {
+                $("#ar-immed-lifnr").val(result_lifnr);
+                $("#ar-immed-idnlf").val(result_idnlf);
+                $("#ar-immed-mtext").val(result_mtext);
+                $("#ar-immed-matnr").val(result_matnr);
+                $("#ar-immed-purch-price").val(result_purch_price);
+                $("#ar-immed-purch-curr").val(result_purch_currency);
+                $("#ar-immed-sales-price").val(result_sales_price);
+                $("#ar-immed-sales-curr").val(result_sales_currency);
+            }
+            if (caller == 2) {
+                $("#aep-lifnr").val(result_lifnr);
+                $("#aep-idnlf").val(result_idnlf);
+                $("#aep-mtext").val(result_mtext);
+                $("#aep-matnr").val(result_matnr);
+                $("#aep-purch-price").val(result_purch_price);
+                $("#aep-purch-curr").val(result_purch_currency);
+                $("#aep-sales-price").val(result_sales_price);
+                $("#aep-sales-curr").val(result_sales_currency);
+            }
+        }
+    </script>
+
+    <script>
         $( function() {
             $( "#time_search" ).datepicker({dateFormat: "yy-mm-dd"});
         } );
@@ -1909,6 +1935,7 @@
     </script>
 
     @include("orders.read_inforecords")
+    @include("orders.read_zpretrecords")
     @include("orders.updaterow")
     @include("orders.accept-reject")
 

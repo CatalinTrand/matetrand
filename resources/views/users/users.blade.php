@@ -123,7 +123,9 @@
                                     <a href="/users" style="padding-left: 30px;padding-top: 3px">{{__('Reset')}}</a>
                                 </div>
                             </form>
-                            <table id="user-list-table" class="table-striped" style="width:100%; clear:left; line-height: 1.4rem;">
+                            <table id="user-list-table" class="table"
+                                   style="width:100%; clear:left; line-height: 1.4rem;">
+                                <thead class="thead-light">
                                 <tr>
                                     <th><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a href="/users?sort=ID&val=asc">&#x25B2;</a>
                                     </th>
@@ -141,6 +143,8 @@
                                     </th>
                                     <th>{{trans('strings.action')}}</th>
                                 </tr>
+                                </thead>
+                                <tbody>
                                 @php
                                     if(isset($_GET['id']) && strcmp($_GET['id'],"") != 0){
                                         $id = $_GET['id'];
@@ -174,14 +178,19 @@
                                         if($user->active == 0)
                                             $active = "Inactive";
 
+                                        $chPass = __('Change password');
+                                        $editUser = __('Change user data');
+                                        $deleteUser = __('Delete user');
+
                                         $table .= "<tr><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td>".
-                                        "<td><button type='button' onclick='change_user_password(\"$id\");return false;'><img id='edit_button_$id' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></button>".
-                                        "<button type='button' onclick='editUser(\"$id\");return false;'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></button>".
-                                        "<button type='button' onclick='deleteUser(\"$id\");return false;'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button></td></tr>";
+                                        "<td><button type='button' onclick='change_user_password(\"$id\");return false;' title='$chPass'><img id='edit_button_$id' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></button>".
+                                        "<button type='button' onclick='editUser(\"$id\");return false;' title='$editUser'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></button>".
+                                        "<button type='button' onclick='deleteUser(\"$id\");return false;' title='$deleteUser'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button></td></tr>";
                                     }
 
                                     echo $table;
                                 @endphp
+                                </tbody>
                             </table>
                         @elseif (Auth::user() && Auth::user()->role == 'Administrator')
                             {{trans('strings.welcome_msg')}}<br>

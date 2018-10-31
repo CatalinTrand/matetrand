@@ -275,34 +275,18 @@
             padding: 15px !important;
         }
 
-        .cancelBtn {
-            background: #ff6666;
-        }
-
-        .cancelBtn:hover{
-            background: #ff3333;
-        }
-
-        .addBtn {
-            background: #b0de78;
-        }
-
-        .addBtn:hover{
-            background: #93d246;
-        }
-
         .ui-widget-header {
-            background: #b0de78;
+            background: slategrey;
             border: 0;
-            color: black;
-            font-weight: normal;
+            color: white;
+            font-weight: bold;
         }
 
         .ui-dialog.ui-dialog-titlebar {
             padding: 0.1em .5em;
             position: relative;
             font-size: 1em;
-            background-color: #b0de78;
+            background-color: lightgray;
         }
 
     </style>

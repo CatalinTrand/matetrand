@@ -33,7 +33,6 @@ return array(
     'App\\Materom\\Orders\\POrder' => $baseDir . '/app/Materom/Orders/POrder.php',
     'App\\Materom\\Orders\\POrderItem' => $baseDir . '/app/Materom/Orders/POrderItem.php',
     'App\\Materom\\Orders\\POrderItemChg' => $baseDir . '/app/Materom/Orders/POrderItemChg.php',
-    'App\\Materom\\Orders\\VOrder' => $baseDir . '/app/Materom/Orders/VOrder.php',
     'App\\Materom\\RFCData' => $baseDir . '/app/Materom/RFCData.php',
     'App\\Materom\\Roles' => $baseDir . '/app/Materom/Roles.php',
     'App\\Materom\\SAP' => $baseDir . '/app/Materom/SAP.php',

@@ -44,7 +44,7 @@
             <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
                     onclick="get_infnr(1);return false;">{{__('Inforecord')}}</button>
             <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget" id="accept-reject-zpret"
-                    onclick="get_zpret(1);return false;">{{__('ZPRET')}}</button>
+                    onclick="get_zpret(1);return false;">ZPRET</button>
         </div>
     </div>
     <div id="ar-proposals-approval" width="95%" style="margin-right: 0.5rem;">
@@ -105,7 +105,7 @@
     $(function () {
         arDialog = $("#accept-reject-dialog").dialog({
             autoOpen: false,
-            height: 480,
+            height: 500,
             width: 920,
             modal: true,
             buttons: [
@@ -340,7 +340,7 @@
         <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
                 onclick="get_infnr(2);return false;">{{__('Inforecord')}}</button>
         <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
-                onclick="get_zpret(2);return false;">{{__('ZPRET')}}</button>
+                onclick="get_zpret(2);return false;">ZPRET</button>
     </div>
 </div>
 
@@ -660,9 +660,19 @@
         read_inforecords(caller, lifnr, idnlf);
     }
 
-    function get_zpret(mode)
+    function get_zpret(caller)
     {
-
+        let lifnr = null;
+        let idnlf = null;
+        if (caller == 1) {
+            lifnr = $("#ar-immed-lifnr").val();
+            idnlf = $("#ar-immed-idnlf").val();
+        }
+        if (caller == 2) {
+            lifnr = $("#aep-lifnr").val();
+            idnlf = $("#aep-idnlf").val();
+        }
+        read_zpretrecords(caller, lifnr, idnlf);
     }
 
     function delete_proposal(mode)
