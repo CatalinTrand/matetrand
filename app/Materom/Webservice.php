@@ -49,13 +49,12 @@ class Webservice
 
     static public function insertAgent($userid, $agent)
     {
-        $find = DB::select("select * from users where id = '$agent'");
-        if (count($find) == 0) {
-            return "No such user!";
-        }
+        $agent_name = MasterData::getKunnrName($agent);
+        if (empty($agent_name)) return "No such user!";
 
         $find = DB::select("select * from users_agent where id = '$userid' and agent = '$agent'");
         if (count($find) == 0) {
+            $agent = SAP::alpha_input($agent);
             DB::insert("insert into users_agent (id, agent) values ('$userid','$agent')");
             return "";
         } else return __("This agent is already set for user");

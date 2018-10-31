@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Materom\Orders;
+use App\Materom\SAP;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,11 +47,11 @@ class LoginController extends Controller
     {
         Session::put('locale', strtolower(Auth::user()->lang));
         Session::put('materomdbcache', Orders::newCacheToken());
-//        DB::beginTransaction();
-//        DB::delete("delete from porders_cache");
-//        DB::delete("delete from pitems_cache");
-//        DB::commit();
         Orders::fillCache();
+        if (Auth::user()->role == "CTV") {
+//          DB::delete("delete from user_agent_clients where id = '" . Auth::user()->id . "'");
+            $clients = SAP::getAgentClients(Auth::user()->id);
+        }
     }
 
     protected function validateLogin(Request $request)

@@ -364,7 +364,7 @@
                                         $table = "";
                                         foreach ($myAGENTs as $aAGENT){
                                                 $agent = $aAGENT->agent;
-                                                $agent_name = \App\User::all()->find($agent)->username;
+                                                $agent_name = \App\Materom\SAP\MasterData::getKunnrName($agent, 2);
                                                 $table .= "<tr style='line-height: 20px'><td>$agent</td><td>$agent_name</td><td><a href='/editUser?id=$id&agentDEL=$agent'><img src='/images/delete.png' class='delete'></a></td></tr>";
                                         }
                                         echo $table;
