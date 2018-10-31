@@ -525,7 +525,7 @@
                 },
                 close: function () {
                     newVendorForm[0].reset();
-                    location.replace(location.pathname + "?id=" + vendorForUser);
+                    //location.replace(location.pathname + "?id=" + vendorForUser);
                 },
                 position: {
                     my: 'top',
@@ -607,7 +607,7 @@
                 },
                 close: function () {
                     newRefferalForm[0].reset();
-                    location.replace(location.pathname + "?id=" + refferalForUser);
+                    //location.replace(location.pathname + "?id=" + refferalForUser);
                 },
                 position: {
                     my: 'top',
@@ -688,7 +688,7 @@
                 },
                 close: function () {
                     newAgentForm[0].reset();
-                    location.replace(location.pathname + "?id=" + agentForUser);
+                    //location.replace(location.pathname + "?id=" + agentForUser);
                 },
                 position: {
                     my: 'top',

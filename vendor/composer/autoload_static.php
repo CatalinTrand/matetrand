@@ -383,7 +383,6 @@ class ComposerStaticInit277b27e48d44d1b2c4d9f7d661e55170
         'App\\Materom\\Orders\\POrder' => __DIR__ . '/../..' . '/app/Materom/Orders/POrder.php',
         'App\\Materom\\Orders\\POrderItem' => __DIR__ . '/../..' . '/app/Materom/Orders/POrderItem.php',
         'App\\Materom\\Orders\\POrderItemChg' => __DIR__ . '/../..' . '/app/Materom/Orders/POrderItemChg.php',
-        'App\\Materom\\Orders\\VOrder' => __DIR__ . '/../..' . '/app/Materom/Orders/VOrder.php',
         'App\\Materom\\RFCData' => __DIR__ . '/../..' . '/app/Materom/RFCData.php',
         'App\\Materom\\Roles' => __DIR__ . '/../..' . '/app/Materom/Roles.php',
         'App\\Materom\\SAP' => __DIR__ . '/../..' . '/app/Materom/SAP.php',

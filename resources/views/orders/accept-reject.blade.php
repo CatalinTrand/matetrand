@@ -660,9 +660,19 @@
         read_inforecords(caller, lifnr, idnlf);
     }
 
-    function get_zpret(mode)
+    function get_zpret(caller)
     {
-
+        let lifnr = null;
+        let idnlf = null;
+        if (caller == 1) {
+            lifnr = $("#ar-immed-lifnr").val();
+            idnlf = $("#ar-immed-idnlf").val();
+        }
+        if (caller == 2) {
+            lifnr = $("#aep-lifnr").val();
+            idnlf = $("#aep-idnlf").val();
+        }
+        read_zpretrecords(caller, lifnr, idnlf);
     }
 
     function delete_proposal(mode)
