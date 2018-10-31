@@ -34,6 +34,18 @@ class EditUsers {
 
     }
 
+    static function delSel($id,$sel){
+        DB::delete("delete from users_sel where id = '$id' and mfrnr = '$sel'");
+    }
+
+    static function refDel($id,$refID){
+        DB::delete("delete from users_ref where id = '$id' and refid = '$refID'");
+    }
+
+    static function agentDel($id,$agentDEL){
+        DB::delete("delete from users_agent where id = '$id' and agent = '$agentDEL'");
+    }
+
     static function getSel($id){
         return DB::select("select * from users_sel where id='$id'");
     }
