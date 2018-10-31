@@ -53,15 +53,16 @@
                 <colgroup>
                     <col width="8%">
                     <col width="17%">
-                    <col width="12%">
-                    <col width="24%">
+                    <col width="10%">
+                    <col width="20%">
                     <col width="7%">
-                    <col width="8%">
-                    <col width="3%">
-                    <col width="9%">
-                    <col width="3%">
-                    <col width="9%">
-                    <col width="3%">
+                    <col width="7%">
+                    <col width="6%">
+                    <col width="2%">
+                    <col width="8.5%">
+                    <col width="2.5%">
+                    <col width="8.5%">
+                    <col width="2.5%">
                 </colgroup>
                 <tr>
                     <th>{{__('Vendor')}}</th>
@@ -69,8 +70,9 @@
                     <th>{{__('Vendor mat.')}}</th>
                     <th>{{__('Material description')}}</th>
                     <th>{{__('Material')}}</th>
+                    <th>{{__('Dlv. date')}}</th>
                     <th colspan="2" style="text-align: right;">{{__('Quantity')}}</th>
-                    <th colspan="2" style="text-align: right;">{{__('Purchase price')}}</th>
+                    <th colspan="2" style="text-align: right;">{{__('Purch. price')}}</th>
                     <th colspan="2" style="text-align: right;">{{__('Sales price')}}</th>
                 </tr>
             </table>
@@ -123,6 +125,7 @@
                             result.items = [];
                             for (i = 1; i < n; i++) {
                                 row = tablerows[i];
+                                let item = new Object();
                                 item.lifnr = row.cells[0].textContent.trim();
                                 item.idnlf = row.cells[2].textContent.trim();
                                 item.mtext = row.cells[3].textContent.trim();
@@ -350,7 +353,7 @@
     $(function () {
         add_edit_Dialog = $("#add-edit-proposal").dialog({
             autoOpen: false,
-            height: 400,
+            height: 420,
             width: 640,
             modal: true,
             buttons: {
@@ -479,15 +482,16 @@
             <colgroup>
                 <col width="8%">
                 <col width="17%">
-                <col width="12%">
-                <col width="24%">
+                <col width="10%">
+                <col width="20%">
                 <col width="7%">
-                <col width="8%">
-                <col width="3%">
-                <col width="9%">
-                <col width="3%">
-                <col width="9%">
-                <col width="3%">
+                <col width="7%">
+                <col width="6%">
+                <col width="2%">
+                <col width="8.5%">
+                <col width="2.5%">
+                <col width="8.5%">
+                <col width="2.5%">
             </colgroup>
             <tr>
                 <th>{{__('Vendor')}}</th>
@@ -495,8 +499,9 @@
                 <th>{{__('Vendor mat.')}}</th>
                 <th>{{__('Material description')}}</th>
                 <th>{{__('Material')}}</th>
+                <th>{{__('Dlv. date')}}</th>
                 <th colspan="2" style="text-align: right;">{{__('Quantity')}}</th>
-                <th colspan="2" style="text-align: right;">{{__('Purchase price')}}</th>
+                <th colspan="2" style="text-align: right;">{{__('Purch. price')}}</th>
                 <th colspan="2" style="text-align: right;">{{__('Sales price')}}</th>
             </tr>
         </table>
