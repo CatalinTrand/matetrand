@@ -22,4 +22,25 @@ class EditUserController
             Input::get("email")
         );
     }
+
+    public function selDel(){
+        EditUsers::delSel(
+            Input::get("id"),
+            Input::get("sel")
+        );
+    }
+
+    public function refDel(){
+        EditUsers::refDel(
+            Input::get("id"),
+            Input::get("ref")
+        );
+    }
+
+    public function agentDel(){
+        EditUsers::agentDel(
+            Input::get("id"),
+            Input::get("agent")
+        );
+    }
 }

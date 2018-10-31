@@ -47,6 +47,7 @@ class HomeController extends Controller
             $id = $_GET['id'];
             $mfrnr = $_GET['mfrnrDEL'];
             DB::delete("delete from users_sel where id = '$id' and mfrnr = '$mfrnr'");
+            unset($_GET['mfrnrDEL']);
         }
 
         //refferal delete
@@ -54,6 +55,7 @@ class HomeController extends Controller
             $id = $_GET['id'];
             $refID = $_GET['refidDEL'];
             DB::delete("delete from users_ref where id = '$id' and refid = '$refID'");
+            unset($_GET['refidDEL']);
         }
 
         //agent delete
@@ -61,6 +63,7 @@ class HomeController extends Controller
             $id = $_GET['id'];
             $agentDEL = $_GET['agentDEL'];
             DB::delete("delete from users_agent where id = '$id' and agent = '$agentDEL'");
+            unset($_GET['agentDEL']);
         }
 
         return view('users.editUser');

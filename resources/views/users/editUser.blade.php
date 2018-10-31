@@ -260,7 +260,7 @@
                                                 $mfrnr = $aSEL->mfrnr;
                                                 if ($mfrnr != '0000000000' && ctype_digit($mfrnr))
                                                     while (substr($mfrnr, 0, 1) == '0') $mfrnr = substr($mfrnr, 1, 10);
-                                                $table .= "<tr style='line-height: 20px'><td>$mfrnr</td><td>$aSEL->mfrnr_name</td><td><a href='/editUser?id=$id&mfrnrDEL=$aSEL->mfrnr'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                                $table .= "<tr style='line-height: 20px'><td>$mfrnr</td><td>$aSEL->mfrnr_name</td><td><button type='button' onclick='selDel(\"$id\",\"$aSEL->mfrnr\");return false;'><img src='/images/delete.png' class='delete'></button></td></tr>";
                                         }
                                         echo $table;
                                     @endphp
@@ -313,7 +313,7 @@
                                     foreach ($myREFs as $aREF){
                                             $id_in_ref = $aREF->refid;
                                             $ref_name = User::where('id','=',$id_in_ref)->get()[0]->username;
-                                            $table .= "<tr style='line-height: 20px'><td>$id_in_ref</td><td>$ref_name</td><td><a href='/editUser?id=$id&refidDEL=$aREF->refid'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                            $table .= "<tr style='line-height: 20px'><td>$id_in_ref</td><td>$ref_name</td><td><button type='button' onclick='refDel(\"$id\",\"$aREF->refid\");return false;'><img src='/images/delete.png' class='delete'></button></td></tr>";
                                     }
                                     echo $table;
                                 @endphp
@@ -365,7 +365,7 @@
                                         foreach ($myAGENTs as $aAGENT){
                                                 $agent = $aAGENT->agent;
                                                 $agent_name = \App\Materom\SAP\MasterData::getKunnrName($agent, 2);
-                                                $table .= "<tr style='line-height: 20px'><td>$agent</td><td>$agent_name</td><td><a href='/editUser?id=$id&agentDEL=$agent'><img src='/images/delete.png' class='delete'></a></td></tr>";
+                                                $table .= "<tr style='line-height: 20px'><td>$agent</td><td>$agent_name</td><td><button type='button' onclick='agentDel(\"$id\",\"$agent\");return false;'><img src='/images/delete.png' class='delete'></button></td></tr>";
                                         }
                                         echo $table;
                                     @endphp
@@ -381,6 +381,59 @@
     </div>
 
     <script>
+        function selDel(id, sel) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.post("editUser/selDel",
+                {
+                    id: id,
+                    sel: sel
+                },
+                function (data, status) {});
+            jQuery.ajaxSetup({async: true});
+            location.replace(location.pathname + "?id=" + id);
+        }
+
+        function refDel(id, ref) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.post("editUser/refDel",
+                {
+                    id: id,
+                    ref: ref
+                },
+                function (data, status) {});
+            jQuery.ajaxSetup({async: true});
+            location.replace(location.pathname + "?id=" + id);
+        }
+
+        function agentDel(id, agent) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.post("editUser/agentDel",
+                {
+                    id: id,
+                    agent: agent
+                },
+                function (data, status) {});
+            jQuery.ajaxSetup({async: true});
+            location.replace(location.pathname + "?id=" + id);
+        }
+    </script>
+
+    <script>
         function generateNew() {
             var api_token = document.getElementById("api_token");
             api_token.value = Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30);
@@ -388,7 +441,7 @@
     </script>
 
     <script>
-        $( document ).ready(function() {
+        $(document).ready(function () {
             selectCheck('{{$user->role}}');
         });
     </script>
@@ -396,7 +449,7 @@
     <script>
 
         function selectCheck(nameSelect) {
-            if(nameSelect == null)
+            if (nameSelect == null)
                 return;
 
             var lifnr_div = document.getElementById("lifnr_div");
