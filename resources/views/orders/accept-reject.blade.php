@@ -98,9 +98,11 @@
         if ($(_this).is(":checked")) {
             $("#ar-proposals-immed").attr("style", "display: none; margin-right: 0.5rem;")
             $("#ar-proposals-approval").attr("style", "display: block; margin-right: 0.5rem;")
+            $("#accept-reject-ok-button").text("{{__('Send proposal')}}");
         } else {
             $("#ar-proposals-immed").attr("style", "display: block; margin-right: 0.5rem;")
             $("#ar-proposals-approval").attr("style", "display: none; margin-right: 0.5rem;")
+            $("#accept-reject-ok-button").text("{{__('Modificare comanda')}}");
         }
     }
 
@@ -190,7 +192,6 @@
                     $("#ar-immed-sales-price").hide();
                     $("#ar-immed-sales-curr").hide();
                     $("#accept-reject-zpret").hide();
-                    $("#accept-reject-ok-button").text("{{__('Modificare comanda')}}");
                 } else {
                     $("#require_sr_approval").show();
                     $("#label_require_sr_approval").show();
@@ -198,8 +199,8 @@
                     $("#ar-immed-sales-price").show();
                     $("#ar-immed-sales-curr").show();
                     $("#accept-reject-zpret").show();
-                    $("#accept-reject-ok-button").text("{{__('Send proposal')}}");
                 }
+                $("#accept-reject-ok-button").text("{{__('Modificare comanda')}}");
             },
             position: {
                 my: "center",

@@ -47,15 +47,15 @@ class LoginController extends Controller
     {
         Session::put('locale', strtolower(Auth::user()->lang));
         Session::put('materomdbcache', Orders::newCacheToken());
-        Orders::fillCache();
         if (Auth::user()->role == "CTV") {
             $id = Auth::user()->id;
             DB::delete("delete from user_agent_clients where id = '$id'");
-            $clients = SAP::getAgentClients(Auth::user()->id);
+            $clients = SAP::getAgentClients($id);
             foreach ($clients as $client){
                 DB::insert("insert into user_agent_clients (id, kunnr) values ('$id','$client')");
             }
         }
+        Orders::fillCache();
     }
 
     protected function validateLogin(Request $request)

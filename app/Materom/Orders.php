@@ -138,8 +138,18 @@ class Orders
             if (!empty($filter_refs_sql))
                 $filter_sql = self::addFilter($filter_sql, "(" . substr($filter_refs_sql, 4) . ")");
         } elseif (Auth::user()->role == "CTV") {
-            $filter_sql = self::addFilter($filter_sql,
-                self::processFilter("ctv", Auth::user()->sapuser));
+            $clients = DB::select("select distinct kunnr from user_agent_clients where id = '" .
+                        Auth::user()->id . "'");
+            $sql = "";
+            foreach($clients as $client) {
+                $sel1 = $items_table . ".kunnr = '$client->kunnr'";
+                if (empty($sql)) $sql = $sel1;
+                else $sql .= ' or ' . $sel1;
+            }
+            if (!empty($sql)) {
+                $sql = "( $sql )";
+                $filter_sql = self::addFilter($filter_sql, $sql);
+            }
         }
 
         // final sql build

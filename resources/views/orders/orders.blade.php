@@ -1614,17 +1614,26 @@
             jQuery.ajaxSetup({async: true});
             if (_statusIR != "success") return;
 
-            @if (\Illuminate\Support\Facades\Auth::user()->role != "CTV")
-            if (rowtype == 'I') {
+            @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
                 if (mode == 1) {
                     accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
                 }
                 if (mode == 2) {
                     accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
-            }
-            @else
+            @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+            @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
+                if (_dataIR.stage == 'R') {
+                    if (mode == 1) {
+                        accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
+                    }
+                    if (mode == 2) {
+                        accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
+                    }
+                } else if (_dataIR.stage = 'C') {
+                    select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+                }
             @endif
         }
 

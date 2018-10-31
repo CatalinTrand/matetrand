@@ -184,7 +184,7 @@ class SAP
                                       'I_MENGE' => $new_menge,
                                       'I_PRICE' => $new_price,
                                       'I_EINDT' => $new_eindt,
-                                      'I_ACKFLAG' => 'N' ]);
+                                      'I_ACKFLAG' => 'N' ])["E_MESSAGE"];
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
@@ -194,7 +194,7 @@ class SAP
     }
 
     static public function createPurchReq($lifnr, $idnlf, $mtext, $matnr,
-                                          $qty, $unit, $price, $curr, $deldate, $infnr)
+                                          $qty, $unit, $price, $curr, $deldate, $infnr = "")
     {
 
         $globalRFCData = DB::select("select * from global_rfc_config");
@@ -218,7 +218,7 @@ class SAP
                                       'I_MENGE' => $qty,
                                       'I_MEINS' => $unit,
                                       'I_DELDATE' => $deldate,
-                                      'I_INFNR' => $infnr ]);
+                                      'I_INFNR' => $infnr ])["E_MESSAGE"];
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
@@ -400,7 +400,6 @@ class SAP
 
     static public function getAgentClients($ctvuserid)
     {
-
         $globalRFCData = DB::select("select * from global_rfc_config");
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
         $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
@@ -425,4 +424,68 @@ class SAP
             return $e->getErrorInfo();
         }
     }
+
+    public static function processSOItem($vbeln, $posnr,
+                $quantity, $quantity_unit, $lifnr, $matnr, $mtext, $idnlf, $purch_price, $purch_curr,
+                $sales_price, $sales_curr, $lfdat, $infnr = "")
+    {
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_SO_ITEM_PROCESS');
+            $result = ($sapfm->invoke(['I_VBELN' => $vbeln,
+                                       'I_POSNR' => $posnr,
+                                       'I_MENGE' => $quantity,
+                                       'I_MEINS' => $quantity_unit,
+                                       'I_LIFNR' => $lifnr,
+                                       'I_MATNR' => $matnr,
+                                       'I_MTEXT' => $mtext,
+                                       'I_IDNLF' => $idnlf,
+                                       'I_PURCH_PRICE' => $purch_price,
+                                       'I_PURCH_CURR' => $purch_curr,
+                                       'I_SALES_PRICE' => $sales_price,
+                                       'I_SALES_CURR' => $sales_curr,
+                                       'I_DELDATE' => $lfdat,
+                                       'I_INFNR' => $infnr
+                ]))["E_MESSAGE"];
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+
+    }
+
+    public static function rejectSOItem($vbeln, $posnr)
+    {
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_SO_ITEM_REJECT');
+            $result = ($sapfm->invoke(['I_VBELN' => $vbeln,
+                                       'I_POSNR' => $posnr
+            ]))["E_MESSAGE"];
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+    }
+
 };

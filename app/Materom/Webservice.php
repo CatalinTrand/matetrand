@@ -373,52 +373,106 @@ class Webservice
             DB::commit();
         } else {
             $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
-            if ($proposal->lifnr == $proposal->itemdata->lifnr) {
-                // keeping the same supplier, just update PO
+            if (($proposal->lifnr == $proposal->itemdata->lifnr) &&
+                ($proposal->itemdata->vbeln == Orders::stockorder)) {
+                // keeping the same supplier for stock orders, just update PO
                 DB::beginTransaction();
                 $tmp_idnlf = $proposal->idnlf;
                 $tmp_mtext = $proposal->mtext;
                 $tmp_matnr = $proposal->matnr;
                 $tmp_lfdat = $proposal->lfdat;
+                $tmp_qty = $proposal->quantity;
+                $tmp_qty_unit = $proposal->quantity_unit;
                 $tmp_purch_price = $proposal->purch_price;
                 $tmp_purch_curr = $proposal->purch_curr;
+                $result  = SAP::savePOItem($ebeln, $ebelp);
+                if (!empty($result)) return $result;
                 DB::update("update pitems set stage = 'Z', pstage = '$stage', status = 'A', " .
                     "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
+                    "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
                     "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr' " .
                     "where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                     "('$ebeln', '$ebelp', '$cdate', 1, 'A', 'Z', '" .
                     Auth::user()->id . "', '" . Auth::user()->username . "')");
                 DB::commit();
-                SAP::savePOItem($ebeln, $ebelp);
             } else {
-                // change supplier
+                // change supplier or change in SO
                 SAP::rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
-                SAP::createPurchReq($proposal->lifnr, $proposal->idnlf, $proposal->mtext, $proposal->matnr,
-                    $proposal->quantity, $proposal->quantity_unit,
-                    $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat, $proposal->infnr);
-                DB::beginTransaction();
-                DB::update("update pitems set stage = 'Z', pstage = '$proposal->itemdata->stage', status = 'X', " .
-                    "idnlf = '$proposal->orig_idnlf', purch_price = '$proposal->orig_purch_price', " .
-                    "qty = '$proposal->orig_qty', lfdat = '$proposal->orig_lfdat' " .
-                    "where ebeln = '$proposal->itemdata->ebeln' and ebelp = '$proposal->itemdata->ebelp'");
-                DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
-                    "('$proposal->itemdata->ebeln', '$proposal->itemdata->ebelp', '$cdate', 0, 'X', 'Z', '" .
-                    Auth::user()->id . "', '" . Auth::user()->username . "')");
-                DB::commit();
+                if ($proposal->itemdata->vbeln == Orders::stockorder) {
+                    $result = SAP::createPurchReq($proposal->lifnr, $proposal->idnlf, $proposal->mtext, $proposal->matnr,
+                        $proposal->quantity, $proposal->quantity_unit,
+                        $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat);
+                    if (!empty($result)) return $result;
+                    DB::beginTransaction();
+                    DB::update("update pitems set stage = 'Z', pstage = '$proposal->itemdata->stage', status = 'X', " .
+                        "idnlf = '$proposal->orig_idnlf', purch_price = '$proposal->orig_purch_price', " .
+                        "qty = '$proposal->orig_qty', lfdat = '$proposal->orig_lfdat' " .
+                        "where ebeln = '$proposal->itemdata->ebeln' and ebelp = '$proposal->itemdata->ebelp'");
+                    DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                        "('$proposal->itemdata->ebeln', '$proposal->itemdata->ebelp', '$cdate', 0, 'X', 'Z', '" .
+                        Auth::user()->id . "', '" . Auth::user()->username . "')");
+                    DB::commit();
+                } else {
+                    $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, $proposal->matnr,
+                        $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
+                        $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
+                    if (!empty($result)) return $result;
+                    DB::beginTransaction();
+                    DB::update("update pitems set stage = 'Z', pstage = '$proposal->itemdata->stage', status = 'X', " .
+                        "idnlf = '$proposal->orig_idnlf', purch_price = '$proposal->orig_purch_price', " .
+                        "qty = '$proposal->orig_qty', lfdat = '$proposal->orig_lfdat' " .
+                        "where ebeln = '$proposal->itemdata->ebeln' and ebelp = '$proposal->itemdata->ebelp'");
+                    DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                        "('$proposal->itemdata->ebeln', '$proposal->itemdata->ebelp', '$cdate', 0, 'X', 'Z', '" .
+                        Auth::user()->id . "', '" . Auth::user()->username . "')");
+                    DB::commit();
+               }
             }
         }
-        return json_encode($result);
+        return "";
     }
 
     static public function acceptProposal($ebeln, $ebelp, $cdate, $pos)
     {
-
+        $proposal = DB::table("pitemchg_proposals")->where([
+                                                        ["ebeln", "=", $ebeln],
+                                                        ["ebelp", "=", $ebelp],
+                                                        ["cdate", "=", $cdate],
+                                                        ["pos", "=", $pos]
+                                                    ])->first();
+        $item = DB::table("pitems")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
+        $result = SAP::processSOItem($item->vbeln, $item->posnr,
+            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, $proposal->matnr,
+            $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
+            $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
+        if (!empty($result)) return $result;
+        DB::beginTransaction();
+        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'A' " .
+            "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        $now = Carbon::now();
+        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+            "('$ebeln', '$ebelp', '$now', 1, 'A', 'Z', '" .
+            Auth::user()->id . "', '" . Auth::user()->username . "')");
+        DB::commit();
+        return "";
     }
 
     static public function rejectProposal($ebeln, $ebelp, $cdate)
     {
-
+        $item = DB::table("pitems")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
+        $result = SAP::rejectSOItem($item->vbeln, $item->posnr);
+        if (!empty($result)) return $result;
+        DB::beginTransaction();
+        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X' " .
+            "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        $now = Carbon::now();
+        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+            "('$ebeln', '$ebelp', '$now', 1, 'X', 'Z', '" .
+            Auth::user()->id . "', '" . Auth::user()->username . "')");
+        DB::commit();
+        return "";
     }
 
 }
