@@ -226,7 +226,8 @@
     </div>
 
     <script>
-        function deleteUser(id){
+        function deleteUser2(id){
+            /*
             var content = document.createElement('div');
             content.innerHTML = "Are you sure that you want to delete <u><b>" + id + "</b></u> ?";
             swal({
@@ -239,11 +240,12 @@
                 if(isConfirm)
                     location.replace(location.pathname + '?del=' + id);
             });
+            */
         }
     </script>
 
     <script>
-        function deleteUser2(id) {
+        function deleteUser(id) {
             if (confirm("{{__('Are you sure do you want to delete ')}}" + id + "?")) {
                 location.replace(location.pathname + '?del=' + id);
             } else {
