@@ -154,6 +154,20 @@
                             result.purch_curr = $("#ar-immed-purch-curr").val().trim();
                             result.sales_price = $("#ar-immed-sales-price").val().trim();
                             result.sales_curr = $("#ar-immed-sales-curr").val().trim();
+                            if (result.lifnr.length == 0 ||
+                                result.idnlf.length == 0 ||
+                                result.mtext.length == 0 ||
+                                result.matnr.length == 0 ||
+                                result.lfdat.length == 0 ||
+                                result.quantity.length == 0 ||
+                                result.quantity_unit.length == 0 ||
+                                result.purch_price.length == 0 ||
+                                result.purch_curr.length == 0 ||
+                                ((_ar_itemdata.vbeln != "!REPLENISH") &&
+                                    (result.sales_price.length == 0 ||
+                                     result.sales_curr.length == 0)
+                                )
+                            ) return;
                         }
                         $.ajaxSetup({
                             headers: {
@@ -169,9 +183,14 @@
                             function (data, status) {
                                 _dataPP = data;
                                 _statusPP = status;
-                            }, "json");
+                            });
                         jQuery.ajaxSetup({async: true});
+                        if (_dataPP != null && _dataPP != undefined && _dataPP.trim().length != 0) {
+                            alert(_dataPP);
+                            return;
+                        }
                         arDialog.dialog("close");
+                        location.reload();
                     }
                 },
                 {
@@ -250,6 +269,18 @@
                 "<td colspan='2' style='text-align: right;'>" + itemdata.sales_price + " " + itemdata.sales_curr + "</td>";
             newRow.append(cols);
             $("#proposals-table-1").append(newRow);
+        } else {
+            $("#ar-immed-lifnr").val("");
+            $("#ar-immed-idnlf").val(itemdata.idnlf);
+            $("#ar-immed-mtext").val(itemdata.mtext);
+            $("#ar-immed-matnr").val(itemdata.matnr);
+            $("#ar-immed-lfdat").val(itemdata.lfdat.substring(0, 10));
+            $("#ar-immed-quantity").val(itemdata.qty);
+            $("#ar-immed-quantity-unit").val(itemdata.qty_uom);
+            $("#ar-immed-purch-price").val("");
+            $("#ar-immed-purch-curr").val("");
+            $("#ar-immed-sales-price").val("");
+            $("#ar-immed-sales-curr").val("");
         }
         arDialog.dialog("open");
     }
@@ -370,6 +401,20 @@
                     let purch_curr = $("#aep-purch-curr").val().trim();
                     let sales_price = $("#aep-sales-price").val().trim();
                     let sales_curr = $("#aep-sales-curr").val().trim();
+                    if (lifnr.length == 0 ||
+                        idnlf.length == 0 ||
+                        mtext.length == 0 ||
+                        matnr.length == 0 ||
+                        lfdat.length == 0 ||
+                        quantity.length == 0 ||
+                        quantity_uom.length == 0 ||
+                        purch_price.length == 0 ||
+                        purch_curr.length == 0 ||
+                        ((_ar_itemdata.vbeln != "!REPLENISH") &&
+                            (sales_price.length == 0 ||
+                             sales_curr.length == 0)
+                        )
+                    ) return;
                     if (add_edit_caller == 1) {
                         if (add_edit_current_row != null) {
                             add_edit_current_row.cells[0].innerHTML = lifnr;
@@ -528,7 +573,6 @@
                         let current_row = proposal_last_selected_line;
                         let result_set = current_row.id;
                         let _sp_pos = result_set.split('_')[4];
-                        select_proposal_dialog.dialog("close");
                         $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -548,10 +592,15 @@
                                 _status = status;
                             }, "json");
                         jQuery.ajaxSetup({async: true});
+                        if (_data != null && _data != undefined && _data.trim().length != 0) {
+                            alert(_data);
+                            return;
+                        }
+                        select_proposal_dialog.dialog("close");
+                        location.reload();
                     }
                 },
                 Reject: function () {
-                    select_proposal_dialog.dialog("close");
                     $.ajaxSetup({
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -570,6 +619,12 @@
                             _status = status;
                         }, "json");
                     jQuery.ajaxSetup({async: true});
+                    if (_data != null && _data != undefined && _data.trim().length != 0) {
+                        alert(_data);
+                        return;
+                    }
+                    select_proposal_dialog.dialog("close");
+                    location.reload();
                 },
                 Cancel: function () {
                     select_proposal_dialog.dialog("close");

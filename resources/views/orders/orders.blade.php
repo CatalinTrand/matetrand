@@ -386,7 +386,7 @@
                                         if ($order->rejected == 1)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                                         elseif ($order->rejected == 2)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
 
                                         $inq_onclick = "";
                                         if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
@@ -489,7 +489,7 @@
                                         if ($order->rejected == 1)
                                             $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                                         elseif ($order->rejected == 2)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
+                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
                                         $inq_onclick = "";
                                         if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
                                         $inquired_icon = "";
@@ -607,6 +607,7 @@
     <script>
         function onselect_zpretrecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
                                       result_purch_price, result_purch_currency, result_sales_price, result_sales_currency){
+            if (result_matnr == null || result_matnr.trim().length == 0) result_matnr = "PA01";
             if (caller == 1) {
                 $("#ar-immed-lifnr").val(result_lifnr);
                 $("#ar-immed-idnlf").val(result_idnlf);
@@ -972,7 +973,7 @@
                     rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                 else
                     if (porder.rejected == 2)
-                        rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
+                        rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
 
 
                 let inq_onclick = "";
@@ -1126,7 +1127,7 @@
                 if (pitem.rejected == 1)
                     rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
                 else if (pitem.rejected == 2)
-                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-64.png'/>";
+                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
 
                 let inq_onclick = "";
                 if (pitem.inq_reply == 1) inq_onclick = "onclick='inquireReply(this, " + pitem.inquired + ");return false;' class='cursorpointer'";
@@ -1146,6 +1147,9 @@
                 if (pitem.reject == 1)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
                         "onclick='rejectPItem(this, 0, null);return false;'/>";
+                if (pitem.reject == 2)
+                    button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='rejectPItem(this, 0, \"\");return false;'/>";
                 let button_inquire = "";
                 if (pitem.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
@@ -1515,7 +1519,7 @@
 
         function rejectPItem(thisbtn, category, reason)
         {
-            if (category == 0 || reason == null) {
+            if (category == 0 && reason == null) {
                 reject_init("I", thisbtn, "{{__('Reject item')}}");
                 return;
             }

@@ -150,18 +150,16 @@ class SAP
         }
     }
 
-    static public function savePOItemWithChange($data) {
-
-    }
-
     static public function savePOItem($ebeln, $ebelp) {
 
+        $new_matnr = "";
         $new_idnlf = "";
         $new_menge = "";
         $new_price = "";
         $new_eindt = "";
 
         $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        if ($item->matnr != $item->orig_matnr) $new_matnr = $item->matnr;
         if ($item->idnlf != $item->orig_idnlf) $new_idnlf = $item->idnlf;
         if ($item->qty != $item->orig_qty) $new_menge = $item->qty;
         if ($item->purch_price != $item->orig_purch_price) $new_price = $item->purch_price;
@@ -180,6 +178,7 @@ class SAP
             $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_CHANGE_ITEM');
             $result = $sapfm->invoke(['I_EBELN' => $ebeln,
                                       'I_EBELP' => $ebelp,
+                                      'I_MATNR' => $new_matnr,
                                       'I_IDNLF' => $new_idnlf,
                                       'I_MENGE' => $new_menge,
                                       'I_PRICE' => $new_price,
@@ -212,7 +211,6 @@ class SAP
                                       'I_MATNR' => $matnr,
                                       'I_MTEXT' => $mtext,
                                       'I_IDNLF' => $idnlf,
-                                      'I_LFDAT' => $lfdat,
                                       'I_PRICE' => $price,
                                       'I_CURR' => $curr,
                                       'I_MENGE' => $qty,

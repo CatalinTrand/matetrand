@@ -196,7 +196,11 @@ class POrderItem
                 }
             }
         } elseif (Auth::user()->role == 'CTV') {
-            if ($this->ctv == Auth::user()->sapuser) $this->owner = 1;
+            if ($this->stage == 'C') {
+                if (DB::table("user_agent_clients")->where([["id", "=", Auth::user()->id],
+                    ["kunnr", "=", $this->kunnr]])->exists())
+                    $this->owner = 1;
+            }
         }
 
         $this->accepted = 0;
@@ -279,7 +283,7 @@ class POrderItem
                         $this->inq_reply = 1;
                     } elseif ($this->status == 'R') {
                         $this->accept = 0;
-                        $this->reject = 1;
+                        $this->reject = 2;
                         $this->inq_reply = 1;
                     }
                 }
@@ -297,7 +301,7 @@ class POrderItem
                     $this->inq_reply = 1;
                 } elseif ($this->status == 'R') {
                     $this->accept = 0;
-                    $this->reject = 1;
+                    $this->reject = 2;
                     $this->inq_reply = 1;
                 }
             }  elseif (Auth::user()->role == 'CTV') {

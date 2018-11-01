@@ -72,12 +72,22 @@ class POrderItemChg
         switch ($this->ctype) {
             case "A":
                 $this->text = __("Accepted");
+                if ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal accepted");
                 break;
             case "T":
-                $this->text = __("Accepted after change");
+                $this->text = __("Acceptance requested");
                 break;
             case "X":
-                $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
+                $this->text = __("Rejected");
+                if (($this->oldval != null) && ($this->oldval != 'C'))
+                    $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
+                if ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal rejected");
+                break;
+            case "R":
+                $this->text = __("Rejection requested") . " (" . $texts[intval($this->oldval) - 1] . ")";
+                break;
+            case "O":
+                $this->text = __("Proposal issued");
                 break;
             case "M":
                 $this->text =  __("Material code modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;

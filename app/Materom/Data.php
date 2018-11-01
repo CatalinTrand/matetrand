@@ -146,7 +146,7 @@ class Data
                                            "purch_price, purch_curr, purch_prun, purch_puom, ".
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
                                            "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed, status, ".
-                                           "orig_idnlf, orig_purch_price, orig_qty, orig_lfdat) values (".
+                                           "orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat) values (".
                        "'$nitem->ebeln', '$nitem->ebelp', '$nitem->matnr', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 35) . "',$nitem->qty, '$nitem->qty_uom', ".
                        "'$nitem->lfdat', '$nitem->mfrnr', ".
                        "'$nitem->purch_price', '$nitem->purch_curr', ".
@@ -155,7 +155,7 @@ class Data
                        "'$nitem->sales_puom', '$nitem->vbeln', '$nitem->posnr', '$nitem->kunnr', ".
                        "'$nitem->shipto', '$nitem->ctv', '$nitem->ctv_name', ".
                        "'$nitem->stage', 0, '$nitem->status', " .
-                       "'$nitem->idnlf', '$nitem->purch_price', $nitem->qty, '$nitem->lfdat')";
+                       "'$nitem->matnr', '$nitem->idnlf', '$nitem->purch_price', $nitem->qty, '$nitem->lfdat')";
 
                 DB::insert($sql);
 
