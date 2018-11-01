@@ -14,6 +14,7 @@ use App\Materom\Orders\POrderItemChg;
 use App\Materom\SAP\MasterData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class Orders
@@ -117,7 +118,6 @@ class Orders
             $filter_sql = self::addFilter($filter_sql,
                 self::processFilter($orders_table . ".lifnr", Auth::user()->lifnr, 10), $sql);
         } elseif (Auth::user()->role == "Referent") {
-            $filter_sql = self::addFilters($filter_sql, self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp));
             $refs = DB::select("select distinct users_ref.id, users.lifnr from users_ref ".
                 "join users using (id) ".
                 "where refid ='" . Auth::user()->id . "'");
@@ -136,7 +136,10 @@ class Orders
                 $filter_refs_sql .= " or ( $sql )";
             }
             if (!empty($filter_refs_sql))
-                $filter_sql = self::addFilter($filter_sql, "(" . substr($filter_refs_sql, 4) . ")");
+                $filter_refs_sql =  "((" . substr($filter_refs_sql, 4) . ") or " .
+                    self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
+            else $filter_refs_sql = self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
+            $filter_sql = self::addFilter($filter_sql, $filter_refs_sql);
         } elseif (Auth::user()->role == "CTV") {
             $clients = DB::select("select distinct kunnr from user_agent_clients where id = '" .
                         Auth::user()->id . "'");
@@ -161,6 +164,7 @@ class Orders
         $sql .= " order by " . $items_table . ".ebeln, " . $items_table . ".ebelp";
         // ...and run
         $items = DB::select($sql);
+        // Log::debug($sql);
         if (empty($items)) return;
 
         // Fill the cache

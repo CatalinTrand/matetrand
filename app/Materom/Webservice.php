@@ -377,8 +377,7 @@ class Webservice
             DB::commit();
         } else {
             $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
-            if (($proposal->lifnr == $proposal->itemdata->lifnr) &&
-                ($proposal->itemdata->vbeln == Orders::stockorder)) {
+            if ($proposal->lifnr == $proposal->itemdata->lifnr) {
                 // keeping the same supplier for stock orders, just update PO
                 $tmp_idnlf = $proposal->idnlf;
                 $tmp_mtext = $proposal->mtext;
@@ -452,7 +451,7 @@ class Webservice
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
                     DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
-                        "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 0, 'X', 'Z', 'C', ''" .
+                        "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 0, 'X', 'Z', 'C', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
                     DB::commit();
                }
@@ -470,6 +469,36 @@ class Webservice
                                                         ["pos", "=", $pos]
                                                     ])->first();
         $item = DB::table("pitems")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
+        $porder = DB::table("porders")->where("ebeln", $ebeln)->first();
+        if ($proposal->lifnr == $porder->lifnr) {
+            // keeping the same supplier for stock orders, just update PO
+            $tmp_idnlf = $proposal->idnlf;
+            $tmp_mtext = $proposal->mtext;
+            $tmp_matnr = $proposal->matnr;
+            $tmp_lfdat = $proposal->lfdat;
+            $tmp_qty = $proposal->qty;
+            $tmp_qty_unit = $proposal->qty_uom;
+            $tmp_purch_price = $proposal->purch_price;
+            $tmp_purch_curr = $proposal->purch_curr;
+            $now = now();
+            DB::beginTransaction();
+            DB::update("update pitems set stage = 'Z', pstage = '" . $item->stage . "', status = 'A', " .
+                "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
+                "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
+                "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr' " .
+                "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                "('$ebeln', '$ebelp', '$now', 1, 'A', 'Z', '" .
+                Auth::user()->id . "', '" . Auth::user()->username . "')");
+            $result  = SAP::savePOItem($ebeln, $ebelp);
+            if (!empty(trim($result))) {
+                DB::rollBack();
+                return $result;
+            }
+            DB::commit();
+            return "";
+        }
+
         SAP::rejectPOItem($ebeln, $ebelp);
         $result = SAP::processSOItem($item->vbeln, $item->posnr,
             $proposal->qty, $proposal->qty_uom, $proposal->lifnr, $proposal->matnr,
