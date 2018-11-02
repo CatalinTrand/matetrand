@@ -138,7 +138,7 @@ class Orders
             if (!empty($filter_refs_sql))
                 $filter_refs_sql =  "((" . substr($filter_refs_sql, 4) . ") or " .
                     self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
-            else $filter_refs_sql = self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
+            else $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
             $filter_sql = self::addFilter($filter_sql, $filter_refs_sql);
         } elseif (Auth::user()->role == "CTV") {
             $clients = DB::select("select distinct kunnr from user_agent_clients where id = '" .
@@ -162,6 +162,7 @@ class Orders
         if (!empty($filter_lifnr_name_sql)) $sql .= " join sap_lfa1 using (lifnr)";
         if (!empty($filter_sql)) $sql .= " where " . $filter_sql;
         $sql .= " order by " . $items_table . ".ebeln, " . $items_table . ".ebelp";
+        Log::debug($sql);
         // ...and run
         $items = DB::select($sql);
         // Log::debug($sql);

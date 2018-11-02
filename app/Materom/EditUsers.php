@@ -4,6 +4,7 @@ namespace App\Materom;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EditUsers {
 
@@ -25,7 +26,7 @@ class EditUsers {
             DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser', active = '$active', deleted_at = NOW() where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");
-        if ($role == "Administrator" && $prevdata->api_token != $token && !empty($token)) {
+        if ($prevdata->role == "Administrator" && $prevdata->api_token != $token && !empty($token)) {
             SAP::rfcUpdateAPIToken($token);
             DB::update("update users set api_token = '' where id <> '$id'");
         }

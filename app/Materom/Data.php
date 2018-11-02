@@ -60,7 +60,7 @@ class Data
         $norder->ekgrp = $saphdr["EKGRP"];
         $userid = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->value("id");
         if ($userid == null)
-            DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1])->value("id");
+            $userid = DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1])->value("id");
         if ($userid == null) return "OK";
         $erdat->hour = $now->hour;
         $erdat->minute = $now->minute;

@@ -71,7 +71,7 @@ class SAP
             $sapconn->close();
             Log::info("SAPRFC (UpdateAPIToken): Successfully updated API token");
         } catch (\SAPNWRFC\Exception $e) {
-            Log::error("SAPRFC (UpdateAPIToken):" . $e->getErrorInfo());
+            Log::error("SAPRFC (UpdateAPIToken): " . $e->getErrorInfo());
         }
     }
 
