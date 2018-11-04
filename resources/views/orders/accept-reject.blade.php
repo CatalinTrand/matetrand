@@ -118,7 +118,7 @@
                     id: "accept-reject-ok-button",
                     click: function () {
                         var result = new Object();
-                        result.type = _ar_type;
+                        result.type = 'O';
                         result.itemdata = _ar_itemdata;
                         if ($("#require_sr_approval").is(":checked")) {
                             let tablerows = $('#proposals-table-1 tr');

@@ -182,7 +182,7 @@ class WebserviceController extends Controller
 
     public function processProposal()
     {
-        return Webservice::processProposal(json_decode(Input::get("proposal")));
+        return Webservice::processProposal(json_decode(Input::get("split")));
     }
 
     public function acceptProposal()

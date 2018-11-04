@@ -380,7 +380,7 @@ class Orders
 
     public static function getProposalsList(){
         //TODO - filtrari?
-        $proposals = DB::select("select * from pitemchg_proposals");
+        $proposals = DB::select("select * from pitemchg_proposals where type = 'O'");
         return $proposals;
     }
 }

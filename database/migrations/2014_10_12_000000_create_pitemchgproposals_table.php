@@ -14,6 +14,7 @@ class CreatePitemchgproposalsTable extends Migration
     public function up()
     {
         Schema::create('pitemchg_proposals', function (Blueprint $table) {
+            $table->string('type', 1);
             $table->string('ebeln', 10);
             $table->string('ebelp', 5);
             $table->dateTime('cdate')->default(now());
@@ -32,6 +33,7 @@ class CreatePitemchgproposalsTable extends Migration
             $table->string('infnr', 10)->default('');
             $table->string('source', 1)->default('');
             $table->string('accepted', 1)->default('');
+            $table->primary(['type', 'ebeln', 'ebelp', 'cdate', 'pos']);
         });
     }
 
