@@ -56,6 +56,7 @@ Route::get('webservice/processproposal','WebserviceController@processProposal');
 Route::get('webservice/acceptproposal','WebserviceController@acceptProposal');
 Route::get('webservice/rejectproposal','WebserviceController@rejectProposal');
 Route::get('webservice/readlifnrname','WebserviceController@readLifnrName');
+Route::post('webservice/sendinquiry','WebserviceController@sendInquiry');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');

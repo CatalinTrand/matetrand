@@ -89,39 +89,53 @@
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
                         @if (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
-                            <a href="/roles"><p
-                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                class="card-line first">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-administrative-tools-48.png'/>
-                                {{__("Roles")}}
-                                </p></a>
-                            <a href="/users"><p
-                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                class="card-line">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
-                                {{__("Users")}}
-                                </p></a>
-                            <a href="/messages"><p
-                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                class="card-line">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
-                                {{__("Messages")}}
-                                </p></a>
+                            <a href="/roles">
+                                <p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line first">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                           src='/images/icons8-administrative-tools-48.png'/>
+                                    {{__("Roles")}}
+                                </p>
+                            </a>
+                            <a href="/users">
+                                <p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                           src='/images/icons8-user-account-80.png'/>
+                                    {{__("Users")}}
+                                </p>
+                            </a>
+                            <a href="/messages">
+                                <p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                           src='/images/icons8-chat-80.png'/>
+                                    {{__("Messages")}}
+                                </p>
+                            </a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                class="card-line selector">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                       src='/images/icons8-todo-list-96.png'/>
                                 {{__("Orders")}}
                             </p>
                         @else
-                            <a href="/messages"><p
-                                style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                class="card-line first">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
-                                {{__('Messages')}}
-                            </p></a>
+                            <a href="/messages">
+                                <p
+                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                        class="card-line first">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                           src='/images/icons8-chat-80.png'/>
+                                    {{__('Messages')}}
+                                </p>
+                            </a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                class="card-line selector">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                <image style='height: 2.2rem; margin-left: -1.5rem;'
+                                       src='/images/icons8-todo-list-96.png'/>
                                 {{__("Orders")}}
                             </p>
                         @endif
@@ -132,52 +146,73 @@
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
                                     {{__('Show by')}}:
-                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="groupOrdersBy" onchange="this.form.submit()">
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                            name="groupOrdersBy" onchange="this.form.submit()">
                                         <option value="0"{{$groupBySelSO}}>{{__('Client/stock orders')}}</option>
                                         <option value="1"{{$groupBySelPO}}>{{__('Purchase orders')}}</option>
                                     </select>
                                     {{__('Filter by status')}}:
-                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_status" onchange="this.form.submit()">
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                            name="filter_status" onchange="this.form.submit()">
                                         <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
                                         <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
                                         <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
                                     </select>
 
-                                </div><br>
+                                </div>
+                                <br>
                                 <div class="container row" style="display: block; max-width: 100%;">
                                     {{__('Displayed orders')}}:
-                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" name="filter_history" onchange="this.form.submit()">
+                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                            name="filter_history" onchange="this.form.submit()">
                                         <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
                                         <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
                                     </select>
                                     @if ($filter_history == 2)
                                         &nbsp;{{__('Documents archived since')}}:
-                                        <input type="text" id="time_search" class="form-control-sm" style="height:1.6rem; width: 6rem;" name="time_search" value="{{$filter_time_val}}"
+                                        <input type="text" id="time_search" class="form-control-sm"
+                                               style="height:1.6rem; width: 6rem;" name="time_search"
+                                               value="{{$filter_time_val}}"
                                                onchange="this.form.submit()">
                                     @endif
-                                </div><br>
+                                </div>
+                                <br>
                                 <div class="container row" style="display: block; max-width: 100%;">
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                                         {{__("Sales order")}}:
-                                        <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_vbeln" value="{{$filter_vbeln}}">&nbsp;&nbsp;
+                                        <input type="text" class="form-control-sm input-sm"
+                                               style="width: 6rem; height: 1.4rem;" name="filter_vbeln"
+                                               value="{{$filter_vbeln}}">&nbsp;&nbsp;
                                     @endif
                                     {{__("Purchase order")}}:
-                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_ebeln" value="{{$filter_ebeln}}">&nbsp;&nbsp;
+                                    <input type="text" class="form-control-sm input-sm"
+                                           style="width: 6rem; height: 1.4rem;" name="filter_ebeln"
+                                           value="{{$filter_ebeln}}">&nbsp;&nbsp;
                                     {{__("Material")}}:
-                                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_matnr" value="{{$filter_matnr}}">&nbsp;&nbsp;
+                                    <input type="text" class="form-control-sm input-sm"
+                                           style="width: 6rem; height: 1.4rem;" name="filter_matnr"
+                                           value="{{$filter_matnr}}">&nbsp;&nbsp;
                                     {{__("Material description")}}:
-                                    <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_mtext" value="{{$filter_mtext}}">&nbsp;&nbsp;
+                                    <input type="text" class="form-control-sm input-sm"
+                                           style="width: 12rem; height: 1.4rem;" name="filter_mtext"
+                                           value="{{$filter_mtext}}">&nbsp;&nbsp;
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                                         {{__("Supplier")}}:
-                                        <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$filter_lifnr}}">&nbsp;&nbsp;
+                                        <input type="text" class="form-control-sm input-sm"
+                                               style="width: 6rem; height: 1.4rem;" name="filter_lifnr"
+                                               value="{{$filter_lifnr}}">&nbsp;&nbsp;
                                         {{__("Supplier name")}}:
-                                        <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
+                                        <input type="text" class="form-control-sm input-sm"
+                                               style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name"
+                                               value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
                                     @endif
-                                    <button type="button" style="margin-left: 15%; height: 1.5rem; " onclick="reset_filters();return false;">{{__('Reset')}}</button>
+                                    <button type="button" style="margin-left: 15%; height: 1.5rem; "
+                                            onclick="reset_filters();return false;">{{__('Reset')}}</button>
 
                                 </div>
 
-                                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;" tabindex="-1">
+                                <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
+                                       tabindex="-1">
                             </form>
                         </div>
                     </div>
@@ -185,7 +220,8 @@
                     <br>
 
                     <div class="card-body orders-table-div" style="height: 70vh; padding-top: 0rem;">
-                        <table style="border: 2px solid black; table-layout: fixed;" class="orders-table basicTable table table-striped" id="orders_table">
+                        <table style="border: 2px solid black; table-layout: fixed;"
+                               class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
                                 <col width="2%">
                                 <col width="2%">
@@ -534,7 +570,7 @@
     </div>
 
     <script>
-        function delete_filters(){
+        function delete_filters() {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -544,7 +580,7 @@
             var df_data, df_status;
             $.post("webservice/deletefilters",
                 {
-                  empty : null
+                    empty: null
                 },
                 function (data, status) {
                     df_data = data;
@@ -553,7 +589,7 @@
             jQuery.ajaxSetup({async: true});
         }
 
-        function re_filter(type,order){
+        function re_filter(type, order) {
             delete_filters();
 
             $.ajaxSetup({
@@ -577,14 +613,14 @@
             location.reload();
         }
 
-        function reset_filters(){
+        function reset_filters() {
             delete_filters();
             location.reload();
         }
     </script>
 
     <script>
-        function onselect_Inforecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency, result_sales_price, result_sales_currency){
+        function onselect_Inforecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency, result_sales_price, result_sales_currency) {
             if (caller == 1) {
                 $("#ar-immed-lifnr").val(result_lifnr);
                 $("#ar-immed-idnlf").val(result_idnlf);
@@ -606,7 +642,7 @@
 
     <script>
         function onselect_zpretrecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
-                                      result_purch_price, result_purch_currency, result_sales_price, result_sales_currency){
+                                      result_purch_price, result_purch_currency, result_sales_price, result_sales_currency) {
             if (result_matnr == null || result_matnr.trim().length == 0) result_matnr = "PA01";
             if (caller == 1) {
                 $("#ar-immed-lifnr").val(result_lifnr);
@@ -632,9 +668,9 @@
     </script>
 
     <script>
-        $( function() {
-            $( "#time_search" ).datepicker({dateFormat: "yy-mm-dd"});
-        } );
+        $(function () {
+            $("#time_search").datepicker({dateFormat: "yy-mm-dd"});
+        });
     </script>
 
     <script>
@@ -653,9 +689,9 @@
             } else if (id.startsWith('P')) {
                 @if ($groupByPO == 1)
                     return null;
-                @else
-                    let res = id.substring(1);
-                    return "S" + res.split("_")[0];
+                        @else
+                let res = id.substring(1);
+                return "S" + res.split("_")[0];
                 @endif
             } else {
                 return null;
@@ -670,13 +706,12 @@
                 return false;
 
             @if ($groupByPO == 1)
-                if (id.startsWith('S') || id.startsWith('P'))
-            @else
-                if (id.startsWith('S'))
-            @endif
-            {
-                return false;
-            }
+            if (id.startsWith('S') || id.startsWith('P'))
+                @else
+                if (id.startsWith('S')) @endif
+                {
+                    return false;
+                }
 
             return isChecked(parent(id));
         }
@@ -787,13 +822,13 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        @if ($groupByPO == 0)
-                            let colsafter = "12";
-                            cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        @else
-                            let colsafter = "13";
+                                @if ($groupByPO == 0)
+                        let colsafter = "12";
+                        cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                                @else
+                        let colsafter = "13";
                         @endif
-                        cols += '<td class="coloured" style="' + last_style + '"></td>';
+                            cols += '<td class="coloured" style="' + last_style + '"></td>';
                         cols += '<td style="' + pi_style + '"></td>';
                         cols += "<td colspan='3'>" + chdate + "</td>";
                         cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
@@ -803,7 +838,7 @@
                         @if ($groupByPO == 1)
                             cols += '<td></td>';
                         @endif
-                        cols += '<td colspan="4"></td>';
+                            cols += '<td colspan="4"></td>';
                         newRow.append(cols);
                         newRow.insertAfter($(_this).closest("tr"));
                         if (line_counter == 0)
@@ -859,10 +894,10 @@
             }
             else if (rowtype == 'P') {
                 porder = order;
-                @if ($groupByPO == 0)
-                    let prevRow = $(currentrow).prev();
-                    while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
-                    sorder = $(prevRow).attr("id").substr(4, 10);
+                        @if ($groupByPO == 0)
+                let prevRow = $(currentrow).prev();
+                while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
+                sorder = $(prevRow).attr("id").substr(4, 10);
                 @endif
             }
 
@@ -899,8 +934,7 @@
             return false;
         }
 
-        function getSOSubTree(currentrow, order, _data)
-        {
+        function getSOSubTree(currentrow, order, _data) {
             // PO header
             var newRow = $("<tr>");
             var cols = "";
@@ -964,16 +998,14 @@
                 let accepted_icon = "";
                 if (porder.accepted == 1)
                     accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
-                else
-                    if (porder.accepted == 2)
-                        accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
+                else if (porder.accepted == 2)
+                    accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
 
                 let rejected_icon = "";
                 if (porder.rejected == 1)
                     rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
-                else
-                    if (porder.rejected == 2)
-                        rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
+                else if (porder.rejected == 2)
+                    rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
 
 
                 let inq_onclick = "";
@@ -981,25 +1013,23 @@
                 let inquired_icon = "";
                 if (porder.inquired == 1)
                     inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' " + inq_onclick + "/>";
-                else
-                    if (porder.inquired == 2)
-                        inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' " + inq_onclick + "/>";
-                    else
-                        if (porder.inquired == 3)
-                            inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' " + inq_onclick + "/>";
+                else if (porder.inquired == 2)
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' " + inq_onclick + "/>";
+                else if (porder.inquired == 3)
+                    inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' " + inq_onclick + "/>";
 
                 let button_accept = "";
                 if (porder.accept == 1)
                     button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
-                                     "onclick='acceptPOrder(this);return false;'/>";
+                        "onclick='acceptPOrder(this);return false;'/>";
                 let button_reject = "";
                 if (porder.reject == 1)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
-                                    "onclick='rejectPOrder(this, 0, null);return false;'/>";
+                        "onclick='rejectPOrder(this, 0, null);return false;'/>";
                 let button_inquire = "";
                 if (porder.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
-                                     "onclick='inquirePOrder(this);return false;'/>";
+                        "onclick='inquirePOrder(this);return false;'/>";
 
                 var newRow = $("<tr>");
                 var cols = "";
@@ -1028,7 +1058,7 @@
                 cols += '<td class="td02" colspan="5"></td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
-                if (i%2 == 0)
+                if (i % 2 == 0)
                     newRow.attr('style', "background-color:LightYellow; vertical-align: middle;");
                 else
                     newRow.attr('style', "background-color:Wheat; vertical-align: middle;");
@@ -1036,8 +1066,7 @@
             }
         }
 
-        function getPOSubTree(currentrow, sorder, order, _data)
-        {
+        function getPOSubTree(currentrow, sorder, order, _data) {
             // PO item header
             var newRow = $("<tr>");
             var cols = "";
@@ -1046,26 +1075,26 @@
             var first_style = "background-color:" + first_color;
             @if ($groupByPO == 0)
                 cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
-                colsafter = 0;
+            colsafter = 0;
             @else
                 cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
-                colsafter = 1;
+            colsafter = 1;
             @endif
-            cols += '<td style="' + po_style + '"></td>';
+                cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="2"><b>{{__("Position")}}</b></td>';
             cols += '<td class="td02" colspan="3"><b>{{__("Material")}}</b></td>';
             cols += '<td class="td02" colspan="4"><b>{{__("Material description")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Quantity")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="padding-left: 0.5rem;"><b>{{__("Delivery date")}}</b></td>';
             cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
-            @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                let sales_price_hdr = '{{__("Sales price")}}';
+                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+            let sales_price_hdr = '{{__("Sales price")}}';
             if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
-                cols += '<td class="td02" colspan="2" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
             @else
                 cols += '<td class="td02" colspan="2"><b>&nbsp;</b></td>';
             @endif
-            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
             cols += '<td class="td02" colspan="3" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
             cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
@@ -1164,28 +1193,28 @@
 
                 @if ($groupByPO == 0)
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + info_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + changed_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + accepted_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + rejected_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + inquired_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_accept + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_reject + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_inquire + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + changed_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + accepted_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + rejected_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + inquired_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_accept + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_reject + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_inquire + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                 @else
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + info_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + owner_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + changed_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + accepted_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + rejected_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + inquired_icon + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_accept + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + owner_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + changed_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + accepted_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + rejected_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + inquired_icon + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_accept + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
+                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
                 @endif
-                cols += '<td class="coloured" style="' + po_style + '"></td>';
-                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " + conv_exit_alpha_output(pitem.ebelp) + "</td>";
+                    cols += '<td class="coloured" style="' + po_style + '"></td>';
+                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><a href='#' style=':hover{color:blue}'>" + conv_exit_alpha_output(pitem.ebelp) + "</a></td>";
 
                 if (pitem.matnr_changeable == 1) {
                     let matnr_class = "td02h";
@@ -1255,11 +1284,14 @@
                 else
                     newRow.attr('style', "background-color:#90D090; vertical-align: middle;");
                 newRow.attr('id', "tr_I" + pitem.ebeln + "_" + pitem.ebelp);
+                // split_dialog('1',$(newRow).find("a[href$=\"#\"]").first(),pitem,"Split item","");
+                $(newRow).find("a[href$=\"#\"]").first().click(function () {
+                    split_dialog('1', $(newRow).find("a[href$=\"#\"]").first(), pitem, "Split item", "");
+                });
             }
         }
 
-        function getPOItemSubTree(currentrow, order, item, _data)
-        {
+        function getPOItemSubTree(currentrow, order, item, _data) {
             // PO item changes header
             var newRow = $("<tr>");
             var cols = "";
@@ -1269,13 +1301,13 @@
             var first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
             var first_style = "background-color:" + first_color;
             cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-            @if ($groupByPO == 0)
-                let colsafter = "8";
-                cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-            @else
-                let colsafter = "9";
+                    @if ($groupByPO == 0)
+            let colsafter = "8";
+            cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                    @else
+            let colsafter = "9";
             @endif
-            cols += '<td class="coloured" style="' + last_style + '"></td>';
+                cols += '<td class="coloured" style="' + last_style + '"></td>';
             cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="3"><b>{{__("Data")}}</b></td>';
             cols += '<td class="td02" colspan="6"><b>{{__("Utilizator")}}</b></td>';
@@ -1300,13 +1332,13 @@
                 let first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
                 let first_style = "background-color:" + first_color;
                 cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                @if ($groupByPO == 0)
-                    let colsreason = "10";
-                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                @else
-                  let colsreason = "11";
+                        @if ($groupByPO == 0)
+                let colsreason = "10";
+                cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                        @else
+                let colsreason = "11";
                 @endif
-                cols += '<td class="coloured" style="' + last_style + '"></td>';
+                    cols += '<td class="coloured" style="' + last_style + '"></td>';
                 cols += '<td style="' + pi_style + '"></td>';
                 cols += '<td class="td02" colspan="3">' + pitemchg.cdate + '</td>';
                 cols += '<td class="td02" colspan="2">' + pitemchg.cuser + '</td>';
@@ -1315,7 +1347,7 @@
                 @if ($groupByPO == 1)
                     colsreason = colsreason + 1;
                 @endif
-                cols += '<td class="td02" colspan="' + colsreason + '">' + pitemchg.reason + '</td>';
+                    cols += '<td class="td02" colspan="' + colsreason + '">' + pitemchg.reason + '</td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
                 if (i % 2 == 0)
@@ -1326,13 +1358,12 @@
             }
         }
 
-        function hideSubTree(thisbtn)
-        {
+        function hideSubTree(thisbtn) {
             var currentrow, nextrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').substr(0, 4);
             while (((nextrow = $(currentrow).next()) != null) &&
-                   (nextrow !== undefined) &&
-                   (nextrow.length > 0)) {
+            (nextrow !== undefined) &&
+            (nextrow.length > 0)) {
                 let crtid = nextrow.attr('id').substr(0, 4);
                 if (crtid == rowid) break;
                 if (rowid == "tr_P")
@@ -1350,8 +1381,7 @@
             }
         }
 
-        function conv_exit_alpha_output(input)
-        {
+        function conv_exit_alpha_output(input) {
             output = input;
             if (/^\d+$/.test(output)) {
                 output = output.replace(/^0+/, '');
@@ -1360,17 +1390,16 @@
             return output;
         }
 
-        function acceptPOrder(thisbtn)
-        {
+        function acceptPOrder(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
             let porder = rowid.substr(4, 10);
             let sorder = "";
-            @if ($groupByPO == 0)
-                let prevRow = $(currentrow).prev();
-                while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
-                sorder = $(prevRow).attr("id").substr(4, 10);
+                    @if ($groupByPO == 0)
+            let prevRow = $(currentrow).prev();
+            while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
+            sorder = $(prevRow).attr("id").substr(4, 10);
             @endif
 
             $.ajaxSetup({
@@ -1393,30 +1422,28 @@
             jQuery.ajaxSetup({async: true});
             if (_statusAP != "success") return;
             if (_dataAP.length > 0) {
-                for(let i = 0; i < _dataAP.length; i++){
-                    if(isChecked('I'+_dataAP[i].ebelp)){
-                        _unused_acceptItem(porder,_dataAP[i].ebelp,'purch-item');
+                for (let i = 0; i < _dataAP.length; i++) {
+                    if (isChecked('I' + _dataAP[i].ebelp)) {
+                        _unused_acceptItem(porder, _dataAP[i].ebelp, 'purch-item');
                     }
                 }
                 location.reload(true);
             }
         }
 
-        function inquirePOrder(thisbtn)
-        {
+        function inquirePOrder(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
             let porder = rowid.substr(4, 10);
-            @if ($groupByPO == 0)
-                let prevRow = $(currentrow).prev();
-                while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
-                sorder = $(prevRow).attr("id").substr(4, 10);
+                    @if ($groupByPO == 0)
+            let prevRow = $(currentrow).prev();
+            while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
+            sorder = $(prevRow).attr("id").substr(4, 10);
             @endif
         }
 
-        function acceptPItem(thisbtn)
-        {
+        function acceptPItem(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
@@ -1426,8 +1453,7 @@
             location.reload(true);
         }
 
-        function rejectSOrder(thisbtn, category, reason)
-        {
+        function rejectSOrder(thisbtn, category, reason) {
             if (category == 0 || reason == null) {
                 reject_init("S", thisbtn, "{{__('Reject sales order')}}");
                 return;
@@ -1458,8 +1484,8 @@
             jQuery.ajaxSetup({async: true});
             if (_statusRS != "success") return;
             if (_dataRS.length > 0) {
-                for(let i = 0; i < _dataRS.length; i++){
-                    if(isChecked('I'+_dataRS[i].ebelp)){
+                for (let i = 0; i < _dataRS.length; i++) {
+                    if (isChecked('I' + _dataRS[i].ebelp)) {
                         doRejectItem(porder, _dataRS[i].ebelp, category, reason, 'X', 'Z');
                     }
                 }
@@ -1467,8 +1493,7 @@
             }
         }
 
-        function rejectPOrder(thisbtn, category, reason)
-        {
+        function rejectPOrder(thisbtn, category, reason) {
             if (category == 0 || reason == null) {
                 reject_init("P", thisbtn, "{{__('Reject purchase order')}}");
                 return;
@@ -1477,10 +1502,10 @@
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
             let porder = rowid.substr(4, 10);
-            @if ($groupByPO == 0)
-                let prevRow = $(currentrow).prev();
-                while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
-                sorder = $(prevRow).attr("id").substr(4, 10);
+                    @if ($groupByPO == 0)
+            let prevRow = $(currentrow).prev();
+            while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
+            sorder = $(prevRow).attr("id").substr(4, 10);
             @endif
             $.ajaxSetup({
                 headers: {
@@ -1502,23 +1527,22 @@
             jQuery.ajaxSetup({async: true});
             if (_statusRP != "success") return;
             if (_dataRP.length > 0) {
-                for(let i = 0; i < _dataRP.length; i++){
-                    if(isChecked('I' + _dataRP[i].ebelp)) {
+                for (let i = 0; i < _dataRP.length; i++) {
+                    if (isChecked('I' + _dataRP[i].ebelp)) {
                         doRejectItem(porder, _dataRP[i].ebelp, category, reason,
-                            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                                'R', 'R'
-                            @else
-                                'X', 'Z'
-                            @endif
-                        );
+                                @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                                    'R', 'R'
+                        @else
+                            'X', 'Z'
+                        @endif
+                    );
                     }
                 }
                 location.reload(true);
             }
         }
 
-        function rejectPItem(thisbtn, category, reason)
-        {
+        function rejectPItem(thisbtn, category, reason) {
             if (category == 0 && reason == null) {
                 reject_init("I", thisbtn, "{{__('Reject item')}}");
                 return;
@@ -1529,8 +1553,8 @@
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
             doRejectItem(porder, item, category, reason,
-            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                'R', 'R'
+                    @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                        'R', 'R'
             @else
                 'X', 'Z'
             @endif
@@ -1538,17 +1562,21 @@
             location.reload(true);
         }
 
-        function inquirePItem(thisbtn)
-        {
+        function inquirePItem(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
+
+            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                send_inquiry('Materom',porder, item);
+            @else
+                send_inquiry('Vendor',porder, item);
+            @endif
         }
 
-        function acceptSOrder(thisbtn)
-        {
+        function acceptSOrder(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // S
@@ -1574,25 +1602,23 @@
             jQuery.ajaxSetup({async: true});
             if (_statusAS != "success") return;
             if (_dataAS.length > 0) {
-                for(let i = 0; i < _dataAS.length; i++){
-                    if(isChecked('I'+_dataAS[i].ebelp)){
-                        _unused_acceptItem(porder,_dataAS[i].ebelp,'purch-item');
+                for (let i = 0; i < _dataAS.length; i++) {
+                    if (isChecked('I' + _dataAS[i].ebelp)) {
+                        _unused_acceptItem(porder, _dataAS[i].ebelp, 'purch-item');
                     }
                 }
                 location.reload(true);
             }
         }
 
-        function inquireSOrder(thisbtn)
-        {
+        function inquireSOrder(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // S
             let sorder = rowid.substr(4, 10);
         }
 
-        function inquireReply(thisbtn, mode)
-        {
+        function inquireReply(thisbtn, mode) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P sau I
@@ -1619,30 +1645,29 @@
             if (_statusIR != "success") return;
 
             @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+            if (mode == 1) {
+                accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
+            }
+            if (mode == 2) {
+                accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
+            }
+            @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+            select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+            @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
+            if (_dataIR.stage == 'R') {
                 if (mode == 1) {
                     accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
                 }
                 if (mode == 2) {
                     accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
-            @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+            } else if (_dataIR.stage = 'C') {
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
-            @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
-                if (_dataIR.stage == 'R') {
-                    if (mode == 1) {
-                        accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
-                    }
-                    if (mode == 2) {
-                        accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
-                    }
-                } else if (_dataIR.stage = 'C') {
-                    select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
-                }
+            }
             @endif
         }
 
-        function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp)
-        {
+        function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp) {
             var c_string = "";
             let comma_count = 0;
             let dot_count = 0;
@@ -1655,13 +1680,13 @@
                 case 3:
                     c_string = "qty";
                     if ((comma_count + dot_count) > 1) return false;
-                    if(!(Math.floor(c_value) == c_value && $.isNumeric(c_value)) || c_value.startsWith('-'))
+                    if (!(Math.floor(c_value) == c_value && $.isNumeric(c_value)) || c_value.startsWith('-'))
                         return false;
                     break;
                 case 4:
                     c_string = "lfdat";
                     var d = new Date(c_value);
-                    if(isNaN(d.valueOf()))
+                    if (isNaN(d.valueOf()))
                         return false;
                     break;
                 case 5:
@@ -1710,9 +1735,9 @@
                 width: 400,
                 modal: true,
                 buttons: {
-                    Change: function (){
-                        if(doChangeItem(change_type, $("#new_chg_val").val(), $("#new_val_hlp").text(),
-                            change_cell.innerHTML,change_ebeln,change_ebelp)) {
+                    Change: function () {
+                        if (doChangeItem(change_type, $("#new_chg_val").val(), $("#new_val_hlp").text(),
+                            change_cell.innerHTML, change_ebeln, change_ebelp)) {
                             change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
                             $("#new_chg_val").text("");
                             $("#new_val_hlp").text("");
@@ -1821,29 +1846,33 @@
 
     </script>
 
-    <div id="change-dialog" title="Modificare pozitie" >
+    <div id="change-dialog" title="Modificare pozitie">
         <form>
             <br>
             <div class="form-group container" align="left">
                 <b id="old_chg_val"></b><br><br>
                 <i id="new_val_txt"></i>
                 <br><br>
-                <table style="border: none; padding: 0px;" width="80%"><tr>
-                <td><input id="new_chg_val" type="text" name="new_chg_val" size="20"
-                       class="form-control col-md-8" value=""></td>
-                <td style="text-align: left;" width="4rem"><b style="text-align: left;  margin-left: -5rem;" id="new_val_hlp"></b></td>
-                </tr></table>
+                <table style="border: none; padding: 0px;" width="80%">
+                    <tr>
+                        <td><input id="new_chg_val" type="text" name="new_chg_val" size="20"
+                                   class="form-control col-md-8" value=""></td>
+                        <td style="text-align: left;" width="4rem"><b style="text-align: left;  margin-left: -5rem;"
+                                                                      id="new_val_hlp"></b></td>
+                    </tr>
+                </table>
             </div>
         </form>
     </div>
 
-    <div id="init-rejection-dialog" title="{{__("Reject item")}}" >
+    <div id="init-rejection-dialog" title="{{__("Reject item")}}">
         <form>
             <br>
             <div class="form-group container" align="left">
                 <div class="row">
                     <label for="reject-category" class="col-md-2 col-form-label text-md-left">{{__("Reason")}}</label>&nbsp;&nbsp;
-                    <select id="reject-category" name="reject-category" class="form-control col-md-9" onchange="rejectCategoryChange(this);return false;">
+                    <select id="reject-category" name="reject-category" class="form-control col-md-9"
+                            onchange="rejectCategoryChange(this);return false;">
                         <option value="1" selected>{{__("Reason 1")}}</option>
                         <option value="2">{{__("Reason 2")}}</option>
                         <option value="3">{{__("Miscellaneous")}}</option>
@@ -1852,8 +1881,10 @@
                 </div>
                 <br>
                 <div class="row">
-                    <label for="reject-reason" class="col-md-2 col-form-label text-md-left">{{__("Explanations")}}</label>&nbsp;&nbsp;
-                    <textarea id="reject-reason" type="text" name="reject-reason" class="form-control col-md-9" style="word-break: break-word; height: 4rem;" maxlength="100" value=""></textarea>
+                    <label for="reject-reason"
+                           class="col-md-2 col-form-label text-md-left">{{__("Explanations")}}</label>&nbsp;&nbsp;
+                    <textarea id="reject-reason" type="text" name="reject-reason" class="form-control col-md-9"
+                              style="word-break: break-word; height: 4rem;" maxlength="100" value=""></textarea>
                 </div>
             </div>
 
@@ -1864,8 +1895,8 @@
     <script>
         var rejectDialog, rejectForm, _reject_type, _reject_this;
 
-        function rejectCategoryChange(_this){
-            if(_this.value == 4)
+        function rejectCategoryChange(_this) {
+            if (_this.value == 4)
                 $("#reject-reason").attr('required', 'true');
             else
                 $("#reject-reason").removeAttr('required');
@@ -1878,35 +1909,47 @@
                 width: 480,
                 modal: true,
                 buttons: {
-                    {{__("Reject")}}: function (){
-                        if(!($("#reject-category").val() == 4 && $("#reject-reason").val().length == 0 )) {
-                            switch (_reject_type) {
-                                case "S":
-                                    rejectSOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                                    break;
-                                case "P":
-                                    rejectPOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                                    break;
-                                case "I":
-                                    rejectPItem(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                                    break;
-                            }
-                            rejectDialog.dialog("close");
-                        }
-                    },
-                    {{__("Cancel")}}: function () {
-                        rejectDialog.dialog("close");
+            {{__("Reject")}}:
+
+            function () {
+                if (!($("#reject-category").val() == 4 && $("#reject-reason").val().length == 0)) {
+                    switch (_reject_type) {
+                        case "S":
+                            rejectSOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                            break;
+                        case "P":
+                            rejectPOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                            break;
+                        case "I":
+                            rejectPItem(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                            break;
                     }
-                },
-                close: function () {
-                    rejectForm[0].reset();
-                },
-                position: {
-                    my: "center",
-                    at: "center",
-                    of: $("#orders_table")
+                    rejectDialog.dialog("close");
                 }
-            });
+            }
+
+        ,
+            {{__("Cancel")}}:
+
+            function () {
+                rejectDialog.dialog("close");
+            }
+        },
+            close: function () {
+                rejectForm[0].reset();
+            }
+        ,
+            position: {
+                my: "center",
+                    at
+            :
+                "center",
+                    of
+            :
+                $("#orders_table")
+            }
+        })
+            ;
             $("#reject-category").on('input', function () {
                 if ($("#new_rej_msg").text() != "") $("#new_rej_msg").text("");
             });
@@ -1924,8 +1967,7 @@
             rejectDialog.dialog("open");
         }
 
-        function readLifnrName(lifnr)
-        {
+        function readLifnrName(lifnr) {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1951,5 +1993,7 @@
     @include("orders.read_zpretrecords")
     @include("orders.updaterow")
     @include("orders.accept-reject")
+    @include("orders.split-item")
+    @include("orders.inquiries")
 
 @endsection

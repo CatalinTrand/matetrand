@@ -226,8 +226,8 @@
     </div>
 
     <script>
-        function deleteUser2(id){
-            /*
+        function deleteUser(id){
+
             var content = document.createElement('div');
             content.innerHTML = "Are you sure that you want to delete <u><b>" + id + "</b></u> ?";
             swal({
@@ -240,12 +240,12 @@
                 if(isConfirm)
                     location.replace(location.pathname + '?del=' + id);
             });
-            */
+
         }
     </script>
 
     <script>
-        function deleteUser(id) {
+        function deleteUser2(id) {
             if (confirm("{{__('Are you sure do you want to delete ')}}" + id + "?")) {
                 location.replace(location.pathname + '?del=' + id);
             } else {
@@ -269,7 +269,6 @@
         });
     </script>
 
-    //  Adding a new password
     <div id="new-password-dialog" title="Change user password">
         <form>
             <br>

@@ -148,13 +148,14 @@ class Webservice
     {
 
         $stage = (Auth::user()->role)[0];
+        if ($stage == 'A') $stage = 'F';
         if ($stage == 'F') $stage = 'R';
         if ($stage == 'R') $stage = 'F';
         if ($stage == 'C') $stage = 'R';
 
         DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         DB::insert("insert into pitemchg (ebeln, ebelp, stage, ctype, reason, cuser, cuser_name) values " .
-            "('$ebeln','$ebelp','$stage','R','$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "')");
+            "('$ebeln','$ebelp','$stage','E','$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "')");
         return "";
     }
 
@@ -176,7 +177,7 @@ class Webservice
     public static function readProposals($ebeln, $ebelp)
     {
         $proposal = DB::table("pitemchg")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", 'O']])->orderBy("cdate", "desc")->first();
-        $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$proposal->ebeln' and ebelp = '$proposal->ebelp' and cdate = '$proposal->cdate'");
+        $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$proposal->ebeln' and ebelp = '$proposal->ebelp' and cdate = '$proposal->cdate' and type = 'O'");
         foreach ($proposals as $proposal) {
             $proposal->lifnr_name = MasterData::getLifnrName($proposal->lifnr);
         }
@@ -349,6 +350,20 @@ class Webservice
         return Data::processPOdata($ebeln, $data);
     }
 
+    static public function sendInquiry($from,$ebeln,$ebelp,$text){
+        $porder = DB::select("select * from porders where ebeln = '$ebeln'")[0];
+        if($from[0] != 'V')
+            $stage = 'R';
+        else
+            $stage = 'F';
+
+        $uId = Auth::id();
+        $uName = Auth::user()->username;
+        DB::insert("insert into pitemchg (ebeln, ebelp,ctype,cuser,cuser_name,stage,reason) VALUES ('$ebeln','$ebelp','E','$uId','$uName','$stage','$text')");
+        DB::update("update pitems set stage = '$stage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        return "";
+    }
+
     static public function processProposal($proposal)
     {
         $result = new \stdClass();
@@ -366,8 +381,8 @@ class Webservice
             $counter = 0;
             foreach ($proposal->items as $propitem) {
                 $propitem->lifnr = SAP::alpha_input($propitem->lifnr);
-                DB::insert("insert into pitemchg_proposals (ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
-                    "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values (" .
+                DB::insert("insert into pitemchg_proposals (type,ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+                    "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
                     "'$ebeln', '$ebelp', '$cdate', $counter, " .
                     "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
                     "'$propitem->quantity', '$propitem->quantity_unit', '$propitem->purch_price', '$propitem->purch_curr', " .
@@ -463,6 +478,7 @@ class Webservice
     static public function acceptProposal($ebeln, $ebelp, $cdate, $pos)
     {
         $proposal = DB::table("pitemchg_proposals")->where([
+                                                        ["type", "=", "O"],
                                                         ["ebeln", "=", $ebeln],
                                                         ["ebelp", "=", $ebelp],
                                                         ["cdate", "=", $cdate],
