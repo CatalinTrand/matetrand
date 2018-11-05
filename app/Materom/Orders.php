@@ -336,7 +336,8 @@ class Orders
 
         } else $orders = $result;
 
-        ksort($orders);
+        if ($orders != null) ksort($orders);
+        else $orders = array();
         return $orders;
     }
 
