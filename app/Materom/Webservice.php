@@ -360,7 +360,6 @@ class Webservice
         $uId = Auth::id();
         $uName = Auth::user()->username;
         DB::insert("insert into pitemchg (ebeln, ebelp,ctype,cuser,cuser_name,stage,reason) VALUES ('$ebeln','$ebelp','E','$uId','$uName','$stage','$text')");
-        DB::update("update pitems set stage = '$stage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
         return "";
     }
 
@@ -381,7 +380,7 @@ class Webservice
             $counter = 0;
             foreach ($proposal->items as $propitem) {
                 $propitem->lifnr = SAP::alpha_input($propitem->lifnr);
-                DB::insert("insert into pitemchg_proposals (type,ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+                DB::insert("insert into pitemchg_proposals (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
                     "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
                     "'$ebeln', '$ebelp', '$cdate', $counter, " .
                     "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
