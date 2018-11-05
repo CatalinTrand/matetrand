@@ -195,6 +195,16 @@ class WebserviceController extends Controller
             );
     }
 
+    public function sendInquiry()
+    {
+        return Webservice::sendInquiry(
+            Input::get("from"),
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("text")
+        );
+    }
+
     public function rejectProposal()
     {
         return Webservice::rejectProposal(

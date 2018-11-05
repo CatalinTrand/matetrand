@@ -354,30 +354,32 @@
                 width: 400,
                 modal: true,
                 buttons: {
-                    Change: function () {
+                    Send: function () {
                         $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             }
                         });
                         jQuery.ajaxSetup({async: false});
-
                         $.post("webservice/replymessage",
                             {
-                                message: message,
+                                message: $("#message").val(),
                                 ebeln: _ebeln,
                                 ebelp: _ebelp,
-                                cdate: _cdates
+                                cdate: _cdate
                             },
                             function (data, status) {
                                 _data = data;
                                 _status = status;
+                                alert(_data);
                             });
                         jQuery.ajaxSetup({async: true});
 
                         if (_status == "success") {
                             alert('Mesaj trimis!');
                             location.reload(true);
+                        } else {
+                            alert('Eroare la trimitere!');
                         }
 
                     },

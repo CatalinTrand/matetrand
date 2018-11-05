@@ -362,7 +362,8 @@ class Orders
         foreach ($result as $order){
             foreach ($order->items as $item){
                 foreach ($item->changes as $item_chg) {
-                        array_push($messages, $item_chg);
+                        if($item_chg->acknowledged == '0')
+                            array_push($messages, $item_chg);
                 }
             }
         }

@@ -240,7 +240,7 @@
                 if(isConfirm)
                     location.replace(location.pathname + '?del=' + id);
             });
-            
+
         }
     </script>
 
@@ -269,7 +269,6 @@
         });
     </script>
 
-    //  Adding a new password
     <div id="new-password-dialog" title="Change user password">
         <form>
             <br>
