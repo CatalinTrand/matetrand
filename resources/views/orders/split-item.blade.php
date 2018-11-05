@@ -102,7 +102,7 @@
                         var _dataPP, _statusPP;
                         $.get("webservice/processproposal",
                             {
-                                split: JSON.stringify(result)
+                                proposal: JSON.stringify(result)
                             },
                             function (data, status) {
                                 _dataPP = data;
