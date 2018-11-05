@@ -144,18 +144,32 @@ class Webservice
         return "";
     }
 
-    public static function replyMessage($ebeln, $ebelp, $cdate, $message)
+    public static function replyMessage($ebeln, $ebelp, $cdate, $message, $to)
     {
+        $porder = DB::Select("select * from porders where ebeln = '$ebeln'")[0];
+        $lifnr = $porder->lifnr;
+        $ref = $porder->ekgrp;
+        $ctv = "";//TODO
 
-        $stage = (Auth::user()->role)[0];
-        if ($stage == 'A') $stage = 'F';
-        if ($stage == 'F') $stage = 'R';
-        if ($stage == 'R') $stage = 'F';
-        if ($stage == 'C') $stage = 'R';
+        $duser = "";
+        $stage = '';
+        if($to[0] == 'F') {
+            $stage = 'F';
+            $duser = $lifnr;
+        }
+        if($to[0] == 'R') {
+            $stage = 'R';
+            $duser = $ref;
+        }
+        if($to[0] == 'C') {
+            $stage = 'C';
+            $duser = $ctv;
+        }
+
 
         DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-        DB::insert("insert into pitemchg (ebeln, ebelp, stage, ctype, reason, cuser, cuser_name) values " .
-            "('$ebeln','$ebelp','$stage','E','$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, stage, ctype, reason, cuser, cuser_name, duser) values " .
+            "('$ebeln','$ebelp','$stage','E','$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "', '$duser')");
         return "";
     }
 
@@ -350,16 +364,31 @@ class Webservice
         return Data::processPOdata($ebeln, $data);
     }
 
-    static public function sendInquiry($from,$ebeln,$ebelp,$text){
-        $porder = DB::select("select * from porders where ebeln = '$ebeln'")[0];
-        if($from[0] != 'V')
-            $stage = 'R';
-        else
+    static public function sendInquiry($from,$ebeln,$ebelp,$text,$to){
+
+        $porder = DB::Select("select * from porders where ebeln = '$ebeln'")[0];
+        $lifnr = $porder->lifnr;
+        $ref = $porder->ekgrp;
+        $ctv = "";//TODO
+
+        $duser = "";
+        $stage = '';
+        if($to[0] == 'F') {
             $stage = 'F';
+            $duser = $lifnr;
+        }
+        if($to[0] == 'R') {
+            $stage = 'R';
+            $duser = $ref;
+        }
+        if($to[0] == 'C') {
+            $stage = 'C';
+            $duser = $ctv;
+        }
 
         $uId = Auth::id();
         $uName = Auth::user()->username;
-        DB::insert("insert into pitemchg (ebeln, ebelp,ctype,cuser,cuser_name,stage,reason) VALUES ('$ebeln','$ebelp','E','$uId','$uName','$stage','$text')");
+        DB::insert("insert into pitemchg (ebeln, ebelp,ctype,cuser,cuser_name,duser,stage,reason) VALUES ('$ebeln','$ebelp','E','$uId','$uName','$duser','$stage','$text')");
         return "";
     }
 

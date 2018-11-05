@@ -11,7 +11,7 @@
 
         $sorting = \Illuminate\Support\Facades\Session::get('message-sorting');
         if(!isset($sorting))
-            $sorting = "none";
+            $sorting = "cdate";
 
         $sort_color_ebeln = "";
         $sort_color_cdate = "";
@@ -334,9 +334,18 @@
 
     <div id="init-reply-dialog" title="{{__('Reply to message')}}">
         <form>
+            @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+                <div class="form-group row" style="width: 80%">
+                    {{__("Recipient")}}:<br>
+                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" id="reply_recipient">
+                        <option value="F" selected>{{__("Vendor")}}</option>
+                        <option value="C">{{__("CTV")}}</option>
+                    </select>
+                </div>
+            @endif
             <br>
             <div class="form-group container-fluid" align="middle">
-                <label for="message" class="col-md-12 col-form-label text-md-left">{{__('Message to refferal')}}:</label>
+                <label for="message" class="col-md-12 col-form-label text-md-left">{{__('Message')}}:</label>
                 <input id="message" type="text" name="message" size="20"
                        class="form-control col-md-12" value="">
             </div>
@@ -355,6 +364,14 @@
                 modal: true,
                 buttons: {
                     Send: function () {
+                        var _to = '';
+                        @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                            _to = 'R';
+                        @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+                            _to = 'R';
+                        @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+                            _to = $('#reply_recipient').val();
+                        @endif
                         $.ajaxSetup({
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -366,7 +383,8 @@
                                 message: $("#message").val(),
                                 ebeln: _ebeln,
                                 ebelp: _ebelp,
-                                cdate: _cdate
+                                cdate: _cdate,
+                                to: _to
                             },
                             function (data, status) {
                                 _data = data;

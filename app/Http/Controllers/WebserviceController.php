@@ -143,7 +143,8 @@ class WebserviceController extends Controller
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("cdate"),
-            Input::get("message")
+            Input::get("message"),
+            Input::get("to")
         );
     }
 
@@ -201,7 +202,8 @@ class WebserviceController extends Controller
             Input::get("from"),
             Input::get("ebeln"),
             Input::get("ebelp"),
-            Input::get("text")
+            Input::get("text"),
+            Input::get("to")
         );
     }
 

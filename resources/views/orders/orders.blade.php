@@ -1214,7 +1214,7 @@
                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
                 @endif
                     cols += '<td class="coloured" style="' + po_style + '"></td>';
-                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><a href='#' style=':hover{color:blue}'>" + conv_exit_alpha_output(pitem.ebelp) + "</a></td>";
+                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_pID'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
 
                 if (pitem.matnr_changeable == 1) {
                     let matnr_class = "td02h";
@@ -1284,10 +1284,16 @@
                 else
                     newRow.attr('style', "background-color:#90D090; vertical-align: middle;");
                 newRow.attr('id', "tr_I" + pitem.ebeln + "_" + pitem.ebelp);
-                // split_dialog('1',$(newRow).find("a[href$=\"#\"]").first(),pitem,"Split item","");
-                $(newRow).find("a[href$=\"#\"]").first().click(function () {
-                    split_dialog('1', $(newRow).find("a[href$=\"#\"]").first(), pitem, "Split item", "");
-                });
+                if(pitem.position_splittable == '1') {
+                    $(newRow).find("#span_pID").first().mouseover(function() {
+                        $(this).css("color","blue");
+                    }).mouseout(function() {
+                        $(this).css("color","black");
+                    });
+                    $(newRow).find("#span_pID").first().click(function () {
+                        split_dialog('1', $(newRow).find("a[href$=\"#\"]").first(), pitem, "Split item", "");
+                    });
+                }
             }
         }
 

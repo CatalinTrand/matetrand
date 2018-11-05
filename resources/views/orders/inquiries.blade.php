@@ -1,6 +1,15 @@
 <div id="new-inquiry-dialog" title="Change user password">
     <form>
         <br>
+        @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+            <div class="form-group row" style="width: 80%">
+                {{__("Recipient")}}:<br>
+                <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" id="inquiry_recipient">
+                    <option value="F" selected>{{__("Vendor")}}</option>
+                    <option value="C">{{__("CTV")}}</option>
+                </select>
+            </div>
+        @endif
         <div class="form-group row" style="width: 80%">
             <label for="new_inquiry" class="col-md-4 col-form-label text-md-left">{{__('New Inquiry')}}</label>
             <input id="new_inquiry" type="text" name="new_inquiry" size="20" style="width: 200px;"
@@ -23,6 +32,14 @@
             modal: true,
             buttons: {
                 Send: function () {
+                    var _to = '';
+                    @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                    _to = 'R';
+                    @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+                    _to = 'R';
+                    @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+                    _to = $('#inquiry_recipient').val();
+                    @endif
                     $.ajaxSetup({
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -34,7 +51,8 @@
                             from: inqIdForUser,
                             ebeln: inqPorder,
                             ebelp: inqPitem,
-                            text: $("#new_inquiry").val()
+                            text: $("#new_inquiry").val(),
+                            to: _to
                         },
                         function (data, status) {
                             inquiryData = data;
@@ -72,7 +90,7 @@
         });
     });
 
-    function send_inquiry(userid,porder,pitem) {
+    function send_inquiry(userid, porder, pitem) {
         $("#new_inquiry_msg").text("");
         $("#new-inquiry-dialog").dialog('option', 'title', 'Send inquiry to ' + userid);
         inqIdForUser = userid;

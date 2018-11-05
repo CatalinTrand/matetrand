@@ -29,6 +29,7 @@ class POrderItemChg
     public $stage;      // changing user stage
     public $cuser;      // changing user
     public $cuser_name; // changing user name
+    public $duser;      // target user
     public $oldval;     // old value
     public $newval;     // new value
     public $reason;     // reason/message text
@@ -51,6 +52,7 @@ class POrderItemChg
         $this->ctype = $pitemchg->ctype;
         $this->cuser = $pitemchg->cuser;
         $this->cuser_name = $pitemchg->cuser_name;
+        $this->duser = $pitemchg->duser;
         $this->oldval = $pitemchg->oldval;
         $this->newval = $pitemchg->newval;
         $this->reason = $pitemchg->reason;
