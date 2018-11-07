@@ -188,7 +188,14 @@ class Webservice
 
     static function sendAck($ebeln, $ebelp, $cdate)
     {
-        DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        if ($cdate == null) {
+            $lastchange = DB::table("pitemchg")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", "A"]])->orderBy("cdate", "desc")->first();
+            if ($lastchange == null)
+                $lastchange = DB::table("pitemchg")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", "X"]])->orderBy("cdate", "desc")->first();
+            if ($lastchange != null) $cdate = $lastchange->cdate;
+        }
+        if ($cdate != null)
+            DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         return "";
     }
 

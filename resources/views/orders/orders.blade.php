@@ -273,34 +273,34 @@
                             </colgroup>
                             <tr>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-check-all-50.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-check-all-50.png' title='Select/unselect items to perform repetitively the same operation'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-info-50.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-info-50.png' title='Information: new arrival, response required, processing time'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png' title='Order/item has been cganged'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png' title='Order/item has been changed'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png' title='Order/item has been approved'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png' title='Order/item has been rejected'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-qmark-50.png'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-qmark-50.png' title='Inquirement for this order/item'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png'/>
+                                    <image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png' title='Perform approval of order/item'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.5rem;' src='/images/icons8-close-window-50.png'/>
+                                    <image style='height: 1.5rem;' src='/images/icons8-close-window-50.png' title='Reject order/item'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png'/>
+                                    <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png' title='Send a message to a person in the flow'/>
                                 </th>
                                 @php
                                     if ($groupByPO == 1) {
@@ -402,10 +402,12 @@
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                                                 break;
                                             case 4:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack2(\"$order->ebeln\"); return false;'>";
+                                                $info_icon = "";
                                                 break;
                                             case 5:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                                                $info_icon = "";
                                                 break;
                                         }
                                         switch ($order->owner) {
@@ -508,9 +510,11 @@
                                                 break;
                                             case 4:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                $info_icon = "";
                                                 break;
                                             case 5:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                                                $info_icon = "";
                                                 break;
                                         }
                                         switch ($order->owner) {
@@ -1004,10 +1008,12 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                         break;
                     case 4:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack2(\"$order->ebeln\"); return false;'>";
+                        info_icon = "";
                         break;
                     case 5:
                         info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                        info_icon = "";
                         break;
                 }
                 let owner_icon = "";
@@ -1157,10 +1163,10 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                         break;
                     case 4:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack(pitem.ebeln, pitem.ebelp, null); return false;'>";
                         break;
                     case 5:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png' onclick='replyack(pitem.ebeln, pitem.ebelp, null); return false;'>";
                         break;
                 }
                 let owner_icon = "";

@@ -326,7 +326,7 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
-                location.reload(true);
+                if (cdate != null) location.reload(true);
             }
         }
     </script>
