@@ -57,6 +57,9 @@ Route::get('webservice/acceptproposal','WebserviceController@acceptProposal');
 Route::get('webservice/rejectproposal','WebserviceController@rejectProposal');
 Route::get('webservice/readlifnrname','WebserviceController@readLifnrName');
 Route::post('webservice/sendinquiry','WebserviceController@sendInquiry');
+Route::get('webservice/processsplit','WebserviceController@processSplit');
+Route::get('webservice/acceptsplit','WebserviceController@acceptSplit');
+Route::get('webservice/rejectsplit','WebserviceController@rejectSplit');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');

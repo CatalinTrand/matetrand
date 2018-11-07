@@ -13,7 +13,7 @@ $table->string('ctype', 1)->default("");
 $table->string('stage', 1)->default("");
 $table->string('cuser')->default('');
 $table->string('cuser_name', 35)->default('');
-$table->string('duser')->default('');
+$table->string('duser', 20)->default('');
 $table->string('oldval', 80)->default('');
 $table->string('newval', 80)->default('');
 $table->string('oebeln', 10)->default('');

@@ -198,6 +198,7 @@ class Orders
 
         $history = Session::get("filter_history");
         $status = Session::get("filter_status");
+        $inquirements = Session::get("filter_inquirements");
 
         if ($history == null) $history = 1;
         else $history = intval($history);
@@ -275,10 +276,12 @@ class Orders
                     $_pitem->appendChange($_pitemchg);
                 }
                 $_pitem->fill($_porder);
-                $_porder->appendItem($_pitem);
+                if (($inquirements != 1) || (($_pitem->inq_reply == 1) && (($_pitem->owner != 0) || (Auth::user()->role == "Administrator"))))
+                    $_porder->appendItem($_pitem);
             }
             $_porder->fill();
-            $result[$porder->ebeln] = $_porder;
+            if ($_porder->items != null)
+                $result[$porder->ebeln] = $_porder;
         }
 
         return $result;
@@ -368,7 +371,7 @@ class Orders
         foreach ($result as $order) {
             foreach ($order->items as $item) {
                 foreach ($item->changes as $item_chg) {
-                    if (strcmp($item_chg->duser, Auth::id()) == 0 && $item_chg->acknowledged == '0' && $item_chg->ctype == 'E')
+                    if ($item_chg->duser == Auth::user()->id && $item_chg->acknowledged == '0' && $item_chg->ctype == 'E')
                         array_push($messages, $item_chg);
                 }
             }

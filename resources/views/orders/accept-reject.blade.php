@@ -647,14 +647,6 @@
 
     function select_proposal(type, this0, itemdata, title, initial_text) {
 
-        $("#sel-prop-msg").text("");
-        $("#sel-proposal-initial-text").text(initial_text);
-        $("#sel-proposal-table").find("tr:gt(0)").remove();
-        $("#select-proposal-dialog").dialog('option', 'title', title);
-        _sp_type = type;
-        _sp_this = this0;
-        _sp_itemdata = itemdata;
-
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -664,6 +656,7 @@
         var _data, _status;
         $.post("webservice/readproposals",
             {
+                type: "O",
                 ebeln: itemdata.ebeln,
                 ebelp: itemdata.ebelp
             },
@@ -673,6 +666,37 @@
             }, "json");
         jQuery.ajaxSetup({async: true});
         if (_status != "success") return;
+        if (_data.length == 0) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _data, _status;
+            $.post("webservice/readproposals",
+                {
+                    type: "S",
+                    ebeln: itemdata.ebeln,
+                    ebelp: itemdata.ebelp
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_data.length != 0) select_split(type, this0, itemdata, title, initial_text, _data);
+            return;
+        }
+
+        $("#sel-prop-msg").text("");
+        $("#sel-proposal-initial-text").text(initial_text);
+        $("#sel-proposal-table").find("tr:gt(0)").remove();
+        $("#select-proposal-dialog").dialog('option', 'title', title);
+        _sp_type = type;
+        _sp_this = this0;
+        _sp_itemdata = itemdata;
+
         if (_data.length > 0) {
             let table = $("#sel-proposal-table");
             for (let i = 0; i < _data.length; i++) {

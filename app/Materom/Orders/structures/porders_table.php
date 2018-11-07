@@ -7,7 +7,6 @@
  */
 
 $table->string('ebeln',10);
-$table->boolean('nof');
 $table->dateTime('wtime');
 $table->dateTime('ctime');
 $table->string('lifnr', 10);

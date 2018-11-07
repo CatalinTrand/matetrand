@@ -108,6 +108,7 @@ class WebserviceController extends Controller
         Session::forget("filter_mtext");
         Session::forget("filter_lifnr");
         Session::forget("filter_lifnr_name");
+        Session::forget("filter_inquirements");
         Orders::fillCache();
     }
 
@@ -142,7 +143,6 @@ class WebserviceController extends Controller
         return Webservice::replyMessage(
             Input::get("ebeln"),
             Input::get("ebelp"),
-            Input::get("cdate"),
             Input::get("message"),
             Input::get("to")
         );
@@ -176,6 +176,7 @@ class WebserviceController extends Controller
     public function readProposals()
     {
         return Webservice::readProposals(
+            Input::get("type"),
             Input::get("ebeln"),
             Input::get("ebelp")
         );
@@ -196,23 +197,45 @@ class WebserviceController extends Controller
             );
     }
 
-    public function sendInquiry()
-    {
-        return Webservice::sendInquiry(
-            Input::get("from"),
-            Input::get("ebeln"),
-            Input::get("ebelp"),
-            Input::get("text"),
-            Input::get("to")
-        );
-    }
-
     public function rejectProposal()
     {
         return Webservice::rejectProposal(
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("cdate")
+        );
+    }
+
+    public function processSplit()
+    {
+        return Webservice::processSplit(json_decode(Input::get("split")));
+    }
+
+    public function acceptSplit()
+    {
+        return Webservice::acceptSplit(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate")
+        );
+    }
+
+    public function rejectSplit()
+    {
+        return Webservice::rejectSplit(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("cdate")
+        );
+    }
+
+    public function sendInquiry()
+    {
+        return Webservice::sendInquiry(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("text"),
+            Input::get("to")
         );
     }
 

@@ -81,15 +81,20 @@ class POrderItemChg
                 break;
             case "X":
                 $this->text = __("Rejected");
-                if (($this->oldval != null) && ($this->oldval != 'C'))
+                if (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
                     $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
                 if ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal rejected");
                 break;
             case "R":
-                $this->text = __("Rejection requested") . " (" . $texts[intval($this->oldval) - 1] . ")";
+                $this->text = __("Rejection requested");
+                if (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
+                    $this->text = __("Rejection requested") . " (" . $texts[intval($this->oldval) - 1] . ")";
                 break;
             case "O":
                 $this->text = __("Proposal issued");
+                break;
+            case "W":
+                $this->text = __("Split proposal rejected");
                 break;
             case "M":
                 $this->text =  __("Material code modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
@@ -104,10 +109,13 @@ class POrderItemChg
                 $this->text = __("Delivery date modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
                 break;
             case "E":
-                $this->text = $this->reason;
+                $this->text = __("Message to ") . $this->duser;
                 break;
             case "S":
-                $this->text = __("Originating from a split");
+                $this->text = __("Item split proposed");
+                break;
+            case "U":
+                $this->text = __("Item splitted");
                 break;
         }
 

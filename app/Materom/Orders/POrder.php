@@ -63,7 +63,6 @@ class POrder
         $this->erdat = $porder->erdat;
         $this->curr = $porder->curr;
         $this->fxrate = $porder->fxrate;
-        $this->nof = $porder->nof;
         $this->wtime = $porder->wtime;
         $this->ctime = $porder->ctime;
         $this->changed = $porder->changed;
@@ -106,14 +105,23 @@ class POrder
             $this->allitems[$item->ebelp] = $pitem;
         }
 
-        $this->owner = reset($this->items)->owner;
+        $this->owner = 0;
+        if ($this->items != null) {
+            $this->owner = reset($this->items)->owner;
+            if ($this->owner != 0) {
+                foreach ($this->items as $item) {
+                    if ($item->info == 4) {$this->info = 4; break;}
+                    if ($item->info == 5) {$this->info = 5; break;}
+                }
+            }
+        }
 
         $this->accepted = 0;
         $this->rejected = 0;
         $this->inquired = 0;
         $this->accept = 0;
         $this->reject = 0;
-        $this->inquire = 1;
+        $this->inquire = 0;
 
 
         $count_accepted = 0;

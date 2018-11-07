@@ -63,6 +63,12 @@
         $tmp = \Illuminate\Support\Facades\Session::get("filter_archdate");
         if(isset($tmp) && $filter_history == 2) $filter_time_val = $tmp;
 
+        $filter_inquirements = 0;
+        $inquirements_checked = "";
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_inquirements");
+        if (isset($tmp)) $filter_inquirements = intval($tmp);
+        if ($filter_inquirements == 1) $inquirements_checked = "checked";
+
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
 
@@ -158,6 +164,8 @@
                                         <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
                                         <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
                                     </select>
+                                    <input type="checkbox" id="filter_inquirements" name="filter_inquirements" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$inquirements_checked}}>
+                                    <label for="filter_inquirements" class="col-form-label text-md-left">{{__('Only inquirements')}}</label>&nbsp;&nbsp;
 
                                 </div>
                                 <br>
@@ -385,7 +393,6 @@
                                                 $info_icon = "";
                                                 break;
                                             case 1:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
                                                 $info_icon = "";
                                                 break;
                                             case 2:
@@ -395,6 +402,9 @@
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                                                 break;
                                             case 4:
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                break;
+                                            case 5:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
                                                 break;
                                         }
@@ -488,7 +498,6 @@
                                                 $info_icon = "";
                                                 break;
                                             case 1:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
                                                 $info_icon = "";
                                                 break;
                                             case 2:
@@ -498,6 +507,9 @@
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                                                 break;
                                             case 4:
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                break;
+                                            case 5:
                                                 $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
                                                 break;
                                         }
@@ -637,6 +649,14 @@
                 $("#aep-purch-price").val(result_purch_price);
                 $("#aep-purch-curr").val(result_purch_currency);
             }
+            if (caller == 3) {
+                $("#aes-lifnr").val(result_lifnr);
+                $("#aes-idnlf").val(result_idnlf);
+                $("#aes-mtext").val(result_mtext);
+                $("#aes-matnr").val(result_matnr);
+                $("#aes-purch-price").val(result_purch_price);
+                $("#aes-purch-curr").val(result_purch_currency);
+            }
         }
     </script>
 
@@ -663,6 +683,16 @@
                 $("#aep-purch-curr").val(result_purch_currency);
                 $("#aep-sales-price").val(result_sales_price);
                 $("#aep-sales-curr").val(result_sales_currency);
+            }
+            if (caller == 3) {
+                $("#aes-lifnr").val(result_lifnr);
+                $("#aes-idnlf").val(result_idnlf);
+                $("#aes-mtext").val(result_mtext);
+                $("#aes-matnr").val(result_matnr);
+                $("#aes-purch-price").val(result_purch_price);
+                $("#aes-purch-curr").val(result_purch_currency);
+                $("#aes-sales-price").val(result_sales_price);
+                $("#aes-sales-curr").val(result_sales_currency);
             }
         }
     </script>
@@ -822,10 +852,10 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                                @if ($groupByPO == 0)
+                        @if ($groupByPO == 0)
                         let colsafter = "12";
                         cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                                @else
+                        @else
                         let colsafter = "13";
                         @endif
                             cols += '<td class="coloured" style="' + last_style + '"></td>';
@@ -965,7 +995,6 @@
                         info_icon = "";
                         break;
                     case 1:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
                         info_icon = "";
                         break;
                     case 2:
@@ -975,6 +1004,9 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                         break;
                     case 4:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        break;
+                    case 5:
                         info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
                         break;
                 }
@@ -1116,7 +1148,6 @@
                         info_icon = "";
                         break;
                     case 1:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
                         info_icon = "";
                         break;
                     case 2:
@@ -1126,6 +1157,9 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                         break;
                     case 4:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                        break;
+                    case 5:
                         info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
                         break;
                 }
@@ -1214,7 +1248,7 @@
                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
                 @endif
                     cols += '<td class="coloured" style="' + po_style + '"></td>';
-                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_pID'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
+                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
 
                 if (pitem.matnr_changeable == 1) {
                     let matnr_class = "td02h";
@@ -1284,14 +1318,17 @@
                 else
                     newRow.attr('style', "background-color:#90D090; vertical-align: middle;");
                 newRow.attr('id', "tr_I" + pitem.ebeln + "_" + pitem.ebelp);
-                if(pitem.position_splittable == '1') {
-                    $(newRow).find("#span_pID").first().mouseover(function() {
-                        $(this).css("color","blue");
+                if (pitem.position_splittable == '1') {
+                    let __inqSpan = $(newRow).find("#span_item").first();
+                    __inqSpan.mouseover(function() {
+                        $(this).css("color", "blue");
+                        $(this).addClass("cursorpointer");
                     }).mouseout(function() {
-                        $(this).css("color","black");
+                        $(this).css("color", "black");
+                        $(this).removeClass("cursorpointer");
                     });
-                    $(newRow).find("#span_pID").first().click(function () {
-                        split_dialog('1', $(newRow).find("a[href$=\"#\"]").first(), pitem, "Split item", "");
+                    __inqSpan.click(function () {
+                        split_dialog('1', __inqSpan, pitem.ebeln, pitem.ebelp, "Split item");
                     });
                 }
             }
@@ -1559,8 +1596,8 @@
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
             doRejectItem(porder, item, category, reason,
-                    @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                        'R', 'R'
+            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                'R', 'R'
             @else
                 'X', 'Z'
             @endif
@@ -1576,9 +1613,9 @@
             let item = rowid.substr(15, 5);
 
             @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                send_inquiry('Materom',porder, item);
+                send_inquiry(porder, item);
             @else
-                send_inquiry('Vendor',porder, item);
+                send_inquiry(porder, item);
             @endif
         }
 
@@ -1657,8 +1694,11 @@
             if (mode == 2) {
                 accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
             }
+            if (mode == 3) {
+                select_proposal(mode, thisbtn, _dataIR, "Selectie split", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, selectati o decizie");
+            }
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
-            select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+                select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
             if (_dataIR.stage == 'R') {
                 if (mode == 1) {
@@ -1667,7 +1707,7 @@
                 if (mode == 2) {
                     accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
-            } else if (_dataIR.stage = 'C') {
+            } else if (_dataIR.stage == 'C') {
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
             }
             @endif

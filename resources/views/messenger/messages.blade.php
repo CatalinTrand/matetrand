@@ -18,11 +18,11 @@
         $sort_color_cuser = "";
 
         if($sorting == "ebeln")
-            $sort_color_ebeln = " style='background-color:#99ffcc'";
+            $sort_color_ebeln = ' style="background-color:#99ffcc"';
         if ($sorting == "cdate")
-            $sort_color_cdate = " style='background-color:#99ffcc'";
+            $sort_color_cdate = ' style="background-color:#99ffcc"';
         if ($sorting == "cuser")
-            $sort_color_cuser = " style='background-color:#99ffcc'";
+            $sort_color_cuser = ' style="background-color:#99ffcc"';
 
         $filter_history = 1;
         $filter_history_curr = " selected";
@@ -214,20 +214,18 @@
                                 <col width="2%">
                             </colgroup>
                             <tr>
-                                <th colspan="2" class="td02h"
-                                    onclick="sortBy('ebeln'); return false;" {{$sort_color_ebeln}}>{{__('Purchase order')}}
+                                <th colspan="3" class="td02h"
+                                    onclick="sortBy('ebeln'); return false;" {!! $sort_color_ebeln !!}>{{__('Purchase order')}}
                                 </th>
-                                <th></th>
                                 <th colspan="2">{{__('Item')}}</th>
                                 <th></th>
-                                <th colspan="2">{{__('Sales order')}}</th>
-                                <th></th>
+                                <th colspan="3">{{__('Sales order')}}</th>
                                 <th colspan="4" class="td02h"
-                                    onclick="sortBy('cdate'); return false;" {{$sort_color_cdate}}>{{__('Change date')}}
+                                    onclick="sortBy('cdate'); return false;" {!! $sort_color_cdate !!}>{{__('Sent on')}}
                                 </th>
                                 <th></th>
                                 <th colspan="4" class="td02h"
-                                    onclick="sortBy('cuser'); return false;" {{$sort_color_cuser}}>{{__('Changed by')}}
+                                    onclick="sortBy('cuser'); return false;" {!! $sort_color_cuser !!}>{{__('Sent by')}}
                                 </th>
                                 <th></th>
                                 <th colspan="1"></th>
@@ -239,14 +237,15 @@
                                 $messages = App\Materom\Orders::getMessageList($sorting);
 
                                 foreach ($messages as $message){
-                                    $button_ack = $filter_history == 2 ? "" : "<button onclick=\"ack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button>";
+                                    $button_ack = $filter_history == 2 ? "" : "<button onclick=\"replyack('$message->ebeln','$message->ebelp','$message->cdate');return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/icons8-checkmark-50-3.png'></button>";
                                     $button_reply = $filter_history == 2 ? "" : "<button onclick=\"replyMsg('$message->ebeln','$message->ebelp','$message->cdate'); return false;\"><image style='height:1.5rem;width:1.5rem' src='/images/reply_arrow1600.png'></button>";
-                                    $tablerow = "<tr><td colspan='2' $sort_color_ebeln>$message->ebeln</td>
+                                    $vbeln = $message->vbeln;
+                                    if ($vbeln == \App\Materom\Orders::stockorder) $vbeln = __("Stock");
+                                    elseif (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor") $vbeln = __("Emergency");
+                                    $tablerow = "<tr><td colspan='3' $sort_color_ebeln>$message->ebeln</td>
+                                                     <td colspan='2'>" . App\Materom\SAP::alpha_output($message->ebelp) . "</td>
                                                      <td></td>
-                                                     <td colspan='2'>$message->ebelp</td>
-                                                     <td></td>
-                                                     <td colspan='2'>$message->vbeln</td>
-                                                     <td></td>
+                                                     <td colspan='3'>$vbeln</td>
                                                      <td colspan='4' $sort_color_cdate>$message->cdate</td>
                                                      <td></td>
                                                      <td colspan='2' $sort_color_cuser>$message->cuser</td>
@@ -255,7 +254,7 @@
                                                      <td colspan='1'>$button_ack</td>
                                                      <td colspan='1'>$button_reply</td>
                                                      <td colspan='1'></td>
-                                                     <td colspan='20'>$message->text</td></tr>";
+                                                     <td colspan='20'>$message->reason</td></tr>";
 
 
                                     echo $tablerow;
@@ -304,7 +303,7 @@
     </script>
 
     <script>
-        function ack(ebeln, ebelp, cdate) {
+        function replyack(ebeln, ebelp, cdate) {
 
             var _data, _status = "";
 
@@ -383,7 +382,6 @@
                                 message: $("#message").val(),
                                 ebeln: _ebeln,
                                 ebelp: _ebelp,
-                                cdate: _cdate,
                                 to: _to
                             },
                             function (data, status) {
@@ -422,12 +420,19 @@
         });
 
         function replyMsg(ebeln, ebelp, cdate) {
+            replyto_inquiry(ebeln, ebelp, cdate);
+            return;
+            /*
             $("#new_reply_msg").text("");
             $("#init-reply-dialog").dialog('option', 'title', 'Formular de raspuns la item ' + ebelp);
             _ebeln = ebeln;
             _ebelp = ebelp;
             _cdate = cdate;
             replyDialog.dialog("open");
+            */
         }
     </script>
+
+    @include("orders.inquiries")
+
 @endsection

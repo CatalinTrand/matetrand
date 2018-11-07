@@ -136,6 +136,7 @@ class POrderItem
         $this->stage = $pitem->stage;
         $this->pstage = $pitem->pstage;
         $this->status = $pitem->status;
+        $this->nof = $pitem->nof;
         $this->changes = array();
     }
 
@@ -171,13 +172,6 @@ class POrderItem
         $this->wtime = $porder->wtime;
         $this->ctime = $porder->ctime;
 
-        $this->info = 0;
-        if (empty($this->status)) $this->info = 1;
-        if (($this->status != 'A') && ($this->status != 'X')) {
-            if ($this->wtime < Carbon::now()) $this->info = 2;
-            if ($this->ctime < Carbon::now()) $this->info = 3;
-        }
-
         $this->owner = 0;
         if (Auth::user()->role == 'Furnizor') {
             if ($this->stage == 'F') $this->owner = 1;
@@ -201,6 +195,15 @@ class POrderItem
                     ["kunnr", "=", $this->kunnr]])->exists())
                     $this->owner = 1;
             }
+        }
+
+        $this->info = 0;
+        if ($this->owner != 0) {
+            if (empty($this->status) && $this->nof) $this->info = 4;
+        }
+        if (($this->status != 'A') && ($this->status != 'X')) {
+            if ($this->wtime < Carbon::now()) $this->info = 2;
+            if ($this->ctime < Carbon::now()) $this->info = 3;
         }
 
         $this->accepted = 0;
@@ -234,7 +237,7 @@ class POrderItem
         $this->delivery_date_changed = 0;
         $this->position_splitted = 0;
 
-
+        $first = true;
         foreach ($this->changes as $itemchg) {
             if (($itemchg->stage == Auth::user()->role[0]) && ($itemchg->acknowledged == 0)) {
                 // $this->inquired = 3;
@@ -243,7 +246,15 @@ class POrderItem
             if ($itemchg->ctype == "Q") $this->quantity_changed = 1;
             if ($itemchg->ctype == "P") $this->price_changed = 1;
             if ($itemchg->ctype == "D") $this->delivery_date_changed = 1;
-            if ($itemchg->ctype == "L") $this->position_splitted = 1;
+            if ($itemchg->ctype == "S") $this->position_splitted = 1;
+
+            if ($first && ($itemchg->ctype == "S") && ($this->inquired == 1) && ($this->inq_reply == 1))
+                $this->inquired = 3;
+
+            if ($first && (($itemchg->ctype == "R") || ($itemchg->ctype == "A")) &&
+                ($this->owner != 0) && ($itemchg->acknowledged == 0))
+                $this->info = 5;
+            $first = false;
         }
 
         $this->accept = 0;
@@ -258,11 +269,13 @@ class POrderItem
         if ($history == 1) {
             if (Auth::user()->role == 'Furnizor') {
                 if ($this->stage == "F" && ($this->owner == 1) && empty($this->status)) {
-                    $this->matnr_changeable = 1;
-                    $this->quantity_changeable = 1;
-                    $this->price_changeable = 1;
-                    $this->delivery_date_changeable = 1;
-                    $this->position_splittable = 1;
+                    if ($this->position_splitted == 0) {
+                        $this->matnr_changeable = 1;
+                        $this->quantity_changeable = 1;
+                        $this->price_changeable = 1;
+                        $this->delivery_date_changeable = 1;
+                        $this->position_splittable = 1;
+                    }
                     $this->accept = 1;
                     $this->reject = 1;
                 }
@@ -271,38 +284,42 @@ class POrderItem
                 if ((($this->stage == "R") && ($this->owner == 1)) ||
                      (($this->stage == "F") && ($this->owner == 2))) {
                     if (empty($this->status)) {
+                        if ($this->position_splitted == 0) {
+                            $this->matnr_changeable = 1;
+                            $this->quantity_changeable = 1;
+                            $this->price_changeable = 1;
+                            $this->delivery_date_changeable = 1;
+                            $this->position_splittable = 1;
+                        }
+                    }
+                    if ((empty($this->status) || ($this->status == 'T'))) {
+                        $this->accept = 1;
+                        $this->reject = 1;
+                        if ($this->inquired != 0 ) $this->inq_reply = 1;
+                    } elseif ($this->status == 'R') {
+                        $this->accept = 0;
+                        $this->reject = 2;
+                        if ($this->inquired != 0 ) $this->inq_reply = 1;
+                    }
+                }
+            } elseif (Auth::user()->role == 'Administrator') {
+                if (empty($this->status)) {
+                    if ($this->position_splitted == 0) {
                         $this->matnr_changeable = 1;
                         $this->quantity_changeable = 1;
                         $this->price_changeable = 1;
                         $this->delivery_date_changeable = 1;
                         $this->position_splittable = 1;
                     }
-                    if ((empty($this->status) || ($this->status == 'T'))) {
-                        $this->accept = 1;
-                        $this->reject = 1;
-                        $this->inq_reply = 1;
-                    } elseif ($this->status == 'R') {
-                        $this->accept = 0;
-                        $this->reject = 2;
-                        $this->inq_reply = 1;
-                    }
-                }
-            } elseif (Auth::user()->role == 'Administrator') {
-                if (empty($this->status)) {
-                    $this->matnr_changeable = 1;
-                    $this->quantity_changeable = 1;
-                    $this->price_changeable = 1;
-                    $this->delivery_date_changeable = 1;
-                    $this->position_splittable = 1;
                 }
                 if (empty($this->status) || ($this->status == 'T')) {
                     $this->accept = 1;
                     $this->reject = 1;
-                    $this->inq_reply = 1;
+                    if ($this->inquired != 0 ) $this->inq_reply = 1;
                 } elseif ($this->status == 'R') {
                     $this->accept = 0;
                     $this->reject = 2;
-                    $this->inq_reply = 1;
+                    if ($this->inquired != 0 ) $this->inq_reply = 1;
                 }
             }  elseif (Auth::user()->role == 'CTV') {
 

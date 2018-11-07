@@ -1,19 +1,20 @@
 <div id="new-inquiry-dialog" title="Change user password">
     <form>
-        <br>
         @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
-            <div class="form-group row" style="width: 80%">
-                {{__("Recipient")}}:<br>
-                <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;" id="inquiry_recipient">
+            <div class="form-group row" style="width: 95%; margin-left: 0.5rem;">
+                <label for="inquiry_recipient" id="label_inquiry_recipient"
+                       class="col-md-2 col-form-label text-md-left">{{__("Recipient")}}</label>
+                <select class="form-control-sm input-sm" style="height: 1.6rem; margin-left: 3px; margin-top: 3px; " id="inquiry_recipient">
                     <option value="F" selected>{{__("Vendor")}}</option>
                     <option value="C">{{__("CTV")}}</option>
                 </select>
             </div>
+        @else
+            <br>
         @endif
-        <div class="form-group row" style="width: 80%">
-            <label for="new_inquiry" class="col-md-4 col-form-label text-md-left">{{__('New Inquiry')}}</label>
-            <input id="new_inquiry" type="text" name="new_inquiry" size="20" style="width: 200px;"
-                   class="form-control col-md-6" required value="">
+        <div class="form-group row" style="width: 95%; margin-left: 1rem;">
+            <textarea id="new_inquiry" type="text" name="new_inquiry" class="form-control"
+                      style="word-break: break-word; height: 4rem;" maxlength="100" value=""></textarea>
         </div>
         <i id="new_inquiry_msg" style="color: red"></i>
     </form>
@@ -22,12 +23,12 @@
 
 <script>
 
-    var inqIdForUser, inqPorder, inqPitem, newInquiryDialog, newInquiryForm;
+    var inqPorder, inqPitem, inqCDate, newInquiryDialog, newInquiryForm;
     var inquiryData, inquiryStatus;
     $(function () {
         newInquiryDialog = $("#new-inquiry-dialog").dialog({
             autoOpen: false,
-            height: 200,
+            height: 240,
             width: 550,
             modal: true,
             buttons: {
@@ -48,7 +49,6 @@
                     jQuery.ajaxSetup({async: false});
                     $.post("webservice/sendinquiry",
                         {
-                            from: inqIdForUser,
                             ebeln: inqPorder,
                             ebelp: inqPitem,
                             text: $("#new_inquiry").val(),
@@ -59,15 +59,9 @@
                             inquiryStatus = status;
                         });
                     jQuery.ajaxSetup({async: true});
-
-                    if (inquiryStatus == "success") {
-                        newInquiryDialog.dialog("close");
-                    }
-                    else {
-                        if (inquiryData != "OK")
-                            $("#new_inquiry_msg").text(inquiryData);
-                        else $("#new_inquiry_msg").text("An error occured sending the inquiry");
-                    }
+                    if (inqCDate != null) replyack(inqPorder, inqPitem, inqCDate);
+                    newInquiryDialog.dialog("close");
+                    location.reload();
                 },
                 Cancel: function () {
                     newInquiryDialog.dialog("close");
@@ -90,12 +84,22 @@
         });
     });
 
-    function send_inquiry(userid, porder, pitem) {
+    function send_inquiry(porder, pitem) {
         $("#new_inquiry_msg").text("");
-        $("#new-inquiry-dialog").dialog('option', 'title', 'Send inquiry to ' + userid);
-        inqIdForUser = userid;
+        $("#new-inquiry-dialog").dialog('option', 'title', 'Send inquiry/message');
         inqPorder = porder;
         inqPitem = pitem;
+        inqCDate = null;
         newInquiryDialog.dialog("open");
     }
+
+    function replyto_inquiry(porder, pitem, cdate) {
+        $("#new_inquiry_msg").text("");
+        $("#new-inquiry-dialog").dialog('option', 'title', 'Reply to inquiry/message');
+        inqPorder = porder;
+        inqPitem = pitem;
+        inqCDate = cdate;
+        newInquiryDialog.dialog("open");
+    }
+
 </script>

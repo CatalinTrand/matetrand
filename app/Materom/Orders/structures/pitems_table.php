@@ -42,4 +42,5 @@ $table->string('orig_idnlf', 35)->default('');
 $table->string('orig_purch_price', 15)->default('');
 $table->string('orig_qty', 10)->default('');
 $table->dateTime('orig_lfdat')->default(now());
+$table->boolean('nof');
 

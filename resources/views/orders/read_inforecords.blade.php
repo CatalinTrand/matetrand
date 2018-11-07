@@ -163,6 +163,11 @@
         if (lifnr != null) $("#inforecord-lifnr").val(lifnr);
         if (idnlf != null) $("#inforecord-idnlf").val(idnlf);
         inforecordCaller = caller;
+        if (caller == 3) {
+            $("#inforecord-lifnr").prop("disabled", true);
+        } else {
+            $("#inforecord-lifnr").prop("disabled", false);
+        }
         inforecordDialog.dialog("open");
     }
 

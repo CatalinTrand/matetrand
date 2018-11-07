@@ -91,6 +91,9 @@ class HomeController extends Controller
         Session::put("filter_mtext", Input::get("filter_mtext"));
         Session::put("filter_lifnr", Input::get("filter_lifnr"));
         Session::put("filter_lifnr_name", Input::get("filter_lifnr_name"));
+        Session::put("filter_inquirements", "0");
+        $tmp = Input::get("filter_inquirements");
+        if (strtoupper($tmp) == "ON" ) Session::put("filter_inquirements", "1");
         Orders::fillCache();
         return redirect()->back();
     }
