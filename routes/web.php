@@ -39,14 +39,14 @@ Route::post('webservice/insertmanufacturer','WebserviceController@insertManufact
 Route::post('webservice/insertreferenceuser','WebserviceController@insertReferenceUser');
 Route::post('webservice/insertagent','WebserviceController@insertAgent');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
-Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
+Route::post('webservice/acceptitemchange','WebserviceController@acceptItemChange');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/dochangeitem','WebserviceController@doChangeItem');
 Route::post('webservice/sendAck','WebserviceController@sendAck');
 Route::post('webservice/replymessage','WebserviceController@replyMessage');
 Route::get('webservice/getsubtree','WebserviceController@getSubTree');
 Route::post('webservice/sortmessages','WebserviceController@sortMessages');
-Route::post('webservice/itemsOfOrder','WebserviceController@itemsOfOrder');
+Route::get('webservice/itemsOfOrder','WebserviceController@itemsOfOrder');
 Route::post('webservice/refilter','WebserviceController@refilter');
 Route::post('webservice/deletefilters','WebserviceController@deletefilters');
 Route::post('webservice/reloadcache','WebserviceController@reloadcache');

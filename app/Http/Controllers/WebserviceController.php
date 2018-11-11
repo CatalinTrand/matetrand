@@ -46,9 +46,9 @@ class WebserviceController extends Controller
         );
     }
 
-    public function acceptItemCHG()
+    public function acceptItemChange()
     {
-        return Webservice::acceptItemCHG(
+        return Webservice::acceptItemChange(
             Input::get("ebeln"),
             Input::get("id"),
             Input::get("type")
@@ -111,6 +111,7 @@ class WebserviceController extends Controller
         Session::forget("filter_lifnr");
         Session::forget("filter_lifnr_name");
         Session::forget("filter_inquirements");
+        Session::forget("autoexplode_PO");
         Orders::fillCache();
     }
 

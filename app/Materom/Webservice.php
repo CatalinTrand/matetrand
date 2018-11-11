@@ -106,6 +106,7 @@ class Webservice
         $pitems = array();
         if ($data == null) return json_encode($pitems);
         $porder = reset($data);
+        Session::put("autoexplode_PO", $porder->ebeln);
         foreach ($porder->items as $pitem) {
             $outpitem = $pitem;
             unset($outpitem->qty);
@@ -171,7 +172,7 @@ class Webservice
 
 
         $cdate = now();
-        DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and ctype = 'E'");
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, stage, ctype, reason, cuser, cuser_name, duser) values " .
             "('$ebeln','$ebelp', '$cdate', '$stage', 'E', '$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "', '$duser')");
         return "";
@@ -210,7 +211,7 @@ class Webservice
         return json_encode($proposals);
     }
 
-    public static function acceptItemCHG($ebeln, $ebelp, $type)
+    public static function acceptItemChange($ebeln, $ebelp, $type)
     {
         $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         $item_changed = $item->changed == "1";
@@ -272,7 +273,8 @@ class Webservice
         if ($column == 'lfdat') $type = 'D';
         if ($column == 'purch_price') $type = 'P';
         $newval = trim($value . " " . $valuehlp);
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type',CURRENT_TIMESTAMP,'" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        $cdate = now();
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         DB::commit();
         return "";
     }
@@ -677,7 +679,7 @@ class Webservice
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'R', pstage = '$stage' " .
+        DB::update("update pitems set stage = 'R', pstage = '$stage', changed = '1' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
             "('$ebeln', '$ebelp', '$cdate', 1, '$proposal->type', 'R', '" .

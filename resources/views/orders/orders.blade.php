@@ -22,7 +22,6 @@
             $groupBySelSO = " selected";
         }
 
-        $filter_status_type = 0;
         $filter_status_selAP = "";
         $filter_status_selRE = "";
         $filter_status_selNA = "";
@@ -30,15 +29,12 @@
         if (isset($tmp)) {
             if ($tmp == "NA") {
                 // toate
-                $filter_status_type = 0;
                 $filter_status_selNA = "selected";
             } elseif ($tmp == "AP") {
                 // aprobat
-                $filter_status_type = 2;
                 $filter_status_selAP = "selected";
             } elseif ($tmp == "RE")  {
                 // rejectat
-                $filter_status_type = 3;
                 $filter_status_selRE = "selected";
             }
         }
@@ -88,6 +84,8 @@
 
         $filter_lifnr_name = \Illuminate\Support\Facades\Session::get("filter_lifnr_name");
         if (!isset($filter_lifnr_name)) $filter_lifnr_name = "";
+
+        $autoexplode_PO = \Illuminate\Support\Facades\Session::get("autoexplode_PO");
 
     @endphp
     <div class="container-fluid">
@@ -161,7 +159,7 @@
                                     </select>
                                     {{__('Filter by status')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                            name="filter_status" onchange="this.form.submit()">
+                                            name="filter_status" onchange="this.form.submit(); return false;">
                                         <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
                                         <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
                                         <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
@@ -368,14 +366,14 @@
                                 foreach ($orders as $order) {
 
                                     if ($groupByPO == 1) {
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters'>" .
+                                        $comanda = "<button type='button' id='butt_P$order->ebeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters'>" .
                                             \App\Materom\SAP::alpha_output($order->ebeln) . "</p>";
                                     } else {
                                         $buttname = $order->vbeln;
                                         if (strtoupper($buttname) == \App\Materom\Orders::stockorder) $buttname = __('Stock');
                                         elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
                                         else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' class='resetfilters'>" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
-                                        $comanda = "<button type='button' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
+                                        $comanda = "<button type='button' id='butt_S$order->vbeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
                                     }
 
                                     $line_counter = $line_counter + 1;
@@ -413,7 +411,7 @@
                                                 $info_icon = "";
                                                 break;
                                             case 5:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif'>";
                                                 $info_icon = "";
                                                 break;
                                         }
@@ -520,7 +518,7 @@
                                                 $info_icon = "";
                                                 break;
                                             case 5:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif'>";
                                                 $info_icon = "";
                                                 break;
                                         }
@@ -837,7 +835,7 @@
             });
             jQuery.ajaxSetup({async: false});
 
-            $.post("webservice/acceptItemCHG",
+            $.post("webservice/acceptitemchange",
                 {
                     ebeln: ebeln,
                     id: id,
@@ -1020,11 +1018,11 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                         break;
                     case 4:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack2(\"$order->ebeln\"); return false;'>";
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack2(\"' + porder.ebeln + '\"); return false;'>";
                         info_icon = "";
                         break;
                     case 5:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png'>";
+                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif'>";
                         info_icon = "";
                         break;
                 }
@@ -1095,7 +1093,7 @@
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_reject + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_inquire + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
-                cols += "<td colspan='3'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " +
+                cols += "<td colspan='3'><button type='button' id='butt_P" + porder.ebeln + "' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " +
                     "<p onclick='re_filter(\"P\",\"" + porder.ebeln + "\")' style='display:inline' class='resetfilters'>" + conv_exit_alpha_output(porder.ebeln) + "</p>"
                     + "</td>";
                 cols += '<td class="td02" colspan="2">' + conv_exit_alpha_output(porder.lifnr) + '</td>';
@@ -1175,10 +1173,10 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
                         break;
                     case 4:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack(pitem.ebeln, pitem.ebelp, null); return false;'>";
+                        info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\"); return false;'>";
                         break;
                     case 5:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.png' onclick='replyack(pitem.ebeln, pitem.ebelp, null); return false;'>";
+                        info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif' onclick='replyack(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\"); return false;'>";
                         break;
                 }
                 let owner_icon = "";
@@ -1973,53 +1971,54 @@
                 width: 480,
                 modal: true,
                 buttons: {
-            {{__("Reject")}}:
+                    {{__("Reject")}}:
+                    function() {
+                        if (!($("#reject-category").val() == 4 && $("#reject-reason").val().length == 0)) {
+                            switch (_reject_type) {
+                                case "S":
+                                    rejectSOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                                    break;
+                                case "P":
+                                    rejectPOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                                    break;
+                                case "I":
+                                    rejectPItem(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                                    break;
+                            }
+                            rejectDialog.dialog("close");
+                        }
+                    },
 
-            function () {
-                if (!($("#reject-category").val() == 4 && $("#reject-reason").val().length == 0)) {
-                    switch (_reject_type) {
-                        case "S":
-                            rejectSOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                            break;
-                        case "P":
-                            rejectPOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                            break;
-                        case "I":
-                            rejectPItem(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                            break;
+                    {{__("Cancel")}}:
+                    function() {
+                        rejectDialog.dialog("close");
                     }
-                    rejectDialog.dialog("close");
+                },
+
+                close: function () {
+                    rejectForm[0].reset();
+                },
+                position: {
+                    my: "center",
+                    at: "center",
+                    of: $("#orders_table")
                 }
-            }
+            });
 
-        ,
-            {{__("Cancel")}}:
-
-            function () {
-                rejectDialog.dialog("close");
-            }
-        },
-            close: function () {
-                rejectForm[0].reset();
-            }
-        ,
-            position: {
-                my: "center",
-                    at
-            :
-                "center",
-                    of
-            :
-                $("#orders_table")
-            }
-        })
-            ;
             $("#reject-category").on('input', function () {
                 if ($("#new_rej_msg").text() != "") $("#new_rej_msg").text("");
             });
             rejectForm = rejectDialog.find("form").on("submit", function (event) {
                 event.preventDefault();
             });
+
+            @if (isset($autoexplode_PO))
+                let autoexplode_button = $('#butt_P{{$autoexplode_PO}}');
+                if (autoexplode_button != null && autoexplode_button != undefined) {
+                    getSubTree(autoexplode_button[0]);
+                    autoexplode_button.scrollIntoView();
+                }
+            @endif
         });
 
         function reject_init(type, this0, title) {
@@ -2051,6 +2050,35 @@
             if (_statusLN != "success") return;
             return _dataLN;
         }
+
+        function replyack(ebeln, ebelp) {
+
+            var _data, _status = "";
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.post("webservice/sendAck",
+                {
+                    ebeln: ebeln,
+                    ebelp: ebelp,
+                    cdate: null
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            $("#tr_I" + ebeln + "_" + ebelp + " td:eq(1)").html("");
+        }
+
+        function replyack2(ebeln) {
+            var _data, _status = "";
+        }
+
     </script>
 
     @include("orders.read_inforecords")

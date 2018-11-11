@@ -251,9 +251,10 @@ class POrderItem
             if ($first && ($itemchg->ctype == "S") && ($this->inquired == 1) && ($this->inq_reply == 1))
                 $this->inquired = 3;
 
-            if ($first && (($itemchg->ctype == "R") || ($itemchg->ctype == "A")) &&
-                ($this->owner != 0) && ($itemchg->acknowledged == 0))
-                $this->info = 5;
+            if ($first && ($itemchg->acknowledged == 0) && (Auth::user()->role == 'Furnizor')) {
+                if ($itemchg->ctype == "A") $this->info = 4;
+                if ($itemchg->ctype == "X") $this->info = 5;
+            }
             $first = false;
         }
 

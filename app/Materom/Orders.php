@@ -197,7 +197,7 @@ class Orders
         if (!isset($cacheid) || empty($cacheid)) return;
 
         $history = Session::get("filter_history");
-        $status = Session::get("filter_status");
+        $filter_status = Session::get("filter_status");
         $inquirements = Session::get("filter_inquirements");
 
         if ($history == null) $history = 1;
@@ -208,10 +208,15 @@ class Orders
         $itemchanges_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
 
         $status_filter = "";
-        if (strcmp($status, 'AP') == 0)
-            $status_filter = " and $items_table.stage = 'A' ";
-        if (strcmp($status, 'RE') == 0)
-            $status_filter = " and $items_table.stage = 'X' ";
+        if ($filter_status == 'AP') {
+            $status_filter = " and $items_table.status = 'A' ";
+        }
+        if ($filter_status == 'RE') {
+            if (Auth::user()->role == 'Furnizor')
+                $status_filter = " and ( $items_table.status = 'X' OR $items_table.status = 'R' )";
+            else
+                $status_filter = " and $items_table.status = 'X' ";
+        }
 
         if ($history == 1 && $s_order == null && $p_order == null && $refresh_dlv) {
             $items = DB::select("select ebeln, ebelp from pitems_cache where session = '$cacheid'");
