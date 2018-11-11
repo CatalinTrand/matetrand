@@ -39,7 +39,7 @@ Route::post('webservice/insertmanufacturer','WebserviceController@insertManufact
 Route::post('webservice/insertreferenceuser','WebserviceController@insertReferenceUser');
 Route::post('webservice/insertagent','WebserviceController@insertAgent');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
-Route::post('webservice/acceptItemCHG','WebserviceController@acceptItemCHG');
+Route::post('webservice/acceptitemchange','WebserviceController@acceptItemChange');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/dochangeitem','WebserviceController@doChangeItem');
 Route::post('webservice/sendAck','WebserviceController@sendAck');

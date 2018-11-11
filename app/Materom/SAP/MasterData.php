@@ -49,8 +49,10 @@ class MasterData
         if (!isset($lifnr_name)) {
             $lifnr_name = __("Undefined supplier");
         }
-        if ($cover_error == 2)
-            DB::insert("insert into sap_lfa1 (lifnr, name1) values ('$lifnr', '$lifnr_name');");
+        if ($cover_error == 2) {
+            $lifnr_name = str_replace('"', "'", $lifnr_name);
+            DB::insert('insert into sap_lfa1 (lifnr, name1) values ("'.$lifnr.'", "'.$lifnr_name.'");');
+        }
         return $lifnr_name;
     }
 
@@ -63,8 +65,10 @@ class MasterData
         if (!isset($kunnr_name)) {
             $kunnr_name = __("Undefined client");
         }
-        if ($cover_error == 2)
-            DB::insert("insert into sap_kna1 (kunnr, name1) values ('$kunnr', '$kunnr_name');");
+        if ($cover_error == 2) {
+            $kunnr_name = str_replace('"', "'", $kunnr_name);
+            DB::insert('insert into sap_kna1 (kunnr, name1) values ("'.$kunnr.'", "'.$kunnr_name.'");');
+        }
         return $kunnr_name;
     }
 
@@ -77,10 +81,26 @@ class MasterData
         if (!isset($ekgrp_name) || $ekgrp_name == null) {
             $ekgrp_name = __("Undefined purchase group");
         }
-        if ($cover_error == 2)
-            DB::insert("insert into sap_t024 (ekgrp, eknam) values ('$ekgrp', '$ekgrp_name');");
+        if ($cover_error == 2) {
+            $ekgrp_name = str_replace('"', "'", $ekgrp_name);
+            DB::insert('insert into sap_t024 (ekgrp, eknam) values ("'.$ekgrp.'", "'.$ekgrp_name.'");');
+        }
         return $ekgrp_name;
     }
 
+    static public function refreshCustomerCache()
+    {
+
+    }
+
+    static public function refreshVendorCache()
+    {
+
+    }
+
+    static public function refreshPurchGroupsCache()
+    {
+
+    }
 
 }
