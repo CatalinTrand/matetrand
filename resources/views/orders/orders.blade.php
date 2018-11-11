@@ -8,7 +8,9 @@
         @endphp
     @endguest
     @php
-
+        $height = "8";
+        if(strcmp(\Illuminate\Support\Facades\Auth::user()->role,"Administrator")==0)
+            $height = "11";
         $groupByPO = \Illuminate\Support\Facades\Session::get('groupOrdersBy');
         if (!isset($groupByPO)) $groupByPO = 1;
 
@@ -147,7 +149,7 @@
                         @endif
                     </div>
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 8rem;">
+                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: {{$height}}rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
@@ -218,6 +220,11 @@
                                             onclick="reset_filters();return false;">{{__('Reset')}}</button>
 
                                 </div>
+
+                                @if(!Auth::guest() && strcmp(Auth::user()->role,"Administrator") == 0)
+                                    <button title="Download the xls report for shown orders" type="button" style="margin-left: 1%; margin-top: 10px; height: 1.5rem;"
+                                            onclick="download_xls();return false;">{{__('XLS Report')}}</button>
+                                @endif
 
                                 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
                                        tabindex="-1">
@@ -632,6 +639,11 @@
         function reset_filters() {
             delete_filters();
             location.reload();
+        }
+
+        function download_xls() {
+            location.replace("webservice/createAndDownloadXLS");
+            return;
         }
     </script>
 

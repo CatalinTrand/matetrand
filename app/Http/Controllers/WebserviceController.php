@@ -12,6 +12,8 @@ use App\Materom\SAP;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 
+use Maatwebsite\Excel\Facades\Excel;
+
 class WebserviceController extends Controller
 {
     public function tryAuthAPIToken()
@@ -252,6 +254,36 @@ class WebserviceController extends Controller
             Input::get("userid"),
             Input::get("agent")
         );
+    }
+
+    public function createAndDownloadXLS(){
+        if(!Auth::guest() && strcmp(Auth::user()->role,"Administrator") == 0) {
+            $items = DB::Select("select * from pitems");
+
+            $itemsArray = [];
+
+            //Excel header
+            array_push($itemsArray,DB::getSchemaBuilder()->getColumnListing("pitems"));
+
+            //Contents
+            foreach ($items as $item) {
+                array_push($itemsArray,(array)$item);
+            }
+
+            //Build excel
+            Excel::create('payments', function($excel) use ($itemsArray) {
+
+                $excel->setTitle('Items');
+                $excel->setCreator(Auth::user()->id)->setCompany('Materom');
+                $excel->setDescription('items file');
+
+                $excel->sheet('sheet_items', function($sheet) use ($itemsArray) {
+                    $sheet->fromArray($itemsArray, null, 'A1', false, false);
+                });
+
+            })->download('xlsx');
+        }
+        return null;
     }
 
     public function changePassword() {
