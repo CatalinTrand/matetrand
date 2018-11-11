@@ -47,11 +47,10 @@ class MasterData
         if (isset($lifnr_name)) return $lifnr_name;
         $lifnr_name = self::getData("LIFNR_NAME", $lifnr);
         if (!isset($lifnr_name)) {
-            if ($cover_error == 0) return;
             $lifnr_name = __("Undefined supplier");
-            if ($cover_error == 2)
-                DB::insert("insert into sap_lfa1 (lifnr, name1) values ('$lifnr', '$lifnr_name');");
         }
+        if ($cover_error == 2)
+            DB::insert("insert into sap_lfa1 (lifnr, name1) values ('$lifnr', '$lifnr_name');");
         return $lifnr_name;
     }
 
@@ -62,11 +61,10 @@ class MasterData
         if (isset($kunnr_name)) return $kunnr_name;
         $kunnr_name = self::getData("KUNNR_NAME", $kunnr);
         if (!isset($kunnr_name)) {
-            if ($cover_error == 0) return;
             $kunnr_name = __("Undefined client");
-            if ($cover_error == 2)
-                DB::insert("insert into sap_kna1 (kunnr, name1) values ('$kunnr', '$kunnr_name');");
         }
+        if ($cover_error == 2)
+            DB::insert("insert into sap_kna1 (kunnr, name1) values ('$kunnr', '$kunnr_name');");
         return $kunnr_name;
     }
 
@@ -76,12 +74,11 @@ class MasterData
         $ekgrp_name = DB::table("sap_t024")->where("ekgrp", $ekgrp)->value("eknam");
         if (isset($ekgrp_name)) return $ekgrp_name;
         $ekgrp_name = self::getData("EKGRP_NAME", $ekgrp);
-        if (!isset($ekgrp_name)) {
-            if ($cover_error == 0) return;
+        if (!isset($ekgrp_name) || $ekgrp_name == null) {
             $ekgrp_name = __("Undefined purchase group");
-            if ($cover_error == 2)
-                DB::insert("insert into sap_t024 (ekgrp, eknam) values ('$ekgrp', '$ekgrp_name');");
         }
+        if ($cover_error == 2)
+            DB::insert("insert into sap_t024 (ekgrp, eknam) values ('$ekgrp', '$ekgrp_name');");
         return $ekgrp_name;
     }
 

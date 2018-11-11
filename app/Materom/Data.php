@@ -80,7 +80,7 @@ class Data
 
         if (is_null($order)) {
             $sql = "insert into porders (ebeln, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate, changed, status) values " .
-                "('$norder->ebeln', $norder->wtime', '$norder->ctime', '$norder->lifnr', " .
+                "('$norder->ebeln', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
                 "'$norder->ekgrp', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
             DB::insert($sql);
         } else {
