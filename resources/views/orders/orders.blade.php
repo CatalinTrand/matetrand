@@ -975,6 +975,7 @@
                 hideSubTree(this);
                 return false;
             };
+            refreshCheck();
             return false;
         }
 
@@ -1472,7 +1473,12 @@
                 {
                     type: rowtype,
                     order: porder,
-                    history: $("filter_history").val()
+                    history: $("filter_hhistory").val(),
+                    @if($groupByPO == 0)
+                        vbeln: sorder
+                    @else
+                        vbeln: null
+                    @endif
                 },
                 function (data, status) {
                     _dataAP = data;
@@ -1482,7 +1488,7 @@
             if (_statusAP != "success") return;
             if (_dataAP.length > 0) {
                 for (let i = 0; i < _dataAP.length; i++) {
-                    if (isChecked('I' + _dataAP[i].ebelp)) {
+                    if (isChecked('I' + _dataAP[i].ebeln + "_"+_dataAP[i].ebelp)) {
                         _unused_acceptItem(porder, _dataAP[i].ebelp, 'purch-item');
                     }
                 }
@@ -1544,7 +1550,7 @@
             if (_statusRS != "success") return;
             if (_dataRS.length > 0) {
                 for (let i = 0; i < _dataRS.length; i++) {
-                    if (isChecked('I' + _dataRS[i].ebelp)) {
+                    if (isChecked('I' + _dataRS[i].ebeln +"_" + _dataRS[i].ebelp)) {
                         doRejectItem(porder, _dataRS[i].ebelp, category, reason, 'X', 'Z');
                     }
                 }
@@ -1577,7 +1583,12 @@
                 {
                     type: rowtype,
                     order: porder,
-                    history: $("filter_history").val()
+                    history: $("filter_history").val(),
+                    @if($groupByPO == 0)
+                    vbeln: sorder
+                    @else
+                    vbeln: null
+                    @endif
                 },
                 function (data, status) {
                     _dataRP = data;
@@ -1587,7 +1598,7 @@
             if (_statusRP != "success") return;
             if (_dataRP.length > 0) {
                 for (let i = 0; i < _dataRP.length; i++) {
-                    if (isChecked('I' + _dataRP[i].ebelp)) {
+                    if (isChecked('I' + _dataRP[i].ebeln +'_' + _dataRP[i].ebelp)) {
                         doRejectItem(porder, _dataRP[i].ebelp, category, reason,
                                 @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
                                     'R', 'R'
@@ -1662,7 +1673,7 @@
             if (_statusAS != "success") return;
             if (_dataAS.length > 0) {
                 for (let i = 0; i < _dataAS.length; i++) {
-                    if (isChecked('I' + _dataAS[i].ebelp)) {
+                    if (isChecked('I' + _dataAS[i].ebeln + "_" +_dataAS[i].ebelp)) {
                         _unused_acceptItem(porder, _dataAS[i].ebelp, 'purch-item');
                     }
                 }

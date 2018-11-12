@@ -253,13 +253,17 @@ class Webservice
         return "";
     }
 
-    public static function itemsOfOrder($type, $order, $history)
+    public static function itemsOfOrder($type, $order, $history, $vbeln)
     {
         $items_table = $history != 2 ? "pitems" : "pitems_arch";
         if ($type == "S") {
             return DB::select("select * from $items_table where vbeln = '$order'");
         } else {
-            return DB::select("select * from $items_table where ebeln = '$order'");
+            $groupByPO = Session::get('groupOrdersBy');
+            if (!isset($groupByPO)) $groupByPO = 1;
+            if($groupByPO == 1)
+                return DB::select("select * from $items_table where ebeln = '$order'");
+            return DB::select("select * from $items_table where ebeln = '$order' and vbeln = '$vbeln'");
         }
     }
 
