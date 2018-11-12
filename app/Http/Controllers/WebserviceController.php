@@ -258,33 +258,53 @@ class WebserviceController extends Controller
         );
     }
 
-    public function createAndDownloadXLS(){
-        if(!Auth::guest() && strcmp(Auth::user()->role,"Administrator") == 0) {
-            $items = DB::Select("select * from pitems");
+    public function downloadOrdersXLS(){
 
-            $itemsArray = [];
+        $orders = Orders::getOrderList(1);
 
-            //Excel header
-            array_push($itemsArray,DB::getSchemaBuilder()->getColumnListing("pitems"));
+        $itemsArray = [];
 
-            //Contents
-            foreach ($items as $item) {
-                array_push($itemsArray,(array)$item);
+        //Excel header
+        array_push($itemsArray, [
+                __("Purchase order"),
+                __("Item"),
+                __("Vendor mat."),
+                __("Description"),
+                __("Quantity"), '',
+                __("Price"), '',
+                __("Delivery date")
+            ]);
+
+        //            array_push($itemsArray,DB::getSchemaBuilder()->getColumnListing("pitems"));
+
+        //Contents
+        foreach ($orders as $order) {
+            foreach($order->items as $item) {
+                array_push($itemsArray, [
+                    SAP::alpha_output($item->ebeln),
+                    SAP::alpha_output($item->ebelp),
+                    $item->idnlf,
+                    $item->mtext,
+                    $item->qty,
+                    $item->qty_uom,
+                    $item->purch_price,
+                    $item->purch_curr,
+                    substr($item->lfdat, 0, 10)
+                ]);
             }
+        }
 
-            //Build excel
-            Excel::create('payments', function($excel) use ($itemsArray) {
-
+        //Build excel
+        Excel::create(__("Materom purchase orders ") . substr(now(), 0, 10),
+            function($excel) use ($itemsArray) {
                 $excel->setTitle('Items');
                 $excel->setCreator(Auth::user()->id)->setCompany('Materom');
                 $excel->setDescription('items file');
 
-                $excel->sheet('sheet_items', function($sheet) use ($itemsArray) {
+                $excel->sheet(__("Purchase orders"), function($sheet) use ($itemsArray) {
                     $sheet->fromArray($itemsArray, null, 'A1', false, false);
                 });
-
             })->download('xlsx');
-        }
         return null;
     }
 

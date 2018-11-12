@@ -57,7 +57,7 @@ Route::get('webservice/acceptproposal','WebserviceController@acceptProposal');
 Route::get('webservice/rejectproposal','WebserviceController@rejectProposal');
 Route::get('webservice/readlifnrname','WebserviceController@readLifnrName');
 Route::post('webservice/sendinquiry','WebserviceController@sendInquiry');
-Route::get('webservice/createAndDownloadXLS','WebserviceController@createAndDownloadXLS');
+Route::get('webservice/downloadordersxls','WebserviceController@downloadOrdersXLS');
 Route::get('webservice/processsplit','WebserviceController@processSplit');
 Route::get('webservice/acceptsplit','WebserviceController@acceptSplit');
 Route::get('webservice/rejectsplit','WebserviceController@rejectSplit');

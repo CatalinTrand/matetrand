@@ -8,9 +8,6 @@
         @endphp
     @endguest
     @php
-        $height = "8";
-        if(strcmp(\Illuminate\Support\Facades\Auth::user()->role,"Administrator")==0)
-            $height = "11";
         $groupByPO = \Illuminate\Support\Facades\Session::get('groupOrdersBy');
         if (!isset($groupByPO)) $groupByPO = 1;
 
@@ -147,10 +144,13 @@
                         @endif
                     </div>
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: {{$height}}rem;">
+                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 8rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
+                                    <table style="border: none; width: 100%;">
+                                    <tr>
+                                    <td>
                                     {{__('Show by')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
                                             name="groupOrdersBy" onchange="this.form.submit()">
@@ -166,7 +166,13 @@
                                     </select>
                                     <input type="checkbox" id="filter_inquirements" name="filter_inquirements" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$inquirements_checked}}>
                                     <label for="filter_inquirements" class="col-form-label text-md-left">{{__('Only inquirements')}}</label>&nbsp;&nbsp;
-
+                                    </td>
+                                    <td width="100px" style="text-align: right;">
+                                        <button title="Download the xls report for shown orders" type="button" style="margin-left: 2px; height: 1.5rem;"
+                                                onclick="download_orders_xls();return false;">{{__('XLS Report')}}</button>
+                                    </td>
+                                    </tr>
+                                    </table>
                                 </div>
                                 <br>
                                 <div class="container row" style="display: block; max-width: 100%;">
@@ -218,11 +224,6 @@
                                             onclick="reset_filters();return false;">{{__('Reset')}}</button>
 
                                 </div>
-
-                                @if(!Auth::guest() && strcmp(Auth::user()->role,"Administrator") == 0)
-                                    <button title="Download the xls report for shown orders" type="button" style="margin-left: 1%; margin-top: 10px; height: 1.5rem;"
-                                            onclick="download_xls();return false;">{{__('XLS Report')}}</button>
-                                @endif
 
                                 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
                                        tabindex="-1">
@@ -639,8 +640,8 @@
             location.reload();
         }
 
-        function download_xls() {
-            location.replace("webservice/createAndDownloadXLS");
+        function download_orders_xls() {
+            location.replace("webservice/downloadordersxls");
             return;
         }
     </script>
