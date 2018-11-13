@@ -1723,7 +1723,8 @@
                 accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
             }
             if (mode == 3) {
-                select_proposal(mode, thisbtn, _dataIR, "Selectie split", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, selectati o decizie");
+                split_dialog('2', thisbtn, porder, item, "Selectie/Split item");
+                // select_proposal(mode, thisbtn, _dataIR, "Selectie split", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, selectati o decizie");
             }
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");

@@ -20,8 +20,8 @@ class CreatePitemchgproposalsTable extends Migration
             $table->dateTime('cdate')->default(now());
             $table->integer('pos');
             $table->string('lifnr', 10);
-            $table->string('idnlf', 10);
-            $table->string('matnr', 10)->default('');
+            $table->string('idnlf', 35);
+            $table->string('matnr', 18)->default('');
             $table->string('mtext', 35)->default('');
             $table->dateTime('lfdat')->default(now());
             $table->string('qty', 10)->default('');

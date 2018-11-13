@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Materom\EditUsers;
+use App\Materom\SAP;
 use Illuminate\Support\Facades\Input;
 
 class EditUserController
@@ -43,4 +44,13 @@ class EditUserController
             Input::get("agent")
         );
     }
+
+    public function kunnrDel()
+    {
+        EditUsers::kunnrDel(
+            Input::get("id"),
+            SAP::alpha_input(Input::get("kunnr"))
+        );
+    }
+
 }

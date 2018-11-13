@@ -88,6 +88,14 @@
                             item.purch_curr = row.cells[7].textContent.split(" ")[1];
                             item.sales_price = row.cells[8].textContent.split(" ")[0];
                             item.sales_curr = row.cells[8].textContent.split(" ")[1];
+                            @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                            if (_sp_si_itemdata.vbeln != "!REPLENISH") {
+                                if ((item.sales_price.trim().length == 0) || (item.sales_curr.trim().length == 0)) {
+                                    alert('{{__("There are missing sales prices - please fill them all before applying/proposing the split")}}');
+                                    return;
+                                }
+                            }
+                            @endif
                             result.items.push(item);
                         }
 
@@ -152,6 +160,7 @@
                 }
                 $("#split-item-ok-button").text("{{__('Apply split')}}");
                 @endif
+                split_last_sp_si_selected_line = null;
             },
             position: {
                 my: "center",
@@ -190,6 +199,49 @@
         _sp_si_type = type;
         _sp_si_this = this0;
         _sp_si_itemdata = _dataIR;
+
+        if (type == '2') {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _data2, _status2;
+            $.post("webservice/readproposals",
+                {
+                    type: "S",
+                    ebeln: ebeln,
+                    ebelp: ebelp
+                },
+                function (data, status) {
+                    _data2 = data;
+                    _status2 = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            if (_data2 == undefined || _data2.length == 0) return;
+
+            if (_data2.length > 0) {
+                let table = $("#splits-table-si-1");
+                for (let i = 0; i < _data2.length; i++) {
+                    var newRow = $("<tr style='height: 1.2rem;' " +
+                        "id='SPLIT_" + _data2[i].ebeln + '_' + _data2[i].ebelp + '_' + _data2[i].cdate.substring(0, 10) + _data2[i].cdate.substring(11, 8) + '_' + _data2[i].pos +
+                        "' onclick='split_selected(this);return false;'>");
+                    var cols = "<td>" + conv_exit_alpha_output(_data2[i].lifnr) + "</td>" +
+                        "<td>" + _data2[i].lifnr_name + "</td>" +
+                        "<td>" + _data2[i].idnlf + "</td>" +
+                        "<td>" + _data2[i].mtext + "</td>" +
+                        "<td>" + _data2[i].matnr + "</td>" +
+                        "<td>" + _data2[i].lfdat.substring(0, 10) + "</td>" +
+                        "<td colspan='2' style='text-align: right;'>" + _data2[i].qty + " " + _data2[i].qty_uom + "</td>" +
+                        "<td colspan='2' style='text-align: right;'>" + _data2[i].purch_price + " " + _data2[i].purch_curr + "</td>" +
+                        "<td colspan='2' style='text-align: right;'>" + _data2[i].sales_price + " " + _data2[i].sales_curr + "</td>";
+                    newRow.append(cols);
+                    table.append(newRow);
+                }
+            }
+        }
+
         siDialog.dialog("open");
     }
 
@@ -270,11 +322,11 @@
                     let matnr = $("#aes-matnr").val().trim();
                     let lfdat = $("#aes-lfdat").val().trim();
                     let quantity = $("#aes-quantity").val().trim();
-                    let quantity_uom = $("#aes-quantity-unit").val().trim();
+                    let quantity_uom = $("#aes-quantity-unit").val().trim().toUpperCase();
                     let purch_price = $("#aes-purch-price").val().trim();
-                    let purch_curr = $("#aes-purch-curr").val().trim();
+                    let purch_curr = $("#aes-purch-curr").val().trim().toUpperCase();
                     let sales_price = $("#aes-sales-price").val().trim();
-                    let sales_curr = $("#aes-sales-curr").val().trim();
+                    let sales_curr = $("#aes-sales-curr").val().trim().toUpperCase();
                     if (lifnr.length == 0 ||
                         idnlf.length == 0 ||
                         mtext.length == 0 ||
@@ -446,7 +498,6 @@
 <script>
 
     var select_split_dialog;
-    var _sp_si_type, _sp_si_this;
     var _sp_si_ebeln, _sp_si_ebelp, _sp_si_cdate;
     $(function () {
         select_split_dialog = $("#select-split-dialog").dialog({

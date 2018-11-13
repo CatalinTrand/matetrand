@@ -49,15 +49,28 @@ class Webservice
 
     static public function insertAgent($userid, $agent)
     {
+        $agent = SAP::alpha_input($agent);
         $agent_name = MasterData::getKunnrName($agent);
-        if (empty($agent_name)) return "No such user!";
+        if (empty($agent_name)) return "The agent is not defined in SAP";
 
         $find = DB::select("select * from users_agent where id = '$userid' and agent = '$agent'");
         if (count($find) == 0) {
-            $agent = SAP::alpha_input($agent);
             DB::insert("insert into users_agent (id, agent) values ('$userid','$agent')");
             return "";
-        } else return __("This agent is already set for user");
+        } else return __("This agent is already defined for user");
+    }
+
+    static public function insertCustomer($userid, $kunnr)
+    {
+        $kunnr = SAP::alpha_input($kunnr);
+        $kunnr_name = MasterData::getKunnrName($kunnr);
+        if (empty($kunnr_name)) return "The client is not defined in SAP";
+
+        $find = DB::select("select * from users_cli where id = '$userid' and kunnr = '$kunnr'");
+        if (count($find) == 0) {
+            DB::insert("insert into users_cli (id, kunnr) values ('$userid','$kunnr')");
+            return "";
+        } else return __("This customer is already defined for user");
     }
 
     static public function changePassword($userid, $newPass)
@@ -215,20 +228,21 @@ class Webservice
     {
         $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         $item_changed = $item->changed == "1";
+        $pstage = $item->pstage;
         $cdate = now();
         if (!$item_changed) {
             SAP::acknowledgePOItem($ebeln, $ebelp, " ");
-            DB::update("update pitems set stage = 'Z', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                 "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
         } else {
             if ($item->stage == 'F') {
-                DB::update("update pitems set stage = 'R', status = 'T' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::update("update pitems set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
             } else {
                 SAP::savePOItem($ebeln, $ebelp);
-                DB::update("update pitems set stage = 'Z', status = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
             }
@@ -446,7 +460,7 @@ class Webservice
             DB::commit();
         } else {
             $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
-            if (($proposal->lifnr == $proposal->itemdata->lifnr) && ($proposal->idnlf == trim($proposal->itemdata->idnlf))) {
+            if (($proposal->lifnr == $proposal->itemdata->lifnr) && ($proposal->idnlf == trim($proposal->itemdata->orig_idnlf))) {
                 // keeping the same supplier for stock orders, just update PO
                 $tmp_idnlf = $proposal->idnlf;
                 $tmp_mtext = $proposal->mtext;
@@ -540,7 +554,7 @@ class Webservice
         ])->first();
         $item = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $porder = DB::table("porders")->where("ebeln", $ebeln)->first();
-        if (($proposal->lifnr == $porder->lifnr) && ($proposal->idnlf == trim($item->idnlf))) {
+        if (($proposal->lifnr == $porder->lifnr) && ($proposal->idnlf == trim($item->orig_idnlf))) {
             // keeping the same supplier for stock orders, just update PO
             $tmp_idnlf = $proposal->idnlf;
             $tmp_mtext = $proposal->mtext;

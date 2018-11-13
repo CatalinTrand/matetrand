@@ -47,6 +47,11 @@ class EditUsers {
         DB::delete("delete from users_agent where id = '$id' and agent = '$agentDEL'");
     }
 
+    static function kunnrDel($id, $kunnr)
+    {
+        DB::delete("delete from users_cli where id = '$id' and kunnr = '$kunnr'");
+    }
+
     static function getSel($id){
         return DB::select("select * from users_sel where id='$id'");
     }
@@ -55,7 +60,14 @@ class EditUsers {
         return DB::select("select * from users_ref where id='$id'");
     }
 
-    static function getAgents($id){
+    static function getAgents($id)
+    {
         return DB::select("select * from users_agent where id='$id'");
     }
+
+    static function getCustomers($id)
+    {
+        return DB::select("select * from users_cli where id='$id'");
+    }
+
 }

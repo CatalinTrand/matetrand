@@ -151,9 +151,9 @@
                             result.quantity = $("#ar-immed-quantity").val().trim();
                             result.quantity_unit = $("#ar-immed-quantity-unit").val().trim();
                             result.purch_price = $("#ar-immed-purch-price").val().trim();
-                            result.purch_curr = $("#ar-immed-purch-curr").val().trim();
+                            result.purch_curr = $("#ar-immed-purch-curr").val().trim().toUpperCase();
                             result.sales_price = $("#ar-immed-sales-price").val().trim();
-                            result.sales_curr = $("#ar-immed-sales-curr").val().trim();
+                            result.sales_curr = $("#ar-immed-sales-curr").val().trim().toUpperCase();
                             if (result.lifnr.length == 0 ||
                                 result.idnlf.length == 0 ||
                                 result.mtext.length == 0 ||
@@ -398,9 +398,9 @@
                     let quantity = $("#aep-quantity").val().trim();
                     let quantity_uom = $("#aep-quantity-unit").val().trim();
                     let purch_price = $("#aep-purch-price").val().trim();
-                    let purch_curr = $("#aep-purch-curr").val().trim();
+                    let purch_curr = $("#aep-purch-curr").val().trim().toUpperCase();
                     let sales_price = $("#aep-sales-price").val().trim();
-                    let sales_curr = $("#aep-sales-curr").val().trim();
+                    let sales_curr = $("#aep-sales-curr").val().trim().toUpperCase();
                     if (lifnr.length == 0 ||
                         idnlf.length == 0 ||
                         mtext.length == 0 ||
@@ -579,7 +579,7 @@
                             }
                         });
                         jQuery.ajaxSetup({async: false});
-                        var _data, _status;
+                        var _2data, _2status;
                         $.get("webservice/acceptproposal",
                             {
                                 ebeln: _sp_ebeln,
@@ -588,12 +588,12 @@
                                 pos: _sp_pos
                             },
                             function (data, status) {
-                                _data = data;
-                                _status = status;
-                            }, "json");
+                                _2data = data;
+                                _2status = status;
+                            });
                         jQuery.ajaxSetup({async: true});
-                        if (_data != null && _data != undefined && _data.trim().length != 0) {
-                            alert(_data);
+                        if (_2data != null && _2data != undefined && _2data.trim().length != 0) {
+                            alert(_2data);
                             return;
                         }
                         select_proposal_dialog.dialog("close");
@@ -607,7 +607,7 @@
                         }
                     });
                     jQuery.ajaxSetup({async: false});
-                    var _data, _status;
+                    var _3data, _3status;
                     $.get("webservice/rejectproposal",
                         {
                             ebeln: _sp_ebeln,
@@ -615,12 +615,12 @@
                             cdate: _sp_cdate
                         },
                         function (data, status) {
-                            _data = data;
-                            _status = status;
-                        }, "json");
+                            _3data = data;
+                            _3status = status;
+                        });
                     jQuery.ajaxSetup({async: true});
-                    if (_data != null && _data != undefined && _data.trim().length != 0) {
-                        alert(_data);
+                    if (_3data != null && _3data != undefined && _3data.trim().length != 0) {
+                        alert(_3data);
                         return;
                     }
                     select_proposal_dialog.dialog("close");
@@ -673,7 +673,6 @@
                 }
             });
             jQuery.ajaxSetup({async: false});
-            var _data, _status;
             $.post("webservice/readproposals",
                 {
                     type: "S",

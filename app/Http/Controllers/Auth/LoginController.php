@@ -51,8 +51,16 @@ class LoginController extends Controller
             $id = Auth::user()->id;
             DB::delete("delete from user_agent_clients where id = '$id'");
             $clients = SAP::getAgentClients($id);
-            foreach ($clients as $client){
+            foreach ($clients as $client) {
                 DB::insert("insert into user_agent_clients (id, kunnr) values ('$id','$client')");
+            }
+            $customers = DB::select("select * from users_cli where id = '$id'");
+            if (!empty($customers)) {
+                foreach ($customers as $customer) {
+                    $client = $customer->kunnr;
+                    if (!DB::table("user_agent_clients")->where([["id", "=", $id], ["kunnr", "=", $client]])->exists())
+                        DB::insert("insert into user_agent_clients (id, kunnr) values ('$id','$client')");
+                }
             }
         }
         Orders::fillCache();

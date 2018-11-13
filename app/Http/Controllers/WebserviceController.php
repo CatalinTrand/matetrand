@@ -258,6 +258,13 @@ class WebserviceController extends Controller
         );
     }
 
+    function insertCustomer(){
+        return Webservice::insertCustomer(
+            Input::get("userid"),
+            Input::get("kunnr")
+        );
+    }
+
     public function downloadOrdersXLS(){
 
         $orders = Orders::getOrderList(1);

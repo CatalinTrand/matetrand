@@ -32,12 +32,14 @@ Route::post('/editUser/edit','EditUserController@editUsers');
 Route::post('/editUser/selDel','EditUserController@selDel');
 Route::post('/editUser/refDel','EditUserController@refDel');
 Route::post('/editUser/agentDel','EditUserController@agentDel');
+Route::post('/editUser/kunnrDel','EditUserController@kunnrDel');
 
 // Webservices
 Route::post('webservice/rfcping','WebserviceController@rfcPing');
 Route::post('webservice/insertmanufacturer','WebserviceController@insertManufacturer');
 Route::post('webservice/insertreferenceuser','WebserviceController@insertReferenceUser');
 Route::post('webservice/insertagent','WebserviceController@insertAgent');
+Route::post('webservice/insertcustomer','WebserviceController@insertCustomer');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/acceptitemchange','WebserviceController@acceptItemChange');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');

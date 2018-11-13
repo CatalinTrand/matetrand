@@ -239,6 +239,7 @@ class POrderItem
 
         $first = true;
         foreach ($this->changes as $itemchg) {
+            if ($itemchg->ctype == 'E') continue;
             if (($itemchg->stage == Auth::user()->role[0]) && ($itemchg->acknowledged == 0)) {
                 // $this->inquired = 3;
             }
@@ -251,7 +252,9 @@ class POrderItem
             if ($first && ($itemchg->ctype == "S") && ($this->inquired == 1) && ($this->inq_reply == 1))
                 $this->inquired = 3;
 
-            if ($first && ($itemchg->acknowledged == 0) && (Auth::user()->role == 'Furnizor')) {
+            if ($first && ($itemchg->acknowledged == 0)
+                && (Auth::user()->role == 'Furnizor')
+                && ($this->pstage != ' ') && ($this->pstage != '') && ($this->pstage != 'F')) {
                 if ($itemchg->ctype == "A") $this->info = 4;
                 if ($itemchg->ctype == "X") $this->info = 5;
             }

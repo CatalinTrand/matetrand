@@ -323,53 +323,110 @@
                 </div>
             </div>
         </div>
-        <div class="container" style="display: inline-block; margin-left: 20.3%" align="middle">
 
-            <div class="container" id="agent_div" style="display: none; margin-left: 25%; width: 100%">
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card" style="height: 250px">
-                            <div class="card-header">
-                                <table width="100%">
-                                    <tr>
-                                        <td width="90%">{{__('Agents')}}</td>
-                                        <td align="right">
-                                            <button id="new-agent-button" type="button"
-                                                    onclick="new_agent_id('{{$id}}');return false;">New
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </table>
+        <div class="row">
+
+            <div class="container" style="display: inline-block; margin-left: 0%" align="left" width="50%">
+                <div class="container" id="agent_div" style="display: none; margin-left: 25%; width: 100%">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card" style="height: 250px">
+                                <div class="card-header">
+                                    <table width="100%">
+                                        <tr>
+                                            <td width="90%">{{__('Agents')}}</td>
+                                            <td align="right">
+                                                <button id="new-agent-button" type="button"
+                                                        onclick="new_agent_id('{{$id}}');return false;">New
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div id="agent-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                                    <form method="POST" action="/editUser" aria-label="Edit Agents"
+                                          style="margin-top: -20px">
+                                        @csrf
+                                    </form>
+                                    <br>
+                                    <table class="table-striped" style="line-height: 1.4rem;" width="100%">
+                                        <tr>
+                                            <th>
+                                                {{ __('Agent') }}
+                                            </th>
+                                            <th>
+                                                {{ __('Agent name') }}
+                                            </th>
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                        @php
+                                            $myAGENTs = \App\Materom\EditUsers::getAgents($id);
+                                            $table = "";
+                                            foreach ($myAGENTs as $aAGENT){
+                                                    $agent = $aAGENT->agent;
+                                                    $agent_name = \App\Materom\SAP\MasterData::getKunnrName($agent, 2);
+                                                    $table .= "<tr><td>$agent</td><td>$agent_name</td><td><button type='button' onclick='agentDel(\"$id\",\"$agent\");return false;'><img src='/images/delete.png' class='delete' style='height: 1.4rem;'></button></td></tr>";
+                                            }
+                                            echo $table;
+                                        @endphp
+                                    </table>
+                                </div>
                             </div>
-                            <div id="agent-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
-                                <form method="POST" action="/editUser" aria-label="Edit Agents"
-                                      style="margin-top: -20px">
-                                    @csrf
-                                </form>
-                                <br>
-                                <table class="basicTable table table-striped">
-                                    <tr>
-                                        <th>
-                                            {{ __('Agent') }}
-                                        </th>
-                                        <th>
-                                            {{ __('Agent name') }}
-                                        </th>
-                                        <th>
-                                            Action
-                                        </th>
-                                    </tr>
-                                    @php
-                                        $myAGENTs = \App\Materom\EditUsers::getAgents($id);
-                                        $table = "";
-                                        foreach ($myAGENTs as $aAGENT){
-                                                $agent = $aAGENT->agent;
-                                                $agent_name = \App\Materom\SAP\MasterData::getKunnrName($agent, 2);
-                                                $table .= "<tr style='line-height: 20px'><td>$agent</td><td>$agent_name</td><td><button type='button' onclick='agentDel(\"$id\",\"$agent\");return false;'><img src='/images/delete.png' class='delete'></button></td></tr>";
-                                        }
-                                        echo $table;
-                                    @endphp
-                                </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container" style="display: inline-block; margin-left: -40%" align="left" width="50%">
+                <div class="container" id="customers_div" style="display: none; margin-left: 25%; width: 100%">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card" style="height: 250px">
+                                <div class="card-header">
+                                    <table width="100%">
+                                        <tr>
+                                            <td width="90%">{{__('SAP Customers')}}</td>
+                                            <td align="right">
+                                                <button id="new-user-customer-button" type="button"
+                                                        onclick="new_user_customer('{{$id}}');return false;">New
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div id="user-customer-ids-card-body" class="card-body" style="overflow-y: scroll; height: 100%;">
+                                    <form method="POST" action="/editUser" aria-label="Edit Customers"
+                                          style="margin-top: -20px">
+                                        @csrf
+                                    </form>
+                                    <br>
+                                    <table class="table-striped" style="line-height: 1.4rem;" width="100%">
+                                        <tr>
+                                            <th>
+                                                {{ __('Customer') }}
+                                            </th>
+                                            <th>
+                                                {{ __('Customer name') }}
+                                            </th>
+                                            <th>
+                                                Action
+                                            </th>
+                                        </tr>
+                                        @php
+                                            $myCustomers = \App\Materom\EditUsers::getCustomers($id);
+                                            $table = "";
+                                            foreach ($myCustomers as $customer) {
+                                                    $kunnr = $customer->kunnr;
+                                                    $kunnr_name = \App\Materom\SAP\MasterData::getKunnrName($kunnr, 2);
+                                                    $kunnr = \App\Materom\SAP::alpha_output($kunnr);
+                                                    $table .= "<tr><td>$kunnr</td><td>$kunnr_name</td><td><button type='button' onclick='kunnrDel(\"$id\",\"$kunnr\");return false;'><img src='/images/delete.png' class='delete' style='height: 1.4rem;'></button></td></tr>";
+                                            }
+                                            echo $table;
+                                        @endphp
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -431,6 +488,24 @@
             jQuery.ajaxSetup({async: true});
             location.replace(location.pathname + "?id=" + id);
         }
+
+        function kunnrDel(id, kunnr) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.post("editUser/kunnrDel",
+                {
+                    id: id,
+                    kunnr: kunnr
+                },
+                function (data, status) {});
+            jQuery.ajaxSetup({async: true});
+            location.replace(location.pathname + "?id=" + id);
+        }
+
     </script>
 
     <script>
@@ -459,6 +534,7 @@
             var token_div = document.getElementById("token_div");
             var sapuser_div = document.getElementById("sapuser_div");
             var agent_div = document.getElementById("agent_div");
+            var customer_div = document.getElementById("customers_div");
 
             if (nameSelect) {
                 if (nameSelect == "Referent" || nameSelect == "Furnizor") {
@@ -477,6 +553,7 @@
                     }
                     token_div.style.display = "none";
                     agent_div.style.display = "none";
+                    customer_div.style.display = "none";
                 }
                 else {
                     ref_div.style.display = "none";
@@ -493,9 +570,11 @@
                     if (nameSelect == "CTV") {
                         sapuser_div.style.display = "";
                         agent_div.style.display = "";
+                        customer_div.style.display = "";
                     } else {
                         sapuser_div.style.display = "none";
                         agent_div.style.display = "none";
+                        customer_div.style.display = "none";
                     }
                 }
             }
@@ -769,5 +848,87 @@
             $(":button:contains('Add')").addClass("addBtn");
         }
     </script>
+
+    <div id="new-customer-dialog" title="Define new direct customer">
+        <form>
+            <br>
+            <div class="form-group row" style="width: 80%">
+                <label for="new_customer" class="col-md-4 col-form-label text-md-left">Customer</label>
+                <input id="new_customer" type="text" name="new_customer" size="20" style="width: 200px;"
+                       class="form-control col-md-6" required value="">
+            </div>
+            <i id="new_customer_msg" style="color: red"></i>
+        </form>
+    </div>
+
+
+    <script>
+
+        var customerForUser, newCustomerDialog, newCustomerForm;
+        var customerData, customerStatus;
+        $(function () {
+            newCustomerDialog = $("#new-customer-dialog").dialog({
+                autoOpen: false,
+                height: 160,
+                width: 400,
+                modal: true,
+                buttons: {
+                    Add: function () {
+                        $.ajaxSetup({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+                        jQuery.ajaxSetup({async: false});
+                        $.post("webservice/insertcustomer",
+                            {
+                                userid: customerForUser,
+                                kunnr: $("#new_customer").val()
+                            },
+                            function (data, status) {
+                                customerData = data;
+                                customerStatus = status;
+                            });
+                        jQuery.ajaxSetup({async: true});
+                        if (customerStatus == "success" && customerData == "") {
+                            location.reload();
+                            newCustomerDialog.dialog("close");
+                        } else {
+                            if (customerData != "")
+                                $("#new_customer_msg").text(customerData);
+                            else $("#new_customer_msg").text("An error occured checking/creating the new customer");
+                        }
+                    },
+                    Cancel: function () {
+                        newCustomerDialog.dialog("close");
+                    }
+                },
+                close: function () {
+                    newCustomerForm[0].reset();
+                },
+                position: {
+                    my: 'top',
+                    at: 'middle',
+                    of: $('#user-customer-ids-card-body')
+                }
+            });
+            $("#new_customer").on('input', function () {
+                if ($("#new_customer_msg").text() != "") $("#new_customer_msg").text("");
+            });
+            newCustomerForm = newCustomerDialog.find("form").on("submit", function (event) {
+                event.preventDefault();
+            });
+        });
+
+        function new_user_customer(userid) {
+            $("#new_customer_msg").text("");
+            $("#new-customer-dialog").dialog('option', 'title', 'Define new customer for ' + userid);
+            customerForUser = userid;
+            newCustomerDialog.dialog("open");
+            $(":button:contains('Cancel')").addClass("cancelBtn");
+            $(":button:contains('Add')").addClass("addBtn");
+        }
+    </script>
+
 
 @endsection
