@@ -127,6 +127,13 @@
             background-position: center center;
         }
 
+        .order-button-rejected4 {
+            background-image:url('/images/icons8-red-arrow-left-64.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
         .order-button-request {
             background-image:url('/images/icons8-greater-than-50.png');
             background-size:     contain;

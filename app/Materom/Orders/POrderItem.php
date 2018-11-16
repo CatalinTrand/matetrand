@@ -211,7 +211,7 @@ class POrderItem
 
         $this->rejected = 0;
         if (Auth::user()->role == 'Furnizor') {
-            if ($this->status == 'X' || $this->status == 'R') $this->rejected = 1;
+            if (($this->status == 'X' || $this->status == 'R') && ($this->pstage != 'Z')) $this->rejected = 1;
         } else {
             if ($this->status == 'X') $this->rejected = 1;
         }
@@ -272,28 +272,37 @@ class POrderItem
         $this->position_splittable = 0;
         if ($history == 1) {
             if (Auth::user()->role == 'Furnizor') {
-                if ($this->stage == "F" && ($this->owner == 1) && empty($this->status)) {
-                    if ($this->position_splitted == 0) {
-                        $this->matnr_changeable = 1;
-                        $this->quantity_changeable = 1;
-                        $this->price_changeable = 1;
-                        $this->delivery_date_changeable = 1;
-                        $this->position_splittable = 1;
+                if ($this->stage == "F" && ($this->owner == 1)) {
+                    if (empty(trim($this->status))) {
+                        if ($this->position_splitted == 0) {
+                            if ($this->changed < 2) {
+                                $this->matnr_changeable = 1;
+                                $this->quantity_changeable = 1;
+                                $this->position_splittable = 1;
+                            }
+                            $this->price_changeable = 1;
+                            $this->delivery_date_changeable = 1;
+                        }
+                        $this->accept = 1;
+                        $this->reject = 1;
+                    } elseif (($this->status == 'R') && ($this->pstage != 'F')) {
+                        // cancellation asked by REF/CTV after initial approval
+                        $this->inquired = 4;
+                        $this->inq_reply = 1;
                     }
-                    $this->accept = 1;
-                    $this->reject = 1;
                 }
-
             } elseif (Auth::user()->role == 'Referent') {
                 if ((($this->stage == "R") && ($this->owner == 1)) ||
                      (($this->stage == "F") && ($this->owner == 2))) {
                     if (empty($this->status)) {
                         if ($this->position_splitted == 0) {
-                            $this->matnr_changeable = 1;
-                            $this->quantity_changeable = 1;
+                            if ($this->changed < 2) {
+                                $this->matnr_changeable = 1;
+                                $this->quantity_changeable = 1;
+                                $this->position_splittable = 1;
+                            }
                             $this->price_changeable = 1;
                             $this->delivery_date_changeable = 1;
-                            $this->position_splittable = 1;
                         }
                     }
                     if ((empty($this->status) || ($this->status == 'T'))) {
@@ -309,11 +318,13 @@ class POrderItem
             } elseif (Auth::user()->role == 'Administrator') {
                 if (empty($this->status)) {
                     if ($this->position_splitted == 0) {
-                        $this->matnr_changeable = 1;
-                        $this->quantity_changeable = 1;
+                        if ($this->changed < 2) {
+                            $this->matnr_changeable = 1;
+                            $this->quantity_changeable = 1;
+                            $this->position_splittable = 1;
+                        }
                         $this->price_changeable = 1;
                         $this->delivery_date_changeable = 1;
-                        $this->position_splittable = 1;
                     }
                 }
                 if (empty($this->status) || ($this->status == 'T')) {
@@ -338,6 +349,20 @@ class POrderItem
         $this->x_purchase_price = trim($this->purch_price) . " " . trim($this->purch_curr);
         if ((Auth::user()->role == 'Furnizor') || ($this->vbeln == Orders::stockorder)) $this->x_sales_price = "";
         else $this->x_sales_price = trim($this->sales_price) . " " . trim($this->sales_curr);
+
+        // Post-processing options
+        if (($this->stage == 'Z') && ($this->status == 'A') && ($this->grdate == null)) {
+            if (Auth::user()->role == 'Furnizor') {
+              if ($porder->lifnr == Auth::user()->lifnr) {
+                    $this->price_changeable = 2;
+                    $this->delivery_date_changeable = 2;
+                    $this->reject = 3;
+                }
+            } elseif ((Auth::user()->role == 'Administrator') || (Auth::user()->role[0] == $this->pstage)) {
+                $this->reject = 4;
+            }
+        }
+
     }
 
 

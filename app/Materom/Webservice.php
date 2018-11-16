@@ -227,25 +227,32 @@ class Webservice
     public static function acceptItemChange($ebeln, $ebelp, $type)
     {
         $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
-        $item_changed = $item->changed == "1";
-        $pstage = $item->pstage;
+        $item_changed = ($item->changed == "1") || ($item->changed == "2");
+        $pstage = $item->stage;
         $cdate = now();
-        if (!$item_changed) {
-            SAP::acknowledgePOItem($ebeln, $ebelp, " ");
-            DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
-                "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
-        } else {
-            if ($item->stage == 'F') {
-                DB::update("update pitems set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
-                    "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
-            } else {
-                SAP::savePOItem($ebeln, $ebelp);
+        if ($type != "F") {
+            if (!$item_changed) {
+                SAP::acknowledgePOItem($ebeln, $ebelp, " ");
                 DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+            } else {
+                if ($item->stage == 'F') {
+                    DB::update("update pitems set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                        "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                } else {
+                    SAP::savePOItem($ebeln, $ebelp);
+                    DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                        "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                }
             }
+        } elseif ($item->pstage == 'Z') {
+            DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval) values " .
+                "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 'F')");
+
         }
 
         return "";
@@ -253,7 +260,8 @@ class Webservice
 
     public static function cancelItem($ebeln, $item, $category, $reason, $new_status, $new_stage)
     {
-        $old_stage = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $item]])->value('stage');
+        $pitem = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $item]])->first();
+        $old_stage = $pitem->stage;
         DB::beginTransaction();
         $cdate = now();
         DB::update("update pitems set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
@@ -263,6 +271,9 @@ class Webservice
         if ($new_status == 'X') {
             SAP::acknowledgePOItem($ebeln, $item, " ");
             SAP::rejectPOItem($ebeln, $item);
+            if (($category == 'G') && ($pitem->vbeln != Orders::stockorder)) {
+                SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
+            }
         }
         return "";
     }
@@ -283,8 +294,16 @@ class Webservice
 
     public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)
     {
+        $pitem = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        $pitem->changed = 1;
+        $new_stage = $pitem->stage;
+        if ($pitem->stage == 'Z') {
+            $pitem->status = ' ';
+            $new_stage = 'F';
+            $pitem->changed = 2;
+        }
         DB::beginTransaction();
-        DB::update("update pitems set $column = '$value', changed = '1' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::update("update pitems set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
         DB::update("update porders set changed = '1' where ebeln = '$ebeln'");
         if ($column == 'idnlf') $type = 'M';
         if ($column == 'qty') $type = 'Q';
@@ -292,7 +311,7 @@ class Webservice
         if ($column == 'purch_price') $type = 'P';
         $newval = trim($value . " " . $valuehlp);
         $cdate = now();
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,stage, cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         DB::commit();
         return "";
     }
@@ -609,7 +628,7 @@ class Webservice
     {
         $item = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         SAP::rejectPOItem($ebeln, $ebelp);
-        $result = SAP::rejectSOItem($item->vbeln, $item->posnr);
+        $result = SAP::rejectSOItem($item->vbeln, $item->posnr, "07");
         $soitem = __("Rejected sales order item ") . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         if (!empty(trim($result))) return;
         DB::beginTransaction();

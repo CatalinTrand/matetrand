@@ -11,6 +11,7 @@ namespace App\Materom;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Data
 {
@@ -59,8 +60,6 @@ class Data
         $norder->lifnr = $saphdr["LIFNR"];
         $norder->ekgrp = $saphdr["EKGRP"];
         $userid = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->value("id");
-        // if ($userid == null)
-        //    $userid = DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1])->value("id");
         if ($userid == null) return "OK";
         $erdat->hour = $now->hour;
         $erdat->minute = $now->minute;
@@ -76,9 +75,12 @@ class Data
         $norder->changed = '0';
         $norder->status = '';
 
+        $new_order_item = false;
+
         DB::beginTransaction();
 
         if (is_null($order)) {
+            $new_order_item = true;
             $sql = "insert into porders (ebeln, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate, changed, status) values " .
                 "('$norder->ebeln', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
                 "'$norder->ekgrp', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
@@ -142,6 +144,7 @@ class Data
             $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
             if (count($users) > 0) $nitem->ctv = $users[0]->id;
             if (is_null($citem)) {
+                $new_order_item = true;
                 $sql = "insert into pitems (ebeln, ebelp, matnr, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, ".
                                            "purch_price, purch_curr, purch_prun, purch_puom, ".
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
@@ -182,13 +185,31 @@ class Data
         foreach($sapitms as $sapitm) {
             SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
         }
-        Mailservice::sendNotification($userid, $ebeln);
+        if ($new_order_item) Mailservice::sendNotification($userid, $ebeln);
         return "OK";
+    }
+
+    public static function archiveItem($ebeln, $ebelp)
+    {
+        $item = DB::table("pitems")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
+        if (empty($item)) return;
+        $porder = DB::table("porders")->where("ebeln", $ebeln)->first();
+        if (empty($porder)) return;
+        $pichanges = DB::table("pitemchg")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
+        $piproposals = DB::table("pitemchg_proposals")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
+        $archdate = now();
+        DB::beginTransaction();
+        DB::delete("delete from pitems_cache where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from pitems_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from pitemchg where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from pitemchg_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp'");
+
     }
 
     public static function performArchiving()
     {
-
     }
 
 }

@@ -1215,7 +1215,7 @@
                 let inquired_icon = "";
                 if (pitem.inquired == 1)
                     inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' " + inq_onclick + "/>";
-                else if (pitem.inquired == 2)
+                else if ((pitem.inquired == 2) || (pitem.inquired == 4))
                     inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' " + inq_onclick + "/>";
                 else if (pitem.inquired == 3)
                     inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' " + inq_onclick + "/>";
@@ -1231,6 +1231,12 @@
                 if (pitem.reject == 2)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
                         "onclick='rejectPItem(this, 0, \"\");return false;'/>";
+                if (pitem.reject == 3)
+                    button_reject = "<button type='button' class='order-button-rejected4' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='requestRejectPItem(this, 3);return false;'/>";
+                if (pitem.reject == 4)
+                    button_reject = "<button type='button' class='order-button-rejected4' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='requestRejectPItem(this, 4);return false;'/>";
                 let button_inquire = "";
                 if (pitem.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
@@ -1290,20 +1296,24 @@
                     cols += '<td class="' + quantity_class + '" colspan="2" style="text-align: right;">' + pitem.x_quantity + '</td>';
                 }
 
-                if (pitem.delivery_date_changeable == 1) {
+                if ((pitem.delivery_date_changeable == 1) || ((pitem.delivery_date_changeable == 2))) {
                     let delivery_date_class = "td02h";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
-                    cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="change_delivery_date(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
+                    let change_delivery_date_func = "change_delivery_date";
+                    if (pitem.delivery_date_changeable == 2) change_delivery_date_func = "change_delivery_date2";
+                    cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="' + change_delivery_date_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 } else {
                     let delivery_date_class = "td02";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
                     cols += '<td class="' + delivery_date_class + '" colspan="2" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 }
 
-                if (pitem.price_changeable == 1) {
+                if ((pitem.price_changeable == 1) || ((pitem.price_changeable == 2))) {
                     let price_class = "td02h";
                     if (pitem.price_changed == 1) price_class += "_c";
-                    cols += '<td class="' + price_class + '" colspan="3" onclick="change_purchase_price(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
+                    let change_purchase_price_func = "change_purchase_price";
+                    if (pitem.price_changeable == 2) change_purchase_price_func = "change_purchase_price2";
+                    cols += '<td class="' + price_class + '" colspan="3" onclick="' + change_purchase_price_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
                 } else {
                     let price_class = "td02";
                     if (pitem.price_changed == 1) price_class += "_c";
@@ -1490,7 +1500,7 @@
             if (_dataAP.length > 0) {
                 for (let i = 0; i < _dataAP.length; i++) {
                     if (isChecked('I' + _dataAP[i].ebeln + "_"+_dataAP[i].ebelp)) {
-                        _unused_acceptItem(porder, _dataAP[i].ebelp, 'purch-item');
+                        _unused_acceptItem(porder, _dataAP[i].ebelp, null);
                     }
                 }
                 location.reload(true);
@@ -1515,7 +1525,7 @@
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
-            _unused_acceptItem(porder, item, 'purch-item');
+            _unused_acceptItem(porder, item, null);
             location.reload(true);
         }
 
@@ -1633,6 +1643,40 @@
             location.reload(true);
         }
 
+        function requestRejectPItem(thisbtn, mode) {
+            var currentrow;
+            let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
+            let rowtype = rowid.substr(3, 1); // I
+            let porder = rowid.substr(4, 10);
+            let item = rowid.substr(15, 5);
+            if (mode == 3) {
+                swal({
+                    title: "{{__('Please confirm you want to cancel this item')}}",
+                    text: "{{__('You have issued earlier a confirmation for this item. Are you sure you want now to cancel it?')}}",
+                    icon: 'warning',
+                    buttons: ["{{__('No')}}", "{{__('This item will not be delivered')}}"],
+                }).then((result) => {
+                    if (result) {
+                        doRejectItem(porder, item, 'F', '', 'R', 'R');
+                        location.reload(true);
+                    }
+                })
+            } else if (mode == 4) {
+                swal({
+                    title: "{{__('Please confirm you want to request cancellation of this item')}}",
+                    text: "{{__('The vendor has issued earlier a confirmation for this item. Are you sure you want now to request the vendor to cancel it?')}}",
+                    icon: "warning",
+                    buttons: ["{{__('No')}}", "{{__('Ask vendor to cancel this item')}}"],
+                }).then((result) => {
+                    if (result) {
+                        doRejectItem(porder, item, 'G', '', 'R', 'F');
+                        location.reload(true);
+                    }
+                })
+
+            }
+        }
+
         function inquirePItem(thisbtn) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
@@ -1675,7 +1719,7 @@
             if (_dataAS.length > 0) {
                 for (let i = 0; i < _dataAS.length; i++) {
                     if (isChecked('I' + _dataAS[i].ebeln + "_" +_dataAS[i].ebelp)) {
-                        _unused_acceptItem(porder, _dataAS[i].ebelp, 'purch-item');
+                        _unused_acceptItem(porder, _dataAS[i].ebelp, null);
                     }
                 }
                 location.reload(true);
@@ -1715,7 +1759,23 @@
             jQuery.ajaxSetup({async: true});
             if (_statusIR != "success") return;
 
-            @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+            if (mode == 4) {
+                swal({
+                    title: "{{__('MATEROM has requested cancellation of this item')}}",
+                    text: "{{__('This item was previously confirmed by you, but MATEROM asks you now to cancel it. Do you agree?')}}",
+                    icon: 'warning',
+                    buttons: ["{{__('No')}}", "{{__('Agree with cancellation')}}"]
+                }).then((result) => {
+                    if (result) {
+                        doRejectItem(porder, item, 'G', '', 'X', 'Z');
+                        location.reload();
+                    } else {
+                        _unused_acceptItem(porder, item, "F");
+                    }
+                })
+            }
+            @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
             if (mode == 1) {
                 accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
             }
@@ -1883,6 +1943,19 @@
             changeDialog.dialog("open");
         }
 
+        function change_delivery_date2(cell, ebeln, ebelp) {
+            swal({
+                title: "{{__('Please confirm changing the delivery date for this item')}}",
+                text: "{{__('You have issued earlier a confirmation for this item. Are you sure you want now to change its delivery date? ')}}",
+                icon: 'warning',
+                buttons: ["{{__('No')}}", "{{__('Ask MATEROM to check a new delivery date')}}"],
+            }).then((result) => {
+                if (result) {
+                    change_delivery_date(cell, ebeln, ebelp)
+                }
+            })
+        }
+
         function change_delivery_date(cell, ebeln, ebelp) {
 
             change_cell = cell;
@@ -1899,6 +1972,19 @@
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare data livrare pentru pozitia ' + ebelp);
             changeDialog.dialog("open");
+        }
+
+        function change_purchase_price2(cell, ebeln, ebelp) {
+            swal({
+                title: "{{__('Please confirm changing the purchase price for this item')}}",
+                text: "{{__('You have issued earlier a confirmation for this item. Are you sure you want now to change its purchase price? ')}}",
+                icon: 'warning',
+                buttons: ["{{__('No')}}", "{{__('Ask MATEROM to check a new purchase price')}}"],
+            }).then((result) => {
+                if (result) {
+                    change_purchase_price(cell, ebeln, ebelp)
+                }
+            })
         }
 
         function change_purchase_price(cell, ebeln, ebelp) {
@@ -2029,7 +2115,7 @@
                 let autoexplode_button = $('#butt_P{{$autoexplode_PO}}');
                 if (autoexplode_button != null && autoexplode_button != undefined) {
                     getSubTree(autoexplode_button[0]);
-                    autoexplode_button.scrollIntoView();
+                    autoexplode_button[0].scrollIntoView();
                 }
             @endif
         });

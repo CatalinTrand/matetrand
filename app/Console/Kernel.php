@@ -7,6 +7,7 @@ use App\Materom\SAP\MasterData;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -16,7 +17,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        'App\Console\Commands\SendMailPurchOrder',
     ];
 
     /**
@@ -29,9 +30,12 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function () {
 
+            Log::info("Daily cleanup job has started");
+
             // refresh internal cache
-            DB::delete("delete from pitems_cache");
-            DB::delete("delete from porders_cache");
+            $pdate = now()->subDays(1);
+            DB::delete("delete from pitems_cache where cache_date <= '$pdate'");
+            DB::delete("delete from porders_cache where cache_date <= '$pdate'");
 
             // refresh SAP table caches
             MasterData::refreshCustomerCache();
@@ -41,7 +45,9 @@ class Kernel extends ConsoleKernel
             // push finally processed orders to archive
             Data::performArchiving();
 
-        })->dailyAt("01:00");
+            Log::info("Daily cleanup job has ended");
+
+        })->dailyAt("03:00");
     }
 
     /**

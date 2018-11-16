@@ -462,7 +462,7 @@ class SAP
 
     }
 
-    public static function rejectSOItem($vbeln, $posnr)
+    public static function rejectSOItem($vbeln, $posnr, $reason)
     {
         $globalRFCData = DB::select("select * from global_rfc_config");
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
@@ -476,7 +476,8 @@ class SAP
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
             $sapfm = $sapconn->getFunction('ZSRM_RFC_SO_ITEM_REJECT');
             $result = ($sapfm->invoke(['I_VBELN' => $vbeln,
-                                       'I_POSNR' => $posnr
+                                       'I_POSNR' => $posnr,
+                                       'I_REASON' => $reason
             ]))["E_MESSAGE"];
             $sapconn->close();
             return $result;

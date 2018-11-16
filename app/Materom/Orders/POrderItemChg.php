@@ -74,20 +74,24 @@ class POrderItemChg
         switch ($this->ctype) {
             case "A":
                 $this->text = __("Accepted");
-                if ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal accepted");
+                if ($this->oldval == 'F') $this->text = __("Cancellation not accepted by vendor");
+                elseif ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal accepted");
                 break;
             case "T":
                 $this->text = __("Acceptance requested");
                 break;
             case "X":
                 $this->text = __("Rejected");
-                if (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
+                if ($this->oldval == 'G') $this->text = __("Cancellation accepted by vendor");
+                elseif (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
                     $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
                 if ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal rejected");
                 break;
             case "R":
                 $this->text = __("Rejection requested");
-                if (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
+                if ($this->oldval == 'F') $this->text = __("Cancellation requested after initial approval");
+                elseif ($this->oldval == 'G') $this->text = __("Cancellation requested to vendor");
+                elseif (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
                     $this->text = __("Rejection requested") . " (" . $texts[intval($this->oldval) - 1] . ")";
                 break;
             case "O":

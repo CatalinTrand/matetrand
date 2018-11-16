@@ -14,7 +14,7 @@ class Mailservice
         if ($user == null) return;
         Mail::send('email.notification',['user' => $user,'ebeln' => $ebeln], function($message) use ($ebeln, $user) {
             $message->to($user->email, $user->username)->subject("Notificare comanda $ebeln");
-            $message->from('srm@materom.ro','SRM');
+            $message->from('no_reply_srm@materom.ro','MATEROM SRM');
         });
 
     }
