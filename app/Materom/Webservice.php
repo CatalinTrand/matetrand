@@ -273,6 +273,10 @@ class Webservice
             SAP::rejectPOItem($ebeln, $item);
             if (($category == 'G') && ($pitem->vbeln != Orders::stockorder)) {
                 SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
+                $ctvuser = DB::table("user_agent_clients")->where("kunnr", $pitem->kunnr)->first();
+                if ($ctvuser != null) {
+                    Mailservice::sendSalesOrderNotification($ctvuser->id, $pitem->vbeln, $pitem->posnr);
+                }
             }
         }
         return "";
@@ -639,6 +643,10 @@ class Webservice
             "('$ebeln', '$ebelp', '$now', 1, 'X', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
+        $ctvuser = DB::table("user_agent_clients")->where("kunnr", $item->kunnr)->first();
+        if ($ctvuser != null) {
+            Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
+        }
         return "";
     }
 
