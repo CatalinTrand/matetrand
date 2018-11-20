@@ -225,7 +225,7 @@ class SAP
         }
     }
 
-    static public function refreshDeliveryStatus($items = null)
+    static public function refreshDeliveryStatus($mode, $items = null)
     {
         if ($items == null)
             $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems order by ebeln, ebelp");
@@ -235,7 +235,7 @@ class SAP
             $sql = substr($sql, 0, -4);
             $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems $sql order by ebeln, ebelp");
         }
-        $items = SAP::rfcGetDeliveryData($items);
+        $items = SAP::rfcGetDeliveryData($mode, $items);
         if ($items != null) {
             DB::beginTransaction();
             foreach ($items as $item) {
@@ -252,11 +252,14 @@ class SAP
         return "OK";
     }
 
-    static public function rfcGetDeliveryData($items) {
+    static public function rfcGetDeliveryData($mode, $items) {
 
         $globalRFCData = DB::select("select * from global_rfc_config");
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if ($mode == 2)
+            $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
+        else
+            $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,

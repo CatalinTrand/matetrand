@@ -101,16 +101,16 @@ class WebserviceController extends Controller
     }
 
     public function deletefilters(){
-        Session::forget('filter_status');
-        Session::forget('filter_history');
-        Session::forget("filter_archdate");
+//        Session::forget('filter_status');
+//        Session::forget('filter_history');
+//        Session::forget("filter_archdate");
         Session::forget("filter_vbeln");
         Session::forget("filter_ebeln");
         Session::forget("filter_matnr");
         Session::forget("filter_mtext");
         Session::forget("filter_lifnr");
         Session::forget("filter_lifnr_name");
-        Session::forget("filter_inquirements");
+//        Session::forget("filter_inquirements");
         Session::forget("autoexplode_PO");
         Orders::fillCache();
     }

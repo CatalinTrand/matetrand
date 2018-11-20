@@ -39,6 +39,7 @@
         $filter_history = 1;
         $filter_history_curr = " selected";
         $filter_history_arch = "";
+        unset($tmp);
         $tmp = \Illuminate\Support\Facades\Session::get('filter_history');
         if (isset($tmp)) {
             if (intval($tmp) != 2) {

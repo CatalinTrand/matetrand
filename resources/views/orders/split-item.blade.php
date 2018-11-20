@@ -270,7 +270,7 @@
         <input id="aes-mtext" type="text" name="aes-mtext" class="form-control col-md-6" value="">
     </div>
     <div class="row" style="padding-top: 3px;">
-        <label for="aes-matnr" class="col-md-3 col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
+        <label id="label-aes-matnr" for="aes-matnr" class="col-md-3 col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
         <input id="aes-matnr" type="text" name="aes-matnr" class="form-control col-md-3" value="">
     </div>
     <div class="row" style="padding-top: 3px;">
@@ -279,9 +279,9 @@
     </div>
     <div class="row" style="padding-top: 3px;">
         <label for="aes-quantity" class="col-md-3 col-form-label text-md-left">{{__('Quantity')}}</label>&nbsp;&nbsp;
-        <input id="aes-quantity" type="text" name="aes-quantity" class="form-control col-md-4" value="" disabled>&nbsp;
+        <input id="aes-quantity" type="text" name="aes-quantity" class="form-control col-md-4" value="">&nbsp;
         <input id="aes-quantity-unit" type="text" name="aes-quantity-unit" class="form-control col-md-1"
-               value="" disabled>
+               value="">
     </div>
     <div class="row" style="padding-top: 3px;">
         <label for="aes-purch-price" class="col-md-3 col-form-label text-md-left">{{__('Purchase price')}}</label>&nbsp;&nbsp;
@@ -319,7 +319,11 @@
                     let lifnr = $("#aes-lifnr").val().trim();
                     let idnlf = $("#aes-idnlf").val().trim();
                     let mtext = $("#aes-mtext").val().trim();
-                    let matnr = $("#aes-matnr").val().trim();
+                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                      let matnr = $("#aes-matnr").val().trim();
+                    @else
+                      let matnr = "PA-99";
+                    @endif
                     let lfdat = $("#aes-lfdat").val().trim();
                     let quantity = $("#aes-quantity").val().trim();
                     let quantity_uom = $("#aes-quantity-unit").val().trim().toUpperCase();
@@ -339,7 +343,7 @@
                         ((_sp_si_itemdata.vbeln != "!REPLENISH") &&
                          (sales_price.length == 0 || sales_curr.length == 0))
                         @endif
-                    ) return;
+                        ) return;
                     if (add_edit_split_caller == 2) {
                         if (add_edit_split_current_row != null) {
                             add_edit_split_current_row.cells[0].innerHTML = lifnr;
@@ -384,9 +388,13 @@
                         $("#aes-sales-price").show();
                         $("#aes-sales-curr").show();
                     }
+                    $("#label-aes-matnr").show();
+                    $("#aes-matnr").show();
                     $("#aes-lifnr").val(_sp_si_itemdata.lifnr);
                     $("#aes-lifnr").prop("disabled", false);
                 @else
+                    $("#label-aes-matnr").hide();
+                    $("#aes-matnr").hide();
                     $("#label-aes-sales-price").hide();
                     $("#aes-sales-price").hide();
                     $("#aes-sales-curr").hide();

@@ -298,6 +298,13 @@ class Webservice
 
     public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)
     {
+        $history = Session::get("filter_history");
+        if (!isset($history)) $history = 1;
+        else $history = intval($history);
+        if ($history == 2) {
+            // update matnr for invoice closing
+            return;
+        }
         $pitem = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         $pitem->changed = 1;
         $new_stage = $pitem->stage;

@@ -220,7 +220,7 @@ class Orders
 
         if ($history == 1 && $s_order == null && $p_order == null && $refresh_dlv) {
             $items = DB::select("select ebeln, ebelp from pitems_cache where session = '$cacheid'");
-            SAP::refreshDeliveryStatus($items);
+            SAP::refreshDeliveryStatus(1, $items);
         }
 
         $porders_sql = "";
