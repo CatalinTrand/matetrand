@@ -361,7 +361,7 @@ class POrderItem
                     $this->delivery_date_changeable = 2;
                     $this->reject = 3;
                 }
-            } elseif ((Auth::user()->role == 'Administrator') || (Auth::user()->role[0] == $this->pstage)) {
+            } else { // if ((Auth::user()->role == 'Administrator') || (Auth::user()->role[0] == $this->pstage)) {
                 $this->reject = 4;
             }
         }

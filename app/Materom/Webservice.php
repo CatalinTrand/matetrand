@@ -433,6 +433,7 @@ class Webservice
 
         $duser = "";
         $stage = '';
+        $internal = 0;
         if ($to[0] == 'F') {
             $stage = 'F';
             $porder = DB::Select("select * from porders where ebeln = '$ebeln'")[0];
@@ -446,18 +447,20 @@ class Webservice
             $ekgrp = $porder->ekgrp;
             $duser = DB::table("users")->where([["role", "=", "Referent"],
                 ["ekgrp", "=", $ekgrp]])->value("id");
+            if (Auth::user()->role == "CTV") $internal = 1;
         }
         if ($to[0] == 'C') {
             $stage = 'C';
             $kunnr = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
             $duser = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("id");
+            if (Auth::user()->role == "Referent") $internal = 1;
         }
 
         $uId = Auth::id();
         $uName = Auth::user()->username;
         $cdate = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, ctype, cuser, cuser_name, duser, stage, reason) VALUES " .
-            "('$ebeln', '$ebelp', '$cdate', 'E', '$uId', '$uName', '$duser', '$stage', '$text')");
+        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, stage, reason) VALUES " .
+            "('$ebeln', '$ebelp', '$cdate', $internal, ''E', '$uId', '$uName', '$duser', '$stage', '$text')");
         return "";
     }
 
