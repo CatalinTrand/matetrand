@@ -133,6 +133,7 @@ class Webservice
             unset($outpitem->sales_curr);
             unset($outpitem->sales_prun);
             unset($outpitem->sales_puom);
+            $outpitem->mfrnr = ucfirst(strtolower(substr(MasterData::getLifnrName($outpitem->mfrnr), 0, 9)));
             $pitems[] = $outpitem;
         }
         return json_encode($pitems);

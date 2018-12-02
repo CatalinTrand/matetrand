@@ -248,11 +248,11 @@
                                 <col style="width:1.6%;">
                                 <col style="width:1.6%;">
                                 <col style="width:1.6%;">
-                                <col width="2%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
+                                <col style="width:2%;">
+                                <col style="width:4%;">
+                                <col width="4%">
+                                <col width="4%">
+                                <col width="4%">
                                 <col width="3%">
                                 <col width="3%">
                                 <col width="3%">
@@ -1132,13 +1132,15 @@
             colsafter = 1;
             @endif
                 cols += '<td style="' + po_style + '"></td>';
-            cols += '<td class="td02" colspan="2"><b>{{__("Position")}}</b></td>';
+            cols += '<td class="td02" colspan="1"><b>{{__("Position")}}</b></td>';
+            cols += '<td class="td02" colspan="1"><b>{{__("Plant")}}</b></td>';
+            cols += '<td class="td02" colspan="1"><b>{{__("Fabricant")}}</b></td>';
             cols += '<td class="td02" colspan="3"><b>{{__("Material")}}</b></td>';
             cols += '<td class="td02" colspan="4"><b>{{__("Material description")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Quantity")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="padding-left: 0.5rem;"><b>{{__("Delivery date")}}</b></td>';
-            cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
-                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
+            @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
             let sales_price_hdr = '{{__("Sales price")}}';
             if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
@@ -1273,7 +1275,9 @@
                 cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
                 @endif
                     cols += '<td class="coloured" style="' + po_style + '"></td>';
-                cols += "<td colspan='2'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
+                cols += "<td colspan='1'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.werks + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + conv_exit_alpha_output(pitem.mfrnr) + '</td>';
 
                 if (pitem.matnr_changeable == 1) {
                     let matnr_class = "td02h";
@@ -1314,11 +1318,11 @@
                     if (pitem.price_changed == 1) price_class += "_c";
                     let change_purchase_price_func = "change_purchase_price";
                     if (pitem.price_changeable == 2) change_purchase_price_func = "change_purchase_price2";
-                    cols += '<td class="' + price_class + '" colspan="3" onclick="' + change_purchase_price_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
+                    cols += '<td class="' + price_class + '" colspan="2" onclick="' + change_purchase_price_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
                 } else {
                     let price_class = "td02";
                     if (pitem.price_changed == 1) price_class += "_c";
-                    cols += '<td class="' + price_class + '" colspan="3" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
+                    cols += '<td class="' + price_class + '" colspan="2" style="text-align: right;">' + pitem.x_purchase_price + '</td>';
                 }
 
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.x_sales_price + '</td>';

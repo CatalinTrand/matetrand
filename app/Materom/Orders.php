@@ -117,6 +117,8 @@ class Orders
             if (!empty($sql)) $sql = "(" . $sql . ")";
             $filter_sql = self::addFilter($filter_sql,
                 self::processFilter($orders_table . ".lifnr", Auth::user()->lifnr, 10), $sql);
+            $filter_sql = self::addFilter($filter_sql,
+                "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         } elseif (Auth::user()->role == "Referent") {
             $refs = DB::select("select distinct users_ref.id, users.lifnr from users_ref " .
                 "join users using (id) " .
@@ -153,6 +155,8 @@ class Orders
                 $sql = "( $sql )";
                 $filter_sql = self::addFilter($filter_sql, $sql);
             }
+            $filter_sql = self::addFilter($filter_sql,
+                "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         }
 
         // final sql build
