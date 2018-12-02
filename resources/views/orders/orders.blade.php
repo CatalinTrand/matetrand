@@ -238,16 +238,16 @@
                         <table style="border: 2px solid black; table-layout: fixed;"
                                class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
-                                <col width="2%">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
+                                <col style="width:1.6%;">
                                 <col width="2%">
                                 <col width="3%">
                                 <col width="3%">
@@ -1788,7 +1788,10 @@
                 // select_proposal(mode, thisbtn, _dataIR, "Selectie split", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, selectati o decizie");
             }
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+                if (mode != 3)
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+                else
+                select_proposal(mode, thisbtn, _dataIR, "Decizie split item", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, decideti daca acceptati");
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
             if (_dataIR.stage == 'R') {
                 if (mode == 1) {

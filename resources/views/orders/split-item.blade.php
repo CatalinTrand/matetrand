@@ -319,11 +319,8 @@
                     let lifnr = $("#aes-lifnr").val().trim();
                     let idnlf = $("#aes-idnlf").val().trim();
                     let mtext = $("#aes-mtext").val().trim();
-                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                      let matnr = $("#aes-matnr").val().trim();
-                    @else
-                      let matnr = "PA-99";
-                    @endif
+                    // let matnr = $("#aes-matnr").val().trim();
+                    let matnr = "PA-99";
                     let lfdat = $("#aes-lfdat").val().trim();
                     let quantity = $("#aes-quantity").val().trim();
                     let quantity_uom = $("#aes-quantity-unit").val().trim().toUpperCase();

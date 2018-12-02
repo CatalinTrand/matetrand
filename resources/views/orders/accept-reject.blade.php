@@ -568,7 +568,7 @@
             width: 960,
             modal: true,
             buttons: {
-                Select: function () {
+                    {{__("Accept")}}: function () {
                     if (proposal_last_selected_line != null) {
                         let current_row = proposal_last_selected_line;
                         let result_set = current_row.id;
@@ -684,7 +684,9 @@
                     _status = status;
                 }, "json");
             jQuery.ajaxSetup({async: true});
-            if (_data.length != 0) select_split(type, this0, itemdata, title, initial_text, _data);
+            if (_data.length != 0) {
+                select_split(type, this0, itemdata, "Decizie split item", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, decideti daca acceptati", _data);
+            }
             return;
         }
 

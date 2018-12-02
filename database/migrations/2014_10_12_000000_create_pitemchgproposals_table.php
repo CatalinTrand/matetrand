@@ -23,7 +23,7 @@ class CreatePitemchgproposalsTable extends Migration
             $table->string('lifnr', 10);
             $table->string('idnlf', 35);
             $table->string('matnr', 18)->default('');
-            $table->string('mtext', 35)->default('');
+            $table->string('mtext', 40)->default('');
             $table->dateTime('lfdat')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->string('qty', 10)->default('');
             $table->string('qty_uom', 3)->default('');
@@ -45,7 +45,7 @@ class CreatePitemchgproposalsTable extends Migration
             $table->string('lifnr', 10);
             $table->string('idnlf', 35);
             $table->string('matnr', 18)->default('');
-            $table->string('mtext', 35)->default('');
+            $table->string('mtext', 40)->default('');
             $table->dateTime('lfdat')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->string('qty', 10)->default('');
             $table->string('qty_uom', 3)->default('');

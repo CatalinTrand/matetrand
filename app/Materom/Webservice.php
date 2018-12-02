@@ -271,10 +271,10 @@ class Webservice
         if ($new_status == 'X') {
             SAP::acknowledgePOItem($ebeln, $item, " ");
             SAP::rejectPOItem($ebeln, $item);
-            if (($category == 'G') && ($pitem->vbeln != Orders::stockorder)) {
+            if ($pitem->vbeln != Orders::stockorder) {
                 SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
-                $ctvuser = DB::table("user_agent_clients")->where("kunnr", $pitem->kunnr)->first();
-                if ($ctvuser != null) {
+                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'")->get();
+                foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderNotification($ctvuser->id, $pitem->vbeln, $pitem->posnr);
                 }
             }
@@ -460,8 +460,9 @@ class Webservice
         $uName = Auth::user()->username;
         $cdate = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, stage, reason) VALUES " .
-            "('$ebeln', '$ebelp', '$cdate', $internal, ''E', '$uId', '$uName', '$duser', '$stage', '$text')");
+            "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$stage', '$text')");
         return "";
+        \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
     }
 
     static public function processProposal($proposal)
@@ -491,6 +492,13 @@ class Webservice
                 $counter++;
             }
             DB::commit();
+            if ($newstage == 'C') {
+                $pitem = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'")->get();
+                foreach ($ctvusers as $ctvuser) {
+                    Mailservice::sendSalesOrderProposal($ctvuser->id, $pitem->vbeln, $pitem->posnr);
+                }
+            }
         } else {
             $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
             if (($proposal->lifnr == $proposal->itemdata->lifnr) && ($proposal->idnlf == trim($proposal->itemdata->orig_idnlf))) {
@@ -521,6 +529,8 @@ class Webservice
             } else {
                 // change supplier/material or change in SO
                 SAP::rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
+                $set_new_lifnr = "";
+                if ($proposal->lifnr != $proposal->itemdata->lifnr) $set_new_lifnr = " new_lifnr ='" . $proposal->lifnr . "', ";
                 if ($proposal->itemdata->vbeln == Orders::stockorder) {
                     $result = SAP::createPurchReq($proposal->lifnr, $proposal->idnlf, $proposal->mtext, $proposal->matnr,
                         $proposal->quantity, $proposal->quantity_unit,
@@ -537,7 +547,7 @@ class Webservice
                     $tmp_lfdat = $proposal->itemdata->orig_lfdat;
                     $tmp_matnr = $proposal->itemdata->orig_matnr;
                     DB::beginTransaction();
-                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = 'X', " .
+                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
@@ -553,7 +563,7 @@ class Webservice
                     $tmp_lfdat = $proposal->itemdata->orig_lfdat;
                     $tmp_matnr = $proposal->itemdata->orig_matnr;
                     $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
-                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, $proposal->matnr,
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, 'PA-99',
                         $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
                         $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
                     if (!empty(trim($result))) {
@@ -562,7 +572,7 @@ class Webservice
                         else return $result;
                     }
                     DB::beginTransaction();
-                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = 'X', " .
+                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
@@ -570,7 +580,15 @@ class Webservice
                         "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 0, 'X', 'Z', 'C', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
                     DB::commit();
+                    if (Auth::user()->role != "CTV") {
+                        $kunnr = $proposal->itemdata->kunnr;
+                        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$kunnr'")->get();
+                        foreach ($ctvusers as $ctvuser) {
+                            Mailservice::sendSalesOrderChange($ctvuser, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
+                        }
+                    }
                 }
+                // if (!empty($set_new_lifnr)) Data::archiveItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
             }
         }
         return "";
@@ -618,7 +636,7 @@ class Webservice
 
         SAP::rejectPOItem($ebeln, $ebelp);
         $result = SAP::processSOItem($item->vbeln, $item->posnr,
-            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, $proposal->matnr,
+            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, 'PA-99', // $proposal->matnr,
             $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
             $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
         $soitem = "";
@@ -627,14 +645,22 @@ class Webservice
                 $soitem = __("New sales order item ") . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
             else return $result;
         }
+        $set_new_lifnr = "";
+        if ($proposal->lifnr != $porder->lifnr) $set_new_lifnr = ", new_lifnr ='$proposal->lifnr'";
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'A' " .
-            "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'A'" . $set_new_lifnr .
+            " where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 1, 'A', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
+        if (Auth::user()->role != "CTV") {
+            $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'")->get();
+            foreach ($ctvusers as $ctvuser) {
+                Mailservice::sendSalesOrderChange($ctvuser, $item->vbeln, $item->posnr, $result);
+            }
+        }
         return "";
     }
 
@@ -653,8 +679,8 @@ class Webservice
             "('$ebeln', '$ebelp', '$now', 1, 'X', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
-        $ctvuser = DB::table("user_agent_clients")->where("kunnr", $item->kunnr)->first();
-        if ($ctvuser != null) {
+        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'")->get();
+        foreach ($ctvusers as $ctvuser) {
             Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
         }
         return "";
@@ -692,11 +718,18 @@ class Webservice
                     $splititem->sales_price, $splititem->sales_curr, $splititem->lfdat);
                 if (!empty(trim($result))) {
                     if (substr($result, 0, 2) == "OK")
-                        $text .= SAP::alpha_output(substr($result, 2));
+                        $text .= ',' . SAP::alpha_output(substr($result, 2));
                     else return $result;
                 }
             }
-            $text = __("New sales order item ") . $text;
+            $text2 = substr($text, 1);
+            $text = __("New sales order items: ") . $text2;
+            if (Auth::user()->role != "CTV") {
+                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'")->get();
+                foreach ($ctvusers as $ctvuser) {
+                    Mailservice::sendSalesOrderChange($ctvuser, $item->vbeln, $item->posnr, $text2);
+                }
+            }
         }
 
         DB::beginTransaction();

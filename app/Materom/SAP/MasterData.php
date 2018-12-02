@@ -9,6 +9,7 @@
 namespace App\Materom\SAP;
 
 use App\Materom\RFCData;
+use App\Materom\SAP;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -44,6 +45,7 @@ class MasterData
     static public function getLifnrName($lifnr, $cover_error = 0)
     {
         if (empty(trim($lifnr))) return "";
+        if (Auth::user()->role == "CTV") return "Furnizor " . SAP::alpha_output($lifnr);
         $lifnr_name = DB::table("sap_lfa1")->where("lifnr", $lifnr)->value("name1");
         if (isset($lifnr_name)) return $lifnr_name;
         $lifnr_name = self::getData("LIFNR_NAME", $lifnr);

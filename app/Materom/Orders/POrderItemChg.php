@@ -9,6 +9,9 @@
 namespace App\Materom\Orders;
 
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 class POrderItemChg
 {
 
@@ -59,6 +62,10 @@ class POrderItemChg
         $this->oebeln = $pitemchg->oebeln;
         $this->oebelp = $pitemchg->oebelp;
         $this->acknowledged = $pitemchg->acknowledged;
+
+        if (DB::table("users")->where("id", $this->cuser)->value("role") == "Furnizor" &&
+            Auth::user()->role == "CTV")
+            $this->cuser_name = __("Vendor") . " " . $this->cuser;
     }
 
     public function fill($pitem)

@@ -465,6 +465,42 @@ class SAP
 
     }
 
+    public static function changeSOItem($vbeln, $posnr,
+                                        $quantity, $quantity_unit, $lifnr, $matnr, $mtext,
+                                        $idnlf, $sales_price, $sales_curr, $lfdat)
+    {
+        return;
+        $globalRFCData = DB::select("select * from global_rfc_config");
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_SO_ITEM_CHANGE');
+            $result = ($sapfm->invoke(['I_VBELN' => $vbeln,
+                                       'I_POSNR' => $posnr,
+                                       'I_LIFNR' => $lifnr,
+                                       'I_MENGE' => $quantity,
+                                       'I_MEINS' => $quantity_unit,
+                                       'I_MATNR' => $matnr,
+                                       'I_MTEXT' => $mtext,
+                                       'I_IDNLF' => $idnlf,
+                                       'I_SALES_PRICE' => $sales_price,
+                                       'I_SALES_CURR' => $sales_curr,
+                                       'I_DELDATE' => $lfdat,
+                                   ]))["E_MESSAGE"];
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+    }
+
     public static function rejectSOItem($vbeln, $posnr, $reason)
     {
         $globalRFCData = DB::select("select * from global_rfc_config");

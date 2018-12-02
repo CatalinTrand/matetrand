@@ -59,6 +59,9 @@ class POrderItem
     public $grqty;       // goods receipt quantity
     public $gidate;      // goods issue quantity
 
+    public $new_lifnr;   // new vendor, if initial one was rejected
+    public $werks;       // plant
+
     // computed/determined fields
     public $sorder;      // sales order to be displayed
     public $kunnr_name;
@@ -137,6 +140,8 @@ class POrderItem
         $this->pstage = $pitem->pstage;
         $this->status = $pitem->status;
         $this->nof = $pitem->nof;
+        $this->new_lifnr = $pitem->new_lifnr;
+        $this->werks = $pitem->werks;
         $this->changes = array();
     }
 
@@ -207,13 +212,22 @@ class POrderItem
         }
 
         $this->accepted = 0;
-        if ($this->status == 'A' ) $this->accepted = 1;
+        if ($this->status == 'A' ) {
+            $this->accepted = 1;
+        }
 
         $this->rejected = 0;
         if (Auth::user()->role == 'Furnizor') {
             if (($this->status == 'X' || $this->status == 'R') && ($this->pstage != 'Z')) $this->rejected = 1;
         } else {
             if ($this->status == 'X') $this->rejected = 1;
+        }
+
+        if (($this->status == 'A') && ($this->stage == 'Z') &&
+            (Auth::user()->role == 'Furnizor') && !empty($this->new_lifnr) && ($this->new_lifnr != $porder->lifnr)) {
+            // The position was accepted by Materom for a different vendor, so the old one must see it as rejected
+            $this->accepted = 0;
+            $this->rejected = 1;
         }
 
         $this->inquired = 0;
@@ -356,7 +370,7 @@ class POrderItem
         // Post-processing options
         if (($this->stage == 'Z') && ($this->status == 'A') && ($this->grdate == null)) {
             if (Auth::user()->role == 'Furnizor') {
-              if ($porder->lifnr == Auth::user()->lifnr) {
+              if (($porder->lifnr == Auth::user()->lifnr) && empty($this->new_lifnr)) {
                     $this->price_changeable = 2;
                     $this->delivery_date_changeable = 2;
                     $this->reject = 3;

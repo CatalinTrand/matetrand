@@ -11,7 +11,7 @@ $table->string('matnr', 18)->default('');
 $table->string('vbeln', 10)->default('');
 $table->string('posnr', 6)->default('');
 $table->string('idnlf', 35)->default('');
-$table->string('mtext', 35)->default('');
+$table->string('mtext', 40)->default('');
 $table->string('mfrnr', 10)->default('');
 $table->string('purch_price', 15)->default('');
 $table->string('purch_curr', 3)->default('');
@@ -43,4 +43,5 @@ $table->string('orig_purch_price', 15)->default('');
 $table->string('orig_qty', 10)->default('');
 $table->dateTime('orig_lfdat')->default(now());
 $table->boolean('nof');
-
+$table->string('new_lifnr', 10)->default('');
+$table->string('werks', 4)->default('');

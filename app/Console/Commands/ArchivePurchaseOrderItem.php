@@ -58,7 +58,7 @@ class ArchivePurchaseOrderItem extends Command
         }
         $purch_item = $this->argument("purch_item");
         if ($purch_item == null) {
-            $this->error(__("Please specify the purchase order item to be acrhived"));
+            $this->error(__("Please specify the purchase order item to be archived"));
             return;
         }
         $purch_item = trim($purch_item);

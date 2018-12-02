@@ -195,6 +195,7 @@ class Orders
         $result = array();
         $cacheid = Session::get('materomdbcache');
         if (!isset($cacheid) || empty($cacheid)) return;
+        set_time_limit(120);
 
         $history = Session::get("filter_history");
         $filter_status = Session::get("filter_status");
