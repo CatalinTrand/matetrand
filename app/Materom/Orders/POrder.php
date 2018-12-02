@@ -93,6 +93,7 @@ class POrder
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
         else $history = intval($history);
+
         $this->allitems = array();
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $items = DB::select("select * from $items_table where ebeln = '$this->ebeln' order by ebelp");
@@ -150,5 +151,13 @@ class POrder
             if ($this->rejected == 2) $this->rejected = 1;
         }
 
+        if ($history == 2) {
+            $this->info = 0;
+            $this->accept = 0;
+            $this->reject = 0;
+            $this->inquire = 0;
+            $this->inquired = 0;
+            $this->inq_reply = 0;
+        }
     }
 }

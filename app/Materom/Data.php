@@ -323,7 +323,7 @@ class Data
             self::archiveItem($pitem->ebeln, $pitem->ebelp);
         }
 
-        $pitems = DB::select("select distinct ebeln, ebelp from pitems where stage = 'Z' and status = 'X'")->get();
+        $pitems = DB::select("select distinct ebeln, ebelp from pitems where stage = 'Z' and status = 'X'");
         foreach ($pitems as $pitem) {
             Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (item rejected)");
             self::archiveItem($pitem->ebeln, $pitem->ebelp);

@@ -273,7 +273,7 @@ class Webservice
             SAP::rejectPOItem($ebeln, $item);
             if ($pitem->vbeln != Orders::stockorder) {
                 SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
-                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'")->get();
+                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderNotification($ctvuser->id, $pitem->vbeln, $pitem->posnr);
                 }
@@ -494,7 +494,7 @@ class Webservice
             DB::commit();
             if ($newstage == 'C') {
                 $pitem = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
-                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'")->get();
+                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderProposal($ctvuser->id, $pitem->vbeln, $pitem->posnr);
                 }
@@ -582,7 +582,7 @@ class Webservice
                     DB::commit();
                     if (Auth::user()->role != "CTV") {
                         $kunnr = $proposal->itemdata->kunnr;
-                        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$kunnr'")->get();
+                        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$kunnr'");
                         foreach ($ctvusers as $ctvuser) {
                             Mailservice::sendSalesOrderChange($ctvuser, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
                         }
@@ -656,7 +656,7 @@ class Webservice
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
         if (Auth::user()->role != "CTV") {
-            $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'")->get();
+            $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
             foreach ($ctvusers as $ctvuser) {
                 Mailservice::sendSalesOrderChange($ctvuser, $item->vbeln, $item->posnr, $result);
             }
@@ -679,7 +679,7 @@ class Webservice
             "('$ebeln', '$ebelp', '$now', 1, 'X', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
-        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'")->get();
+        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
         foreach ($ctvusers as $ctvuser) {
             Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
         }
@@ -725,7 +725,7 @@ class Webservice
             $text2 = substr($text, 1);
             $text = __("New sales order items: ") . $text2;
             if (Auth::user()->role != "CTV") {
-                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'")->get();
+                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderChange($ctvuser, $item->vbeln, $item->posnr, $text2);
                 }
