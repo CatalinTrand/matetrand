@@ -243,16 +243,17 @@ class Webservice
                     DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                         "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
                 } else {
-                    SAP::savePOItem($ebeln, $ebelp);
+                    $reason = "";
+                    if ($pstage != 'Z') SAP::savePOItem($ebeln, $ebelp); else $reason = __("Definitively accepted");
                     DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
-                        "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                    DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                        "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$reason')");
                 }
             }
         } elseif ($item->pstage == 'Z') {
             DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval) values " .
-                "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 'F')");
+                "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 'F')");
 
         }
 

@@ -378,6 +378,18 @@ class POrderItem
             }
         }
 
+        if ($history == 1 &&
+            $this->stage == 'Z' &&
+            ($this->pstage == 'R' || $this->pstage == 'C') &&
+            $this->status == 'A' &&
+            $this->changed == 1 &&
+            $this->matnr_changed == 0 &&
+            $this->position_splitted == 0) {
+            $this->owner = 1;
+            $this->accept = 1;
+            if ($this->reject != 3) $this->reject = 1;
+        }
+
         if ($history == 2) {
             $this->info = 0;
             $this->accept = 0;

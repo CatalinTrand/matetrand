@@ -3,6 +3,7 @@
 namespace App\Materom;
 
 use App\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,7 @@ class Mailservice
             $message->to($user->email, $user->username)->subject("Notificare comanda $ebeln");
             $message->from('no_reply_srm@materom.ro','MATEROM SRM');
         });
-
+        Log::debug("Sent mail 'Notificare comanda $ebeln' to '$user->email'");
     }
 
     static public function sendSalesOrderNotification($userid, $vbeln, $posnr) {
@@ -29,7 +30,7 @@ class Mailservice
             $message->to($user->email, $user->username)->subject("Notificare anulare pozitie comanda $vbeln/$posnr");
             $message->from('no_reply_srm@materom.ro','MATEROM SRM');
         });
-
+        Log::debug("Sent mail 'Notificare anulare pozitie comanda $vbeln/$posnr' to '$user->email'");
     }
 
     static public function sendSalesOrderProposal($userid, $vbeln, $posnr) {
@@ -42,7 +43,7 @@ class Mailservice
                 $message->to($user->email, $user->username)->subject("Propunere modificare pozitie comanda $vbeln/$posnr");
                 $message->from('no_reply_srm@materom.ro','MATEROM SRM');
             });
-
+        Log::debug("Sent mail 'Propunere modificare pozitie comanda $vbeln/$posnr' to '$user->email'");
     }
 
     static public function sendSalesOrderChange($userid, $vbeln, $posnr, $newposnr) {
@@ -55,7 +56,7 @@ class Mailservice
                 $message->to($user->email, $user->username)->subject("Notificare inlocuire pozitie comanda $vbeln/$posnr");
                 $message->from('no_reply_srm@materom.ro','MATEROM SRM');
             });
-
+        Log::debug("Sent mail 'Notificare inlocuire pozitie comanda $vbeln/$posnr' to '$user->email'");
     }
 
 }

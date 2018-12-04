@@ -52,7 +52,7 @@ class Data
         if ($ebeln != $saphdr["EBELN"]) return "Wrong purchase order";
         $orders = DB::select("select * from porders where ebeln = '$ebeln'");
         if (count($orders) == 0) $order = null;
-        else $order = $orders[0];
+        else return "OK";
         $norder = new \stdClass();
         $now = new Carbon();
         $erdat = new Carbon();

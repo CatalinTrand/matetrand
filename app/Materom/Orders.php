@@ -286,7 +286,8 @@ class Orders
                     $_pitem->appendChange($_pitemchg);
                 }
                 $_pitem->fill($_porder);
-                if (($inquirements != 1) || (($_pitem->inq_reply == 1) && (($_pitem->owner != 0) || (Auth::user()->role == "Administrator"))))
+                if (($inquirements != 1) ||
+                    ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")) && (($_pitem->owner != 0) || (Auth::user()->role == "Administrator"))))
                     $_porder->appendItem($_pitem);
             }
             $_porder->fill();
