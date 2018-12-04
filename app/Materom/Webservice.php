@@ -547,13 +547,15 @@ class Webservice
                     $tmp_qty = $proposal->itemdata->orig_qty;
                     $tmp_lfdat = $proposal->itemdata->orig_lfdat;
                     $tmp_matnr = $proposal->itemdata->orig_matnr;
+                    $newstatus = 'X';
+                    if ($proposal->lifnr == $proposal->itemdata->lifnr) $newstatus = 'A';
                     DB::beginTransaction();
-                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
+                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
                     DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
-                        "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 1, 'X', 'Z', '" .
+                        "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 1, '$newstatus', 'Z', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$banfn')");
                     DB::commit();
                 } else {

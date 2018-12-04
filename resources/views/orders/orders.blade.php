@@ -85,6 +85,10 @@
 
         $autoexplode_PO = \Illuminate\Support\Facades\Session::get("autoexplode_PO");
 
+        $background_color = "";
+        if (\Illuminate\Support\Facades\Auth::user()->role == 'Furnizor') $background_color = "background-color: lightyellow;";
+        elseif (\Illuminate\Support\Facades\Auth::user()->role == 'Referent') $background_color = "background-color: lightgreen;";
+        elseif (\Illuminate\Support\Facades\Auth::user()->role == 'CTV') $background_color = "background-color: lightgray;";
     @endphp
     <div class="container-fluid">
         <input type="hidden" id="filter_history" value="{{$filter_history}}">
@@ -145,7 +149,7 @@
                         @endif
                     </div>
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 8rem;">
+                        <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 8rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">

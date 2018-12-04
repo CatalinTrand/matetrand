@@ -308,6 +308,7 @@ class Orders
 
         if ($groupByPO == 0) {
             $orders = array();
+            if (($result != null) && !empty($result))
             foreach ($result as $porder) {
                 foreach ($porder->salesorders as $vbeln => $ebelp) {
                     $sorder = isset($orders[$vbeln]) ? $orders[$vbeln] : null;
