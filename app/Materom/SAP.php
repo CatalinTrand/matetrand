@@ -418,7 +418,13 @@ class SAP
             $records = ($sapfm->invoke(['I_AGENTS' => json_encode($agents)]))["E_CLIENTS"];
             $sapconn->close();
             $records = json_decode($records);
-            foreach($records AS $record) $clients[] = $record->CLIENT;
+            $clients = array();
+            foreach($records AS $record) {
+                $client = new \stdClass();
+                $client->client = $record->CLIENT;
+                $client->agent = $record->AGENT;
+                $clients[] = $client;
+            }
             return $clients;
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
@@ -469,7 +475,6 @@ class SAP
                                         $quantity, $quantity_unit, $lifnr, $matnr, $mtext,
                                         $idnlf, $sales_price, $sales_curr, $lfdat)
     {
-        return;
         $globalRFCData = DB::select("select * from global_rfc_config");
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
         $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");

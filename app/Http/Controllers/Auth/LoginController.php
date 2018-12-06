@@ -47,6 +47,7 @@ class LoginController extends Controller
     {
         Session::put('locale', strtolower(Auth::user()->lang));
         Session::put('materomdbcache', Orders::newCacheToken());
+        Session::put("groupOrdersBy", 1);
         if (Auth::user()->role == "CTV") {
             $id = Auth::user()->id;
             DB::delete("delete from user_agent_clients where id = '$id'");
@@ -54,10 +55,10 @@ class LoginController extends Controller
             if (!empty($clients)) {
                 $sql = "";
                 foreach ($clients as $client) {
-                    $sql .= ",('$id','$client')";
+                    $sql .= ",('$id','$client->client','$client->agent')";
                 }
                 $sql = substr($sql, 1);
-                DB::insert("insert into user_agent_clients (id, kunnr) values " . $sql);
+                DB::insert("insert into user_agent_clients (id, kunnr, agent) values " . $sql);
             }
             $customers = DB::select("select * from users_cli where id = '$id'");
             if (!empty($customers)) {
@@ -67,6 +68,7 @@ class LoginController extends Controller
                         DB::insert("insert into user_agent_clients (id, kunnr) values ('$id','$client')");
                 }
             }
+            Session::put("groupOrdersBy", 4);
         }
         Orders::fillCache();
     }

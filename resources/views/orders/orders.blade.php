@@ -11,12 +11,27 @@
         $groupByPO = \Illuminate\Support\Facades\Session::get('groupOrdersBy');
         if (!isset($groupByPO)) $groupByPO = 1;
 
-        if($groupByPO == 1) {
-            $groupBySelPO = " selected";
+        if ($groupByPO == 2) {
+            $groupBySelPOa = "";
+            $groupBySelPOu = " selected";
+            $groupBySelPOs = "";
             $groupBySelSO = "";
-        } else {
-            $groupBySelPO = "";
+        } elseif ($groupByPO == 3) {
+            $groupBySelPOa = "";
+            $groupBySelPOu = "";
+            $groupBySelPOs = " selected";
+            $groupBySelSO = "";
+        } elseif ($groupByPO == 4) {
+            $groupBySelPOa = "";
+            $groupBySelPOu = "";
+            $groupBySelPOs = "";
             $groupBySelSO = " selected";
+        } else {
+            $groupByPO = 1;
+            $groupBySelPOa = " selected";
+            $groupBySelPOu = "";
+            $groupBySelPOs = "";
+            $groupBySelSO = "";
         }
 
         $filter_status_selAP = "";
@@ -159,8 +174,10 @@
                                     {{__('Show by')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
                                             name="groupOrdersBy" onchange="this.form.submit()">
-                                        <option value="0"{{$groupBySelSO}}>{{__('Client/stock orders')}}</option>
-                                        <option value="1"{{$groupBySelPO}}>{{__('Purchase orders')}}</option>
+                                        <option value="1"{{$groupBySelPOa}}>{{__('Purchase orders (urgent & stock)')}}</option>
+                                        <option value="2"{{$groupBySelPOu}}>{{__('Purchase orders (urgent)')}}</option>
+                                        <option value="3"{{$groupBySelPOs}}>{{__('Purchase orders (stock)')}}</option>
+                                        <option value="4"{{$groupBySelSO}}>{{__('Sales orders')}}</option>
                                     </select>
                                     {{__('Filter by status')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
@@ -314,7 +331,7 @@
                                     <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png' title='Send a message to a person in the flow'/>
                                 </th>
                                 @php
-                                    if ($groupByPO == 1) {
+                                    if ($groupByPO != 4) {
                                         echo '<th class="td02" colspan="3">' . __('Purchase order') . '</th>';
                                         $th1 = __("Supplier");
                                         $th2 = ""; // "Nume";
@@ -344,7 +361,7 @@
                                         }
 
                                     }
-                                if ($groupByPO == 1) {
+                                if ($groupByPO != 4) {
                                     echo "<th colspan=2>$th1</th>";
                                     echo "<th colspan=5>$th2</th>";
                                     echo "<th colspan=2>$th3</th>";
@@ -371,7 +388,7 @@
 
                                 foreach ($orders as $order) {
 
-                                    if ($groupByPO == 1) {
+                                    if ($groupByPO != 4) {
                                         $comanda = "<button type='button' id='butt_P$order->ebeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters'>" .
                                             \App\Materom\SAP::alpha_output($order->ebeln) . "</p>";
                                     } else {
@@ -389,7 +406,7 @@
                                     $button_reject = "";
                                     $button_inquire = "";
 
-                                    if ($groupByPO == 1) {
+                                    if ($groupByPO != 4) {
                                         $oid = "P" . $order->ebeln;
                                         $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
                                                 "<td class='td02' colspan=5>$order->lifnr_name</td>" .
@@ -731,15 +748,15 @@
         function parent(id) {
             if (id.startsWith('I')) {
                 let res = id.substring(1);
-                @if ($groupByPO == 0)
+                @if ($groupByPO == 4)
                     return $("input[name*='_" + res.split("_")[0] + "']")[0].name;
                 @else
                     return $("input[name*='" + res.split("_")[0] + "']")[0].name;
                 @endif
             } else if (id.startsWith('P')) {
-                @if ($groupByPO == 1)
+                @if ($groupByPO != 4)
                     return null;
-                        @else
+                @else
                 let res = id.substring(1);
                 return "S" + res.split("_")[0];
                 @endif
@@ -755,7 +772,7 @@
             if ($.inArray(id, unCheckedList) > -1)
                 return false;
 
-            @if ($groupByPO == 1)
+            @if ($groupByPO != 4)
             if (id.startsWith('S') || id.startsWith('P'))
                 @else
                 if (id.startsWith('S')) @endif
@@ -872,7 +889,7 @@
                         var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
                         var first_style = "background-color:" + first_color;
                         cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        @if ($groupByPO == 0)
+                        @if ($groupByPO == 4)
                         let colsafter = "12";
                         cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
                         @else
@@ -885,7 +902,7 @@
                         cols += '<td colspan="6">' + ctext + '</td>';
                         cols += '<td colspan="2">' + creason + '</td>';
                         cols += "<td colspan=" + colsafter + "></td>";
-                        @if ($groupByPO == 1)
+                        @if ($groupByPO != 4)
                             cols += '<td></td>';
                         @endif
                             cols += '<td colspan="4"></td>';
@@ -944,7 +961,7 @@
             }
             else if (rowtype == 'P') {
                 porder = order;
-                        @if ($groupByPO == 0)
+                @if ($groupByPO == 4)
                 let prevRow = $(currentrow).prev();
                 while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
                 sorder = $(prevRow).attr("id").substr(4, 10);
@@ -1128,7 +1145,7 @@
             var po_style = "background-color:" + $(currentrow).css("background-color") + ";";
             var first_color = $(currentrow).find(".first_color").css("background-color");
             var first_style = "background-color:" + first_color;
-            @if ($groupByPO == 0)
+            @if ($groupByPO == 4)
                 cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
             colsafter = 0;
             @else
@@ -1256,8 +1273,8 @@
                 var first_color = $(currentrow).find(".first_color").css("background-color");
                 var first_style = "background-color:" + first_color;
 
-                @if ($groupByPO == 0)
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + info_icon + '</td>';
+                @if ($groupByPO == 4)
+                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + info_icon + '</td>';
                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + changed_icon + '</td>';
                 cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + accepted_icon + '</td>';
@@ -1345,7 +1362,7 @@
                 cols += '<td class="td02" colspan="3" style="text-align: right;">' + pitem.grqty + '</td>';
 
 
-                @if ($groupByPO == 1)
+                @if ($groupByPO != 4)
                     cols += '<td colspan="1"></td>';
                 @endif
                 newRow.append(cols).hide();
@@ -1381,7 +1398,7 @@
             var first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
             var first_style = "background-color:" + first_color;
             cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                    @if ($groupByPO == 0)
+            @if ($groupByPO == 4)
             let colsafter = "8";
             cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
                     @else
@@ -1412,7 +1429,7 @@
                 let first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
                 let first_style = "background-color:" + first_color;
                 cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        @if ($groupByPO == 0)
+                @if ($groupByPO == 4)
                 let colsreason = "10";
                 cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
                         @else
@@ -1424,7 +1441,7 @@
                 cols += '<td class="td02" colspan="2">' + pitemchg.cuser + '</td>';
                 cols += '<td class="td02" colspan="4">' + pitemchg.cuser_name + '</td>';
                 cols += '<td class="td02" colspan="8">' + pitemchg.text + '</td>';
-                @if ($groupByPO == 1)
+                @if ($groupByPO != 4)
                     colsreason = colsreason + 1;
                 @endif
                     cols += '<td class="td02" colspan="' + colsreason + '">' + pitemchg.reason + '</td>';
@@ -1476,7 +1493,7 @@
             let rowtype = rowid.substr(3, 1); // P
             let porder = rowid.substr(4, 10);
             let sorder = "";
-                    @if ($groupByPO == 0)
+            @if ($groupByPO == 4)
             let prevRow = $(currentrow).prev();
             while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
             sorder = $(prevRow).attr("id").substr(4, 10);
@@ -1494,7 +1511,7 @@
                     type: rowtype,
                     order: porder,
                     history: $("filter_hhistory").val(),
-                    @if($groupByPO == 0)
+                    @if($groupByPO == 4)
                         vbeln: sorder
                     @else
                         vbeln: null
@@ -1521,7 +1538,7 @@
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
             let porder = rowid.substr(4, 10);
-                    @if ($groupByPO == 0)
+            @if ($groupByPO == 4)
             let prevRow = $(currentrow).prev();
             while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
             sorder = $(prevRow).attr("id").substr(4, 10);
@@ -1587,7 +1604,7 @@
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
             let porder = rowid.substr(4, 10);
-                    @if ($groupByPO == 0)
+            @if ($groupByPO == 4)
             let prevRow = $(currentrow).prev();
             while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
             sorder = $(prevRow).attr("id").substr(4, 10);
@@ -1604,7 +1621,7 @@
                     type: rowtype,
                     order: porder,
                     history: $("filter_history").val(),
-                    @if($groupByPO == 0)
+                    @if($groupByPO == 4)
                     vbeln: sorder
                     @else
                     vbeln: null

@@ -12,18 +12,23 @@ class EditUsers {
 
         $prevusers = DB::select("select * from users where id ='$id'");
         $prevdata = null; if (count($prevusers) != 0) $prevdata = $prevusers[0];
+        $activated_at = $prevdata->activated_at;
 
-        if(strcmp($active,"Active") == 0)
+        if(strcmp($active,"Active") == 0) {
             $active = 1;
-        else
+            if ($prevdata->active == 0) $activated_at = now();
+        } else {
             $active = 0;
+        }
 
         if (ctype_digit($lifnr)) $lifnr = str_pad($lifnr, 10, "0", STR_PAD_LEFT);
 
         if($active == 1)
-            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser',  lifnr = '$lifnr', ekgrp = '$ekgrp', active = '$active', deleted_at = null where id = '$id'");
+            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser',  lifnr = '$lifnr'," .
+                               " ekgrp = '$ekgrp', active = '$active', deleted_at = null, activated_at = '$activated_at' where id = '$id'");
         else
-            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser', active = '$active', deleted_at = NOW() where id = '$id'");
+            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser', ".
+            "active = '$active', deleted_at = NOW(), activated_at = '$activated_at' where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");
         if ($prevdata->role == "Administrator" && $prevdata->api_token != $token && !empty($token)) {

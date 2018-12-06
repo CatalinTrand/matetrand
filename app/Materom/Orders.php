@@ -70,6 +70,13 @@ class Orders
 
     public static function fillCache()
     {
+
+        $groupByPO = Session::get('groupOrdersBy');
+        if (!isset($groupByPO)) {
+            $groupByPO = 1;
+            if (Auth::user()->role == "CTV") $groupByPO = 4;
+        }
+
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
         else $history = intval($history);
@@ -159,6 +166,9 @@ class Orders
                 "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         }
 
+        if ($groupByPO == 2) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln <> '" . Orders::stockorder . "'");
+        elseif ($groupByPO == 3) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln = '" . Orders::stockorder . "'");
+
         // final sql build
         $sql = "select " . $items_table . ".ebeln, " . $items_table . ".ebelp, " . $items_table . ".vbeln " .
             " from " . $items_table .
@@ -166,10 +176,9 @@ class Orders
         if (!empty($filter_lifnr_name_sql)) $sql .= " join sap_lfa1 using (lifnr)";
         if (!empty($filter_sql)) $sql .= " where " . $filter_sql;
         $sql .= " order by " . $items_table . ".ebeln, " . $items_table . ".ebelp";
-        Log::debug($sql);
+//      Log::debug($sql);
         // ...and run
         $items = DB::select($sql);
-        // Log::debug($sql);
         if (empty($items)) return;
 
         // Fill the cache
@@ -307,7 +316,7 @@ class Orders
 
         $result = self::loadFromCache(null, null, true);
 
-        if ($groupByPO == 0) {
+        if ($groupByPO == 4) {
             $orders = array();
             if (($result != null) && !empty($result))
             foreach ($result as $porder) {

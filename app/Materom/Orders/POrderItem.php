@@ -381,6 +381,7 @@ class POrderItem
         if ($history == 1 &&
             $this->stage == 'Z' &&
             ($this->pstage == 'R' || $this->pstage == 'C') &&
+            Auth::user()->role == 'Furnizor' &&
             $this->status == 'A' &&
             $this->changed == 1 &&
             $this->matnr_changed == 0 &&

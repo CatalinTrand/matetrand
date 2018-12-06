@@ -292,7 +292,7 @@ class Webservice
         } else {
             $groupByPO = Session::get('groupOrdersBy');
             if (!isset($groupByPO)) $groupByPO = 1;
-            if($groupByPO == 1)
+            if($groupByPO != 4)
                 return DB::select("select * from $items_table where ebeln = '$order'");
             return DB::select("select * from $items_table where ebeln = '$order' and vbeln = '$vbeln'");
         }
@@ -619,17 +619,27 @@ class Webservice
             $tmp_qty_unit = $proposal->qty_uom;
             $tmp_purch_price = $proposal->purch_price;
             $tmp_purch_curr = $proposal->purch_curr;
+            $tmp_sales_price = $proposal->sales_price;
+            $tmp_sales_curr = $proposal->sales_curr;
             $now = now();
             DB::beginTransaction();
             DB::update("update pitems set stage = 'Z', pstage = '" . $item->stage . "', status = 'A', " .
                 "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
                 "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
-                "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr' " .
+                "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr', " .
+                "sales_price = '$tmp_sales_price', sales_curr = '$tmp_sales_curr' " .
                 "where ebeln = '$ebeln' and ebelp = '$ebelp'");
             DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                 "('$ebeln', '$ebelp', '$now', 1, 'A', 'Z', '" .
                 Auth::user()->id . "', '" . Auth::user()->username . "')");
             $result = SAP::savePOItem($ebeln, $ebelp);
+            if (!empty(trim($result))) {
+                DB::rollBack();
+                return $result;
+            }
+            $result = SAP::changeSOItem($item->vbeln, $item->posnr,
+                $proposal->qty, $proposal->qty_uom, $proposal->lifnr, "", "", "",
+                $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
             if (!empty(trim($result))) {
                 DB::rollBack();
                 return $result;

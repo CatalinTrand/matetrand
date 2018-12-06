@@ -59,8 +59,21 @@ class Data
         $norder->ebeln = $ebeln;
         $norder->lifnr = $saphdr["LIFNR"];
         $norder->ekgrp = $saphdr["EKGRP"];
-        $userid = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->value("id");
-        if ($userid == null) return "OK";
+        $user = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->value("id")->first();
+        if ($user == null) return "";
+        if ($user->activated_at == null) return "";
+        $userid = $user->id;
+
+        $sbedat = $saphdr["BEDAT"];
+        $bedat = new Carbon();
+        $bedat->day = substr($sbedat, 6, 2);
+        $bedat->month = substr($sbedat, 4, 2);
+        $bedat->year = substr($sbedat, 0, 4);
+        if ($sbedat < $user->activated_at) {
+            Log::debug("Purchase order $ebeln (document date $bedat) rejected due to user $userid activation date of $user->activated_at");
+            return "";
+        }
+
         $erdat->hour = $now->hour;
         $erdat->minute = $now->minute;
         $erdat->second = $now->second;
@@ -76,6 +89,7 @@ class Data
         $norder->status = '';
 
         $new_order_item = false;
+        $send_mail = true;
 
         DB::beginTransaction();
 
@@ -112,6 +126,7 @@ class Data
             $nitem->matnr = $sapitm["MATNR"];
             $nitem->idnlf = $sapitm["IDNLF"];
             $nitem->mtext = $sapitm["MTEXT"];
+            $nitem->mtext = str_replace("'", "\'", $nitem->mtext);
             $nitem->qty = $sapitm["MENGE"];
             $nitem->qty_uom = $sapitm["MEINS"];
             $nitem->lfdat = $sapitm["LFDAT"];
@@ -122,6 +137,7 @@ class Data
             $nitem->lfdat = $lfdat->toDateTimeString();
             $nitem->mfrnr = $sapitm["MFRNR"];
             $nitem->werks = $sapitm["WERKS"];
+            if ($nitem->werks == "D000" || $nitem->werks != "G000") $send_mail = false;
             $nitem->purch_price = $sapitm["PURCH_PRICE"];
             $nitem->purch_curr = $sapitm["PURCH_CURR"];
             $nitem->purch_prun = $sapitm["PURCH_PRUN"];
@@ -151,7 +167,7 @@ class Data
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
                                            "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed, status, ".
                                            "orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof) values (".
-                       "'$nitem->ebeln', '$nitem->ebelp', '$nitem->matnr', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 35) . "',$nitem->qty, '$nitem->qty_uom', ".
+                       "'$nitem->ebeln', '$nitem->ebelp', '$nitem->matnr', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 40) . "',$nitem->qty, '$nitem->qty_uom', ".
                        "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->werks', ".
                        "'$nitem->purch_price', '$nitem->purch_curr', ".
                        "$nitem->purch_prun, '$nitem->purch_puom', ".
@@ -186,7 +202,7 @@ class Data
         foreach($sapitms as $sapitm) {
             SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
         }
-        if ($new_order_item) Mailservice::sendNotification($userid, $ebeln);
+        if ($new_order_item && $send_mail) Mailservice::sendNotification($userid, $ebeln);
         return "OK";
     }
 

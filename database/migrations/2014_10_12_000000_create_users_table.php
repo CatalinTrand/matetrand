@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
@@ -28,6 +29,7 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
+            $table->timestamp('activated_at')->nullable()->default(DB::raw('CURRENT_TIMESTAMP'));
         });
     }
 

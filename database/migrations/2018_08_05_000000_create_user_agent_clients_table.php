@@ -16,6 +16,7 @@ class CreateUserAgentClientsTable extends Migration
         Schema::create('user_agent_clients', function (Blueprint $table) {
             $table->string('id',20);
             $table->string('kunnr',10);
+            $table->string('agent',20);
             $table->primary(['id', 'kunnr']);
         });
     }
