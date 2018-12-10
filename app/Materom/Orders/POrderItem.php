@@ -267,8 +267,9 @@ class POrderItem
                 $this->inquired = 3;
 
             if ($first && ($itemchg->acknowledged == 0)
-                && (Auth::user()->role == 'Furnizor')
-                && ($this->pstage != ' ') && ($this->pstage != '') && ($this->pstage != 'F')) {
+                && (Auth::user()->role == 'Furnizor') // && $this->owner != 0
+                && ($this->pstage != ' ') && ($this->pstage != '')
+                && ($this->pstage != 'F')) { // } && ($this->stage != 'Z')) {
                 if ($itemchg->ctype == "A") $this->info = 4;
                 if ($itemchg->ctype == "X") $this->info = 5;
             }

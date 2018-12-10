@@ -2,6 +2,7 @@
 
 namespace App\Materom;
 
+use App\Materom\SAP\MasterData;
 use App\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -11,7 +12,7 @@ class Mailservice
 {
     static public function sendNotification($userid, $ebeln) {
 
-        $user = DB::table("users")->where("id", $userid)->get()[0];
+        $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
         Mail::send('email.notification',['user' => $user,'ebeln' => $ebeln], function($message) use ($ebeln, $user) {
@@ -23,17 +24,19 @@ class Mailservice
 
     static public function sendSalesOrderNotification($userid, $vbeln, $posnr) {
 
-        $user = DB::table("users")->where("id", $userid)->get()[0];
+        $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
         if ($user->role == "CTV") {
             $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if ($kunnr != null)
-                $agent = DB::table("user_agent_clients")->where(["id", "=", $user->id], ["kunnr", "=", $kunnr])->value("agent");
+                $agent = DB::table("user_agent_clients")->where([["id", "=", $user->id], ["kunnr", "=", $kunnr]])->value("agent");
             else
-                $agent = DB::table("users_agent")->where(["id", "=", $user->id])->value("agent");
-            if (isset($agent) && $agent != null)
+                $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+            if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
+                $user->agent = MasterData::getKunnrName($user->agent);
+            }
         }
         Mail::send('email.salesordernotification',['user' => $user,'vbeln' => $vbeln,'posnr' => $posnr],
             function($message) use ($vbeln, $posnr, $user) {
@@ -46,17 +49,19 @@ class Mailservice
 
     static public function sendSalesOrderProposal($userid, $vbeln, $posnr) {
 
-        $user = DB::table("users")->where("id", $userid)->get()[0];
+        $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
         if ($user->role == "CTV") {
             $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if ($kunnr != null)
-                $agent = DB::table("user_agent_clients")->where(["id", "=", $user->id], ["kunnr", "=", $kunnr])->value("agent");
+                $agent = DB::table("user_agent_clients")->where([["id", "=", $user->id], ["kunnr", "=", $kunnr]])->value("agent");
             else
-                $agent = DB::table("users_agent")->where(["id", "=", $user->id])->value("agent");
-            if (isset($agent) && $agent != null)
+                $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+            if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
+                $user->agent = MasterData::getKunnrName($user->agent);
+            }
         }
         Mail::send('email.salesorderproposal',['user' => $user,'vbeln' => $vbeln,'posnr' => $posnr],
             function($message) use ($vbeln, $posnr, $user) {
@@ -69,17 +74,19 @@ class Mailservice
 
     static public function sendSalesOrderChange($userid, $vbeln, $posnr, $newposnr) {
 
-        $user = DB::table("users")->where("id", $userid)->get()[0];
+        $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
         if ($user->role == "CTV") {
             $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if ($kunnr != null)
-                $agent = DB::table("user_agent_clients")->where(["id", "=", $user->id], ["kunnr", "=", $kunnr])->value("agent");
+                $agent = DB::table("user_agent_clients")->where([["id", "=", $user->id], ["kunnr", "=", $kunnr]])->value("agent");
             else
-                $agent = DB::table("users_agent")->where(["id", "=", $user->id])->value("agent");
-            if (isset($agent) && $agent != null)
+                $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+            if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
+                $user->agent = MasterData::getKunnrName($user->agent);
+            }
         }
         Mail::send('email.salesorderchange',['user' => $user,'vbeln' => $vbeln, 'posnr' => $posnr, 'newposnr' => $newposnr],
             function($message) use ($vbeln, $posnr, $user) {

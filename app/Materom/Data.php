@@ -55,35 +55,41 @@ class Data
         else return "OK";
         $norder = new \stdClass();
         $now = new Carbon();
-        $erdat = new Carbon();
         $norder->ebeln = $ebeln;
         $norder->lifnr = $saphdr["LIFNR"];
         $norder->ekgrp = $saphdr["EKGRP"];
-        $user = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->value("id")->first();
+        $user = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1])->first();
         if ($user == null) return "";
         if ($user->activated_at == null) return "";
         $userid = $user->id;
+
+        $serdat = $saphdr["ERDAT"];
+        $erdat = new Carbon();
+        $erdat->day = substr($serdat, 6, 2);
+        $erdat->month = substr($serdat, 4, 2);
+        $erdat->year = substr($serdat, 0, 4);
+        $erdat->hour = $now->hour;
+        $erdat->minute = $now->minute;
+        $erdat->second = $now->second;
+        if ($erdat < $user->activated_at) {
+            Log::debug("Purchase order $ebeln (created on $erdat) rejected due to user $userid activation date of $user->activated_at");
+            return "";
+        }
+        $norder->erdat = $erdat->toDateTimeString();
 
         $sbedat = $saphdr["BEDAT"];
         $bedat = new Carbon();
         $bedat->day = substr($sbedat, 6, 2);
         $bedat->month = substr($sbedat, 4, 2);
         $bedat->year = substr($sbedat, 0, 4);
-        if ($sbedat < $user->activated_at) {
-            Log::debug("Purchase order $ebeln (document date $bedat) rejected due to user $userid activation date of $user->activated_at");
-            return "";
-        }
+        $norder->bedat = $bedat->toDateTimeString();
 
-        $erdat->hour = $now->hour;
-        $erdat->minute = $now->minute;
-        $erdat->second = $now->second;
-        $norder->erdat = $erdat->toDateTimeString();
         $norder->ernam = $saphdr["ERNAM"];
         $norder->curr = $saphdr["CURR"];
         $norder->fxrate = $saphdr["FXRATE"];
-        $now->addHours(12);
-        $norder->wtime = $now->toDateTimeString();
         $now->addHours(24);
+        $norder->wtime = $now->toDateTimeString();
+        $now->addHours(48);
         $norder->ctime = $now->toDateTimeString();
         $norder->changed = '0';
         $norder->status = '';
@@ -95,9 +101,9 @@ class Data
 
         if (is_null($order)) {
             $new_order_item = true;
-            $sql = "insert into porders (ebeln, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate, changed, status) values " .
+            $sql = "insert into porders (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) values " .
                 "('$norder->ebeln', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
-                "'$norder->ekgrp', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
+                "'$norder->ekgrp', '$norder->bedat', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
             DB::insert($sql);
         } else {
             $sql = "update porders set " .
@@ -255,9 +261,9 @@ class Data
              $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
              $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr, $archdate]);
 
-        DB::insert("INSERT INTO porders_arch (ebeln, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate, changed, status, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO porders_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
-             $porder->ekgrp, $porder->erdat, $porder->ernam, $porder->curr,
+             $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
              $porder->fxrate, $porder->changed, $porder->status, $archdate]);
 
         DB::commit();
@@ -313,9 +319,9 @@ class Data
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr]);
 
         if (!DB::table("porders")->where("ebeln", $ebeln)->exists())
-            DB::insert("INSERT INTO porders (ebeln, wtime, ctime, lifnr, ekgrp, erdat, ernam, curr, fxrate, changed, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO porders (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
-                    $porder->ekgrp, $porder->erdat, $porder->ernam, $porder->curr,
+                    $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
                     $porder->fxrate, $porder->changed, $porder->status]);
 
         DB::commit();

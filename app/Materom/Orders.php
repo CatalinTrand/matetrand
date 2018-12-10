@@ -307,6 +307,29 @@ class Orders
         return $result;
     }
 
+    public static function readPOrder($ebeln)
+    {
+        $porder = DB::table("porders")->where("ebeln", $ebeln)->first();
+        if ($porder == null) return null;
+        $_porder = new POrder($porder);
+        $pitems = DB::table("pitems")->where("ebeln", $ebeln)->get();
+        if ($pitems != null)
+        foreach ($pitems as $pitem) {
+            $_pitem = new POrderItem($pitem);
+            $pichgs = DB::select("select * from pitemchg where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' order by ebeln, ebelp, cdate desc");
+            if ($pichgs != null)
+            foreach ($pichgs as $pichg) {
+                $_pitemchg = new POrderItemChg($pichg);
+                $_pitemchg->fill($_pitem);
+                $_pitem->appendChange($_pitemchg);
+            }
+            $_pitem->fill($_porder);
+            $_porder->appendItem($_pitem);
+        }
+        $_porder->fill();
+        return $_porder;
+    }
+
     public static function getOrderList($groupByPO = null)
     {
 
@@ -388,23 +411,23 @@ class Orders
         $result = self::loadFromCache();
 
         $messages = array();
-
-        foreach ($result as $order) {
-            foreach ($order->items as $item) {
-                foreach ($item->changes as $item_chg) {
-                    if ($item_chg->duser == Auth::user()->id && $item_chg->acknowledged == '0' && $item_chg->ctype == 'E')
-                        array_push($messages, $item_chg);
+        if ($result != null && !empty($result)) {
+            foreach ($result as $order) {
+                foreach ($order->items as $item) {
+                    foreach ($item->changes as $item_chg) {
+                        if ($item_chg->duser == Auth::user()->id && $item_chg->acknowledged == '0' && $item_chg->ctype == 'E')
+                            array_push($messages, $item_chg);
+                    }
                 }
             }
+
+            if (strcmp($sorting, "ebeln") == 0)
+                usort($messages, array("App\Materom\Orders", "cmp_ebeln"));
+            else if (strcmp($sorting, "cuser") == 0)
+                usort($messages, array("App\Materom\Orders", "cmp_cuser"));
+            else
+                usort($messages, array("App\Materom\Orders", "cmp_cdate"));
         }
-
-        if (strcmp($sorting, "ebeln") == 0)
-            usort($messages, array("App\Materom\Orders", "cmp_ebeln"));
-        else if (strcmp($sorting, "cuser") == 0)
-            usort($messages, array("App\Materom\Orders", "cmp_cuser"));
-        else
-            usort($messages, array("App\Materom\Orders", "cmp_cdate"));
-
         return $messages;
 
     }

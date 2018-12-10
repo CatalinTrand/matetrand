@@ -99,6 +99,10 @@
         if (!isset($filter_lifnr_name)) $filter_lifnr_name = "";
 
         $autoexplode_PO = \Illuminate\Support\Facades\Session::get("autoexplode_PO");
+        $autoexplode_SO = null;
+        if ($groupByPO == 4) {
+            $autoexplode_SO = \Illuminate\Support\Facades\Session::get("autoexplode_SO");
+        } else \Illuminate\Support\Facades\Session::forget("autoexplode_SO");
 
         $background_color = "";
         if (\Illuminate\Support\Facades\Auth::user()->role == 'Furnizor') $background_color = "background-color: lightyellow;";
@@ -340,6 +344,7 @@
                                         $th5 = __("Data creare");
                                         $th6 = __("Moneda");
                                         $th7 = __("Rata schimb");
+                                        $th8 = __("Data cda.");
                                     } else {
                                         echo '<th class="td02" colspan="3">' . __('Sales order') . '</th>';
                                         if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
@@ -368,8 +373,9 @@
                                     echo "<th colspan=4>$th4</th>";
                                     echo "<th colspan=3>$th5</th>";
                                     echo "<th colspan=2>$th6</th>";
-                                    echo "<th colspan=3>$th7</th>";
-                                    for ($i = 0; $i < 6; $i++) echo "<th>&nbsp;</th>";
+                                    echo "<th colspan=2>$th7</th>";
+                                    echo "<th colspan=2>$th8</th>";
+                                    for ($i = 0; $i < 4; $i++) echo "<th>&nbsp;</th>";
                                 } else {
                                     echo "<th colspan=2>$th1</th>";
                                     echo "<th colspan=5>$th2</th>";
@@ -412,9 +418,10 @@
                                                 "<td class='td02' colspan=5>$order->lifnr_name</td>" .
                                                 "<td class='td02' colspan=1>$order->ekgrp</td>" .
                                                 "<td class='td02' colspan=5>$order->ekgrp_name</td>" .
-                                                "<td class='td02' colspan=3>$order->erdat</td>" .
+                                                "<td class='td02' colspan=3>$order->erdat_out</td>" .
                                                 "<td class='td02' colspan=2>$order->curr</td>" .
-                                                "<td class='td02' colspan=3>$order->fxrate</td>";
+                                                "<td class='td02' colspan=2>$order->fxrate</td>".
+                                                "<td class='td02' colspan=2>$order->bedat_out</td>";
 
                                         switch ($order->info) {
                                             case 0:
@@ -849,7 +856,7 @@
             }
         }
 
-        function _unused_acceptItem(ebeln, id, type) {
+        function _unused_acceptItem(ebeln, id, type, reload) {
             var _data, _status = "";
             $.ajaxSetup({
                 headers: {
@@ -870,53 +877,7 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_status == "success") {
-                location.reload(true);
-                return;//todo
-                //show new row
-                if (_this.closest('tr').innerHTML.toString().includes(">-</button>")) {
-                    var date = new Date();
-                    var chdate = date.getFullYear() + "-" + date.getMonth() + "-" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                    var cuser = "{{\Illuminate\Support\Facades\Auth::user()->id}}";
-                    var cuser_name = "{{\Illuminate\Support\Facades\Auth::user()->username}}";
-                    var ctext = "{{__("Acceptare")}}";
-                    var creason = "";
-                    if (chdate != null) {
-                        var newRow = $("<tr>");
-                        var cols = "";
-                        var pi_style = "background-color:" + $(_this).css("background-color") + ";";
-                        var color = $(_this).closest("tr").find(".coloured").css("background-color");
-                        var last_style = "background-color:" + color;
-                        var first_color = $(_this).closest("tr").find(".first_color").css("background-color");
-                        var first_style = "background-color:" + first_color;
-                        cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
-                        @if ($groupByPO == 4)
-                        let colsafter = "12";
-                        cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        @else
-                        let colsafter = "13";
-                        @endif
-                            cols += '<td class="coloured" style="' + last_style + '"></td>';
-                        cols += '<td style="' + pi_style + '"></td>';
-                        cols += "<td colspan='3'>" + chdate + "</td>";
-                        cols += '<td colspan="4">' + cuser + ' ' + cuser_name + '</td>';
-                        cols += '<td colspan="6">' + ctext + '</td>';
-                        cols += '<td colspan="2">' + creason + '</td>';
-                        cols += "<td colspan=" + colsafter + "></td>";
-                        @if ($groupByPO != 4)
-                            cols += '<td></td>';
-                        @endif
-                            cols += '<td colspan="4"></td>';
-                        newRow.append(cols);
-                        newRow.insertAfter($(_this).closest("tr"));
-                        if (line_counter == 0)
-                            newRow.attr('style', "background-color:Azure; vertical-align: middle;");
-                        else
-                            newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
-                        alert("Accepted!");
-                        newRow.attr('id', "tr_C" + ebeln3 + "_" + ebelp3 + "_" +
-                            chdate.substr(0, 10) + "_" + chdate.substr(11, 8));
-                    }
-                }
+                if (reload) location.reload(true);
             } else alert('Error processing operation!');
         }
 
@@ -1016,7 +977,8 @@
             cols += '<td colspan="3"><b>{{__("Data creare")}}</b></td>';
             cols += '<td colspan="2"><b>{{__("Moneda")}}</b></td>';
             cols += '<td colspan="3"><b>{{__("Rata de schimb")}}</b></td>';
-            cols += '<td colspan="5"><b></b></td>';
+            cols += '<td colspan="3"><b>{{__("Data cda.")}}</b></td>';
+            cols += '<td colspan="2"><b></b></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
@@ -1124,10 +1086,11 @@
                 cols += '<td class="td02" colspan="5">' + porder.lifnr_name + '</td>';
                 cols += '<td class="td02" colspan="1">' + porder.ekgrp + '</td>';
                 cols += '<td class="td02" colspan="5">' + porder.ekgrp_name + '</td>';
-                cols += '<td class="td02" colspan="3">' + porder.erdat + '</td>';
+                cols += '<td class="td02" colspan="3">' + porder.erdat_out + '</td>';
                 cols += '<td class="td02" colspan="2">' + porder.curr + '</td>';
                 cols += '<td class="td02" colspan="3">' + porder.fxrate + '</td>';
-                cols += '<td class="td02" colspan="5"></td>';
+                cols += '<td class="td02" colspan="3">' + porder.bedat_out + '</td>';
+                cols += '<td class="td02" colspan="2"></td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
                 if (i % 2 == 0)
@@ -1526,7 +1489,7 @@
             if (_dataAP.length > 0) {
                 for (let i = 0; i < _dataAP.length; i++) {
                     if (isChecked('I' + _dataAP[i].ebeln + "_"+_dataAP[i].ebelp)) {
-                        _unused_acceptItem(porder, _dataAP[i].ebelp, null);
+                        _unused_acceptItem(porder, _dataAP[i].ebelp, null, false);
                     }
                 }
                 location.reload(true);
@@ -1551,7 +1514,7 @@
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
-            _unused_acceptItem(porder, item, null);
+            _unused_acceptItem(porder, item, null, true);
             location.reload(true);
         }
 
@@ -1745,7 +1708,7 @@
             if (_dataAS.length > 0) {
                 for (let i = 0; i < _dataAS.length; i++) {
                     if (isChecked('I' + _dataAS[i].ebeln + "_" +_dataAS[i].ebelp)) {
-                        _unused_acceptItem(porder, _dataAS[i].ebelp, null);
+                        _unused_acceptItem(porder, _dataAS[i].ebelp, null, false);
                     }
                 }
                 location.reload(true);
@@ -1797,7 +1760,7 @@
                         doRejectItem(porder, item, 'G', '', 'X', 'Z');
                         location.reload();
                     } else {
-                        _unused_acceptItem(porder, item, "F");
+                        _unused_acceptItem(porder, item, "F", true);
                     }
                 })
             }
@@ -2140,13 +2103,26 @@
                 event.preventDefault();
             });
 
-            @if (isset($autoexplode_PO))
-                let autoexplode_button = $('#butt_P{{$autoexplode_PO}}');
-                if (autoexplode_button != null && autoexplode_button != undefined) {
-                    getSubTree(autoexplode_button[0]);
-                    autoexplode_button[0].scrollIntoView();
+            @if (isset($autoexplode_SO) && $autoexplode_SO != null)
+            let autoexplode_so_button = $('#butt_S{{$autoexplode_SO}}');
+            if (autoexplode_so_button != null && autoexplode_so_button != undefined) {
+                getSubTree(autoexplode_so_button[0]);
+                autoexplode_so_button[0].scrollIntoView();
+            }
+            @endif
+
+            @if (isset($autoexplode_PO) && $autoexplode_PO != null)
+                let autoexplode_po_button = $('#butt_P{{$autoexplode_PO}}');
+                if (autoexplode_po_button != null && autoexplode_po_button != undefined) {
+                    getSubTree(autoexplode_po_button[0]);
+                    autoexplode_po_button[0].scrollIntoView();
                 }
             @endif
+
+            @php
+                \Illuminate\Support\Facades\Session::forget("autoexplode_PO");
+                \Illuminate\Support\Facades\Session::forget("autoexplode_SO");
+            @endphp
         });
 
         function reject_init(type, this0, title) {

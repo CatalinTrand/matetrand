@@ -23,7 +23,10 @@ class POrder
     // purchase order related information
     public $lifnr;    // EKKO-LIFNR
     public $ekgrp;    // EKKO-EKGRP
+    public $bedat;    // EKKO-BEDAT
+    public $bedat_out;// EKKO-BEDAT
     public $erdat;    // EKKO-ERDAT
+    public $erdat_out;// EKKO-ERDAT
     public $curr;     // EKKO-WAERS
     public $fxrate;   // EKKO-WKURS
     public $wtime;    // processing warning date
@@ -60,7 +63,10 @@ class POrder
         $this->ebeln = $porder->ebeln;
         $this->lifnr = $porder->lifnr;
         $this->ekgrp = $porder->ekgrp;
+        $this->bedat = $porder->bedat;
+        $this->bedat_out = (new Carbon($this->bedat))->format("Y-m-d");
         $this->erdat = $porder->erdat;
+        $this->erdat_out = (new Carbon($this->erdat))->format("Y-m-d H:i:s");
         $this->curr = $porder->curr;
         $this->fxrate = $porder->fxrate;
         $this->wtime = $porder->wtime;

@@ -49,7 +49,7 @@ class Webservice
 
     static public function insertAgent($userid, $agent)
     {
-        $agent = SAP::alpha_input($agent);
+        $agent = strtoupper(SAP::alpha_input($agent));
         $agent_name = MasterData::getKunnrName($agent);
         if (empty($agent_name)) return "The agent is not defined in SAP";
 
@@ -62,7 +62,7 @@ class Webservice
 
     static public function insertCustomer($userid, $kunnr)
     {
-        $kunnr = SAP::alpha_input($kunnr);
+        $kunnr = strtoupper(SAP::alpha_input($kunnr));
         $kunnr_name = MasterData::getKunnrName($kunnr);
         if (empty($kunnr_name)) return "The client is not defined in SAP";
 
@@ -94,15 +94,16 @@ class Webservice
     public static function getSubTree($type, $sorder, $porder, $item)
     {
         $data = Orders::loadFromCache($sorder, $porder);
-        if ($type == 'S') return self::getSOSubTree($data);
+        if ($type == 'S') return self::getSOSubTree($sorder, $data);
         if ($type == 'P') return self::getPOSubTree($data);
         if ($type == 'I') return self::getPOItemSubTree($data, $item);
     }
 
-    public static function getSOSubTree($data)
+    public static function getSOSubTree($sorder, $data)
     {
         $porders = array();
         if ($data == null) return json_encode($porders);
+        Session::put("autoexplode_SO", $sorder);
         foreach ($data as $porder) {
             $outporder = $porder;
             unset($outporder->items);
@@ -228,6 +229,10 @@ class Webservice
     public static function acceptItemChange($ebeln, $ebelp, $type)
     {
         $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        $_porder = Orders::readPOrder($ebeln);
+        if ($_porder == null) return;
+        if (!isset($_porder->items[$ebelp])) return;
+        if ($_porder->items[$ebelp]->accept == 0) return;
         $item_changed = ($item->changed == "1") || ($item->changed == "2");
         $pstage = $item->stage;
         $cdate = now();
@@ -263,6 +268,10 @@ class Webservice
     public static function cancelItem($ebeln, $item, $category, $reason, $new_status, $new_stage)
     {
         $pitem = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $item]])->first();
+        $_porder = Orders::readPOrder($ebeln);
+        if ($_porder == null) return;
+        if (!isset($_porder->items[$item])) return;
+        if ($_porder->items[$item]->reject == 0) return;
         $old_stage = $pitem->stage;
         DB::beginTransaction();
         $cdate = now();
@@ -662,7 +671,7 @@ class Webservice
         $set_new_lifnr = "";
         if ($proposal->lifnr != $porder->lifnr) $set_new_lifnr = ", new_lifnr ='$proposal->lifnr'";
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'A'" . $set_new_lifnr .
+        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X'" . $set_new_lifnr .
             " where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
