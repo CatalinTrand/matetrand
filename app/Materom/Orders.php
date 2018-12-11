@@ -12,6 +12,7 @@ use App\Materom\Orders\POrder;
 use App\Materom\Orders\POrderItem;
 use App\Materom\Orders\POrderItemChg;
 use App\Materom\SAP\MasterData;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,6 +22,9 @@ class Orders
 {
     public const salesorder = "SALESORDER";
     public const stockorder = "!REPLENISH";
+
+    public static $overdue_items;
+    public static $overdue_orders;
 
     public static function newCacheToken($length = 40) // after an idea by Scott Arciszewski
     {
@@ -213,6 +217,7 @@ class Orders
         $history = Session::get("filter_history");
         $filter_status = Session::get("filter_status");
         $inquirements = Session::get("filter_inquirements");
+        $overdue = Session::get("filter_overdue");
 
         if ($history == null) $history = 1;
         else $history = intval($history);
@@ -281,8 +286,15 @@ class Orders
 
         $xitem = 0;
         $xitemchg = 0;
+        $now = Carbon::now();
+        $now->hour = 0;
+        $now->minute = 0;
+        $now->second = 0;
+        self::$overdue_orders = 0;
+        self::$overdue_items = 0;
         foreach ($porders as $porder) {
             $_porder = new POrder($porder);
+            $overdueitems = false;
             while ($xitem < count($pitems) && ($pitem = $pitems[$xitem])->ebeln == $porder->ebeln) {
                 $xitem++;
                 $_pitem = new POrderItem($pitem);
@@ -297,14 +309,21 @@ class Orders
                 $_pitem->fill($_porder);
                 if (($inquirements != 1) ||
                     ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")) && (($_pitem->owner != 0) || (Auth::user()->role == "Administrator"))))
-                    $_porder->appendItem($_pitem);
+                    if ($overdue == 0 || $_pitem->lfdat < $now) $_porder->appendItem($_pitem);
+                if ($overdueitems = $_pitem->lfdat < $now) self::$overdue_items++;
             }
             $_porder->fill();
+            if ($overdueitems) self::$overdue_orders++;
             if ($_porder->items != null)
                 $result[$porder->ebeln] = $_porder;
         }
 
         return $result;
+    }
+
+    public static function overdues()
+    {
+        return "" . self::$overdue_orders . "/" . self::$overdue_items;
     }
 
     public static function readPOrder($ebeln)
@@ -333,7 +352,7 @@ class Orders
     public static function getOrderList($groupByPO = null)
     {
 
-        if (!isset($groupByPO))
+        if (!isset($groupByPO) || $groupByPO == null)
             $groupByPO = Session::get("groupOrdersBy");
         if (!isset($groupByPO)) $groupByPO = 1;
 

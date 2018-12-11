@@ -76,9 +76,17 @@
 
         $filter_inquirements = 0;
         $inquirements_checked = "";
+        unset($tmp);
         $tmp = \Illuminate\Support\Facades\Session::get("filter_inquirements");
         if (isset($tmp)) $filter_inquirements = intval($tmp);
         if ($filter_inquirements == 1) $inquirements_checked = "checked";
+
+        $filter_overdue = 0;
+        $overdue_checked = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_overdue");
+        if (isset($tmp)) $filter_overdue = intval($tmp);
+        if ($filter_overdue == 1) $overdue_checked = "checked";
 
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
@@ -108,6 +116,9 @@
         if (\Illuminate\Support\Facades\Auth::user()->role == 'Furnizor') $background_color = "background-color: lightyellow;";
         elseif (\Illuminate\Support\Facades\Auth::user()->role == 'Referent') $background_color = "background-color: lightgreen;";
         elseif (\Illuminate\Support\Facades\Auth::user()->role == 'CTV') $background_color = "background-color: lightgray;";
+
+        $orders = App\Materom\Orders::getOrderList();
+
     @endphp
     <div class="container-fluid">
         <input type="hidden" id="filter_history" value="{{$filter_history}}">
@@ -214,6 +225,9 @@
                                                style="height:1.6rem; width: 6rem;" name="time_search"
                                                value="{{$filter_time_val}}"
                                                onchange="this.form.submit()">
+                                    @else
+                                        <input type="checkbox" id="filter_overdue" name="filter_overdue" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$overdue_checked}}>
+                                        <label for="filter_overdue" class="col-form-label text-md-left">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;&nbsp;
                                     @endif
                                 </div>
                                 <br>
@@ -389,7 +403,6 @@
                                 @endphp
                             </tr>
                             @php
-                                $orders = App\Materom\Orders::getOrderList();
                                 $line_counter = 1;
 
                                 foreach ($orders as $order) {
@@ -1115,7 +1128,7 @@
                 cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
             colsafter = 1;
             @endif
-                cols += '<td style="' + po_style + '"></td>';
+            cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="1"><b>{{__("Position")}}</b></td>';
             cols += '<td class="td02" colspan="1"><b>{{__("Plant")}}</b></td>';
             cols += '<td class="td02" colspan="1"><b>{{__("Fabricant")}}</b></td>';
@@ -1166,6 +1179,9 @@
                         break;
                     case 5:
                         info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif' onclick='replyack(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\"); return false;'>";
+                        break;
+                    case 6:
+                        info_icon = "<image style='height: 1.2rem;' src='/images/icons8-shipped-48.png'>";
                         break;
                 }
                 let owner_icon = "";
@@ -1237,28 +1253,28 @@
                 var first_style = "background-color:" + first_color;
 
                 @if ($groupByPO == 4)
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + info_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + changed_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + accepted_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + rejected_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + inquired_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_accept + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_reject + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_inquire + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + info_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + owner_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + changed_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + accepted_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + rejected_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '">' + inquired_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_accept + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_reject + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_inquire + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
                 @else
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + info_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + owner_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + changed_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + accepted_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + rejected_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + inquired_icon + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_accept + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
-                cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + owner_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + changed_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + accepted_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + rejected_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + inquired_icon + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_accept + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
                 @endif
-                    cols += '<td class="coloured" style="' + po_style + '"></td>';
+                cols += '<td class="coloured" style="' + po_style + '">' + pitem.posnr_out + '</td>';
                 cols += "<td colspan='1'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.werks + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + conv_exit_alpha_output(pitem.mfrnr) + '</td>';

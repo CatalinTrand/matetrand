@@ -10,6 +10,7 @@ namespace App\Materom\Orders;
 
 
 use App\Materom\Orders;
+use App\Materom\SAP;
 use App\Materom\SAP\MasterData;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,7 @@ class POrderItem
     // purchase order item related information
     public $vbeln;       // EKKN-VBELN
     public $posnr;       // EKKN-VBELP
+    public $posnr_out;
     public $idnlf;       // EKPO-IDNLF
     public $mtext;       // EKPO-TXZ01
     public $mfrnr;       // EKPO-MFRNR (VBAP-ZZMFRNR)
@@ -112,6 +114,7 @@ class POrderItem
         $this->ebelp = $pitem->ebelp;
         $this->vbeln = $pitem->vbeln;
         $this->posnr = $pitem->posnr;
+        $this->posnr_out = "";
         $this->idnlf = $pitem->idnlf;
         $this->mtext = $pitem->mtext;
         $this->mfrnr = $pitem->mfrnr;
@@ -157,6 +160,9 @@ class POrderItem
         if (!isset($history)) $history = 1;
         else $history = intval($history);
 
+        $groupByPO = Session::get("groupOrdersBy");
+        if (!isset($groupByPO) || $groupByPO == null) $groupByPO = 1;
+
         $this->sorder = $this->vbeln;
         if (Auth::user()->role == 'Furnizor') {
             $this->sales_price = "";
@@ -169,6 +175,7 @@ class POrderItem
             $this->shipto_name = "";
             $this->ctv = "";
             $this->ctv_name = "";
+            $this->posnr_out = "";
             if ($this->sorder != Orders::stockorder) $this->sorder = Orders::salesorder;
         } else {
             $this->kunnr_name = MasterData::getKunnrName($this->kunnr, 2);
@@ -176,6 +183,7 @@ class POrderItem
         }
         $this->wtime = $porder->wtime;
         $this->ctime = $porder->ctime;
+        if ($groupByPO == 4 && $this->vbeln != Orders::stockorder) $this->posnr_out = SAP::alpha_output($this->posnr);
 
         $this->owner = 0;
         if (Auth::user()->role == 'Furnizor') {
@@ -399,7 +407,10 @@ class POrderItem
             $this->inquire = 0;
             $this->inquired = 0;
             $this->inq_reply = 0;
+        } else {
+            if ($this->grdate != null) $this->info = 6;
         }
+
     }
 
 

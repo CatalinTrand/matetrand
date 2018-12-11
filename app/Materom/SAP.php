@@ -159,7 +159,7 @@ class SAP
         $new_eindt = "";
 
         $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
-        if ($item->matnr != $item->orig_matnr) $new_matnr = $item->matnr;
+        if ($item->matnr != $item->orig_matnr && $item->vbeln == Orders::stockorder) $new_matnr = $item->matnr;
         if ($item->idnlf != $item->orig_idnlf) $new_idnlf = $item->idnlf;
         if ($item->qty != $item->orig_qty) $new_menge = $item->qty;
         if ($item->purch_price != $item->orig_purch_price) $new_price = $item->purch_price;

@@ -675,7 +675,7 @@ class Webservice
             " where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
-            "('$ebeln', '$ebelp', '$now', 1, 'A', 'Z', 'C', '" .
+            "('$ebeln', '$ebelp', '$now', 0, 'A', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
         if (Auth::user()->role != "CTV") {
@@ -761,7 +761,7 @@ class Webservice
         DB::delete("delete from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         $cdate = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
-            "('$ebeln', '$ebelp', '$cdate', 1, 'U', 'R', '" .
+            "('$ebeln', '$ebelp', '$cdate', 0, 'U', 'R', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$text')");
         DB::commit();
         return "";

@@ -94,6 +94,9 @@ class HomeController extends Controller
         Session::put("filter_inquirements", "0");
         $tmp = Input::get("filter_inquirements");
         if (strtoupper($tmp) == "ON" ) Session::put("filter_inquirements", "1");
+        Session::put("filter_overdue", "0");
+        $tmp = Input::get("filter_overdue");
+        if (strtoupper($tmp) == "ON" ) Session::put("filter_overdue", "1");
         Orders::fillCache();
         return redirect()->back();
     }
