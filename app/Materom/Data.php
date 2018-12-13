@@ -208,7 +208,11 @@ class Data
         foreach($sapitms as $sapitm) {
             SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
         }
-        if ($new_order_item && $send_mail) Mailservice::sendNotification($userid, $ebeln);
+        if ($new_order_item) {
+            if ($send_mail) Mailservice::sendNotification($userid, $ebeln);
+            $refuser = DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1])->first();
+            if ($refuser != null) Mailservice::sendNotification($refuser->id, $ebeln);
+        }
         return "OK";
     }
 

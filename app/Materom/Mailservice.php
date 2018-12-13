@@ -10,8 +10,21 @@ use Illuminate\Support\Facades\DB;
 
 class Mailservice
 {
-    static public function sendNotification($userid, $ebeln) {
+    static public function sendMessageCopy($userid, $from, $order, $content)
+    {
+        $user = DB::table("users")->where("id", $userid)->first();
+        if ($user == null) return;
+        Mail::send('email.messagecopy',['user' => $user,'from' => $from, 'order' => $order, 'content' => $content],
+            function($message) use ($user, $from, $order) {
+            $message->to($user->email, $user->username)->subject(__("Mesaj SRM pentru comanda ") . $order);
+            $message->from('no_reply_srm@materom.ro','MATEROM SRM');
+        });
+        Log::debug("Sent mail 'Copie mesaj SRM de la $from' to '$user->email'");
 
+    }
+
+    static public function sendNotification($userid, $ebeln)
+    {
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
@@ -22,8 +35,8 @@ class Mailservice
         Log::debug("Sent mail 'Notificare comanda $ebeln' to '$user->email'");
     }
 
-    static public function sendSalesOrderNotification($userid, $vbeln, $posnr) {
-
+    static public function sendSalesOrderNotification($userid, $vbeln, $posnr)
+    {
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
@@ -47,8 +60,8 @@ class Mailservice
         Log::debug("Sent mail 'Notificare anulare pozitie comanda $vbeln/$posnr' to '$user->email'");
     }
 
-    static public function sendSalesOrderProposal($userid, $vbeln, $posnr) {
-
+    static public function sendSalesOrderProposal($userid, $vbeln, $posnr)
+    {
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
@@ -72,8 +85,8 @@ class Mailservice
         Log::debug("Sent mail 'Propunere modificare pozitie comanda $vbeln/$posnr' to '$user->email'");
     }
 
-    static public function sendSalesOrderChange($userid, $vbeln, $posnr, $newposnr) {
-
+    static public function sendSalesOrderChange($userid, $vbeln, $posnr, $newposnr)
+    {
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;

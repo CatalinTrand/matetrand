@@ -209,6 +209,8 @@ class Orders
 
     static public function loadFromCache($s_order = null, $p_order = null, $refresh_dlv = false)
     {
+        // if (Auth::user()->role == "Administrator") Log::debug("Performance check: start loadFromCache");
+
         $result = array();
         $cacheid = Session::get('materomdbcache');
         if (!isset($cacheid) || empty($cacheid)) return;
@@ -218,6 +220,7 @@ class Orders
         $filter_status = Session::get("filter_status");
         $inquirements = Session::get("filter_inquirements");
         $overdue = Session::get("filter_overdue");
+        if (!isset($overdue) || $overdue == null) $overdue = 0;
 
         if ($history == null) $history = 1;
         else $history = intval($history);
@@ -309,14 +312,20 @@ class Orders
                 $_pitem->fill($_porder);
                 if (($inquirements != 1) ||
                     ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")) && (($_pitem->owner != 0) || (Auth::user()->role == "Administrator"))))
-                    if ($overdue == 0 || $_pitem->lfdat < $now) $_porder->appendItem($_pitem);
-                if ($overdueitems = $_pitem->lfdat < $now) self::$overdue_items++;
+                    if ($overdue == 0 || $_pitem->lfdat < $now) {
+                        $_porder->appendItem($_pitem);
+                        self::$overdue_items++;
+                        $overdueitems = true;
+                    }
             }
             $_porder->fill();
-            if ($overdueitems) self::$overdue_orders++;
-            if ($_porder->items != null)
+            if ($_porder->items != null) {
                 $result[$porder->ebeln] = $_porder;
+                if ($overdueitems) self::$overdue_orders++;
+            }
         }
+
+        // if (Auth::user()->role == "Administrator") Log::debug("Performance check: end loadFromCache");
 
         return $result;
     }

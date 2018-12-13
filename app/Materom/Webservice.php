@@ -289,6 +289,11 @@ class Webservice
                     Mailservice::sendSalesOrderNotification($ctvuser->id, $pitem->vbeln, $pitem->posnr);
                 }
             }
+            if ($old_stage != 'R') {
+                $refuser = DB::table("users")->where(["ekgrp" => $pitem->ekgrp, "role" => "Referent", "active" => 1])->first();
+                if ($refuser != null)
+                    Mailservice::sendSalesOrderNotification($refuser->id, $pitem->vbeln, $pitem->posnr);
+            }
         }
         return "";
     }
@@ -441,7 +446,7 @@ class Webservice
 
     static public function sendInquiry($ebeln, $ebelp, $text, $to)
     {
-
+        $order = SAP::alpha_output($ebeln) . "/" . SAP::alpha_output($ebelp);
         $duser = "";
         $stage = '';
         $internal = 0;
@@ -461,9 +466,15 @@ class Webservice
             if (Auth::user()->role == "CTV") $internal = 1;
         }
         if ($to[0] == 'C') {
+            $pitem = DB::table("pitems")->where(['ebeln' => $ebeln, 'ebelp' => $ebelp])->first();
+            if ($pitem->vbeln != Orders::stockorder)
+                $order = SAP::alpha_output($pitem->vbeln) . "/" . SAP::alpha_output($pitem->posnr);
             $stage = 'C';
             $kunnr = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $duser = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("id");
+            $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+            if ($dusers == null || empty($dusers))
+                $duser = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("id");
+            else $duser = $dusers[0]->id;
             if (Auth::user()->role == "Referent") $internal = 1;
         }
 
@@ -472,8 +483,9 @@ class Webservice
         $cdate = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, stage, reason) VALUES " .
             "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$stage', '$text')");
-        return "";
+        Mailservice::sendMessageCopy($duser, $uName, $order, $text);
         \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
+        return "";
     }
 
     static public function processProposal($proposal)
@@ -503,8 +515,8 @@ class Webservice
                 $counter++;
             }
             DB::commit();
+            $pitem = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
             if ($newstage == 'C') {
-                $pitem = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
                 $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderProposal($ctvuser->id, $pitem->vbeln, $pitem->posnr);
@@ -599,6 +611,11 @@ class Webservice
                         foreach ($ctvusers as $ctvuser) {
                             Mailservice::sendSalesOrderChange($ctvuser, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
                         }
+                    }
+                    if (Auth::user()->role != "Referent") {
+                        $refuser = DB::table("users")->where(["ekgrp" => $proposal->itemdata->ekgrp, "role" => "Referent", "active" => 1])->first();
+                        if ($refuser != null)
+                            Mailservice::sendSalesOrderChange($refuser, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
                     }
                 }
                 // if (!empty($set_new_lifnr)) Data::archiveItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);

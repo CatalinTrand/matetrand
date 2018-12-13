@@ -7,6 +7,7 @@
             exit();
         @endphp
     @endguest
+
     @php
         $groupByPO = \Illuminate\Support\Facades\Session::get('groupOrdersBy');
         if (!isset($groupByPO)) $groupByPO = 1;
@@ -179,7 +180,7 @@
                         @endif
                     </div>
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 8px; height: 8rem;">
+                        <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 8.2rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container row" style="display: block; max-width: 100%;">
@@ -232,6 +233,9 @@
                                 </div>
                                 <br>
                                 <div class="container row" style="display: block; max-width: 100%;">
+                                    <table style="border: none; width: 100%;">
+                                    <tr>
+                                    <td>
                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
                                         {{__("Sales order")}}:
                                         <input type="text" class="form-control-sm input-sm"
@@ -260,9 +264,13 @@
                                                style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name"
                                                value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
                                     @endif
-                                    <button type="button" style="margin-left: 15%; height: 1.5rem; "
+                                    </td>
+                                    <td width="100px" style="text-align: right;">
+                                        <button type="button" style="margin-left: 2px; height: 1.5rem; "
                                             onclick="reset_filters();return false;">{{__('Reset')}}</button>
-
+                                    </td>
+                                    </tr>
+                                    </table>
                                 </div>
 
                                 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
@@ -686,9 +694,7 @@
             location.replace("webservice/downloadordersxls");
             return;
         }
-    </script>
 
-    <script>
         function onselect_Inforecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr, result_purch_price, result_purch_currency, result_sales_price, result_sales_currency) {
             if (caller == 1) {
                 $("#ar-immed-lifnr").val(result_lifnr);
@@ -715,9 +721,7 @@
                 $("#aes-purch-curr").val(result_purch_currency);
             }
         }
-    </script>
 
-    <script>
         function onselect_zpretrecord(caller, result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
                                       result_purch_price, result_purch_currency, result_sales_price, result_sales_currency) {
             if (result_matnr == null || result_matnr.trim().length == 0) result_matnr = "PA01";
@@ -752,15 +756,10 @@
                 $("#aes-sales-curr").val(result_sales_currency);
             }
         }
-    </script>
 
-    <script>
         $(function () {
             $("#time_search").datepicker({dateFormat: "yy-mm-dd"});
         });
-    </script>
-
-    <script>
 
         var checkedList = [];
         var unCheckedList = [];

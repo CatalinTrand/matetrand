@@ -178,7 +178,7 @@ class SAP
             $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_CHANGE_ITEM');
             $result = $sapfm->invoke(['I_EBELN' => $ebeln,
                                       'I_EBELP' => $ebelp,
-                                      'I_MATNR' => $new_matnr,
+                                      'I_MATNR' => "",
                                       'I_IDNLF' => $new_idnlf,
                                       'I_MENGE' => $new_menge,
                                       'I_PRICE' => $new_price,
@@ -227,6 +227,8 @@ class SAP
 
     static public function refreshDeliveryStatus($mode, $items = null)
     {
+        // if (Auth::user()->role == "Administrator") Log::debug("Performance check: start refreshDeliveryStatus");
+
         if ($items == null)
             $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems order by ebeln, ebelp");
         else {
@@ -249,7 +251,11 @@ class SAP
             }
             DB::commit();
         }
+
+        // if (Auth::user()->role == "Administrator") Log::debug("Performance check: end refreshDeliveryStatus");
+
         return "OK";
+
     }
 
     static public function rfcGetDeliveryData($mode, $items) {
