@@ -83,6 +83,7 @@ class POrderItemChg
                 $this->text = __("Accepted");
                 if ($this->oldval == 'F') $this->text = __("Cancellation not accepted by vendor");
                 elseif ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal accepted");
+                elseif ($this->stage == 'Z' && $this->oldval == 'U') $this->text = __("Split request accepted");
                 break;
             case "T":
                 $this->text = __("Acceptance requested");
@@ -92,7 +93,8 @@ class POrderItemChg
                 if ($this->oldval == 'G') $this->text = __("Cancellation accepted by vendor");
                 elseif (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
                     $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
-                if ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal rejected");
+                elseif ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal rejected");
+                elseif ($this->stage == 'Z' && $this->oldval == 'W') $this->text = __("Split request rejected");
                 break;
             case "R":
                 $this->text = __("Rejection requested");
@@ -103,9 +105,6 @@ class POrderItemChg
                 break;
             case "O":
                 $this->text = __("Proposal issued");
-                break;
-            case "W":
-                $this->text = __("Split proposal rejected");
                 break;
             case "M":
                 $this->text =  __("Material code modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
@@ -124,9 +123,6 @@ class POrderItemChg
                 break;
             case "S":
                 $this->text = __("Item split proposed");
-                break;
-            case "U":
-                $this->text = __("Item splitted");
                 break;
         }
 

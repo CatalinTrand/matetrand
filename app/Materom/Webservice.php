@@ -162,7 +162,7 @@ class Webservice
 
     public static function replyMessage($ebeln, $ebelp, $message, $to)
     {
-
+        $order = SAP::alpha_output($ebeln) . "/" . SAP::alpha_output($ebelp);
         $duser = "";
         $stage = '';
         if ($to[0] == 'F') {
@@ -178,11 +178,16 @@ class Webservice
             $ekgrp = $porder->ekgrp;
             $duser = DB::table("users")->where([["role", "=", "Referent"],
                 ["ekgrp", "=", $ekgrp]])->value("id");
+            if (Auth::user()->role == "CTV") $internal = 1;
         }
         if ($to[0] == 'C') {
             $stage = 'C';
             $kunnr = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $duser = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("id");
+            $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+            if ($dusers == null || empty($dusers))
+                $duser = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("id");
+            else $duser = $dusers[0]->id;
+            if (Auth::user()->role == "Referent") $internal = 1;
         }
 
 
@@ -190,6 +195,7 @@ class Webservice
         DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and ctype = 'E'");
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, stage, ctype, reason, cuser, cuser_name, duser) values " .
             "('$ebeln','$ebelp', '$cdate', '$stage', 'E', '$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "', '$duser')");
+        Mailservice::sendMessageCopy($duser, Auth::user()->username, $order, $message);
         return "";
     }
 
@@ -460,7 +466,7 @@ class Webservice
         }
         if ($to[0] == 'R') {
             $stage = 'R';
-            $porder = DB::Select("select * from porders where ebeln = '$ebeln'")[0];
+            $porder = DB::select("select * from porders where ebeln = '$ebeln'")[0];
             $ekgrp = $porder->ekgrp;
             $duser = DB::table("users")->where([["role", "=", "Referent"],
                 ["ekgrp", "=", $ekgrp]])->value("id");
@@ -717,7 +723,7 @@ class Webservice
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
-            "('$ebeln', '$ebelp', '$now', 1, 'X', 'Z', 'C', '" .
+            "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
         $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
@@ -774,12 +780,12 @@ class Webservice
         }
 
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'R', pstage = '$item->stage' " .
+        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
         DB::delete("delete from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         $cdate = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
-            "('$ebeln', '$ebelp', '$cdate', 0, 'U', 'R', '" .
+        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+            "('$ebeln', '$ebelp', '$cdate', 0, 'A', 'Z', 'U', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$text')");
         DB::commit();
         return "";
@@ -788,15 +794,25 @@ class Webservice
     static public function rejectSplit($ebeln, $ebelp, $cdate)
     {
         $item = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+        SAP::rejectPOItem($ebeln, $ebelp);
+        $result = SAP::rejectSOItem($item->vbeln, $item->posnr, "07");
+        $soitem = __("Rejected split for sales order item ") . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
+        if (!empty(trim($result))) return;
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'R', pstage = '$item->stage' " .
+        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
         DB::delete("delete from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-        $cdate = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
-            "('$ebeln', '$ebelp', '$cdate', 1, 'W', 'R', '" .
-            Auth::user()->id . "', '" . Auth::user()->username . "')");
+        $now = now();
+        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+            "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'W', '" .
+            Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
+        if (Auth::user()->role != 'CTV') {
+            $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
+            foreach ($ctvusers as $ctvuser) {
+                Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
+            }
+        }
         return "";
     }
 
