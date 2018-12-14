@@ -119,6 +119,18 @@
         elseif (\Illuminate\Support\Facades\Auth::user()->role == 'CTV') $background_color = "background-color: lightgray;";
 
         $orders = App\Materom\Orders::getOrderList();
+        $message_count = App\Materom\Orders::unreadMessageCount();
+        $message_svg = "";
+        if ($message_count > 0) {
+            if ($message_count > 99) $message_count = '>99';
+            else $message_count = "&nbsp;" . $message_count;
+            $message_svg = '&nbsp;<svg style="vertical-align: middle;" width="41" height="38">
+                  <g>
+                  <rect x="2" y="2" rx="8" ry="8" width="35" height="32" style="fill:red;stroke:black;stroke-width:2;opacity:0.99" />
+                  <text x="5" y="23" font-family="Arial" font-size="16" fill="white">' . $message_count . '</text>
+                  </g>
+                </svg>';
+        }
 
     @endphp
     <div class="container-fluid">
@@ -152,7 +164,7 @@
                                         class="card-line">
                                     <image style='height: 2.2rem; margin-left: -1.5rem;'
                                            src='/images/icons8-chat-80.png'/>
-                                    {{__("Messages")}}
+                                    {{__("Messages")}}{!!$message_svg!!}
                                 </p>
                             </a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
@@ -168,7 +180,7 @@
                                         class="card-line first">
                                     <image style='height: 2.2rem; margin-left: -1.5rem;'
                                            src='/images/icons8-chat-80.png'/>
-                                    {{__('Messages')}}
+                                    {{__('Messages')}}{!!$message_svg!!}
                                 </p>
                             </a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
@@ -281,7 +293,7 @@
 
                     <br>
 
-                    <div class="card-body orders-table-div" style="height: 70vh; padding-top: 0rem;">
+                    <div class="card-body orders-table-div" style="height: 69vh; padding-top: 0rem;">
                         <table style="border: 2px solid black; table-layout: fixed;"
                                class="orders-table basicTable table table-striped" id="orders_table">
                             <colgroup>
@@ -1659,7 +1671,7 @@
                     text: "{{__('You have issued earlier a confirmation for this item. Are you sure you want now to cancel it?')}}",
                     icon: 'warning',
                     buttons: ["{{__('No')}}", "{{__('This item will not be delivered')}}"],
-                }).then((result) => {
+                }).then(function(result) {
                     if (result) {
                         doRejectItem(porder, item, 'F', '', 'R', 'R');
                         location.reload(true);
@@ -1671,7 +1683,7 @@
                     text: "{{__('The vendor has issued earlier a confirmation for this item. Are you sure you want now to request the vendor to cancel it?')}}",
                     icon: "warning",
                     buttons: ["{{__('No')}}", "{{__('Ask vendor to cancel this item')}}"],
-                }).then((result) => {
+                }).then(function(result) {
                     if (result) {
                         doRejectItem(porder, item, 'G', '', 'R', 'F');
                         location.reload(true);
@@ -1770,7 +1782,7 @@
                     text: "{{__('This item was previously confirmed by you, but MATEROM asks you now to cancel it. Do you agree?')}}",
                     icon: 'warning',
                     buttons: ["{{__('No')}}", "{{__('Agree with cancellation')}}"]
-                }).then((result) => {
+                }).then(function(result) {
                     if (result) {
                         doRejectItem(porder, item, 'G', '', 'X', 'Z');
                         location.reload();
@@ -1878,13 +1890,18 @@
                 modal: true,
                 buttons: {
                     Change: function () {
-                        if (doChangeItem(change_type, $("#new_chg_val").val(), $("#new_val_hlp").text(),
-                            change_cell.innerHTML, change_ebeln, change_ebelp)) {
-                            change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
-                            $("#new_chg_val").text("");
-                            $("#new_val_hlp").text("");
-                            changeDialog.dialog("close");
-                            location.reload();
+                        let new_val = $("#new_chg_val").val().trim();
+                        if (new_val.length > 0) {
+                            if (doChangeItem(change_type, new_val, $("#new_val_hlp").text(),
+                                change_cell.innerHTML, change_ebeln, change_ebelp)) {
+                                change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
+                                $("#new_chg_val").text("");
+                                $("#new_val_hlp").text("");
+                                changeDialog.dialog("close");
+                                location.reload();
+                            }
+                        } else {
+                            alert("{{__('Enter a correct value')}}");
                         }
                     },
                     Cancel: function () {
@@ -1956,7 +1973,7 @@
                 text: "{{__('You have issued earlier a confirmation for this item. Are you sure you want now to change its delivery date? ')}}",
                 icon: 'warning',
                 buttons: ["{{__('No')}}", "{{__('Ask MATEROM to check a new delivery date')}}"],
-            }).then((result) => {
+            }).then(function(result) {
                 if (result) {
                     change_delivery_date(cell, ebeln, ebelp)
                 }
@@ -1987,7 +2004,7 @@
                 text: "{{__('You have issued earlier a confirmation for this item. Are you sure you want now to change its purchase price? ')}}",
                 icon: 'warning',
                 buttons: ["{{__('No')}}", "{{__('Ask MATEROM to check a new purchase price')}}"],
-            }).then((result) => {
+            }).then(function(result) {
                 if (result) {
                     change_purchase_price(cell, ebeln, ebelp)
                 }

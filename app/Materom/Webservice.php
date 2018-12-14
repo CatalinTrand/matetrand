@@ -271,7 +271,8 @@ class Webservice
         $_porder = Orders::readPOrder($ebeln);
         if ($_porder == null) return;
         if (!isset($_porder->items[$item])) return;
-        if ($_porder->items[$item]->reject == 0) return;
+        if (!(($_porder->items[$item]->reject != 0) ||
+              ($_porder->items[$item]->inquired == 4 && $_porder->items[$item]->inq_reply == 1))) return;
         $old_stage = $pitem->stage;
         DB::beginTransaction();
         $cdate = now();

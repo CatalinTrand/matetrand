@@ -45,6 +45,19 @@
         };
         $oldglobal = $global;
 
+        $message_count = App\Materom\Orders::unreadMessageCount();
+        $message_svg = "";
+        if ($message_count > 0) {
+            if ($message_count > 99) $message_count = '>99';
+            else $message_count = "&nbsp;" . $message_count;
+            $message_svg = '&nbsp;<svg style="vertical-align: middle;" width="41" height="38">
+                  <g>
+                  <rect x="2" y="2" rx="8" ry="8" width="35" height="32" style="fill:red;stroke:black;stroke-width:2;opacity:0.99" />
+                  <text x="5" y="23" font-family="Arial" font-size="16" fill="white">' . $message_count . '</text>
+                  </g>
+                </svg>';
+        }
+
     @endphp
 
     <div class="container-fluid">
@@ -62,7 +75,7 @@
                         </p></a>
                         <a href="/messages"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
                             <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
-                            {{__("Messages")}}
+                            {{__("Messages")}}{!!$message_svg!!}
                         </p></a>
                         <a href="/orders"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
                             <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>

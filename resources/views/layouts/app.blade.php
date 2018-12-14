@@ -385,7 +385,7 @@
         @yield('content')
     </main>
 </div>
-<div align="center" style="position:absolute;bottom:2px;width:100%">
+<div align="center" style="position:fixed;bottom:5px;width:100%">
     Copyright &copy; 2018 by Materom. All rights reserved.
 </div>
 

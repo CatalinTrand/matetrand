@@ -286,54 +286,6 @@
     }
 </script>
 
-<div id="accept-reject-simple" title="Accept/reject">
-    <div class="row">
-        <label for="ar-message" class="col-md-2 col-form-label text-md-left">{{__('Message')}}</label>&nbsp;&nbsp;
-        <textarea id="ar-message" type="text" name="aar-message" class="form-control col-md-9"
-                  style="word-break: break-word; height: 4rem;" maxlength="100" value=""></textarea>
-    </div>
-</div>
-
-<script>
-    var ar_simple_Dialog, ar_simple_Form, _ar_simple_this;
-
-    $(function () {
-        ar_simple_Dialog = $("#init-rejection-simple").dialog({
-            autoOpen: false,
-            height: 250,
-            width: 480,
-            modal: true,
-            buttons: {
-                Accept: function () {
-                },
-                Reject: function () {
-                    //functia ta aici
-                }
-            },
-            close: function () {
-                ar_simple_Form[0].reset();
-            },
-            position: {
-                my: "center",
-                at: "center",
-                of: window
-            }
-        });
-        ar_simple_Form = ar_simple_Dialog.find("form").on("submit", function (event) {
-            event.preventDefault();
-        });
-    });
-
-    function accept_reject_simple(this0, title, initial_text) {
-        $("#ar-message").val(initial_text);
-        $("#accept-reject-simple").dialog('option', 'title', title);
-
-        _ar_simple_this = this0;
-        ar_simple_Dialog.dialog("open");
-    }
-
-</script>
-
 <div id="add-edit-proposal" title="Add/edit proposal">
     <div class="row">
         <label for="aep-lifnr" class="col-md-3 col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;

@@ -433,6 +433,13 @@ class Orders
     }
 
 
+    public static function unreadMessageCount()
+    {
+        $count = DB::select("select count(*) as count from pitemchg where duser ='" . Auth::user()->id . "' and acknowledged = 0 and ctype = 'E'");
+        if ($count == null || empty($count)) return 0;
+        return $count[0]->count;
+    }
+
     public static function getMessageList($sorting)
     {
 
