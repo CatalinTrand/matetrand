@@ -345,8 +345,10 @@ class Data
         SAP::refreshDeliveryStatus(2);
         $pitems = DB::table("pitems")->where("grdate", "<>", "null")->get();
         foreach($pitems as $pitem) {
-            Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (goods received)");
-            self::archiveItem($pitem->ebeln, $pitem->ebelp);
+            if ("".$pitem->qty == explode(" ", $pitem->grqty)[0]) {
+                Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (goods received)");
+                self::archiveItem($pitem->ebeln, $pitem->ebelp);
+            }
         }
 
         $pitems = DB::select("select distinct ebeln, ebelp from pitems where stage = 'Z' and status = 'X'");

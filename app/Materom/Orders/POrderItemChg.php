@@ -91,7 +91,7 @@ class POrderItemChg
             case "X":
                 $this->text = __("Rejected");
                 if ($this->oldval == 'G') $this->text = __("Cancellation accepted by vendor");
-                elseif (($this->oldval != null) && ($this->oldval != '0') && ($this->oldval != 'C'))
+                elseif (($this->oldval != null) && (($this->oldval == '1') || ($this->oldval == '2') || ($this->oldval == '3') || ($this->oldval == '4')))
                     $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
                 elseif ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal rejected");
                 elseif ($this->stage == 'Z' && $this->oldval == 'W') $this->text = __("Split request rejected");

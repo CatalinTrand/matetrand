@@ -528,7 +528,7 @@
                         function (data, status) {
                             _data = data;
                             _status = status;
-                        }, "json");
+                        });
                     jQuery.ajaxSetup({async: true});
                     if (_data != null && _data != undefined && _data.trim().length != 0) {
                         alert(_data);
@@ -554,7 +554,7 @@
                         function (data, status) {
                             _data = data;
                             _status = status;
-                        }, "json");
+                        });
                     jQuery.ajaxSetup({async: true});
                     if (_data != null && _data != undefined && _data.trim().length != 0) {
                         alert(_data);

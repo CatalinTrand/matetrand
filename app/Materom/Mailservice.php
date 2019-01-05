@@ -3,7 +3,7 @@
 namespace App\Materom;
 
 use App\Materom\SAP\MasterData;
-use App\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +19,7 @@ class Mailservice
             $message->to($user->email, $user->username)->subject(__("Mesaj SRM pentru comanda ") . $order);
             $message->from('no_reply_srm@materom.ro','MATEROM SRM');
         });
-        Log::debug("Sent mail 'Copie mesaj SRM de la $from' to '$user->email'");
+        Log::debug("Sent mail 'Copie mesaj SRM' de la '$from' la '$user->email'");
 
     }
 
@@ -35,20 +35,24 @@ class Mailservice
         Log::debug("Sent mail 'Notificare comanda $ebeln' to '$user->email'");
     }
 
-    static public function sendSalesOrderNotification($userid, $vbeln, $posnr)
+    static public function sendSalesOrderNotification($userid, $vbeln, $posnr, $forcectv = false)
     {
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
-        if ($user->role == "CTV") {
+        if ($user->role == "CTV" || $forcectv) {
             $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
-            if ($kunnr != null)
-                $agent = DB::table("user_agent_clients")->where([["id", "=", $user->id], ["kunnr", "=", $kunnr]])->value("agent");
-            else
+            if (isset($kunnr) && $kunnr != null) {
+                $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+                if ($dusers == null || empty($dusers))
+                    $agent = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("agent");
+                else $agent = DB::table("users_agent")->where("id", $dusers[0]->id)->value("agent");
+            } else {
                 $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+            }
             if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
-                $user->agent = MasterData::getKunnrName($user->agent);
+                $user->agent = MasterData::getKunnrName(SAP::alpha_input($user->agent));
             }
         }
         Mail::send('email.salesordernotification',['user' => $user,'vbeln' => $vbeln,'posnr' => $posnr],
@@ -67,13 +71,17 @@ class Mailservice
         $user->agent = $user->username;
         if ($user->role == "CTV") {
             $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
-            if ($kunnr != null)
-                $agent = DB::table("user_agent_clients")->where([["id", "=", $user->id], ["kunnr", "=", $kunnr]])->value("agent");
-            else
+            if (isset($kunnr) && $kunnr != null) {
+                $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+                if ($dusers == null || empty($dusers))
+                    $agent = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("agent");
+                else $agent = DB::table("users_agent")->where("id", $dusers[0]->id)->value("agent");
+            } else {
                 $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+            }
             if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
-                $user->agent = MasterData::getKunnrName($user->agent);
+                $user->agent = MasterData::getKunnrName(SAP::alpha_input($user->agent));
             }
         }
         Mail::send('email.salesorderproposal',['user' => $user,'vbeln' => $vbeln,'posnr' => $posnr],
@@ -92,13 +100,17 @@ class Mailservice
         $user->agent = $user->username;
         if ($user->role == "CTV") {
             $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
-            if ($kunnr != null)
-                $agent = DB::table("user_agent_clients")->where([["id", "=", $user->id], ["kunnr", "=", $kunnr]])->value("agent");
-            else
+            if (isset($kunnr) && $kunnr != null) {
+                $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+                if ($dusers == null || empty($dusers))
+                    $agent = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("agent");
+                else $agent = DB::table("users_agent")->where("id", $dusers[0]->id)->value("agent");
+            } else {
                 $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+            }
             if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
-                $user->agent = MasterData::getKunnrName($user->agent);
+                $user->agent = MasterData::getKunnrName(SAP::alpha_input($user->agent));
             }
         }
         Mail::send('email.salesorderchange',['user' => $user,'vbeln' => $vbeln, 'posnr' => $posnr, 'newposnr' => $newposnr],

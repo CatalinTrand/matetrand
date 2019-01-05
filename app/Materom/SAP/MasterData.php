@@ -21,7 +21,7 @@ class MasterData
     {
         $globalRFCData = DB::select("select * from global_rfc_config");
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,

@@ -345,7 +345,7 @@
                                     <image style='height: 1.3rem;' src='/images/icons8-info-50.png' title='Information: new arrival, response required, processing time'/>
                                 </th>
                                 <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png' title='Order/item has been cganged'/>
+                                    <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png' title='Your responsability to take action'/>
                                 </th>
                                 <th colspan="1" class="td01">
                                     <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png' title='Order/item has been changed'/>
@@ -900,6 +900,10 @@
                     _status = status;
                 });
             jQuery.ajaxSetup({async: true});
+            if (_data != null && _data != undefined && _data.trim().length != 0) {
+                alert(_2data);
+                return;
+            }
             if (_status == "success") {
                 if (reload) location.reload(true);
             } else alert('Error processing operation!');
@@ -928,6 +932,10 @@
                     _status = status;
                 });
             jQuery.ajaxSetup({async: true});
+            if (_data != null && _data != undefined && _data.trim().length != 0) {
+                alert(_data);
+                return;
+            }
             return _status == "success";
         }
 

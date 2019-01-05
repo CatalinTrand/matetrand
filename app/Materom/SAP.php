@@ -98,14 +98,15 @@ class SAP
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();
         }
+        return __("Internal error");
     }
 
     static public function acknowledgePOItem($ebeln, $ebelp, $ackflag) {
 
         $globalRFCData = DB::select("select * from global_rfc_config");
-        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
         $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
-        if($roleData) $roleData = $roleData[0]; else return;
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
             $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
@@ -116,21 +117,22 @@ class SAP
             $result = $sapfm->invoke(['I_EBELN' => $ebeln,
                                       'I_EBELP' => $ebelp,
                                       'I_GET_SET_FLAG' => 'B',
-                                      'I_INDICATOR' => $ackflag ]);
+                                      'I_INDICATOR' => $ackflag ])["E_MESSAGE"];
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();
         }
+        return "Internal error";
     }
 
     static public function rejectPOItem($ebeln, $ebelp) {
 
         $globalRFCData = DB::select("select * from global_rfc_config");
-        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
         $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
-        if($roleData) $roleData = $roleData[0]; else return;
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
             $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
@@ -141,13 +143,14 @@ class SAP
             $result = $sapfm->invoke(['I_EBELN' => $ebeln,
                                       'I_EBELP' => $ebelp,
                                       'I_GET_SET_FLAG' => 'S',
-                                      'I_INDICATOR' => 'L' ]);
+                                      'I_INDICATOR' => 'L' ])["E_MESSAGE"];
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();
         }
+        return "Internal error";
     }
 
     static public function savePOItem($ebeln, $ebelp) {
@@ -223,6 +226,7 @@ class SAP
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();
         }
+        return __("Internal error");
     }
 
     static public function refreshDeliveryStatus($mode, $items = null)
