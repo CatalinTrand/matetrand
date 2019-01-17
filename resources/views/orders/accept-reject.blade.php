@@ -205,21 +205,24 @@
             },
             open: function () {
                 if (_ar_itemdata.vbeln == "!REPLENISH") {
+                    $("#require_sr_approval").prop("checked", false);
                     $("#require_sr_approval").hide();
                     $("#label_require_sr_approval").hide();
                     $("#label-ar-immed-sales-price").hide();
                     $("#ar-immed-sales-price").hide();
                     $("#ar-immed-sales-curr").hide();
                     $("#accept-reject-zpret").hide();
+                    $("#accept-reject-ok-button").text("{{__('Modificare comanda')}}");
                 } else {
+                    $("#require_sr_approval").prop("checked", true);
                     $("#require_sr_approval").show();
                     $("#label_require_sr_approval").show();
                     $("#label-ar-immed-sales-price").show();
                     $("#ar-immed-sales-price").show();
                     $("#ar-immed-sales-curr").show();
                     $("#accept-reject-zpret").show();
+                    $("#accept-reject-ok-button").text("{{__('Send proposal')}}");
                 }
-                $("#accept-reject-ok-button").text("{{__('Modificare comanda')}}");
             },
             position: {
                 my: "center",
@@ -236,10 +239,18 @@
     function accept_reject_dialog(type, this0, itemdata, title, initial_text) {
         $("#new_rej_msg").text("");
         $("#initial-text").text(initial_text);
-        $("#require_sr_approval").prop("checked", false);
         $("#proposals-table-1").find("tr:gt(0)").remove();
-        $("#ar-proposals-immed").attr("style", "display: block; margin-right: 0.5rem;");
-        $("#ar-proposals-approval").attr("style", "display: none; margin-right: 0.5rem;");
+        if (itemdata.vbeln == "!REPLENISH") {
+            $("#require_sr_approval").prop("checked", false);
+            $("#ar-proposals-immed").attr("style", "display: block; margin-right: 0.5rem;");
+            $("#ar-proposals-approval").attr("style", "display: none; margin-right: 0.5rem;");
+        } else {
+            $("#require_sr_approval").prop("checked", true);
+            $("#ar-proposals-immed").attr("style", "display: none; margin-right: 0.5rem;")
+            $("#ar-proposals-approval").attr("style", "display: block; margin-right: 0.5rem;")
+            $("#accept-reject-ok-button").text("{{__('Send proposal')}}");
+        }
+
         $("#accept-reject-dialog").dialog('option', 'title', title);
         _ar_type = type;
         _ar_this = this0;

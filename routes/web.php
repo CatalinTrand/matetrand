@@ -41,6 +41,7 @@ Route::post('webservice/insertreferenceuser','WebserviceController@insertReferen
 Route::post('webservice/insertagent','WebserviceController@insertAgent');
 Route::post('webservice/insertcustomer','WebserviceController@insertCustomer');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
+Route::post('webservice/impersonate_as_user','WebserviceController@impersonateAsUser');
 Route::post('webservice/acceptitemchange','WebserviceController@acceptItemChange');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/dochangeitem','WebserviceController@doChangeItem');

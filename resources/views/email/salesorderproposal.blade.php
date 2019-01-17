@@ -3,6 +3,7 @@
 </h3>
 <h4>{{__("Va rugam faceti click")}} <a href="http://srm.materom.ro/orders">{{__("aici")}}</a> {{__("pentru a procesa aceasta propunere")}}.
 </h4>
+{!! \App\Materom\Mailservice::orderHistory($user, $vbeln, $posnr) !!}
 <br><br><br>
 {{__("Acest mail este generat automat de catre portalul SRM, va rugam nu raspundeti.")}}<br>
 <img src="http://srm.materom.ro/images/logo.png">

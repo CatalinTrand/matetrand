@@ -87,9 +87,9 @@ class Data
         $norder->ernam = $saphdr["ERNAM"];
         $norder->curr = $saphdr["CURR"];
         $norder->fxrate = $saphdr["FXRATE"];
-        $now->addHours(24);
+        $now->addHours(4);
         $norder->wtime = $now->toDateTimeString();
-        $now->addHours(48);
+        $now->addHours(8);
         $norder->ctime = $now->toDateTimeString();
         $norder->changed = '0';
         $norder->status = '';

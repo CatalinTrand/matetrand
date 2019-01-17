@@ -104,7 +104,10 @@ class POrder
         $items_table = $history == 1 ? "pitems" : "pitems_arch";
         $items = DB::select("select * from $items_table where ebeln = '$this->ebeln' order by ebelp");
         foreach($items as $item) {
-            if (isset($this->items[$item->ebelp])) $pitem = $this->items[$item->ebelp];
+            if (isset($this->items[$item->ebelp])) {
+                $pitem = $this->items[$item->ebelp];
+                if ($pitem->info == 0) $this->info = 0;
+            }
             else {
                 $pitem = new POrderItem($item);
                 $pitem->fill($this);

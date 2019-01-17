@@ -2,11 +2,13 @@
 
 namespace App\Materom;
 
+use App\Materom\Orders\POrderItemChg;
 use App\Materom\SAP\MasterData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class Mailservice
 {
@@ -120,6 +122,56 @@ class Mailservice
                 $message->from('no_reply_srm@materom.ro','MATEROM SRM');
             });
         Log::debug("Sent mail 'Notificare inlocuire pozitie comanda $vbeln/$posnr' to '$user->email'");
+    }
+
+    static public function orderHistory($user, $vbeln, $posnr)
+    {
+        $result = "";
+        $item = DB::table("pitems")->where(["vbeln" => $vbeln, "posnr" => $posnr])->first();
+        if (is_null($item)) return $result;
+        $itemhist = DB::select("select * from pitemchg where ebeln = '$item->ebeln' and ebelp = '$item->ebelp' order by cdate desc");
+        if (is_null($itemhist) || empty($itemhist)) return $result;
+
+        $locale = app('translator')->getLocale();
+        Session::put('locale', strtolower($user->lang));
+        app('translator')->setLocale(Session::get("locale"));
+        $result .= "<br>" . __("Istoricul actiunilor efectuate asupra pozitiei ") .
+            SAP::alpha_output($item->ebeln) . "/" . SAP::alpha_output($item->ebelp) . "<br><table style='width: 120em;'>";
+
+        $result .= "<thead style='line-height: 1.3rem;'>";
+        $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle;'>";
+        $result .= "<th style='width: 12%; text-align: left; padding: 2px;'><b>". __('Data') . "</b></th>";
+        $result .= "<th colspan='2' style='width: 20%; text-align: left; padding: 2px;'><b>". __('Utilizator') . "</b></th>";
+        $result .= "<th style='width: 25%; text-align: left; padding: 2px;'><b>". __('Ce s-a schimbat') . "</b></th>";
+        $result .= "<th style='width: 43%; text-align: left; padding: 2px;'><b>". __('Motiv') . "</b></th>";
+        $result .= "</tr>";
+        $result .= "</thead>";
+
+        $result .= "<tbody style='line-height: 1.3rem;'>";
+        $i = 0;
+        foreach($itemhist as $itemh) {
+            $pitemchg = new POrderItemChg($itemh, true);
+            $pitemchg->fill($item);
+
+            $i++;
+            if (($i % 2) == 0)
+                $result .= "<tr style='background-color:Azure; vertical-align: middle; text-align: left;'>";
+            else
+                $result .= "<tr style='background-color:LightCyan; vertical-align: middle; text-align: left;'>";
+            $result .= "<td style='padding: 2px;'>". $pitemchg->cdate ."</td>";
+            $result .= "<td style='padding: 2px;'>". $pitemchg->cuser ."</td>";
+            $result .= "<td style='padding: 2px;'>". $pitemchg->cuser_name ."</td>";
+            $result .= "<td style='padding: 2px;'>". $pitemchg->text ."</td>";
+            $result .= "<td style='padding: 2px;'>". $pitemchg->reason ."</td>";
+            $result .= "</tr>";
+        }
+        $result .= "</tbody>";
+
+        $result .= "</table><br>";
+        Session::put('locale', $locale);
+        app('translator')->setLocale(Session::get("locale"));
+
+        return $result;
     }
 
 }

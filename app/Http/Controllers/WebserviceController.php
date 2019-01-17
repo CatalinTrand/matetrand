@@ -279,6 +279,7 @@ class WebserviceController extends Controller
                 __("Item"),
                 __("Vendor mat."),
                 __("Description"),
+                __("Fabricant"),
                 __("Quantity"), '',
                 __("Price"), '',
                 __("Delivery date")
@@ -294,6 +295,7 @@ class WebserviceController extends Controller
                     SAP::alpha_output($item->ebelp),
                     $item->idnlf,
                     $item->mtext,
+                    ucfirst(strtolower(MasterData::getLifnrName($item->mfrnr))),
                     $item->qty,
                     $item->qty_uom,
                     $item->purch_price,
@@ -320,6 +322,12 @@ class WebserviceController extends Controller
     public function changePassword() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));
+    }
+
+    public function impersonateAsUser() {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        if (Auth::user()->role == "Administrator")
+            Auth::loginUsingId(Input::get("id"));
     }
 
     public function getSubTree()

@@ -215,11 +215,14 @@
                                         $chPass = __('Change password');
                                         $editUser = __('Change user data');
                                         $deleteUser = __('Delete user');
+                                        $impersonateAsUser = __('Impersonate as user');
 
                                         $table .= "<tr><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td>".
                                         "<td><button type='button' onclick='change_user_password(\"$id\");return false;' title='$chPass'><img id='edit_button_$id' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></button>".
                                         "<button type='button' onclick='editUser(\"$id\");return false;' title='$editUser'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></button>".
-                                        "<button type='button' onclick='deleteUser(\"$id\");return false;' title='$deleteUser'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button></td></tr>";
+                                        "<button type='button' onclick='deleteUser(\"$id\");return false;' title='$deleteUser'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button>".
+                                        "<button type='button' onclick='impersonateAsUser(\"$id\");return false;' title='$impersonateAsUser'><img src='images/icons8-circled-up-right-50-2.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='".__("Impersonate as user")."'></button>".
+                                        "</td></tr>";
                                     }
 
                                     echo $table;
@@ -241,7 +244,6 @@
 
     <script>
         function deleteUser(id){
-
             var content = document.createElement('div');
             content.innerHTML = "Are you sure that you want to delete <u><b>" + id + "</b></u> ?";
             swal({
@@ -254,8 +256,41 @@
                 if(isConfirm)
                     location.replace(location.pathname + '?del=' + id);
             });
+        }
+
+        function impersonateAsUser(id){
+            var content = document.createElement('div');
+            var _data2, _status2;
+            content.innerHTML = "Are you sure that you want to impersonate as user <u><b>" + id + "</b></u> ?";
+            swal({
+                title: "Impersonate as User",
+                content: content,
+                icon: "warning",
+                buttons: true,
+                dangerMode: true
+            }).then(function(isConfirm) {
+                if(isConfirm) {
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
+                    jQuery.ajaxSetup({async: false});
+                    $.post("webservice/impersonate_as_user",
+                        {
+                            id: id
+                        },
+                        function (data, status) {
+                            _data2 = data;
+                            _status2 = status;
+                        });
+                    jQuery.ajaxSetup({async: true});
+                    location.replace("/orders");
+                }
+            });
 
         }
+
     </script>
 
     <script>

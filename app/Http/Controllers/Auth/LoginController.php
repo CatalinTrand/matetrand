@@ -70,6 +70,7 @@ class LoginController extends Controller
             }
             Session::put("groupOrdersBy", 4);
         }
+        if (Auth::user()->id == "radu") Session::put("filter_ebeln", "NONE");
         Orders::fillCache();
     }
 

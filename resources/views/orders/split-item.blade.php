@@ -193,7 +193,8 @@
         jQuery.ajaxSetup({async: true});
         if (_statusIR != "success") return;
         $("#new_rej_msg").text("");
-        $("#require_sr_sp_si_approval").prop("checked", false);
+        $("#require_sr_sp_si_approval").prop("checked", true);
+        $("#split-item-ok-button").text("{{__('Send split proposal')}}");
         $("#splits-table-si-1").find("tr:gt(0)").remove();
         $("#si-splits-approval").attr("style", "display: block; margin-right: 0.5rem;");
         _sp_si_type = type;

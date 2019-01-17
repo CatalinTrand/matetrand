@@ -263,7 +263,7 @@ class Webservice
                             if (($result != null) && strlen(trim($result)) != 0) return $result;
                             if ($item->vbeln != Orders::stockorder) {
                                 $result = SAP::changeSOItem($item->vbeln, $item->posnr,
-                                    $item->qty, $item->qty_uom, $item->lifnr, "", "", "",
+                                    $item->qty, $item->qty_uom, $_porder->lifnr, "", "", "",
                                     $item->sales_price, $item->sales_curr, $item->lfdat);
                                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                             }
@@ -276,7 +276,7 @@ class Webservice
                                     $item->purch_price, $item->purch_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
                                     if (substr($result, 0, 2) == "OK")
-                                        $reason = __("New purchase requisition ") . SAP::alpha_output(substr($result, 2));
+                                        $reason = __("New purchase requisition") . " " . SAP::alpha_output(substr($result, 2));
                                     else return $result;
                                 }
                             } else {
@@ -286,7 +286,7 @@ class Webservice
                                     $item->sales_price, $item->sales_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
                                     if (substr($result, 0, 2) == "OK")
-                                        $reason = __("New sales order item ") . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
+                                        $reason = __("New sales order item"). " " . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
                                     else return $result;
                                 }
                                 $new_status = 'X';
@@ -344,8 +344,10 @@ class Webservice
         DB::beginTransaction();
         $cdate = now();
         DB::update("update pitems set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
+        $category1 = addcslashes($category, "'");
+        $reason1 = addcslashes($reason, "'");
         DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval, reason) values " .
-            "('$ebeln','$item', '$new_status', '$new_stage', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$category', '$reason')");
+            "('$ebeln','$item', '$new_status', '$new_stage', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$category1', '$reason1')");
         DB::commit();
         return "";
     }
@@ -646,7 +648,7 @@ class Webservice
                         $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
                     if (!empty(trim($result))) {
                         if (substr($result, 0, 2) == "OK")
-                            $soitem = __("New sales order item ") . substr($result, 2);
+                            $soitem = __("New sales order item") . " " . substr($result, 2);
                         else return $result;
                     }
                     DB::beginTransaction();
@@ -737,7 +739,7 @@ class Webservice
         $soitem = "";
         if (!empty(trim($result))) {
             if (substr($result, 0, 2) == "OK")
-                $soitem = __("New sales order item ") . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
+                $soitem = __("New sales order item") . " " . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
             else return $result;
         }
         $set_new_lifnr = "";
@@ -766,13 +768,13 @@ class Webservice
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::rejectSOItem($item->vbeln, $item->posnr, "07");
         if (($result != null) && strlen(trim($result)) != 0) return $result;
-        $soitem = __("Rejected sales order item ") . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
+        $soitem = __("Rejected sales order item") . " " . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         DB::beginTransaction();
         DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
         DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
-            "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'C', '" .
+            "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'D', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
         $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");

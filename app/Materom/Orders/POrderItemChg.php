@@ -45,7 +45,7 @@ class POrderItemChg
     public $vbeln;
     public $text;       // message text
 
-    function __construct($pitemchg)
+    function __construct($pitemchg, $forcectv = false)
     {
         $this->ebeln = $pitemchg->ebeln;
         $this->ebelp = $pitemchg->ebelp;
@@ -64,7 +64,7 @@ class POrderItemChg
         $this->acknowledged = $pitemchg->acknowledged;
 
         if (DB::table("users")->where("id", $this->cuser)->value("role") == "Furnizor" &&
-            Auth::user()->role == "CTV")
+            ($forcectv || Auth::user()->role == "CTV"))
             $this->cuser_name = __("Vendor") . " " . $this->cuser;
     }
 
@@ -93,7 +93,8 @@ class POrderItemChg
                 if ($this->oldval == 'G') $this->text = __("Cancellation accepted by vendor");
                 elseif (($this->oldval != null) && (($this->oldval == '1') || ($this->oldval == '2') || ($this->oldval == '3') || ($this->oldval == '4')))
                     $this->text = __("Rejected") . " (" . $texts[intval($this->oldval) - 1] . ")";
-                elseif ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal rejected");
+                elseif ($this->stage == 'Z' && $this->oldval == 'C') $this->text = __("Proposal accepted, order item cancelled");
+                elseif ($this->stage == 'Z' && $this->oldval == 'D') $this->text = __("Proposal rejected, order item cancelled");
                 elseif ($this->stage == 'Z' && $this->oldval == 'W') $this->text = __("Split request rejected");
                 break;
             case "R":
@@ -119,7 +120,7 @@ class POrderItemChg
                 $this->text = __("Delivery date modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
                 break;
             case "E":
-                $this->text = __("Message to ") . $this->duser;
+                $this->text = __("Message to") . " ". $this->duser;
                 break;
             case "S":
                 $this->text = __("Item split proposed");
