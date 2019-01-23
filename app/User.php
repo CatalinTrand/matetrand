@@ -19,7 +19,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'id','role', 'username', 'email', 'password','lang','ekgrp','lifnr','sapuser',
+        'id','role', 'username', 'email', 'password','lang','ekgrp','lifnr','sapuser', 'sap_system'
     ];
 
     /**
@@ -33,5 +33,14 @@ class User extends Authenticatable
 
     public $keyType = 'string';
     public $incrementing = false;
+
+    // specific table names
+    public $pitemchg;
+    public $pitemchg_proposals;
+    public $pitems;
+    public $porders;
+    public $pitems_cache;
+    public $porders_cache;
+    public $roles;
 
 }

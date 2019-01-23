@@ -293,360 +293,362 @@
 
                     <br>
 
-                    <div class="card-body orders-table-div" style="height: 69vh; padding-top: 0rem;">
-                        <table style="border: 2px solid black; table-layout: fixed;"
-                               class="orders-table basicTable table table-striped" id="orders_table">
-                            <colgroup>
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:1.6%;">
-                                <col style="width:2%;">
-                                <col style="width:4%;">
-                                <col width="4%">
-                                <col width="4%">
-                                <col width="4%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="2%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="3%">
-                                <col width="2%">
-                                <col width="3%">
-                                <col width="2%">
-                                <col width="3%">
-                                <col width="2%">
-                                <col width="1%">
-                                <col width="3%">
-                                <col width="3%">
-                            </colgroup>
-                            <tr>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-check-all-50.png' title='Select/unselect items to perform repetitively the same operation'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-info-50.png' title='Information: new arrival, response required, processing time'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png' title='Your responsability to take action'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png' title='Order/item has been changed'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png' title='Order/item has been approved'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png' title='Order/item has been rejected'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.3rem;' src='/images/icons8-qmark-50.png' title='Inquirement for this order/item'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png' title='Perform approval of order/item'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.5rem;' src='/images/icons8-close-window-50.png' title='Reject order/item'/>
-                                </th>
-                                <th colspan="1" class="td01">
-                                    <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png' title='Send a message to a person in the flow'/>
-                                </th>
-                                @php
-                                    if ($groupByPO != 4) {
-                                        echo '<th class="td02" colspan="3">' . __('Purchase order') . '</th>';
-                                        $th1 = __("Supplier");
-                                        $th2 = ""; // "Nume";
-                                        $th3 = __("Referent");
-                                        $th4 = ""; // "Aprovizionare";
-                                        $th5 = __("Data creare");
-                                        $th6 = __("Moneda");
-                                        $th7 = __("Rata schimb");
-                                        $th8 = __("Data cda.");
-                                    } else {
-                                        echo '<th class="td02" colspan="3">' . __('Sales order') . '</th>';
-                                        if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
-                                            $th1 = __("Client");
+                    <div style="overflow: scroll;">
+                        <div class="card-body orders-table-div" style="height: 67vh; padding-top: 0rem; width: 100%;">
+                            <table style="border: 2px solid black; table-layout: fixed;"
+                                   class="orders-table basicTable table table-striped" id="orders_table">
+                                <colgroup>
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
+                                    <col style="width:2%;">
+                                    <col style="width:4%;">
+                                    <col width="4%">
+                                    <col width="4%">
+                                    <col width="4%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="2%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                    <col width="2%">
+                                    <col width="3%">
+                                    <col width="2%">
+                                    <col width="3%">
+                                    <col width="2%">
+                                    <col width="1%">
+                                    <col width="3%">
+                                    <col width="3%">
+                                </colgroup>
+                                <tr>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.3rem;' src='/images/icons8-check-all-50.png' title='Select/unselect items to perform repetitively the same operation'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.3rem;' src='/images/icons8-info-50.png' title='Information: new arrival, response required, processing time'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.3rem;' src='/images/icons8-circled-right-50-1.png' title='Your responsability to take action'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png' title='Order/item has been changed'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png' title='Order/item has been approved'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png' title='Order/item has been rejected'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.3rem;' src='/images/icons8-qmark-50.png' title='Inquirement for this order/item'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.5rem;' src='/images/icons8-checkmark-50-3.png' title='Perform approval of order/item'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.5rem;' src='/images/icons8-close-window-50.png' title='Reject order/item'/>
+                                    </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png' title='Send a message to a person in the flow'/>
+                                    </th>
+                                    @php
+                                        if ($groupByPO != 4) {
+                                            echo '<th class="td02" colspan="3">' . __('Purchase order') . '</th>';
+                                            $th1 = __("Supplier");
                                             $th2 = ""; // "Nume";
-                                            $th3 = __("Livrare la");
-                                            $th4 = ""; // "Nume";
-                                            $th5 = __("CTV");
-                                            $th6 = __("Nume consilier");
-                                            $th7 = "";
+                                            $th3 = __("Referent");
+                                            $th4 = ""; // "Aprovizionare";
+                                            $th5 = __("Data creare");
+                                            $th6 = __("Moneda");
+                                            $th7 = __("Rata schimb");
+                                            $th8 = __("Data cda.");
                                         } else {
-                                            $th1 = "";
-                                            $th2 = "";
-                                            $th3 = "";
-                                            $th4 = "";
-                                            $th5 = "";
-                                            $th6 = "";
-                                            $th7 = "";
+                                            echo '<th class="td02" colspan="3">' . __('Sales order') . '</th>';
+                                            if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
+                                                $th1 = __("Client");
+                                                $th2 = ""; // "Nume";
+                                                $th3 = __("Livrare la");
+                                                $th4 = ""; // "Nume";
+                                                $th5 = __("CTV");
+                                                $th6 = __("Nume consilier");
+                                                $th7 = "";
+                                            } else {
+                                                $th1 = "";
+                                                $th2 = "";
+                                                $th3 = "";
+                                                $th4 = "";
+                                                $th5 = "";
+                                                $th6 = "";
+                                                $th7 = "";
+                                            }
+
+                                        }
+                                    if ($groupByPO != 4) {
+                                        echo "<th colspan=2>$th1</th>";
+                                        echo "<th colspan=5>$th2</th>";
+                                        echo "<th colspan=2>$th3</th>";
+                                        echo "<th colspan=4>$th4</th>";
+                                        echo "<th colspan=3>$th5</th>";
+                                        echo "<th colspan=2>$th6</th>";
+                                        echo "<th colspan=2>$th7</th>";
+                                        echo "<th colspan=2>$th8</th>";
+                                        for ($i = 0; $i < 4; $i++) echo "<th>&nbsp;</th>";
+                                    } else {
+                                        echo "<th colspan=2>$th1</th>";
+                                        echo "<th colspan=5>$th2</th>";
+                                        echo "<th colspan=2>$th3</th>";
+                                        echo "<th colspan=5>$th4</th>";
+                                        echo "<th colspan=2>$th5</th>";
+                                        echo "<th colspan=5>$th6</th>";
+                                        echo "<th>$th7</th>";
+                                        for ($i = 0; $i < 5; $i++) echo "<th>&nbsp;</th>";
+                                    }
+                                    @endphp
+                                </tr>
+                                @php
+                                    $line_counter = 1;
+
+                                    foreach ($orders as $order) {
+
+                                        if ($groupByPO != 4) {
+                                            $comanda = "<button type='button' id='butt_P$order->ebeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters'>" .
+                                                \App\Materom\SAP::alpha_output($order->ebeln) . "</p>";
+                                        } else {
+                                            $buttname = $order->vbeln;
+                                            if (strtoupper($buttname) == \App\Materom\Orders::stockorder) $buttname = __('Stock');
+                                            elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
+                                            else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' class='resetfilters'>" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
+                                            $comanda = "<button type='button' id='butt_S$order->vbeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
                                         }
 
+                                        $line_counter = $line_counter + 1;
+                                        if ($line_counter == 2) $line_counter = 0;
+
+                                        $button_accept = "";
+                                        $button_reject = "";
+                                        $button_inquire = "";
+
+                                        if ($groupByPO != 4) {
+                                            $oid = "P" . $order->ebeln;
+                                            $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
+                                                    "<td class='td02' colspan=5>$order->lifnr_name</td>" .
+                                                    "<td class='td02' colspan=1>$order->ekgrp</td>" .
+                                                    "<td class='td02' colspan=5>$order->ekgrp_name</td>" .
+                                                    "<td class='td02' colspan=3>$order->erdat_out</td>" .
+                                                    "<td class='td02' colspan=2>$order->curr</td>" .
+                                                    "<td class='td02' colspan=2>$order->fxrate</td>".
+                                                    "<td class='td02' colspan=2>$order->bedat_out</td>";
+
+                                            switch ($order->info) {
+                                                case 0:
+                                                    $info_icon = "";
+                                                    break;
+                                                case 1:
+                                                    $info_icon = "";
+                                                    break;
+                                                case 2:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                                                    break;
+                                                case 3:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                                                    break;
+                                                case 4:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack2(\"$order->ebeln\"); return false;'>";
+                                                    $info_icon = "";
+                                                    break;
+                                                case 5:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif'>";
+                                                    $info_icon = "";
+                                                    break;
+                                            }
+                                            switch ($order->owner) {
+                                                case 0:
+                                                    $owner_icon = "";
+                                                    break;
+                                                case 1:
+                                                    $owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                                    break;
+                                                case 2:
+                                                    $owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
+                                                    break;
+                                            }
+
+                                            $changed_icon = "";
+                                            if ($order->changed != 0)
+                                                $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
+                                            $accepted_icon = "";
+                                            if ($order->accepted == 1)
+                                                $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                            elseif ($order->accepted == 2)
+                                                $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
+                                            $rejected_icon = "";
+                                            if ($order->rejected == 1)
+                                                $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                            elseif ($order->rejected == 2)
+                                                $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
+
+                                            $inq_onclick = "";
+                                            if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
+                                            $inquired_icon = "";
+                                            if ($order->inquired == 1)
+                                                $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' $inq_onclick/>";
+                                            elseif ($order->inquired == 2)
+                                                $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
+                                            elseif ($order->inquired == 3)
+                                                $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' $inq_onclick/>";
+
+                                            if ($order->accept == 1)
+                                                $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
+                                                                 "onclick='acceptPOrder(this);return false;'/>";
+                                            if ($order->reject == 1)
+                                                $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
+                                                                 "onclick='rejectPOrder(this, 0, null);return false;'/>";
+                                            if ($order->inquire == 1)
+                                                $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
+                                                                  "onclick='inquirePOrder(this);return false;'/>";
+
+                                            if ($line_counter == 0)
+                                                $style = "background-color:LightYellow;";
+                                            else
+                                                $style = "background-color:Wheat;";
+
+                                            echo "<tr id='tr_$oid' style='$style'>" .
+                                                 "<td align='center' style='vertical-align: middle;'>".
+                                                    "<input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>" .
+                                                 "<td class='td01'>$info_icon</td>" .
+                                                 "<td class='td01'>$owner_icon</td>" .
+                                                 "<td class='td01'>$changed_icon</td>" .
+                                                 "<td class='td01'>$accepted_icon</td>" .
+                                                 "<td class='td01'>$rejected_icon</td>" .
+                                                 "<td class='td01'>$inquired_icon</td>" .
+                                                 "<td  class='td01' style='padding: 0;'>$button_accept</td>" .
+                                                 "<td class='td01' style='padding: 0;'>$button_reject</td>" .
+                                                 "<td class='td01' style='padding: 0;'>$button_inquire</td>" .
+                                                 "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
+                                                 "$data<td colspan='6'></td></tr>";
+                                        } else {
+                                            $oid = "S" . $order->vbeln;
+                                            if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
+                                                $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->kunnr) . "</td>" .
+                                                        "<td class='td02' colspan=5>$order->kunnr_name</td>" .
+                                                        "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->shipto) . "</td>" .
+                                                        "<td class='td02' colspan=5>$order->shipto_name</td>" .
+                                                        "<td class='td02' colspan=2>$order->ctv</td>" .
+                                                        "<td class='td02' colspan=5>$order->ctv_name</td>".
+                                                        "<td></td>";
+                                            } else {
+                                                $data = "<td class='td02' colspan=2>&nbsp;</td>" .
+                                                        "<td class='td02' colspan=5>&nbsp;</td>" .
+                                                        "<td class='td02' colspan=2>&nbsp;</td>" .
+                                                        "<td class='td02' colspan=5>&nbsp;</td>" .
+                                                        "<td class='td02' colspan=2>&nbsp;</td>" .
+                                                        "<td class='td02' colspan=5>&nbsp;</td>".
+                                                        "<td></td>";
+                                            }
+
+                                            switch ($order->info) {
+                                                case 0:
+                                                    $info_icon = "";
+                                                    break;
+                                                case 1:
+                                                    $info_icon = "";
+                                                    break;
+                                                case 2:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
+                                                    break;
+                                                case 3:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
+                                                    break;
+                                                case 4:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
+                                                    $info_icon = "";
+                                                    break;
+                                                case 5:
+                                                    $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif'>";
+                                                    $info_icon = "";
+                                                    break;
+                                            }
+                                            switch ($order->owner) {
+                                                case 0:
+                                                    $owner_icon = "";
+                                                    break;
+                                                case 1:
+                                                    $owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
+                                                    break;
+                                                case 2:
+                                                    $owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
+                                                    break;
+                                            }
+
+                                            $changed_icon = "";
+                                            if ($order->changed != 0)
+                                                $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
+                                            $accepted_icon = "";
+                                            if ($order->accepted == 1)
+                                                $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
+                                            elseif ($order->accepted == 2)
+                                                $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
+                                            $rejected_icon = "";
+                                            if ($order->rejected == 1)
+                                                $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
+                                            elseif ($order->rejected == 2)
+                                                $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
+                                            $inq_onclick = "";
+                                            if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
+                                            $inquired_icon = "";
+                                            if ($order->inquired == 1)
+                                                $imquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' $inq_onclick/>";
+                                            elseif ($order->inquired == 2)
+                                                $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
+                                            elseif ($order->inquired == 3)
+                                                $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' $inq_onclick/>";
+
+                                            if ($order->accept == 1)
+                                                $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
+                                                                 "onclick='acceptSOrder(this);return false;' />";
+                                            if ($order->reject == 1)
+                                                $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
+                                                                 "onclick='rejectSOrder(this, 0, null);return false;' />";
+                                            if ($order->inquire == 1)
+                                                $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
+                                                                  "onclick='inquireSOrder(this);return false;' />";
+
+                                            if ($line_counter == 0)
+                                                $style = "background-color:white;";
+                                            else
+                                                $style = "background-color:WhiteSmoke;";
+
+                                            echo "<tr id='tr_$oid' style='$style' class='td01'>" .
+                                                 "<td align='center' style='vertical-align: middle;'>" .
+                                                 "<input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>" .
+                                                 "<td>$info_icon</td>" .
+                                                 "<td>$owner_icon</td>" .
+                                                 "<td colspan='7'></td>" .
+                                                 "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
+                                                 "$data<td colspan='5'></td></tr>";
+                                        }
                                     }
-                                if ($groupByPO != 4) {
-                                    echo "<th colspan=2>$th1</th>";
-                                    echo "<th colspan=5>$th2</th>";
-                                    echo "<th colspan=2>$th3</th>";
-                                    echo "<th colspan=4>$th4</th>";
-                                    echo "<th colspan=3>$th5</th>";
-                                    echo "<th colspan=2>$th6</th>";
-                                    echo "<th colspan=2>$th7</th>";
-                                    echo "<th colspan=2>$th8</th>";
-                                    for ($i = 0; $i < 4; $i++) echo "<th>&nbsp;</th>";
-                                } else {
-                                    echo "<th colspan=2>$th1</th>";
-                                    echo "<th colspan=5>$th2</th>";
-                                    echo "<th colspan=2>$th3</th>";
-                                    echo "<th colspan=5>$th4</th>";
-                                    echo "<th colspan=2>$th5</th>";
-                                    echo "<th colspan=5>$th6</th>";
-                                    echo "<th>$th7</th>";
-                                    for ($i = 0; $i < 5; $i++) echo "<th>&nbsp;</th>";
-                                }
                                 @endphp
-                            </tr>
-                            @php
-                                $line_counter = 1;
-
-                                foreach ($orders as $order) {
-
-                                    if ($groupByPO != 4) {
-                                        $comanda = "<button type='button' id='butt_P$order->ebeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters'>" .
-                                            \App\Materom\SAP::alpha_output($order->ebeln) . "</p>";
-                                    } else {
-                                        $buttname = $order->vbeln;
-                                        if (strtoupper($buttname) == \App\Materom\Orders::stockorder) $buttname = __('Stock');
-                                        elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
-                                        else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' class='resetfilters'>" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
-                                        $comanda = "<button type='button' id='butt_S$order->vbeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
-                                    }
-
-                                    $line_counter = $line_counter + 1;
-                                    if ($line_counter == 2) $line_counter = 0;
-
-                                    $button_accept = "";
-                                    $button_reject = "";
-                                    $button_inquire = "";
-
-                                    if ($groupByPO != 4) {
-                                        $oid = "P" . $order->ebeln;
-                                        $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
-                                                "<td class='td02' colspan=5>$order->lifnr_name</td>" .
-                                                "<td class='td02' colspan=1>$order->ekgrp</td>" .
-                                                "<td class='td02' colspan=5>$order->ekgrp_name</td>" .
-                                                "<td class='td02' colspan=3>$order->erdat_out</td>" .
-                                                "<td class='td02' colspan=2>$order->curr</td>" .
-                                                "<td class='td02' colspan=2>$order->fxrate</td>".
-                                                "<td class='td02' colspan=2>$order->bedat_out</td>";
-
-                                        switch ($order->info) {
-                                            case 0:
-                                                $info_icon = "";
-                                                break;
-                                            case 1:
-                                                $info_icon = "";
-                                                break;
-                                            case 2:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
-                                                break;
-                                            case 3:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
-                                                break;
-                                            case 4:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif' onclick='replyack2(\"$order->ebeln\"); return false;'>";
-                                                $info_icon = "";
-                                                break;
-                                            case 5:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif'>";
-                                                $info_icon = "";
-                                                break;
-                                        }
-                                        switch ($order->owner) {
-                                            case 0:
-                                                $owner_icon = "";
-                                                break;
-                                            case 1:
-                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
-                                                break;
-                                            case 2:
-                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
-                                                break;
-                                        }
-
-                                        $changed_icon = "";
-                                        if ($order->changed != 0)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
-                                        $accepted_icon = "";
-                                        if ($order->accepted == 1)
-                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
-                                        elseif ($order->accepted == 2)
-                                            $accepted_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
-                                        $rejected_icon = "";
-                                        if ($order->rejected == 1)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
-                                        elseif ($order->rejected == 2)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
-
-                                        $inq_onclick = "";
-                                        if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
-                                        $inquired_icon = "";
-                                        if ($order->inquired == 1)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' $inq_onclick/>";
-                                        elseif ($order->inquired == 2)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
-                                        elseif ($order->inquired == 3)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' $inq_onclick/>";
-
-                                        if ($order->accept == 1)
-                                            $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='acceptPOrder(this);return false;'/>";
-                                        if ($order->reject == 1)
-                                            $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='rejectPOrder(this, 0, null);return false;'/>";
-                                        if ($order->inquire == 1)
-                                            $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
-                                                              "onclick='inquirePOrder(this);return false;'/>";
-
-                                        if ($line_counter == 0)
-                                            $style = "background-color:LightYellow;";
-                                        else
-                                            $style = "background-color:Wheat;";
-
-                                        echo "<tr id='tr_$oid' style='$style'>" .
-                                             "<td align='center' style='vertical-align: middle;'>".
-                                                "<input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>" .
-                                             "<td class='td01'>$info_icon</td>" .
-                                             "<td class='td01'>$owner_icon</td>" .
-                                             "<td class='td01'>$changed_icon</td>" .
-                                             "<td class='td01'>$accepted_icon</td>" .
-                                             "<td class='td01'>$rejected_icon</td>" .
-                                             "<td class='td01'>$inquired_icon</td>" .
-                                             "<td  class='td01' style='padding: 0;'>$button_accept</td>" .
-                                             "<td class='td01' style='padding: 0;'>$button_reject</td>" .
-                                             "<td class='td01' style='padding: 0;'>$button_inquire</td>" .
-                                             "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
-                                             "$data<td colspan='6'></td></tr>";
-                                    } else {
-                                        $oid = "S" . $order->vbeln;
-                                        if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
-                                            $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->kunnr) . "</td>" .
-                                                    "<td class='td02' colspan=5>$order->kunnr_name</td>" .
-                                                    "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->shipto) . "</td>" .
-                                                    "<td class='td02' colspan=5>$order->shipto_name</td>" .
-                                                    "<td class='td02' colspan=2>$order->ctv</td>" .
-                                                    "<td class='td02' colspan=5>$order->ctv_name</td>".
-                                                    "<td></td>";
-                                        } else {
-                                            $data = "<td class='td02' colspan=2>&nbsp;</td>" .
-                                                    "<td class='td02' colspan=5>&nbsp;</td>" .
-                                                    "<td class='td02' colspan=2>&nbsp;</td>" .
-                                                    "<td class='td02' colspan=5>&nbsp;</td>" .
-                                                    "<td class='td02' colspan=2>&nbsp;</td>" .
-                                                    "<td class='td02' colspan=5>&nbsp;</td>".
-                                                    "<td></td>";
-                                        }
-
-                                        switch ($order->info) {
-                                            case 0:
-                                                $info_icon = "";
-                                                break;
-                                            case 1:
-                                                $info_icon = "";
-                                                break;
-                                            case 2:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/warning.png'>";
-                                                break;
-                                            case 3:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/critical.png'>";
-                                                break;
-                                            case 4:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/green_blink.gif'>";
-                                                $info_icon = "";
-                                                break;
-                                            case 5:
-                                                $info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif'>";
-                                                $info_icon = "";
-                                                break;
-                                        }
-                                        switch ($order->owner) {
-                                            case 0:
-                                                $owner_icon = "";
-                                                break;
-                                            case 1:
-                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/blueArrow.png'>";
-                                                break;
-                                            case 2:
-                                                $owner_icon = "<image style='height: 1.2rem;' src='/images/purpleArrow.png'>";
-                                                break;
-                                        }
-
-                                        $changed_icon = "";
-                                        if ($order->changed != 0)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-unchecked-checkbox-50-3.png'/>";
-                                        $accepted_icon = "";
-                                        if ($order->accepted == 1)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-50-1.png'/>";
-                                        elseif ($order->accepted == 2)
-                                            $changed_icon = "<image style='height: 1.3rem;' src='/images/icons8-checkmark-yellow-64.png'/>";
-                                        $rejected_icon = "";
-                                        if ($order->rejected == 1)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-delete-50-2.png'/>";
-                                        elseif ($order->rejected == 2)
-                                            $rejected_icon = "<image style='height: 1.3rem;' src='/images/icons8-cancel-yellow-48.png'/>";
-                                        $inq_onclick = "";
-                                        if ($order->inq_reply == 1) $inq_onclick = "onclick='inquireReply(this, $order->inquired);return false;' class='cursorpointer'";
-                                        $inquired_icon = "";
-                                        if ($order->inquired == 1)
-                                            $imquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-green.png' $inq_onclick/>";
-                                        elseif ($order->inquired == 2)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-red.png' $inq_onclick/>";
-                                        elseif ($order->inquired == 3)
-                                            $inquired_icon = "<image style='height: 1.3rem;' src='/images/icons8-qmark-50-yellow.png' $inq_onclick/>";
-
-                                        if ($order->accept == 1)
-                                            $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='acceptSOrder(this);return false;' />";
-                                        if ($order->reject == 1)
-                                            $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
-                                                             "onclick='rejectSOrder(this, 0, null);return false;' />";
-                                        if ($order->inquire == 1)
-                                            $button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
-                                                              "onclick='inquireSOrder(this);return false;' />";
-
-                                        if ($line_counter == 0)
-                                            $style = "background-color:white;";
-                                        else
-                                            $style = "background-color:WhiteSmoke;";
-
-                                        echo "<tr id='tr_$oid' style='$style' class='td01'>" .
-                                             "<td align='center' style='vertical-align: middle;'>" .
-                                             "<input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>" .
-                                             "<td>$info_icon</td>" .
-                                             "<td>$owner_icon</td>" .
-                                             "<td colspan='7'></td>" .
-                                             "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
-                                             "$data<td colspan='5'></td></tr>";
-                                    }
-                                }
-                            @endphp
-                        </table>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1815,6 +1817,17 @@
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
                 else
                 select_proposal(mode, thisbtn, _dataIR, "Decizie split item", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, decideti daca acceptati");
+            @elseif (\Illuminate\Support\Facades\Auth::user()->id == "radu")
+            if (_dataIR.stage == 'R') {
+                if (mode == 1) {
+                    accept_reject_dialog2(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
+                }
+                if (mode == 2) {
+                    accept_reject_dialog2(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
+                }
+            } else if (_dataIR.stage == 'C') {
+                select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+            }
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
             if (_dataIR.stage == 'R') {
                 if (mode == 1) {
@@ -2229,6 +2242,7 @@
     @include("orders.read_zpretrecords")
     @include("orders.updaterow")
     @include("orders.accept-reject")
+    @include("orders.accept-reject2")
     @include("orders.split-item")
     @include("orders.inquiries")
 

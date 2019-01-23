@@ -164,8 +164,6 @@ class Data
             $nitem->status = '';
             $nitem->nof = true;
 
-            $users = DB::select("select * from users where sapuser = '$nitem->ctv' and role = 'CTV'");
-            if (count($users) > 0) $nitem->ctv = $users[0]->id;
             if (is_null($citem)) {
                 $new_order_item = true;
                 $sql = "insert into pitems (ebeln, ebelp, matnr, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, werks, ".

@@ -162,11 +162,6 @@
             clear: both;
         }
 
-        .orders-table-div {
-            overflow-y: scroll;
-            height: 700px;
-        }
-
         .header-fixed > tbody {
             overflow-y: auto;
             height: 150px;

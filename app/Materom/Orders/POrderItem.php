@@ -53,8 +53,8 @@ class POrderItem
     public $sales_puom;  // VBAP-KPEIN
     public $kunnr;       // VBAK-KUNNR
     public $shipto;      // VBPA-KUNNR WE
-    public $ctv;         // VBAK-ERNAM
-    public $ctv_name;    // just in case it is deleted from USR02
+    public $ctv;         // KNVH-HKUNNR or VBAK-ERNAM
+    public $ctv_name;    // cache (just for performance)
     public $deldate;     // inbound delivery confirmation date
     public $delqty;      // inbound qty
     public $grdate;      // goods receipt date
