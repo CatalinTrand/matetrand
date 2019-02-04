@@ -306,6 +306,9 @@
                 <a class="navbar-brand" href="{{ url('http://www.materom.ro') }}">
                     <img src="/images/logo.png" class="logo">
                 </a>
+                <div style="margin-left: -4rem; font-weight: bold; font-size: 150%; color: #007bff;">
+                    {{__("System")}}:&nbsp{{App\Materom\System::$system_name}}
+                </div>
             @endguest
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false"

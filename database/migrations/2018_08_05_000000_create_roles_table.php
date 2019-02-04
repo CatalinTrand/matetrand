@@ -14,9 +14,10 @@ class CreateRolesTable extends Migration
     public function up()
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->string('rfc_role', 20)->unique();
-            $table->string('rfc_user', 12);
-            $table->string('rfc_passwd', 12);
+            require __DIR__.'/../../app/Materom/TableStructures/roles_table.php';
+        });
+        Schema::create('roles_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/roles_table.php';
         });
     }
 
@@ -28,5 +29,6 @@ class CreateRolesTable extends Migration
     public function down()
     {
         Schema::dropIfExists('roles');
+        Schema::dropIfExists('roles_300');
     }
 }

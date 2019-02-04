@@ -10,6 +10,7 @@ namespace App\Console\Commands;
 
 use App\Materom\Data;
 use App\Materom\SAP;
+use App\Materom\System;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -52,7 +53,7 @@ class UnarchivePurchaseOrderItem extends Command
             $this->error(__("Please specify the purchase order to be acrhived"));
             return;
         }
-        $porder = DB::table("porders_arch")->where("ebeln", $purch_order)->first();
+        $porder = DB::table(System::$table_porders. "_arch")->where("ebeln", $purch_order)->first();
         if ($porder == null) {
             $this->error(__("The specified archived purchase order does not exist"));
             return;
@@ -65,9 +66,9 @@ class UnarchivePurchaseOrderItem extends Command
         $purch_item = trim($purch_item);
         if ($purch_item != "*") {
             $purch_item = str_pad($purch_item, 5, "0", STR_PAD_LEFT);
-            $pitems = DB::table("pitems_arch")->where([["ebeln", "=", $porder->ebeln], ["ebelp", "=", $purch_item]])->get();
+            $pitems = DB::table(System::$table_pitems ."_arch")->where([["ebeln", "=", $porder->ebeln], ["ebelp", "=", $purch_item]])->get();
         } else
-            $pitems = DB::table("pitems_arch")->where([["ebeln", "=", $porder->ebeln]])->get();
+            $pitems = DB::table(System::$table_pitems ."_arch")->where([["ebeln", "=", $porder->ebeln]])->get();
         if ($pitems == null) {
             $this->error(__("The specified archived purchase order item/s does/do not exist"));
             return;

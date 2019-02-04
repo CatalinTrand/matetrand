@@ -29,7 +29,8 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();
-            $table->timestamp('activated_at')->nullable()->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('activated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->string('sap_system',3)->default('');
         });
     }
 

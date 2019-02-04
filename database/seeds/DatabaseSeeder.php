@@ -15,11 +15,6 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             GlobalRFCDataTableSeeder::class,
             RolesTableSeeder::class,
-            OrdersTableSeeder::class,
-            OrdersTableSeederArchive::class,
-            PurchGroupsTableSeeder::class,
-            SupplierTableSeeder::class,
-            CustomerTableSeeder::class,
         ]);
     }
 }

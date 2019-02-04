@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Materom\Mailservice;
+use App\Materom\System;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +56,7 @@ class SendMailPurchOrder extends Command
             $this->error(__("Please specify the purchase order for which the mail is being sent for"));
             return;
         }
-        if (!DB::table("porders")->where("ebeln", $porder)->exists()) {
+        if (!DB::table(System::$table_porders)->where("ebeln", $porder)->exists()) {
             $this->error(__("The specified purchase order does not exist"));
             return;
         }

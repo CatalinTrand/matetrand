@@ -12,14 +12,25 @@ class RolesTableSeeder extends Seeder
      */
     public function run()
     {
+        // 200
         DB::delete("delete from roles");
         DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
-            " values ('Administrator','cont-test','PusulaC')");
+            " values ('Administrator','trandafir','PusulaC76')");
         DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
-            " values ('Furnizor','cont-test','PusulaC')");
+            " values ('Furnizor','trandafir','PusulaC76')");
         DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
-            " values ('Referent','cont-test','PusulaC')");
+            " values ('Referent','trandafir','PusulaC76')");
         DB::insert("insert into roles (rfc_role, rfc_user, rfc_passwd)" .
-            " values ('CTV','cont-test','PusulaC')");
+            " values ('CTV','trandafir','PusulaC76')");
+        // 300
+        DB::delete("delete from roles_300");
+        DB::insert("insert into roles_300 (rfc_role, rfc_user, rfc_passwd)" .
+            " values ('Administrator','trandafir','PusulaC77')");
+        DB::insert("insert into roles_300 (rfc_role, rfc_user, rfc_passwd)" .
+            " values ('Furnizor','trandafir','PusulaC77')");
+        DB::insert("insert into roles_300 (rfc_role, rfc_user, rfc_passwd)" .
+            " values ('Referent','trandafir','PusulaC77')");
+        DB::insert("insert into roles_300 (rfc_role, rfc_user, rfc_passwd)" .
+            " values ('CTV','trandafir','PusulaC77')");
     }
 }

@@ -14,10 +14,10 @@ class CreateUsersSelTable extends Migration
     public function up()
     {
         Schema::create('users_sel', function (Blueprint $table) {
-            $table->string('id');
-            $table->string('mfrnr',10);
-            $table->string('mfrnr_name',35)->default('');
-            $table->primary(['id', 'mfrnr']);
+            require __DIR__.'/../../app/Materom/TableStructures/users_sel_table.php';
+        });
+        Schema::create('users_sel_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/users_sel_table.php';
         });
     }
 
@@ -29,5 +29,6 @@ class CreateUsersSelTable extends Migration
     public function down()
     {
         Schema::dropIfExists('users_sel');
+        Schema::dropIfExists('users_sel_300');
     }
 }

@@ -14,9 +14,7 @@ class CreateUsersRefTable extends Migration
     public function up()
     {
         Schema::create('users_ref', function (Blueprint $table) {
-            $table->string('id');
-            $table->string('refid');
-            $table->primary(['id', 'refid']);
+            require __DIR__.'/../../app/Materom/TableStructures/users_ref_table.php';
         });
     }
 

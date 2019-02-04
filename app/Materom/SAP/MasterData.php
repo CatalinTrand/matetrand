@@ -10,6 +10,7 @@ namespace App\Materom\SAP;
 
 use App\Materom\RFCData;
 use App\Materom\SAP;
+use App\Materom\System;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -19,9 +20,9 @@ class MasterData
 
     static public function getData($command, $in)
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = 'Administrator'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -46,7 +47,7 @@ class MasterData
     {
         if (empty(trim($lifnr))) return "";
         if (Auth::user()->role == "CTV") return "Furnizor " . SAP::alpha_output($lifnr);
-        $lifnr_name = DB::table("sap_lfa1")->where("lifnr", $lifnr)->value("name1");
+        $lifnr_name = DB::table(System::$table_sap_lfa1)->where("lifnr", $lifnr)->value("name1");
         if (isset($lifnr_name)) return $lifnr_name;
         $lifnr_name = self::getData("LIFNR_NAME", $lifnr);
         if (!isset($lifnr_name)) {
@@ -54,7 +55,7 @@ class MasterData
         }
         if ($cover_error == 2) {
             $lifnr_name = str_replace('"', "'", $lifnr_name);
-            DB::insert('insert into sap_lfa1 (lifnr, name1) values ("'.$lifnr.'", "'.$lifnr_name.'");');
+            DB::insert('insert into '. System::$table_sap_lfa1 .' (lifnr, name1) values ("'.$lifnr.'", "'.$lifnr_name.'");');
         }
         return $lifnr_name;
     }
@@ -62,7 +63,7 @@ class MasterData
     static public function getKunnrName($kunnr, $cover_error = 0)
     {
         if (empty(trim($kunnr))) return "";
-        $kunnr_name = DB::table("sap_kna1")->where("kunnr", $kunnr)->value("name1");
+        $kunnr_name = DB::table(System::$table_sap_kna1)->where("kunnr", $kunnr)->value("name1");
         if (isset($kunnr_name)) return $kunnr_name;
         $kunnr_name = self::getData("KUNNR_NAME", $kunnr);
         if (!isset($kunnr_name)) {
@@ -70,7 +71,7 @@ class MasterData
         }
         if ($cover_error == 2) {
             $kunnr_name = str_replace('"', "'", $kunnr_name);
-            DB::insert('insert into sap_kna1 (kunnr, name1) values ("'.$kunnr.'", "'.$kunnr_name.'");');
+            DB::insert('insert into '. System::$table_sap_kna1 .' (kunnr, name1) values ("'.$kunnr.'", "'.$kunnr_name.'");');
         }
         return $kunnr_name;
     }
@@ -78,7 +79,7 @@ class MasterData
     static public function getEkgrpName($ekgrp, $cover_error = 0)
     {
         if (empty(trim($ekgrp))) return "";
-        $ekgrp_name = DB::table("sap_t024")->where("ekgrp", $ekgrp)->value("eknam");
+        $ekgrp_name = DB::table(System::$table_sap_t024)->where("ekgrp", $ekgrp)->value("eknam");
         if (isset($ekgrp_name)) return $ekgrp_name;
         $ekgrp_name = self::getData("EKGRP_NAME", $ekgrp);
         if (!isset($ekgrp_name) || $ekgrp_name == null) {
@@ -86,17 +87,25 @@ class MasterData
         }
         if ($cover_error == 2) {
             $ekgrp_name = str_replace('"', "'", $ekgrp_name);
-            DB::insert('insert into sap_t024 (ekgrp, eknam) values ("'.$ekgrp.'", "'.$ekgrp_name.'");');
+            DB::insert('insert into '. System::$table_sap_t024 .' (ekgrp, eknam) values ("'.$ekgrp.'", "'.$ekgrp_name.'");');
         }
         return $ekgrp_name;
     }
 
     static public function refreshCustomerCache()
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
-        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
-        if($roleData) $roleData = $roleData[0]; else return;
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0];
+        else {
+            Log::error("Error retrieving data from Global RFC table (". System::$table_global_rfc_config .")");
+            return;
+        }
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = 'Administrator'");
+        if($roleData) $roleData = $roleData[0];
+        else {
+            Log::error("Error retrieving data from Roles table (". System::$table_roles .")");
+            return;
+        }
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
             $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
@@ -119,13 +128,14 @@ class MasterData
             $sapconn->close();
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            Log::error($e);
+            return $e;
         }
         DB::beginTransaction();
-        DB::delete("delete from sap_kna1");
+        DB::delete("delete from ". System::$table_sap_kna1);
         foreach ($customers as $customer) {
             $customer->name1 = str_replace('"', "'", $customer->name1);
-            DB::insert('insert into sap_kna1 (kunnr, name1) values ("'. $customer->kunnr .
+            DB::insert('insert into '. System::$table_sap_kna1 .' (kunnr, name1) values ("'. $customer->kunnr .
                 '", "'. $customer->name1 . '")');
         }
         DB::commit();
@@ -134,10 +144,18 @@ class MasterData
 
     static public function refreshVendorCache()
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
-        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
-        if($roleData) $roleData = $roleData[0]; else return;
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0];
+        else {
+            Log::error("Error retrieving data from Global RFC table (". System::$table_global_rfc_config .")");
+            return;
+        }
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = 'Administrator'");
+        if($roleData) $roleData = $roleData[0];
+        else {
+            Log::error("Error retrieving data from Roles table (". System::$table_roles .")");
+            return;
+        }
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
             $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
@@ -160,13 +178,14 @@ class MasterData
             $sapconn->close();
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            Log::error($e);
+            return $e;
         }
         DB::beginTransaction();
-        DB::delete("delete from sap_lfa1");
+        DB::delete("delete from ". System::$table_sap_lfa1);
         foreach ($vendors as $vendor) {
             $vendor->name1 = str_replace('"', "'", $vendor->name1);
-            DB::insert('insert into sap_lfa1 (lifnr, name1) values ("'. $vendor->lifnr .
+            DB::insert('insert into '. System::$table_sap_lfa1 .' (lifnr, name1) values ("'. $vendor->lifnr .
                 '", "'. $vendor->name1 . '")');
         }
         DB::commit();
@@ -175,10 +194,18 @@ class MasterData
 
     static public function refreshPurchGroupsCache()
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
-        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
-        if($roleData) $roleData = $roleData[0]; else return;
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0];
+        else {
+            Log::error("Error retrieving data from Global RFC table (". System::$table_global_rfc_config .")");
+            return;
+        }
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = 'Administrator'");
+        if($roleData) $roleData = $roleData[0];
+        else {
+            Log::error("Error retrieving data from Roles table (". System::$table_roles .")");
+            return;
+        }
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
             $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
@@ -198,15 +225,15 @@ class MasterData
             }
             $sapconn->close();
         } catch (\SAPNWRFC\Exception $e) {
-//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            Log::error($e);
+            return $e;
         }
         DB::beginTransaction();
-        DB::delete("delete from sap_t024");
+        DB::delete("delete from ". System::$table_sap_t024);
         foreach ($pgroups as $pgroup) {
             $pgroup->eknam = str_replace('"', "'", $pgroup->eknam);
             $pgroup->ektel = str_replace('"', "'", $pgroup->ektel);
-            DB::insert('insert into sap_t024 (ekgrp, eknam, ektel, smtp_addr) values ("'.
+            DB::insert('insert into '. System::$table_sap_t024 .' (ekgrp, eknam, ektel, smtp_addr) values ("'.
                 $pgroup->ekgrp . '", "'. $pgroup->eknam . '",  "'. $pgroup->ektel . '", "'. $pgroup->smtp_addr . '")');
         }
         DB::commit();

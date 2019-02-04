@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Materom\Orders;
 use App\Materom\SAP\MasterData;
+use App\Materom\System;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
@@ -18,11 +19,14 @@ class WebserviceController extends Controller
 {
     public function tryAuthAPIToken()
     {
-        if (Auth::user() == null){
+        if (Auth::user() == null) {
             if(Input::get("api_token") != null ){
                 $token = Input::get("api_token");
                 Auth::attempt(['api_token' => $token]);
             }
+        }
+        if (Auth::user() != null && System::$system != Auth::user()->sap_system) {
+            System::init(Auth::user()->sap_system);
         }
     }
 

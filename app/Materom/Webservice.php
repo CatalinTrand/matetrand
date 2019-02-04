@@ -25,11 +25,11 @@ class Webservice
     static public function insertManufacturer($userid, $mfrnr)
     {
         if (ctype_digit($mfrnr)) $mfrnr = str_pad($mfrnr, 10, "0", STR_PAD_LEFT);
-        $find = DB::select("select * from users_sel where id = '$userid' and mfrnr = '$mfrnr'");
+        $find = DB::select("select * from ". System::$table_users_sel ." where id = '$userid' and mfrnr = '$mfrnr'");
         if (count($find) == 0) {
             $mfrnr_name = SAP\MasterData::getLifnrName($mfrnr);
             if (is_array($mfrnr_name) || strlen(trim($mfrnr_name)) == 0) return __('Manufacturer does not exist');
-            DB::insert("insert into users_sel (id, mfrnr, mfrnr_name) values ('$userid','$mfrnr', '$mfrnr_name')");
+            DB::insert("insert into ". System::$table_users_sel ." (id, mfrnr, mfrnr_name) values ('$userid','$mfrnr', '$mfrnr_name')");
             return "";
         } else return __("Manufacturer already exists");
     }
@@ -54,9 +54,9 @@ class Webservice
         $agent_name = MasterData::getKunnrName($agent);
         if (empty($agent_name)) return "The agent is not defined in SAP";
 
-        $find = DB::select("select * from users_agent where id = '$userid' and agent = '$agent'");
+        $find = DB::select("select * from ". System::$table_users_agent ." where id = '$userid' and agent = '$agent'");
         if (count($find) == 0) {
-            DB::insert("insert into users_agent (id, agent) values ('$userid','$agent')");
+            DB::insert("insert into ". System::$table_users_agent ." (id, agent) values ('$userid','$agent')");
             return "";
         } else return __("This agent is already defined for user");
     }
@@ -67,9 +67,9 @@ class Webservice
         $kunnr_name = MasterData::getKunnrName($kunnr);
         if (empty($kunnr_name)) return "The client is not defined in SAP";
 
-        $find = DB::select("select * from users_cli where id = '$userid' and kunnr = '$kunnr'");
+        $find = DB::select("select * from ". System::$table_users_cli ." where id = '$userid' and kunnr = '$kunnr'");
         if (count($find) == 0) {
-            DB::insert("insert into users_cli (id, kunnr) values ('$userid','$kunnr')");
+            DB::insert("insert into ". System::$table_users_cli ." (id, kunnr) values ('$userid','$kunnr')");
             return "";
         } else return __("This customer is already defined for user");
     }
@@ -168,14 +168,14 @@ class Webservice
         $stage = '';
         if ($to[0] == 'F') {
             $stage = 'F';
-            $porder = DB::select("select * from porders where ebeln = '$ebeln'")[0];
+            $porder = DB::select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
             $lifnr = $porder->lifnr;
             $duser = DB::table("users")->where([["role", "=", "Furnizor"],
                 ["lifnr", "=", $lifnr]])->value("id");
         }
         if ($to[0] == 'R') {
             $stage = 'R';
-            $porder = DB::select("select * from porders where ebeln = '$ebeln'")[0];
+            $porder = DB::select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
             $ekgrp = $porder->ekgrp;
             $duser = DB::table("users")->where([["role", "=", "Referent"],
                 ["ekgrp", "=", $ekgrp]])->value("id");
@@ -183,17 +183,17 @@ class Webservice
         }
         if ($to[0] == 'C') {
             $stage = 'C';
-            $kunnr = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+            $kunnr = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
+            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count");
             if ($dusers == null || empty($dusers))
-                $duser = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("id");
+                $duser = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
             else $duser = $dusers[0]->id;
             if (Auth::user()->role == "Referent") $internal = 1;
         }
 
         $cdate = now();
-        DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and ctype = 'E'");
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, stage, ctype, reason, cuser, cuser_name, duser) values " .
+        DB::update("update ". System::$table_pitemchg ." set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and ctype = 'E'");
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, stage, ctype, reason, cuser, cuser_name, duser) values " .
             "('$ebeln','$ebelp', '$cdate', '$stage', 'E', '$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "', '$duser')");
         Mailservice::sendMessageCopy($duser, Auth::user()->username, $order, $message);
         return "";
@@ -201,8 +201,8 @@ class Webservice
 
     static function readPOItem($order, $item)
     {
-        $porder = DB::table("porders")->where("ebeln", $order)->first();
-        $pitem = DB::table("pitems")->where([["ebeln", '=', $order], ["ebelp", '=', $item]])->first();
+        $porder = DB::table(System::$table_porders)->where("ebeln", $order)->first();
+        $pitem = DB::table(System::$table_pitems)->where([["ebeln", '=', $order], ["ebelp", '=', $item]])->first();
         $pitem->lifnr = $porder->lifnr;
         $pitem->lifnr_name = MasterData::getLifnrName($porder->lifnr);
         return json_encode($pitem);
@@ -211,21 +211,21 @@ class Webservice
     static function sendAck($ebeln, $ebelp, $cdate)
     {
         if ($cdate == null) {
-            $lastchange = DB::table("pitemchg")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", "A"]])->orderBy("cdate", "desc")->first();
+            $lastchange = DB::table(System::$table_pitemchg)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", "A"]])->orderBy("cdate", "desc")->first();
             if ($lastchange == null)
-                $lastchange = DB::table("pitemchg")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", "X"]])->orderBy("cdate", "desc")->first();
+                $lastchange = DB::table(System::$table_pitemchg)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", "X"]])->orderBy("cdate", "desc")->first();
             if ($lastchange != null) $cdate = $lastchange->cdate;
         }
         if ($cdate != null)
-            DB::update("update pitemchg set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+            DB::update("update ". System::$table_pitemchg ." set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         return "";
     }
 
     public static function readProposals($type, $ebeln, $ebelp)
     {
-        $proposal = DB::table("pitemchg")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", $type]])->orderBy("cdate", "desc")->first();
+        $proposal = DB::table(System::$table_pitemchg)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", $type]])->orderBy("cdate", "desc")->first();
         if ($proposal == null) return json_encode(array());
-        $proposals = DB::select("select * from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$proposal->cdate' and type = '$type'");
+        $proposals = DB::select("select * from ". System::$table_pitemchg_proposals ." where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$proposal->cdate' and type = '$type'");
         foreach ($proposals as $proposal) {
             $proposal->lifnr_name = MasterData::getLifnrName($proposal->lifnr);
         }
@@ -234,7 +234,7 @@ class Webservice
 
     public static function acceptItemChange($ebeln, $ebelp, $type)
     {
-        $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         $_porder = Orders::readPOrder($ebeln);
         if ($_porder == null) return;
         if (!isset($_porder->items[$ebelp])) return;
@@ -246,13 +246,13 @@ class Webservice
             if (!$item_changed) {
                 $result = SAP::acknowledgePOItem($ebeln, $ebelp, " ");
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
-                DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
             } else {
                 if ($item->stage == 'F') {
-                    DB::update("update pitems set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                    DB::update("update ". System::$table_pitems ." set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                         "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
                 } else {
                     $reason = "";
@@ -293,14 +293,14 @@ class Webservice
                             }
                         }
                     } else $reason = __("Definitively accepted");
-                    DB::update("update pitems set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                    DB::update("update ". System::$table_pitems ." set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
                         "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$reason')");
                 }
             }
         } elseif ($item->pstage == 'Z') {
-            DB::update("update pitems set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval) values " .
+            DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval) values " .
                 "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 'F')");
 
         }
@@ -310,7 +310,7 @@ class Webservice
 
     public static function cancelItem($ebeln, $item, $category, $reason, $new_status, $new_stage)
     {
-        $pitem = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $item]])->first();
+        $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $item]])->first();
         $_porder = Orders::readPOrder($ebeln);
         if ($_porder == null) return;
         if (!isset($_porder->items[$item])) return;
@@ -325,7 +325,7 @@ class Webservice
             if ($pitem->vbeln != Orders::stockorder) {
                 $result = SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
-                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'");
+                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$pitem->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     try {
                         Mailservice::sendSalesOrderNotification($ctvuser->id, $pitem->vbeln, $pitem->posnr);
@@ -343,10 +343,10 @@ class Webservice
         }
         DB::beginTransaction();
         $cdate = now();
-        DB::update("update pitems set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
+        DB::update("update ". System::$table_pitems ." set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
         $category1 = addcslashes($category, "'");
         $reason1 = addcslashes($reason, "'");
-        DB::insert("insert into pitemchg (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval, reason) values " .
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval, reason) values " .
             "('$ebeln','$item', '$new_status', '$new_stage', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$category1', '$reason1')");
         DB::commit();
         return "";
@@ -354,7 +354,7 @@ class Webservice
 
     public static function itemsOfOrder($type, $order, $history, $vbeln)
     {
-        $items_table = $history != 2 ? "pitems" : "pitems_arch";
+        $items_table = $history != 2 ? System::$table_pitems : System::$table_pitems . "_arch";
         if ($type == "S") {
             return DB::select("select * from $items_table where vbeln = '$order'");
         } else {
@@ -375,7 +375,7 @@ class Webservice
             // update matnr for invoice closing
             return;
         }
-        $pitem = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         $pitem->changed = 1;
         $new_stage = $pitem->stage;
         if ($pitem->stage == 'Z') {
@@ -384,15 +384,15 @@ class Webservice
             $pitem->changed = 2;
         }
         DB::beginTransaction();
-        DB::update("update pitems set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::update("update porders set changed = '1' where ebeln = '$ebeln'");
+        DB::update("update ". System::$table_pitems ." set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::update("update ". System::$table_porders ." set changed = '1' where ebeln = '$ebeln'");
         if ($column == 'idnlf') $type = 'M';
         if ($column == 'qty') $type = 'Q';
         if ($column == 'lfdat') $type = 'D';
         if ($column == 'purch_price') $type = 'P';
         $newval = trim($value . " " . $valuehlp);
         $cdate = now();
-        DB::insert("insert into pitemchg (ebeln,ebelp,ctype,stage, cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage, cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         DB::commit();
         return "";
     }
@@ -422,7 +422,7 @@ class Webservice
 
     static public function getCTVUsers()
     {
-        $users = DB::select("select * from users where role = 'CTV'");
+        $users = DB::select("select * from users where role = 'CTV' and sap_system = '" . Auth::user()->sap_system ."'");
         $result = '[ ';
         foreach ($users AS $user) {
             if ($user->active == 1) $user_active = 'X'; else $user_active = '';
@@ -471,7 +471,8 @@ class Webservice
             'lang' => $language,
             'lifnr' => $lifnr,
             'password' => Hash::make($password),
-            'created_at' => Carbon::now()->getTimestamp()
+            'created_at' => Carbon::now()->getTimestamp(),
+            'sap_system' => Auth::user()->sap_system,
         ]);
         return "OK";
     }
@@ -506,28 +507,28 @@ class Webservice
         $internal = 0;
         if ($to[0] == 'F') {
             $stage = 'F';
-            $porder = DB::Select("select * from porders where ebeln = '$ebeln'")[0];
+            $porder = DB::Select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
             $lifnr = $porder->lifnr;
             $duser = DB::table("users")->where([["role", "=", "Furnizor"],
                 ["lifnr", "=", $lifnr]])->value("id");
         }
         if ($to[0] == 'R') {
             $stage = 'R';
-            $porder = DB::select("select * from porders where ebeln = '$ebeln'")[0];
+            $porder = DB::select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
             $ekgrp = $porder->ekgrp;
             $duser = DB::table("users")->where([["role", "=", "Referent"],
                 ["ekgrp", "=", $ekgrp]])->value("id");
             if (Auth::user()->role == "CTV") $internal = 1;
         }
         if ($to[0] == 'C') {
-            $pitem = DB::table("pitems")->where(['ebeln' => $ebeln, 'ebelp' => $ebelp])->first();
+            $pitem = DB::table(System::$table_pitems)->where(['ebeln' => $ebeln, 'ebelp' => $ebelp])->first();
             if ($pitem->vbeln != Orders::stockorder)
                 $order = SAP::alpha_output($pitem->vbeln) . "/" . SAP::alpha_output($pitem->posnr);
             $stage = 'C';
-            $kunnr = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+            $kunnr = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
+            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count");
             if ($dusers == null || empty($dusers))
-                $duser = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("id");
+                $duser = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
             else $duser = $dusers[0]->id;
             if (Auth::user()->role == "Referent") $internal = 1;
         }
@@ -535,7 +536,7 @@ class Webservice
         $uId = Auth::id();
         $uName = Auth::user()->username;
         $cdate = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, stage, reason) VALUES " .
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, stage, reason) VALUES " .
             "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$stage', '$text')");
         Mailservice::sendMessageCopy($duser, $uName, $order, $text);
         \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
@@ -552,15 +553,15 @@ class Webservice
         if (Auth::user()->role == "Furnizor") $newstage ='R';
         if (isset($proposal->items)) {
             DB::beginTransaction();
-            DB::update("update pitems set stage = '$newstage', pstage = '$stage', status = 'T' " .
+            DB::update("update ". System::$table_pitems ." set stage = '$newstage', pstage = '$stage', status = 'T' " .
                 "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                 "('$ebeln', '$ebelp', '$cdate', 1, '$proposal->type', '$newstage', '" .
                 Auth::user()->id . "', '" . Auth::user()->username . "')");
             $counter = 0;
             foreach ($proposal->items as $propitem) {
                 $propitem->lifnr = SAP::alpha_input($propitem->lifnr);
-                DB::insert("insert into pitemchg_proposals (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+                DB::insert("insert into ". System::$table_pitemchg_proposals ." (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
                     "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
                     "'$ebeln', '$ebelp', '$cdate', $counter, " .
                     "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
@@ -569,9 +570,9 @@ class Webservice
                 $counter++;
             }
             DB::commit();
-            $pitem = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+            $pitem = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
             if ($newstage == 'C') {
-                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$pitem->kunnr'");
+                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$pitem->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderProposal($ctvuser->id, $pitem->vbeln, $pitem->posnr);
                 }
@@ -589,12 +590,12 @@ class Webservice
                 $tmp_purch_price = $proposal->purch_price;
                 $tmp_purch_curr = $proposal->purch_curr;
                 DB::beginTransaction();
-                DB::update("update pitems set stage = 'Z', pstage = '$stage', status = 'A', " .
+                DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$stage', status = 'A', " .
                     "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
                     "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
                     "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr' " .
                     "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                     "('$ebeln', '$ebelp', '$cdate', 1, 'A', 'Z', '" .
                     Auth::user()->id . "', '" . Auth::user()->username . "')");
                 $result = SAP::savePOItem($ebeln, $ebelp);
@@ -627,11 +628,11 @@ class Webservice
                     $newstatus = 'X';
                     if ($proposal->lifnr == $proposal->itemdata->lifnr) $newstatus = 'A';
                     DB::beginTransaction();
-                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
+                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
-                    DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
                         "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 1, '$newstatus', 'Z', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$banfn')");
                     DB::commit();
@@ -652,23 +653,23 @@ class Webservice
                         else return $result;
                     }
                     DB::beginTransaction();
-                    DB::update("update pitems set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
+                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
-                    DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
                         "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 0, 'X', 'Z', 'C', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
                     DB::commit();
                     if (Auth::user()->role != "CTV") {
                         $kunnr = $proposal->itemdata->kunnr;
-                        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$kunnr'");
+                        $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$kunnr'");
                         foreach ($ctvusers as $ctvuser) {
                             Mailservice::sendSalesOrderChange($ctvuser->id, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
                         }
                     }
                     if (Auth::user()->role != "Referent") {
-                        $ekgrp = DB::table("porders")->where("ebeln", $proposal->itemdata->ebeln)->value("ekgrp");
+                        $ekgrp = DB::table(System::$table_porders)->where("ebeln", $proposal->itemdata->ebeln)->value("ekgrp");
                         $refuser = DB::table("users")->where(["ekgrp" => $ekgrp, "role" => "Referent", "active" => 1])->first();
                         if ($refuser != null)
                             Mailservice::sendSalesOrderChange($refuser->id, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
@@ -682,15 +683,15 @@ class Webservice
 
     static public function acceptProposal($ebeln, $ebelp, $cdate, $pos)
     {
-        $proposal = DB::table("pitemchg_proposals")->where([
+        $proposal = DB::table(System::$table_pitemchg_proposals)->where([
             ["type", "=", "O"],
             ["ebeln", "=", $ebeln],
             ["ebelp", "=", $ebelp],
             ["cdate", "=", $cdate],
             ["pos", "=", $pos]
         ])->first();
-        $item = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
-        $porder = DB::table("porders")->where("ebeln", $ebeln)->first();
+        $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+        $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
         if (($proposal->lifnr == $porder->lifnr) && ($proposal->idnlf == trim($item->orig_idnlf))) {
             // keeping the same supplier for stock orders, just update PO
             $tmp_idnlf = $proposal->idnlf;
@@ -705,13 +706,13 @@ class Webservice
             $tmp_sales_curr = $proposal->sales_curr;
             $now = now();
             DB::beginTransaction();
-            DB::update("update pitems set stage = 'Z', pstage = '" . $item->stage . "', status = 'A', " .
+            DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '" . $item->stage . "', status = 'A', " .
                 "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
                 "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
                 "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr', " .
                 "sales_price = '$tmp_sales_price', sales_curr = '$tmp_sales_curr' " .
                 "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                 "('$ebeln', '$ebelp', '$now', 0, 'A', 'Z', '" .
                 Auth::user()->id . "', '" . Auth::user()->username . "')");
             $result = SAP::savePOItem($ebeln, $ebelp);
@@ -745,15 +746,15 @@ class Webservice
         $set_new_lifnr = "";
         if ($proposal->lifnr != $porder->lifnr) $set_new_lifnr = ", new_lifnr ='$proposal->lifnr'";
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X'" . $set_new_lifnr .
+        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X'" . $set_new_lifnr .
             " where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 0, 'A', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
         if (Auth::user()->role != "CTV") {
-            $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
+            $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
             foreach ($ctvusers as $ctvuser) {
                 Mailservice::sendSalesOrderChange($ctvuser->id, $item->vbeln, $item->posnr, $result);
             }
@@ -763,21 +764,21 @@ class Webservice
 
     static public function rejectProposal($ebeln, $ebelp, $cdate)
     {
-        $item = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+        $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $result = SAP::rejectPOItem($ebeln, $ebelp);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::rejectSOItem($item->vbeln, $item->posnr, "07");
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $soitem = __("Rejected sales order item") . " " . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X' " .
+        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'D', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
-        $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
+        $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
         foreach ($ctvusers as $ctvuser) {
             Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
         }
@@ -786,8 +787,8 @@ class Webservice
 
     static public function acceptSplit($ebeln, $ebelp, $cdate)
     {
-        $item = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
-        $splititems = DB::table("pitemchg_proposals")->where([
+        $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+        $splititems = DB::table(System::$table_pitemchg_proposals)->where([
             ["type", "=", "S"],
             ["ebeln", "=", $ebeln],
             ["ebelp", "=", $ebelp],
@@ -824,7 +825,7 @@ class Webservice
             $text2 = substr($text, 1);
             $text = __("New sales order items: ") . $text2;
             if (Auth::user()->role != "CTV") {
-                $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
+                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderChange($ctvuser->id, $item->vbeln, $item->posnr, $text2);
                 }
@@ -832,11 +833,11 @@ class Webservice
         }
 
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X' " .
+        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::delete("delete from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        DB::delete("delete from ". System::$table_pitemchg_proposals ." where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         $cdate = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$cdate', 0, 'A', 'Z', 'U', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$text')");
         DB::commit();
@@ -845,23 +846,23 @@ class Webservice
 
     static public function rejectSplit($ebeln, $ebelp, $cdate)
     {
-        $item = DB::table("pitems")->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+        $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $result = SAP::rejectPOItem($ebeln, $ebelp);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::rejectSOItem($item->vbeln, $item->posnr, "07");
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $soitem = __("Rejected split for sales order item ") . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'Z', pstage = '$item->stage', status = 'X' " .
+        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::delete("delete from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        DB::delete("delete from ". System::$table_pitemchg_proposals ." where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         $now = now();
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'W', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
         if (Auth::user()->role != 'CTV') {
-            $ctvusers = DB::select("select distinct id from user_agent_clients where kunnr = '$item->kunnr'");
+            $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
             foreach ($ctvusers as $ctvuser) {
                 Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
             }
@@ -877,15 +878,15 @@ class Webservice
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
         DB::beginTransaction();
-        DB::update("update pitems set stage = 'R', pstage = '$stage', changed = '1' " .
+        DB::update("update ". System::$table_pitems ." set stage = 'R', pstage = '$stage', changed = '1' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::insert("insert into pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
             "('$ebeln', '$ebelp', '$cdate', 1, '$proposal->type', 'R', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "')");
         $counter = 0;
         foreach ($proposal->items as $propitem) {
             $propitem->lifnr = SAP::alpha_input($propitem->lifnr);
-            DB::insert("insert into pitemchg_proposals (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+            DB::insert("insert into ". System::$table_pitemchg_proposals ." (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
                 "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
                 "'$ebeln', '$ebelp', '$cdate', $counter, " .
                 "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .

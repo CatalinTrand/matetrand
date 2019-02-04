@@ -14,9 +14,10 @@ class CreateUsersCli extends Migration
     public function up()
     {
         Schema::create('users_cli', function (Blueprint $table) {
-            $table->string('id',20);
-            $table->string('kunnr',10);
-            $table->primary(['id', 'kunnr']);
+            require __DIR__.'/../../app/Materom/TableStructures/users_cli_table.php';
+        });
+        Schema::create('users_cli_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/users_cli_table.php';
         });
     }
 
@@ -28,5 +29,6 @@ class CreateUsersCli extends Migration
     public function down()
     {
         Schema::dropIfExists('users_cli');
+        Schema::dropIfExists('users_cli_300');
     }
 }

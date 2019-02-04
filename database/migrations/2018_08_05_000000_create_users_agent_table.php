@@ -14,9 +14,10 @@ class CreateUsersAgentTable extends Migration
     public function up()
     {
         Schema::create('users_agent', function (Blueprint $table) {
-            $table->string('id',20);
-            $table->string('agent',20);
-            $table->primary(['id', 'agent']);
+            require __DIR__.'/../../app/Materom/TableStructures/users_agent_table.php';
+        });
+        Schema::create('users_agent_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/users_agent_table.php';
         });
     }
 
@@ -28,5 +29,6 @@ class CreateUsersAgentTable extends Migration
     public function down()
     {
         Schema::dropIfExists('users_agent');
+        Schema::dropIfExists('users_agent_300');
     }
 }

@@ -20,7 +20,8 @@ class EditUserController
             Input::get("lifnr"),
             Input::get("ekgrp"),
             Input::get("active"),
-            Input::get("email")
+            Input::get("email"),
+            Input::get("sap_system")
         );
     }
 

@@ -14,9 +14,12 @@ class CreatePitemsTable extends Migration
     public function up()
     {
         Schema::create('pitems', function (Blueprint $table) {
-
             require __DIR__.'/../../app/Materom/Orders/structures/pitems_table.php';
-
+            $table->primary(['ebeln', 'ebelp']);
+            $table->index('vbeln');
+        });
+        Schema::create('pitems_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/Orders/structures/pitems_table.php';
             $table->primary(['ebeln', 'ebelp']);
             $table->index('vbeln');
         });
@@ -30,5 +33,6 @@ class CreatePitemsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('pitems');
+        Schema::dropIfExists('pitems_300');
     }
 }

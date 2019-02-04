@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Materom\Orders;
 use App\Materom\SAP;
+use App\Materom\System;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,12 +46,13 @@ class LoginController extends Controller
 
     protected function authenticated(Request $request, $user)
     {
+        System::init(Auth::user()->sap_system);
         Session::put('locale', strtolower(Auth::user()->lang));
         Session::put('materomdbcache', Orders::newCacheToken());
         Session::put("groupOrdersBy", 1);
         if (Auth::user()->role == "CTV") {
             $id = Auth::user()->id;
-            DB::delete("delete from user_agent_clients where id = '$id'");
+            DB::delete("delete from ". System::$table_user_agent_clients ." where id = '$id'");
             $clients = SAP::getAgentClients($id);
             if (!empty($clients)) {
                 $sql = "";
@@ -58,19 +60,19 @@ class LoginController extends Controller
                     $sql .= ",('$id','$client->client','$client->agent')";
                 }
                 $sql = substr($sql, 1);
-                DB::insert("insert into user_agent_clients (id, kunnr, agent) values " . $sql);
+                DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr, agent) values " . $sql);
             }
-            $customers = DB::select("select * from users_cli where id = '$id'");
+            $customers = DB::select("select * from ". System::$table_users_cli ." where id = '$id'");
             if (!empty($customers)) {
                 foreach ($customers as $customer) {
                     $client = $customer->kunnr;
-                    if (!DB::table("user_agent_clients")->where([["id", "=", $id], ["kunnr", "=", $client]])->exists())
-                        DB::insert("insert into user_agent_clients (id, kunnr) values ('$id','$client')");
+                    if (!DB::table(System::$table_user_agent_clients)->where([["id", "=", $id], ["kunnr", "=", $client]])->exists())
+                        DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr) values ('$id','$client')");
                 }
             }
             Session::put("groupOrdersBy", 4);
         }
-        if (Auth::user()->id == "radu") Session::put("filter_ebeln", "NONE");
+        if (substr(Auth::user()->id, 0, 4) == "radu") Session::put("filter_ebeln", "NONE");
         Orders::fillCache();
     }
 

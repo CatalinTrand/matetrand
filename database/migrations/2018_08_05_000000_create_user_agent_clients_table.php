@@ -14,10 +14,10 @@ class CreateUserAgentClientsTable extends Migration
     public function up()
     {
         Schema::create('user_agent_clients', function (Blueprint $table) {
-            $table->string('id',20);
-            $table->string('kunnr',10);
-            $table->string('agent',20);
-            $table->primary(['id', 'kunnr']);
+            require __DIR__.'/../../app/Materom/TableStructures/user_agent_clients_table.php';
+        });
+        Schema::create('user_agent_clients_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/user_agent_clients_table.php';
         });
     }
 
@@ -29,5 +29,6 @@ class CreateUserAgentClientsTable extends Migration
     public function down()
     {
         Schema::dropIfExists('user_agent_clients');
+        Schema::dropIfExists('user_agent_clients_300');
     }
 }

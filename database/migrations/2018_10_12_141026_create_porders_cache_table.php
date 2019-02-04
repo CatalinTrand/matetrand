@@ -15,13 +15,10 @@ class CreatePordersCacheTable extends Migration
     public function up()
     {
         Schema::create('porders_cache', function (Blueprint $table) {
-
-            $table->string('session', 40);
-            $table->string('ebeln',10)->default('');
-            $table->dateTime('cache_date')->default(DB::raw('CURRENT_TIMESTAMP'));
-
-            $table->primary(['session', 'ebeln']);
-
+            require __DIR__.'/../../app/Materom/TableStructures/porders_cache_table.php';
+        });
+        Schema::create('porders_cache_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/porders_cache_table.php';
         });
     }
 
@@ -33,5 +30,6 @@ class CreatePordersCacheTable extends Migration
     public function down()
     {
         Schema::dropIfExists('porders_cache');
+        Schema::dropIfExists('porders_cache_300');
     }
 }

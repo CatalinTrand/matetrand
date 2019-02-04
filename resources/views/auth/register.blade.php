@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $sap_system = trim(Auth::user()->sap_system);
+        if(empty($sap_system)) $sap_system = "200";
+        $currentsystem200 = "";
+        $currentsystem300 = "";
+        if ($sap_system == "200") $currentsystem200 = "selected";
+        if ($sap_system == "300") $currentsystem300 = "selected";
+    @endphp
     @if (Auth::user() && Auth::user()->role == 'Administrator')
         <div class="container">
             <div class="row justify-content-center">
@@ -33,6 +41,19 @@
 
                                     <div class="col-md-6">
                                         <input class="form-control" id="id" type="text" name="id" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="sap_system"
+                                           class="col-md-4 col-form-label text-md-right">{{ __('System') }}</label>
+
+                                    <div class="col-md-6">
+                                        <select id="sap_system" type="text" class="form-control" name="sap_system" required
+                                                onchange="selectCheck(this);">
+                                            <option value="200" {{$currentsystem200}}>200</option>
+                                            <option value="300" {{$currentsystem300}}>300</option>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -94,8 +115,7 @@
                                            class="col-md-4 col-form-label text-md-right">Language</label>
 
                                     <div class="col-md-6">
-                                        <select id="lang" type="text" class="form-control" name="lang" required
-                                                autofocus>
+                                        <select id="lang" type="text" class="form-control" name="lang" required>
                                             <option>RO</option>
                                             <option>HU</option>
                                             <option>DE</option>

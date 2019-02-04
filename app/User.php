@@ -34,13 +34,4 @@ class User extends Authenticatable
     public $keyType = 'string';
     public $incrementing = false;
 
-    // specific table names
-    public $pitemchg;
-    public $pitemchg_proposals;
-    public $pitems;
-    public $porders;
-    public $pitems_cache;
-    public $porders_cache;
-    public $roles;
-
 }

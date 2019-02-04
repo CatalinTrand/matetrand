@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Materom\Data;
 use App\Materom\SAP\MasterData;
+use App\Materom\System;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\DB;
@@ -30,22 +31,37 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function () {
 
-            Log::info("Daily cleanup job has started");
-
-            // refresh internal cache
             $pdate = now()->subDays(1);
-            DB::delete("delete from pitems_cache where cache_date <= '$pdate'");
-            DB::delete("delete from porders_cache where cache_date <= '$pdate'");
 
+            System::init();
+
+            Log::info("Daily cleanup job has started in system ". System::$system_name);
+            // refresh internal cache
+            DB::delete("delete from ". System::$table_pitems_cache ." where cache_date <= '$pdate'");
+            DB::delete("delete from ". System::$table_porders_cache ." where cache_date <= '$pdate'");
             // refresh SAP table caches
             MasterData::refreshCustomerCache();
             MasterData::refreshVendorCache();
             MasterData::refreshPurchGroupsCache();
-
             // push finally processed orders to archive
             Data::performArchiving();
+            Log::info("Daily cleanup job has ended in system ". System::$system_name);
 
-            Log::info("Daily cleanup job has ended");
+            if (System::is300) {
+                System::init("300");
+                Log::info("Daily cleanup job has started in system ". System::$system_name);
+                // refresh internal cache
+                DB::delete("delete from ". System::$table_pitems_cache ." where cache_date <= '$pdate'");
+                DB::delete("delete from ". System::$table_porders_cache ." where cache_date <= '$pdate'");
+                // refresh SAP table caches
+                MasterData::refreshCustomerCache();
+                MasterData::refreshVendorCache();
+                MasterData::refreshPurchGroupsCache();
+                // push finally processed orders to archive
+                Data::performArchiving();
+                Log::info("Daily cleanup job has ended in system ". System::$system_name);
+
+            }
 
         })->dailyAt("03:00");
     }

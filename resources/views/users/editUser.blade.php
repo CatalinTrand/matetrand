@@ -31,6 +31,12 @@
 
         $user = $users[0];
 
+        if(empty(trim($user->sap_system))) $user->sap_system = "200";
+        $currentsystem200 = "";
+        $currentsystem300 = "";
+        if ($user->sap_system == "200") $currentsystem200 = "selected";
+        if ($user->sap_system == "300") $currentsystem300 = "selected";
+
         if(is_null($user->ekgrp)) $user->ekgrp = "";
         if(is_null($user->lifnr))  $user->lifnr = "";
         if(is_null($user->sapuser))  $user->sapuser = "";
@@ -60,7 +66,7 @@
         $selectedDE = "";
         $selectedEN = "";
 
-        switch ($user->lang){
+        switch (strtoupper($user->lang)){
             case 'RO':
                 $selectedRO = "selected"; break;
             case 'HU':
@@ -98,6 +104,39 @@
                             <form method="POST" action="/editUser/edit" aria-label="Edit User">
                                 @csrf
                                 <font color='green'>{{$msg}}</font>
+
+                                <div class="form-group row">
+                                    <label for="__userid"
+                                           class="col-md-3 col-form-label text-md-left">{{ __('User ID') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input id="__userid" type="text" name="__userid" class="form-control" required
+                                               value="{{$user->id}}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="__role"
+                                           class="col-md-3 col-form-label text-md-left">{{ __('User Type') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input id="__role" type="text" name="__role" class="form-control" required
+                                               value="{{$user->role}}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="sap_system"
+                                           class="col-md-3 col-form-label text-md-left">{{ __('System') }}</label>
+
+                                    <div class="col-md-6">
+                                        <select id="sap_system" type="text" class="form-control" name="sap_system" required>
+                                            <option value="200" {{$currentsystem200}}>200</option>
+                                            <option value="300" {{$currentsystem300}}>300</option>
+                                        </select>
+                                    </div>
+                                </div>
+
 
                                 <div class="form-group row">
                                     <label for="username"

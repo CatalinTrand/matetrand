@@ -46,7 +46,7 @@ class HomeController extends Controller
         if(isset($_GET['mfrnrDEL'])){
             $id = $_GET['id'];
             $mfrnr = $_GET['mfrnrDEL'];
-            DB::delete("delete from users_sel where id = '$id' and mfrnr = '$mfrnr'");
+            DB::delete("delete from ". \App\Materom\System::$table_users_sel ." where id = '$id' and mfrnr = '$mfrnr'");
             unset($_GET['mfrnrDEL']);
         }
 
@@ -62,7 +62,7 @@ class HomeController extends Controller
         if(isset($_GET['agentDEL'])){
             $id = $_GET['id'];
             $agentDEL = $_GET['agentDEL'];
-            DB::delete("delete from users_agent where id = '$id' and agent = '$agentDEL'");
+            DB::delete("delete from ". \App\Materom\System::$table_users_agent ." where id = '$id' and agent = '$agentDEL'");
             unset($_GET['agentDEL']);
         }
 

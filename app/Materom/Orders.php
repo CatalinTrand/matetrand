@@ -96,12 +96,12 @@ class Orders
         $cacheid = Session::get('materomdbcache');
         if (!isset($cacheid) || empty($cacheid)) return;
 
-        $orders_table = $history == 1 ? "porders" : "porders_arch";
-        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $orders_table = $history == 1 ? System::$table_porders : System::$table_porders . "_arch";
+        $items_table = $history == 1 ? System::$table_pitems : System::$table_pitems . "_arch";
 
         DB::beginTransaction();
-        DB::delete("delete from porders_cache where session = '$cacheid'");
-        DB::delete("delete from pitems_cache where session = '$cacheid'");
+        DB::delete("delete from ". System::$table_porders_cache ." where session = '$cacheid'");
+        DB::delete("delete from ". System::$table_pitems_cache ." where session = '$cacheid'");
         DB::commit();
 
         $filter_vbeln_sql = self::processFilter($items_table . ".vbeln", $filter_vbeln, 10);
@@ -117,7 +117,7 @@ class Orders
         $filter_sql = self::addFilters($filter_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql);
 
         if (Auth::user()->role == "Furnizor") {
-            $manufacturers = DB::select("select distinct mfrnr from users_sel where id ='" . Auth::user()->id . "'");
+            $manufacturers = DB::select("select distinct mfrnr from ". System::$table_users_sel ." where id ='" . Auth::user()->id . "'");
             $sql = "";
             foreach ($manufacturers as $manufacturer) {
                 if (empty(trim($manufacturer->mfrnr))) continue;
@@ -136,7 +136,7 @@ class Orders
                 "where refid ='" . Auth::user()->id . "'");
             $filter_refs_sql = "";
             foreach ($refs as $ref) {
-                $manufacturers = DB::select("select distinct mfrnr from users_sel where id ='" . $ref->id . "'");
+                $manufacturers = DB::select("select distinct mfrnr from ". System::$table_users_sel ." where id ='" . $ref->id . "'");
                 $sql = "";
                 foreach ($manufacturers as $manufacturer) {
                     if (empty(trim($manufacturer->mfrnr))) continue;
@@ -154,7 +154,7 @@ class Orders
             else $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
             $filter_sql = self::addFilter($filter_sql, $filter_refs_sql);
         } elseif (Auth::user()->role == "CTV") {
-            $clients = DB::select("select distinct kunnr from user_agent_clients where id = '" .
+            $clients = DB::select("select distinct kunnr from ". System::$table_user_agent_clients ." where id = '" .
                 Auth::user()->id . "'");
             $sql = "";
             foreach ($clients as $client) {
@@ -190,8 +190,8 @@ class Orders
         DB::beginTransaction();
 
         // Order cache
-        $psql = "insert into porders_cache (session, ebeln, cache_date) values ";
-        $isql = "insert into pitems_cache (session, ebeln, ebelp, vbeln, cache_date) values ";
+        $psql = "insert into ". System::$table_porders_cache ." (session, ebeln, cache_date) values ";
+        $isql = "insert into ". System::$table_pitems_cache ." (session, ebeln, ebelp, vbeln, cache_date) values ";
 
         $prev_ebeln = '$#$#$#$#$#';
         foreach ($items as $item) {
@@ -225,9 +225,9 @@ class Orders
         if ($history == null) $history = 1;
         else $history = intval($history);
 
-        $orders_table = $history == 1 ? "porders" : "porders_arch";
-        $items_table = $history == 1 ? "pitems" : "pitems_arch";
-        $itemchanges_table = $history == 1 ? "pitemchg" : "pitemchg_arch";
+        $orders_table = $history == 1 ? System::$table_porders : System::$table_porders . "_arch";
+        $items_table = $history == 1 ? System::$table_pitems : System::$table_pitems . "_arch";
+        $itemchanges_table = $history == 1 ? System::$table_pitemchg : System::$table_pitemchg . "_arch";
 
         $status_filter = "";
         if ($filter_status == 'AP') {
@@ -241,21 +241,21 @@ class Orders
         }
 
         if ($history == 1 && $s_order == null && $p_order == null && $refresh_dlv) {
-            $items = DB::select("select ebeln, ebelp from pitems_cache where session = '$cacheid'");
+            $items = DB::select("select ebeln, ebelp from ". System::$table_pitems_cache ." where session = '$cacheid'");
             SAP::refreshDeliveryStatus(1, $items);
         }
 
         $porders_sql = "";
         $pitems_sql = "";
         if ($p_order != null) {
-            $porders_sql = " and porders_cache.ebeln = '$p_order'";
-            $pitems_sql = " and pitems_cache.ebeln = '$p_order'";
+            $porders_sql = " and ". System::$table_porders_cache .".ebeln = '$p_order'";
+            $pitems_sql = " and ". System::$table_pitems_cache .".ebeln = '$p_order'";
         }
         if ($s_order != null) {
             if ((Auth::user()->role == 'Furnizor') && ($s_order == self::salesorder))
-                $pitems_sql .= " and pitems_cache.vbeln <> '" . self::stockorder . "'";
-            else $pitems_sql .= " and pitems_cache.vbeln = '$s_order'";
-            $pitems = DB::select("select distinct ebeln, ebelp from pitems_cache " .
+                $pitems_sql .= " and ". System::$table_pitems_cache .".vbeln <> '" . self::stockorder . "'";
+            else $pitems_sql .= " and ". System::$table_pitems_cache .".vbeln = '$s_order'";
+            $pitems = DB::select("select distinct ebeln, ebelp from ". System::$table_pitems_cache .
                 " where session = '$cacheid'" . $pitems_sql . " order by ebeln, ebelp");
             if (empty($pitems)) return $result;
             $pitems_sql .= " and (";
@@ -264,27 +264,27 @@ class Orders
             foreach ($pitems as $pitem) {
                 if ($prev_ebeln != $pitem->ebeln) {
                     $prev_ebeln = $pitem->ebeln;
-                    $porders_sql .= "porders_cache.ebeln = '$pitem->ebeln' or ";
+                    $porders_sql .= System::$table_porders_cache .".ebeln = '$pitem->ebeln' or ";
                 }
-                $pitems_sql .= "(pitems_cache.ebeln = '$pitem->ebeln' and pitems_cache.ebelp = '$pitem->ebelp') or ";
+                $pitems_sql .= "(". System::$table_pitems_cache .".ebeln = '$pitem->ebeln' and ". System::$table_pitems_cache .".ebelp = '$pitem->ebelp') or ";
             }
             $porders_sql = substr($porders_sql, 0, -4) . ")";
             $pitems_sql = substr($pitems_sql, 0, -4) . ")";
         }
 
-        $porders = DB::select("select $orders_table.* from $orders_table join porders_cache using (ebeln) " .
-            "where porders_cache.session = '$cacheid' " . $porders_sql .
+        $porders = DB::select("select $orders_table.* from $orders_table join ". System::$table_porders_cache ." using (ebeln) " .
+            "where ". System::$table_porders_cache .".session = '$cacheid' " . $porders_sql .
             "order by $orders_table.ebeln");
         if (empty($porders)) return $result;
 
-        $pitems = DB::select("select $items_table.* from $items_table join pitems_cache using (ebeln, ebelp) " .
-            " where pitems_cache.session = '$cacheid'" . $pitems_sql . $status_filter .
+        $pitems = DB::select("select $items_table.* from $items_table join ". System::$table_pitems_cache ." using (ebeln, ebelp) " .
+            " where ". System::$table_pitems_cache .".session = '$cacheid'" . $pitems_sql . $status_filter .
             " order by $items_table.ebeln, $items_table.ebelp");
         if (empty($pitems)) return $result;
 
         $pitemschg = DB::select("select $itemchanges_table.* from $itemchanges_table " .
-            "join pitems_cache using (ebeln, ebelp)" .
-            " where pitems_cache.session = '$cacheid'" . $pitems_sql .
+            "join ". System::$table_pitems_cache ." using (ebeln, ebelp)" .
+            " where ". System::$table_pitems_cache .".session = '$cacheid'" . $pitems_sql .
             " order by $itemchanges_table.ebeln, $itemchanges_table.ebelp, $itemchanges_table.cdate desc");
 
         $xitem = 0;
@@ -337,14 +337,14 @@ class Orders
 
     public static function readPOrder($ebeln)
     {
-        $porder = DB::table("porders")->where("ebeln", $ebeln)->first();
+        $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
         if ($porder == null) return null;
         $_porder = new POrder($porder);
-        $pitems = DB::table("pitems")->where("ebeln", $ebeln)->get();
+        $pitems = DB::table(System::$table_pitems)->where("ebeln", $ebeln)->get();
         if ($pitems != null)
         foreach ($pitems as $pitem) {
             $_pitem = new POrderItem($pitem);
-            $pichgs = DB::select("select * from pitemchg where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' order by ebeln, ebelp, cdate desc");
+            $pichgs = DB::select("select * from ". System::$table_pitemchg ." where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' order by ebeln, ebelp, cdate desc");
             if ($pichgs != null)
             foreach ($pichgs as $pichg) {
                 $_pitemchg = new POrderItemChg($pichg);
@@ -435,7 +435,7 @@ class Orders
 
     public static function unreadMessageCount()
     {
-        $count = DB::select("select count(*) as count from pitemchg where duser ='" . Auth::user()->id . "' and acknowledged = 0 and ctype = 'E'");
+        $count = DB::select("select count(*) as count from ". System::$table_pitemchg ." where duser ='" . Auth::user()->id . "' and acknowledged = 0 and ctype = 'E'");
         if ($count == null || empty($count)) return 0;
         return $count[0]->count;
     }
@@ -470,7 +470,7 @@ class Orders
     public static function getProposalsList()
     {
         //TODO - filtrari?
-        $proposals = DB::select("select * from pitemchg_proposals where type = 'O'");
+        $proposals = DB::select("select * from ". System::$table_pitemchg_proposals ." where type = 'O'");
         return $proposals;
     }
 }

@@ -74,6 +74,10 @@ class RegisterController extends Controller
         $lifnr = $data['lifnr'];
         if (is_null($lifnr) || !isset($lifnr)) $lifnr = "";
         if (ctype_digit($lifnr)) $lifnr = str_pad($lifnr, 10, "0", STR_PAD_LEFT);
+        $sap_system = $data['sap_system'];
+        if ($sap_system == null) $sap_system = "";
+        $sap_system = trim($sap_system);
+        if ("X".$sap_system == "X200") $sap_system = "";
 
         return User::create([
             'id' => $data['id'],
@@ -84,6 +88,7 @@ class RegisterController extends Controller
             'ekgrp' => $ekgrp,
             'lifnr' => $lifnr,
             'email' => $data['email'],
+            'sap_system' => $sap_system,
             'password' => Hash::make($data['password']),
             'created_at' => Carbon::now()->getTimestamp()
         ]);

@@ -14,9 +14,10 @@ class CreateSapKna1Table extends Migration
     public function up()
     {
         Schema::create('sap_kna1', function (Blueprint $table) {
-            $table->string('kunnr',10)->default('');
-            $table->string('name1',35)->default('');
-            $table->primary("kunnr");
+            require __DIR__.'/../../app/Materom/TableStructures/sap_kna1_table.php';
+        });
+        Schema::create('sap_kna1_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/sap_kna1_table.php';
         });
     }
 
@@ -28,5 +29,6 @@ class CreateSapKna1Table extends Migration
     public function down()
     {
         Schema::dropIfExists('sap_kna1');
+        Schema::dropIfExists('sap_kna1_300');
     }
 }

@@ -15,13 +15,16 @@ class CreatePordersTable extends Migration
     public function up()
     {
         Schema::create('porders', function (Blueprint $table) {
-
             require __DIR__.'/../../app/Materom/Orders/structures/porders_table.php';
-
             $table->primary("ebeln");
             $table->index("lifnr");
             $table->index("ekgrp");
-
+        });
+        Schema::create('porders_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/Orders/structures/porders_table.php';
+            $table->primary("ebeln");
+            $table->index("lifnr");
+            $table->index("ekgrp");
         });
     }
 
@@ -33,5 +36,6 @@ class CreatePordersTable extends Migration
     public function down()
     {
         Schema::dropIfExists('porders');
+        Schema::dropIfExists('porders_300');
     }
 }

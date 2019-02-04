@@ -14,11 +14,12 @@ class CreatePitemchgTable extends Migration
     public function up()
     {
         Schema::create('pitemchg', function (Blueprint $table) {
-
             require __DIR__.'/../../app/Materom/Orders/structures/pitemchg_table.php';
-
             $table->primary(['ebeln', 'ebelp', 'cdate']);
-
+        });
+        Schema::create('pitemchg_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/Orders/structures/pitemchg_table.php';
+            $table->primary(['ebeln', 'ebelp', 'cdate']);
         });
     }
 
@@ -30,5 +31,6 @@ class CreatePitemchgTable extends Migration
     public function down()
     {
         Schema::dropIfExists('pitemchg');
+        Schema::dropIfExists('pitemchg_300');
     }
 }

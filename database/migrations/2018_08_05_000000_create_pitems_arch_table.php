@@ -15,9 +15,13 @@ class CreatePitemsArchTable extends Migration
     public function up()
     {
         Schema::create('pitems_arch', function (Blueprint $table) {
-
             require __DIR__.'/../../app/Materom/Orders/structures/pitems_table.php';
-
+            $table->primary(['ebeln', 'ebelp']);
+            $table->index('vbeln');
+            $table->timestamp('archdate')->default(DB::raw('CURRENT_TIMESTAMP'));
+        });
+        Schema::create('pitems_300_arch', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/Orders/structures/pitems_table.php';
             $table->primary(['ebeln', 'ebelp']);
             $table->index('vbeln');
             $table->timestamp('archdate')->default(DB::raw('CURRENT_TIMESTAMP'));
@@ -32,5 +36,6 @@ class CreatePitemsArchTable extends Migration
     public function down()
     {
         Schema::dropIfExists('pitems_arch');
+        Schema::dropIfExists('pitems_300_arch');
     }
 }

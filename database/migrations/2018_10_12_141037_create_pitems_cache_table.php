@@ -15,15 +15,10 @@ class CreatePitemsCacheTable extends Migration
     public function up()
     {
         Schema::create('pitems_cache', function (Blueprint $table) {
-
-            $table->string('session', 40);
-            $table->string('ebeln', 10);
-            $table->string('ebelp', 5);
-            $table->string('vbeln', 10);
-            $table->dateTime('cache_date')->default(DB::raw('CURRENT_TIMESTAMP'));
-
-            $table->primary(['session', 'ebeln', 'ebelp']);
-
+            require __DIR__.'/../../app/Materom/TableStructures/pitems_cache_table.php';
+        });
+        Schema::create('pitems_cache_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/pitems_cache_table.php';
         });
     }
 
@@ -35,5 +30,6 @@ class CreatePitemsCacheTable extends Migration
     public function down()
     {
         Schema::dropIfExists('pitems_cache');
+        Schema::dropIfExists('pitems_cache_300');
     }
 }

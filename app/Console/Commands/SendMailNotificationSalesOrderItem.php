@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Materom\Mailservice;
 use App\Materom\SAP;
+use App\Materom\System;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -66,7 +67,7 @@ class SendMailNotificationSalesOrderItem extends Command
         }
         $soitem = str_pad($soitem, 6, "0", STR_PAD_LEFT);
 
-        if (!DB::table("pitems")->where(["vbeln" => $sorder, "posnr" => $soitem])->exists()) {
+        if (!DB::table(System::$table_pitems)->where(["vbeln" => $sorder, "posnr" => $soitem])->exists()) {
             $this->error(__("The specified sales order item does not exist ($sorder/$soitem)"));
             return;
         }

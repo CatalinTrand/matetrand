@@ -10,6 +10,7 @@ namespace App\Materom\Orders;
 
 
 use App\Materom\SAP\MasterData;
+use App\Materom\System;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -101,7 +102,7 @@ class POrder
         else $history = intval($history);
 
         $this->allitems = array();
-        $items_table = $history == 1 ? "pitems" : "pitems_arch";
+        $items_table = $history == 1 ? System::$table_pitems : System::$table_pitems . "_arch";
         $items = DB::select("select * from $items_table where ebeln = '$this->ebeln' order by ebelp");
         foreach($items as $item) {
             if (isset($this->items[$item->ebelp])) {

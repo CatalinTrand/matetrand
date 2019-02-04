@@ -14,9 +14,10 @@ class CreateSapLfa1Table extends Migration
     public function up()
     {
         Schema::create('sap_lfa1', function (Blueprint $table) {
-            $table->string('lifnr',10)->default('');
-            $table->string('name1',35)->default('');
-            $table->primary("lifnr");
+            require __DIR__.'/../../app/Materom/TableStructures/sap_lfa1_table.php';
+        });
+        Schema::create('sap_lfa1_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/sap_lfa1_table.php';
         });
     }
 
@@ -28,5 +29,6 @@ class CreateSapLfa1Table extends Migration
     public function down()
     {
         Schema::dropIfExists('sap_lfa1');
+        Schema::dropIfExists('sap_lfa1_300');
     }
 }

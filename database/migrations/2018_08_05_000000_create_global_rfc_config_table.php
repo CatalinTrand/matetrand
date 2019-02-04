@@ -14,10 +14,10 @@ class CreateGlobalRfcConfigTable extends Migration
     public function up()
     {
         Schema::create('global_rfc_config', function (Blueprint $table) {
-            $table->string('rfc_router')->default('');
-            $table->string('rfc_server');
-            $table->string('rfc_sysnr', 2);
-            $table->string('rfc_client', 3);
+            require __DIR__.'/../../app/Materom/TableStructures/global_rfc_config_table.php';
+        });
+        Schema::create('global_rfc_config_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/global_rfc_config_table.php';
         });
     }
 
@@ -29,5 +29,6 @@ class CreateGlobalRfcConfigTable extends Migration
     public function down()
     {
         Schema::dropIfExists('global_rfc_config');
+        Schema::dropIfExists('global_rfc_config_300');
     }
 }

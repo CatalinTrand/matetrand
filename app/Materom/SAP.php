@@ -56,9 +56,9 @@ class SAP
 
     static public function rfcUpdateAPIToken($api_token)
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -69,7 +69,7 @@ class SAP
             $sapfm = $sapconn->getFunction('ZSRM_RFC_SET_API_TOKEN');
             $returnValue = $sapfm->invoke(['API_TOKEN' => $api_token]);
             $sapconn->close();
-            Log::info("SAPRFC (UpdateAPIToken): Successfully updated API token");
+            Log::info("SAPRFC (UpdateAPIToken): Successfully updated API token (" . System::$system_name . ")");
         } catch (\SAPNWRFC\Exception $e) {
             Log::error("SAPRFC (UpdateAPIToken): " . $e->getErrorInfo());
         }
@@ -77,9 +77,9 @@ class SAP
 
     static public function rfcGetPOData($ebeln) {
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -103,9 +103,9 @@ class SAP
 
     static public function acknowledgePOItem($ebeln, $ebelp, $ackflag) {
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -129,9 +129,9 @@ class SAP
 
     static public function rejectPOItem($ebeln, $ebelp) {
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -161,16 +161,16 @@ class SAP
         $new_price = "";
         $new_eindt = "";
 
-        $item = DB::table("pitems")->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         if ($item->matnr != $item->orig_matnr && $item->vbeln == Orders::stockorder) $new_matnr = $item->matnr;
         if ($item->idnlf != $item->orig_idnlf) $new_idnlf = $item->idnlf;
         if ($item->qty != $item->orig_qty) $new_menge = $item->qty;
         if ($item->purch_price != $item->orig_purch_price) $new_price = $item->purch_price;
         if ($item->lfdat != $item->orig_lfdat) $new_eindt = $item->lfdat;
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -199,9 +199,9 @@ class SAP
                                           $qty, $unit, $price, $curr, $deldate, $infnr = "")
     {
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -234,18 +234,18 @@ class SAP
         // if (Auth::user()->role == "Administrator") Log::debug("Performance check: start refreshDeliveryStatus");
 
         if ($items == null)
-            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems order by ebeln, ebelp");
+            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from ". System::$table_pitems ." order by ebeln, ebelp");
         else {
             $sql = "where ";
             foreach ($items as $item) $sql .= "(ebeln = '$item->ebeln' and ebelp = '$item->ebelp') or ";
             $sql = substr($sql, 0, -4);
-            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from pitems $sql order by ebeln, ebelp");
+            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from ". System::$table_pitems ." $sql order by ebeln, ebelp");
         }
         $items = SAP::rfcGetDeliveryData($mode, $items);
         if ($items != null) {
             DB::beginTransaction();
             foreach ($items as $item) {
-                db::update("update pitems set" .
+                db::update("update ". System::$table_pitems ." set" .
                     " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
                     ", delqty = '$item->delqty'" .
                     ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
@@ -264,12 +264,12 @@ class SAP
 
     static public function rfcGetDeliveryData($mode, $items) {
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
         if ($mode == 2)
-            $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
+            $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = 'Administrator'");
         else
-            $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+            $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -305,9 +305,9 @@ class SAP
     static public function readInforecords($lifnr, $lifnr_name, $idnlf, $mtext, $matnr)
     {
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -361,9 +361,9 @@ class SAP
     static public function readZPRETrecords($lifnr, $lifnr_name, $idnlf, $mtext, $matnr)
     {
 
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -411,9 +411,9 @@ class SAP
 
     static public function getAgentClients($ctvuserid)
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::deftable_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -446,9 +446,9 @@ class SAP
                 $quantity, $quantity_unit, $lifnr, $matnr, $mtext, $idnlf, $purch_price, $purch_curr,
                 $sales_price, $sales_curr, $lfdat, $infnr = "")
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -485,9 +485,9 @@ class SAP
                                         $quantity, $quantity_unit, $lifnr, $matnr, $mtext,
                                         $idnlf, $sales_price, $sales_curr, $lfdat)
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -518,9 +518,9 @@ class SAP
 
     public static function rejectSOItem($vbeln, $posnr, $reason)
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,

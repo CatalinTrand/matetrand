@@ -12,6 +12,7 @@ namespace App\Materom\Orders;
 use App\Materom\Orders;
 use App\Materom\SAP;
 use App\Materom\SAP\MasterData;
+use App\Materom\System;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -197,14 +198,14 @@ class POrderItem
                     "       and users_ref.refid = '" . Auth::user()->id . "'" .
                     " order by id");
                 foreach ($suppliers as $supplier) {
-                    $manufacturers = DB::select("select distinct mfrnr from users_sel where id = '$supplier->id'");
+                    $manufacturers = DB::select("select distinct mfrnr from ". System::$table_users_sel ." where id = '$supplier->id'");
                     if (empty($manufacturers)) {$this->owner = 2; break;}
                     if (isset(array_flip($manufacturers)[$porder->mfrnr])) {$this->owner = 2; break;}
                 }
             }
         } elseif (Auth::user()->role == 'CTV') {
             if ($this->stage == 'C') {
-                if (DB::table("user_agent_clients")->where([["id", "=", Auth::user()->id],
+                if (DB::table(System::$table_user_agent_clients)->where([["id", "=", Auth::user()->id],
                     ["kunnr", "=", $this->kunnr]])->exists())
                     $this->owner = 1;
             }

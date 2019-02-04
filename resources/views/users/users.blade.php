@@ -129,21 +129,22 @@
                             <br><br>
                             <form method="{{Request::url()}}" method="get" class="filterForm">
                                 <div class="row">
-                                    <div class="form-group col-sm-1 input-group-sm">
+                                    <div style="width: 6rem;" class="form-group input-group-sm">
                                         <input type="text" class="form-control input-sm" name="id" placeholder=""
                                                value="" style="border-radius: 2px; border-color: black">
                                     </div>
-                                    <div class="form-group col-xs-2 input-group-sm">
+                                    <div style="width: 6rem;"></div>
+                                    <div style="width: 8rem; margin-left: -0.5rem;" class="form-group input-group-sm">
                                         <input type="text" class="form-control input-sm" name="role" placeholder=""
                                                value=""
                                                style="border-radius: 2px; border-color: black;margin-left: 10px">
                                     </div>
-                                    <div class="form-group col-sm-2 input-group-sm">
+                                    <div  style="width: 15rem;" class="form-group input-group-sm">
                                         <input type="text" class="form-control input-sm" name="user" placeholder=""
                                                value=""
                                                style="border-radius: 2px; border-color: black; margin-left: 20px">
                                     </div>
-                                    <div class="form-group col-xs-3 input-group-sm">
+                                    <div  style="width: 15rem;" class="form-group input-group-sm">
                                         <input type="text" class="form-control input-sm" name="email" placeholder=""
                                                value=""
                                                style="border-radius: 2px; border-color: black; margin-left: 25px">
@@ -157,17 +158,18 @@
                                 </div>
                             </form>
                             <table id="user-list-table" class="table"
-                                   style="width:100%; clear:left; line-height: 1.4rem;">
+                                   style="width:100%; clear:left; line-height: 1em;">
                                 <thead class="thead-light">
                                 <tr>
-                                    <th><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a
+                                    <th style="width: 6rem;"><a href="/users?sort=ID&val=desc">&#x25BC;</a>ID<a
                                                 href="/users?sort=ID&val=asc">&#x25B2;</a>
                                     </th>
-                                    <th><a href="/users?sort=role&val=desc">&#x25BC;</a>{{trans('strings.role')}}<a
+                                    <th style="width: 6rem;">{{__('System')}}</th>
+                                    <th style="width: 9rem;"><a href="/users?sort=role&val=desc">&#x25BC;</a>{{trans('strings.role')}}<a
                                                 href="/users?sort=role&val=asc">&#x25B2;</a></th>
-                                    <th><a href="/users?sort=user&val=desc">&#x25BC;</a>{{trans('strings.username')}}<a
+                                    <th style="width: 15rem;"><a href="/users?sort=user&val=desc">&#x25BC;</a>{{trans('strings.username')}}<a
                                                 href="/users?sort=user&val=asc">&#x25B2;</a></th>
-                                    <th><a href="/users?sort=email&val=desc">&#x25BC;</a>{{__('Email')}}<a
+                                    <th style="width: 15rem;"><a href="/users?sort=email&val=desc">&#x25BC;</a>{{__('Email')}}<a
                                                 href="/users?sort=email&val=asc">&#x25B2;</a></th>
                                     <th>
                                         {{__('Language')}}
@@ -180,20 +182,21 @@
                                 </thead>
                                 <tbody>
                                 @php
+                                    $sap_system = Auth::user()->sap_system;
                                     if(isset($_GET['id']) && strcmp($_GET['id'],"") != 0){
                                         $id = $_GET['id'];
-                                        $users = DB::select("select * from users where id='$id'");
+                                        $users = DB::select("select * from users where id='$id' and sap_system = '$sap_system'");
                                     }else if (isset($_GET['role']) && strcmp($_GET['role'],"") != 0){
                                         $role = $_GET['role'];
-                                        $users = DB::select("select * from users where role like '%$role%'");
+                                        $users = DB::select("select * from users where role like '%$role%' and sap_system = '$sap_system'");
                                     }else if (isset($_GET['user']) && strcmp($_GET['user'],"") != 0){
                                         $user = $_GET['user'];
-                                        $users = DB::select("select * from users where username like '%$user%'");
+                                        $users = DB::select("select * from users where username like '%$user%' and sap_system = '$sap_system'");
                                     }else if (isset($_GET['email']) && strcmp($_GET['email'],"") != 0){
                                         $email = $_GET['email'];
-                                        $users = DB::select("select * from users where email like '%$email%'");
+                                        $users = DB::select("select * from users where email like '%$email%' and sap_system = '$sap_system'");
                                     } else {
-                                        $users = DB::select("select * from users");
+                                        $users = DB::select("select * from users where sap_system = '$sap_system'");
                                     }
 
                                     if($users != null && count($users) > 1)
@@ -203,10 +206,12 @@
 
                                     foreach ($users as $user){
                                         $id = $user->id;
+                                        $sap_system = $user->sap_system;
+                                        if (empty(trim($sap_system))) $sap_system = "200";
                                         $email = $user->email;
                                         $role = $user->role;
                                         $name = $user->username;
-                                        $lang = $user->lang;
+                                        $lang = strtoupper($user->lang);
 
                                         $active = "Active";
                                         if($user->active == 0)
@@ -217,11 +222,11 @@
                                         $deleteUser = __('Delete user');
                                         $impersonateAsUser = __('Impersonate as user');
 
-                                        $table .= "<tr><td>$id</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td>".
-                                        "<td><button type='button' onclick='change_user_password(\"$id\");return false;' title='$chPass'><img id='edit_button_$id' src='images/icons8-password-reset-80.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></button>".
-                                        "<button type='button' onclick='editUser(\"$id\");return false;' title='$editUser'><img id='edit_button_$id' src='images/edit.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></button>".
-                                        "<button type='button' onclick='deleteUser(\"$id\");return false;' title='$deleteUser'><img src='images/delete.png' style='height: 1.3rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button>".
-                                        "<button type='button' onclick='impersonateAsUser(\"$id\");return false;' title='$impersonateAsUser'><img src='images/icons8-circled-up-right-50-2.png' style='height: 1.3rem; padding-left: 0.2rem;' class='edit_user_button' title='".__("Impersonate as user")."'></button>".
+                                        $table .= "<tr><td>$id</td><td>$sap_system</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td>".
+                                        "<td style='padding-top: 0px; padding-bottom: 0px; vertical-align: middle;'><button type='button' onclick='change_user_password(\"$id\");return false;' title='$chPass'><img id='edit_button_$id' src='images/icons8-password-reset-80.png' style='height: 1.5rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></button>".
+                                        "<button type='button' onclick='editUser(\"$id\");return false;' title='$editUser'><img id='edit_button_$id' src='images/edit.png' style='height: 1.5rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></button>".
+                                        "<button type='button' onclick='deleteUser(\"$id\");return false;' title='$deleteUser'><img src='images/delete.png' style='height: 1.5rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button>".
+                                        "<button type='button' onclick='impersonateAsUser(\"$id\");return false;' title='$impersonateAsUser'><img src='images/icons8-circled-up-right-50-2.png' style='height: 1.5rem; padding-left: 0.2rem;' class='edit_user_button' title='".__("Impersonate as user")."'></button>".
                                         "</td></tr>";
                                     }
 

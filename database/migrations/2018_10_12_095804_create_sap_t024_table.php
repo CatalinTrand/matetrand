@@ -14,11 +14,10 @@ class CreateSapT024Table extends Migration
     public function up()
     {
         Schema::create('sap_t024', function (Blueprint $table) {
-            $table->string('ekgrp',3)->default('');
-            $table->string('eknam',18)->default('');
-            $table->string('ektel',12)->default('');
-            $table->string('smtp_addr',241)->default('');
-            $table->primary("ekgrp");
+            require __DIR__.'/../../app/Materom/TableStructures/sap_t024_table.php';
+        });
+        Schema::create('sap_t024_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/sap_t024_table.php';
         });
     }
 
@@ -30,5 +29,6 @@ class CreateSapT024Table extends Migration
     public function down()
     {
         Schema::dropIfExists('sap_t024');
+        Schema::dropIfExists('sap_t024_300');
     }
 }

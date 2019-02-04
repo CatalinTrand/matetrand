@@ -11,6 +11,7 @@ namespace App\Console\Commands;
 use App\Materom\Data;
 use App\Materom\RFCData;
 use App\Materom\SAP;
+use App\Materom\System;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +23,7 @@ class Maintenance extends Command
      *
      * @var string
      */
-    protected $signature = 'materom:maintenance {maintenancecommand}';
+    protected $signature = 'materom:maintenance {maintenancesystem} {maintenancecommand}';
 
     /**
      * The console command description.
@@ -48,6 +49,17 @@ class Maintenance extends Command
      */
     public function handle()
     {
+        $system = $this->argument("maintenancesystem");
+        if ($system == null) {
+            $this->error(__("Please specify the system to be maintained"));
+            return;
+        }
+        if (("X".$system != "X200") && ("X".$system != "X300")) {
+            $this->error(__("Wrong system specified"));
+            return;
+        }
+        System::init($system);
+
         $command = $this->argument("maintenancecommand");
         if ($command == null) {
             $this->error(__("Please specify the maintenance command"));
@@ -62,9 +74,9 @@ class Maintenance extends Command
 
     private function update_all_ctvs()
     {
-        $globalRFCData = DB::select("select * from global_rfc_config");
+        $globalRFCData = DB::select("select * from ". System::deftable_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from roles where rfc_role = 'Administrator'");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = 'Administrator'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -77,7 +89,7 @@ class Maintenance extends Command
             $this->error("SAPRFC (UpdateAllCTVs): " . $e);
         }
 
-        $pitems = DB::select("select * from pitems where vbeln != '!REPLENISH'");
+        $pitems = DB::select("select * from ". System::$table_pitems ." where vbeln != '!REPLENISH'");
         DB::beginTransaction();
         foreach ($pitems as $pitem) {
             $ctv = null;
@@ -88,7 +100,7 @@ class Maintenance extends Command
             }
             if (is_null($ctv)) break;
             $ctv_name = SAP\MasterData::getKunnrName($ctv);
-            DB::update("update pitems set ctv='$ctv', ctv_name='$ctv_name' ".
+            DB::update("update ". System::$table_pitems ." set ctv='$ctv', ctv_name='$ctv_name' ".
               "where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp'");
             $this->info("Purchase order item " . SAP::alpha_output($pitem->ebeln) . "/" . SAP::alpha_output($pitem->ebelp) .
             ": CTV '" . trim($pitem->ctv) . "' => '" . trim($ctv) . "' (" . trim($ctv_name) . ")");

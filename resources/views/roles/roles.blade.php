@@ -13,31 +13,31 @@
         use Illuminate\Support\Facades\DB;
 
         //load configuration from the database
-        $adminData = DB::select("select * from roles where rfc_role = 'administrator'");
+        $adminData = DB::select("select * from ". App\Materom\System::$table_roles ." where rfc_role = 'administrator'");
         if($adminData)
             $adminData = $adminData[0];
         else
             $adminData = new RFCData('', '', '', '', '', '');
 
-        $referentData = DB::select("select * from roles where rfc_role = 'referent'");
+        $referentData = DB::select("select * from ". App\Materom\System::$table_roles ." where rfc_role = 'referent'");
         if($referentData)
             $referentData = $referentData[0];
         else
             $referentData = new RFCData('', '', '', '', '', '');
 
-        $furnizorData = DB::select("select * from roles where rfc_role = 'furnizor'");
+        $furnizorData = DB::select("select * from ". App\Materom\System::$table_roles ." where rfc_role = 'furnizor'");
         if($furnizorData)
             $furnizorData = $furnizorData[0];
         else
             $furnizorData = new RFCData('', '', '', '', '', '');
 
-        $ctvData = DB::select("select * from roles where rfc_role = 'ctv'");
+        $ctvData = DB::select("select * from ". App\Materom\System::$table_roles ." where rfc_role = 'ctv'");
         if($ctvData)
             $ctvData = $ctvData[0];
         else
             $ctvData = new RFCData('', '', '', '', '', '');
 
-        $global = DB::select("select * from global_rfc_config");
+        $global = DB::select("select * from ". App\Materom\System::$table_global_rfc_config);
         if($global)
             $global = $global[0];
         else {

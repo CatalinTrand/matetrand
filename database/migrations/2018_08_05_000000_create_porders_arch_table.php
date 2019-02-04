@@ -15,10 +15,15 @@ class CreatePordersArchTable extends Migration
     public function up()
     {
         Schema::create('porders_arch', function (Blueprint $table) {
-
             require __DIR__.'/../../app/Materom/Orders/structures/porders_table.php';
             $table->timestamp('archdate')->default(DB::raw('CURRENT_TIMESTAMP'));
-
+            $table->primary("ebeln");
+            $table->index("lifnr");
+            $table->index("ekgrp");
+        });
+        Schema::create('porders_300_arch', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/Orders/structures/porders_table.php';
+            $table->timestamp('archdate')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->primary("ebeln");
             $table->index("lifnr");
             $table->index("ekgrp");
@@ -33,5 +38,6 @@ class CreatePordersArchTable extends Migration
     public function down()
     {
         Schema::dropIfExists('porders_arch');
+        Schema::dropIfExists('porders_300_arch');
     }
 }

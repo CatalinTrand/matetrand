@@ -43,14 +43,14 @@ class Mailservice
         if ($user == null) return;
         $user->agent = $user->username;
         if ($user->role == "CTV" || $forcectv) {
-            $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
+            $kunnr = DB::table(System::$table_pitems)->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if (isset($kunnr) && $kunnr != null) {
-                $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+                $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count");
                 if ($dusers == null || empty($dusers))
-                    $agent = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("agent");
-                else $agent = DB::table("users_agent")->where("id", $dusers[0]->id)->value("agent");
+                    $agent = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("agent");
+                else $agent = DB::table(System::$table_users_agent)->where("id", $dusers[0]->id)->value("agent");
             } else {
-                $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+                $agent = DB::table(System::$table_users_agent)->where("id", $user->id)->value("agent");
             }
             if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
@@ -72,14 +72,14 @@ class Mailservice
         if ($user == null) return;
         $user->agent = $user->username;
         if ($user->role == "CTV") {
-            $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
+            $kunnr = DB::table(System::$table_pitems)->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if (isset($kunnr) && $kunnr != null) {
-                $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+                $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count");
                 if ($dusers == null || empty($dusers))
-                    $agent = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("agent");
-                else $agent = DB::table("users_agent")->where("id", $dusers[0]->id)->value("agent");
+                    $agent = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("agent");
+                else $agent = DB::table(System::$table_users_agent)->where("id", $dusers[0]->id)->value("agent");
             } else {
-                $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+                $agent = DB::table(System::$table_users_agent)->where("id", $user->id)->value("agent");
             }
             if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
@@ -101,14 +101,14 @@ class Mailservice
         if ($user == null) return;
         $user->agent = $user->username;
         if ($user->role == "CTV") {
-            $kunnr = DB::table("pitems")->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
+            $kunnr = DB::table(System::$table_pitems)->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if (isset($kunnr) && $kunnr != null) {
-                $dusers = DB::select("select id, count(*) as count from users_agent join user_agent_clients using (id) where kunnr = '$kunnr' group by id order by count");
+                $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count");
                 if ($dusers == null || empty($dusers))
-                    $agent = DB::table("user_agent_clients")->where("kunnr", $kunnr)->value("agent");
-                else $agent = DB::table("users_agent")->where("id", $dusers[0]->id)->value("agent");
+                    $agent = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("agent");
+                else $agent = DB::table(System::$table_users_agent)->where("id", $dusers[0]->id)->value("agent");
             } else {
-                $agent = DB::table("users_agent")->where("id", $user->id)->value("agent");
+                $agent = DB::table(System::$table_users_agent)->where("id", $user->id)->value("agent");
             }
             if (isset($agent) && $agent != null) {
                 $user->agent = $agent;
@@ -127,9 +127,9 @@ class Mailservice
     static public function orderHistory($user, $vbeln, $posnr)
     {
         $result = "";
-        $item = DB::table("pitems")->where(["vbeln" => $vbeln, "posnr" => $posnr])->first();
+        $item = DB::table(System::$table_pitems)->where(["vbeln" => $vbeln, "posnr" => $posnr])->first();
         if (is_null($item)) return $result;
-        $itemhist = DB::select("select * from pitemchg where ebeln = '$item->ebeln' and ebelp = '$item->ebelp' order by cdate desc");
+        $itemhist = DB::select("select * from ".System::$table_pitemchg ." where ebeln = '$item->ebeln' and ebelp = '$item->ebelp' order by cdate desc");
         if (is_null($itemhist) || empty($itemhist)) return $result;
 
         $locale = app('translator')->getLocale();

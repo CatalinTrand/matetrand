@@ -50,9 +50,9 @@ class Data
         if (!array_key_exists("ES_HEADER", $data)) return $data;
         $saphdr = $data["ES_HEADER"];
         if ($ebeln != $saphdr["EBELN"]) return "Wrong purchase order";
-        $orders = DB::select("select * from porders where ebeln = '$ebeln'");
+        $orders = DB::select("select * from ". System::$table_porders ." where ebeln = '$ebeln'");
         if (count($orders) == 0) $order = null;
-        else return "OK";
+          else return "OK";
         $norder = new \stdClass();
         $now = new Carbon();
         $norder->ebeln = $ebeln;
@@ -65,9 +65,10 @@ class Data
 
         $serdat = $saphdr["ERDAT"];
         $erdat = new Carbon();
-        $erdat->day = substr($serdat, 6, 2);
-        $erdat->month = substr($serdat, 4, 2);
+        $erdat->day = 1;
         $erdat->year = substr($serdat, 0, 4);
+        $erdat->month = substr($serdat, 4, 2);
+        $erdat->day = substr($serdat, 6, 2);
         $erdat->hour = $now->hour;
         $erdat->minute = $now->minute;
         $erdat->second = $now->second;
@@ -79,9 +80,10 @@ class Data
 
         $sbedat = $saphdr["BEDAT"];
         $bedat = new Carbon();
-        $bedat->day = substr($sbedat, 6, 2);
-        $bedat->month = substr($sbedat, 4, 2);
+        $bedat->day = 1;
         $bedat->year = substr($sbedat, 0, 4);
+        $bedat->month = substr($sbedat, 4, 2);
+        $bedat->day = substr($sbedat, 6, 2);
         $norder->bedat = $bedat->toDateTimeString();
 
         $norder->ernam = $saphdr["ERNAM"];
@@ -101,12 +103,12 @@ class Data
 
         if (is_null($order)) {
             $new_order_item = true;
-            $sql = "insert into porders (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) values " .
+            $sql = "insert into ". System::$table_porders ." (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) values " .
                 "('$norder->ebeln', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
                 "'$norder->ekgrp', '$norder->bedat', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
             DB::insert($sql);
         } else {
-            $sql = "update porders set " .
+            $sql = "update ". System::$table_porders ." set " .
                 "lifnr = '$norder->lifnr', ".
                 "ekgrp = '$norder->ekgrp', ".
                 "curr = '$norder->curr', " .
@@ -115,7 +117,7 @@ class Data
             DB::update($sql);
         }
 
-        $items = DB::select("select * from pitems where ebeln = '$ebeln' order by ebelp");
+        $items = DB::select("select * from ". System::$table_pitems ." where ebeln = '$ebeln' order by ebelp");
         $sapitms = $data["ET_ITEMS"];
         $citem = null;
         foreach($sapitms as $sapitm) {
@@ -137,6 +139,7 @@ class Data
             $nitem->qty_uom = $sapitm["MEINS"];
             $nitem->lfdat = $sapitm["LFDAT"];
             $lfdat = new Carbon();
+            $lfdat->day = 1;
             $lfdat->year = substr($nitem->lfdat, 0, 4);
             $lfdat->month = substr($nitem->lfdat, 4, 2);
             $lfdat->day = substr($nitem->lfdat, 6, 2);
@@ -166,7 +169,8 @@ class Data
 
             if (is_null($citem)) {
                 $new_order_item = true;
-                $sql = "insert into pitems (ebeln, ebelp, matnr, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, werks, ".
+                $sql = "insert into ". System::$table_pitems .
+                                           " (ebeln, ebelp, matnr, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, werks, ".
                                            "purch_price, purch_curr, purch_prun, purch_puom, ".
                                            "sales_price, sales_curr, sales_prun, sales_puom, ".
                                            "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed, status, ".
@@ -184,7 +188,7 @@ class Data
                 DB::insert($sql);
 
             } else {
-                $sql = "update pitems set idnlf = '$nitem->idnlf', nof = '$nitem->nof', " .
+                $sql = "update ". System::$table_pitems ." set idnlf = '$nitem->idnlf', nof = '$nitem->nof', " .
                     "mtext = '$nitem->mtext', ".
                     "qty = $nitem->qty, ".
                     "qty_uom = '$nitem->qty_uom', ".
@@ -216,29 +220,29 @@ class Data
 
     public static function archiveItem($ebeln, $ebelp, $nodel = false)
     {
-        $porder = DB::table("porders")->where("ebeln", $ebeln)->first();
+        $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
         if ($porder == null) return "Purchase order not found";
-        $pitem = DB::table("pitems")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
+        $pitem = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
         if ($pitem == null) return "Purchase order item not found";
-        $pichanges = DB::table("pitemchg")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
-        $piproposals = DB::table("pitemchg_proposals")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
+        $pichanges = DB::table(System::$table_pitemchg)->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
+        $piproposals = DB::table(System::$table_pitemchg_proposals)->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
         $archdate = now();
 
         DB::beginTransaction();
 
         if (!$nodel) {
-            DB::delete("delete from porders_arch where ebeln = '$ebeln'");
-            DB::delete("delete from pitems_cache where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::delete("delete from pitems where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::delete("delete from pitems_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::delete("delete from pitemchg where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::delete("delete from pitemchg_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::delete("delete from pitemchg_proposals where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::delete("delete from pitemchg_proposals_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::delete("delete from ". System::$table_porders. "_arch where ebeln = '$ebeln'");
+            DB::delete("delete from ". System::$table_pitems_cache ." where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::delete("delete from ". System::$table_pitems ." where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::delete("delete from ". System::$table_pitems . "_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::delete("delete from ". System::$table_pitemchg ." where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::delete("delete from ". System::$table_pitemchg ."_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::delete("delete from ". System::$table_pitemchg_proposals ." where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::delete("delete from ". System::$table_pitemchg_proposals ."_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
         }
 
         foreach($piproposals as $proposal) {
-            DB::insert("INSERT INTO pitemchg_proposals_arch (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr, source, accepted, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO ". System::$table_pitemchg_proposals ."_arch (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr, source, accepted, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$proposal->type, $proposal->ebeln, $proposal->ebelp, $proposal->cdate, $proposal->pos,
                  $proposal->lifnr, $proposal->idnlf, $proposal->matnr, $proposal->mtext, $proposal->lfdat,
                  $proposal->qty, $proposal->qty_uom, $proposal->purch_price, $proposal->purch_curr, $proposal->sales_price,
@@ -246,14 +250,14 @@ class Data
         }
 
         foreach($pichanges as $pichange) {
-            DB::insert("INSERT INTO pitemchg_arch (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, duser, oldval, newval, oebeln, oebelp, reason, acknowledged, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO ". System::$table_pitemchg ."_arch (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, duser, oldval, newval, oebeln, oebelp, reason, acknowledged, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$pichange->ebeln, $pichange->ebelp, $pichange->cdate, $pichange->internal, $pichange->ctype,
                  $pichange->stage, $pichange->cuser, $pichange->cuser_name, $pichange->duser, $pichange->oldval,
                  $pichange->newval, $pichange->oebeln, $pichange->oebelp, $pichange->reason, $pichange->acknowledged,
                  $archdate]);
         }
 
-        DB::insert("INSERT INTO pitems_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, lfdat, deldate, delqty, grdate, grqty, gidate, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO ". System::$table_pitems ."_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, lfdat, deldate, delqty, grdate, grqty, gidate, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
              $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
              $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
@@ -263,17 +267,17 @@ class Data
              $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
              $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr, $archdate]);
 
-        DB::insert("INSERT INTO porders_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO ". System::$table_porders ."_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
              $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
              $porder->fxrate, $porder->changed, $porder->status, $archdate]);
 
         DB::commit();
 
-        if (!$nodel && !DB::table("pitems")->where([["ebeln", "=", $ebeln]])->exists()) {
+        if (!$nodel && !DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln]])->exists()) {
             DB::beginTransaction();
-            DB::delete("delete from porders_cache where ebeln = '$ebeln'");
-            DB::delete("delete from porders where ebeln = '$ebeln'");
+            DB::delete("delete from ". System::$table_porders_cache ." where ebeln = '$ebeln'");
+            DB::delete("delete from ". System::$table_porders ." where ebeln = '$ebeln'");
             DB::commit();
         }
 
@@ -282,21 +286,21 @@ class Data
 
     public static function unArchiveItem($ebeln, $ebelp)
     {
-        $porder = DB::table("porders_arch")->where("ebeln", $ebeln)->first();
+        $porder = DB::table(System::$table_porders ."_arch")->where("ebeln", $ebeln)->first();
         if ($porder == null) return "Archived purchase order does not exist";
-        $pitem = DB::table("pitems_arch")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
+        $pitem = DB::table(System::$table_pitems. "_arch")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->first();
         if ($pitem == null) return "Archived purchase order item does not exist";
-        $pichanges = DB::table("pitemchg_arch")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
-        $piproposals = DB::table("pitemchg_proposals_arch")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
+        $pichanges = DB::table(System::$table_pitemchg ."_arch")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
+        $piproposals = DB::table(System::$table_pitemchg_proposals ."_arch")->where([["ebeln", "=", $ebeln],["ebelp", "=", $ebelp]])->get();
 
         DB::beginTransaction();
 
-        DB::delete("delete from pitems_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::delete("delete from pitemchg_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::delete("delete from pitemchg_proposals_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from ". System::$table_pitems ."_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from ". System::$table_pitemchg ."_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::delete("delete from ". System::$table_pitemchg_proposals ."_arch where ebeln = '$ebeln' and ebelp = '$ebelp'");
 
         foreach($piproposals as $proposal) {
-            DB::insert("INSERT INTO pitemchg_proposals (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr, source, accepted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO ". System::$table_pitemchg_proposals ." (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr, source, accepted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$proposal->type, $proposal->ebeln, $proposal->ebelp, $proposal->cdate, $proposal->pos,
                     $proposal->lifnr, $proposal->idnlf, $proposal->matnr, $proposal->mtext, $proposal->lfdat,
                     $proposal->qty, $proposal->qty_uom, $proposal->purch_price, $proposal->purch_curr, $proposal->sales_price,
@@ -304,13 +308,13 @@ class Data
         }
 
         foreach($pichanges as $pichange) {
-            DB::insert("INSERT INTO pitemchg (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, duser, oldval, newval, oebeln, oebelp, reason, acknowledged) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, duser, oldval, newval, oebeln, oebelp, reason, acknowledged) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$pichange->ebeln, $pichange->ebelp, $pichange->cdate, $pichange->internal, $pichange->ctype,
                     $pichange->stage, $pichange->cuser, $pichange->cuser_name, $pichange->duser, $pichange->oldval,
                     $pichange->newval, $pichange->oebeln, $pichange->oebelp, $pichange->reason, $pichange->acknowledged]);
         }
 
-        DB::insert("INSERT INTO pitems (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, lfdat, deldate, delqty, grdate, grqty, gidate, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO ". System::$table_pitems ." (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, lfdat, deldate, delqty, grdate, grqty, gidate, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
                 $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
                 $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
@@ -320,18 +324,18 @@ class Data
                 $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr]);
 
-        if (!DB::table("porders")->where("ebeln", $ebeln)->exists())
-            DB::insert("INSERT INTO porders (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        if (!DB::table(System::$table_porders)->where("ebeln", $ebeln)->exists())
+            DB::insert("INSERT INTO ". System::$table_porders ." (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
                     $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
                     $porder->fxrate, $porder->changed, $porder->status]);
 
         DB::commit();
 
-        if (!DB::table("pitems_arch")->where([["ebeln", "=", $ebeln]])->exists()) {
+        if (!DB::table(System::$table_pitems ."_arch")->where([["ebeln", "=", $ebeln]])->exists()) {
             DB::beginTransaction();
-            DB::delete("delete from porders_cache where ebeln = '$ebeln'");
-            DB::delete("delete from porders_arch where ebeln = '$ebeln'");
+            DB::delete("delete from ". System::$table_porders_cache ." where ebeln = '$ebeln'");
+            DB::delete("delete from ". System::$table_porders ."_arch where ebeln = '$ebeln'");
             DB::commit();
         }
 
@@ -341,7 +345,7 @@ class Data
     public static function performArchiving()
     {
         SAP::refreshDeliveryStatus(2);
-        $pitems = DB::table("pitems")->where("grdate", "<>", "null")->get();
+        $pitems = DB::table(System::$table_pitems)->where("grdate", "<>", "null")->get();
         foreach($pitems as $pitem) {
             if ("".$pitem->qty == explode(" ", $pitem->grqty)[0]) {
                 Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (goods received)");
@@ -349,7 +353,7 @@ class Data
             }
         }
 
-        $pitems = DB::select("select distinct ebeln, ebelp from pitems where stage = 'Z' and status = 'X'");
+        $pitems = DB::select("select distinct ebeln, ebelp from ". System::$table_pitems ." where stage = 'Z' and status = 'X'");
         foreach ($pitems as $pitem) {
             Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (item rejected)");
             self::archiveItem($pitem->ebeln, $pitem->ebelp);
@@ -357,9 +361,9 @@ class Data
 
         // Delayed archiving
         $pitems = null;
-        $pitems = DB::table("pitems")->where("new_lifnr", "<>", "")->get();
+        $pitems = DB::table(System::$table_pitems)->where("new_lifnr", "<>", "")->get();
         foreach($pitems as $pitem) {
-            if (DB::table("pitems_arch")->where([["ebeln", "=", $pitem->ebeln],["ebelp", "=", $pitem->ebelp]])->exists()) {
+            if (DB::table(System::$table_pitems ."_arch")->where([["ebeln", "=", $pitem->ebeln],["ebelp", "=", $pitem->ebelp]])->exists()) {
                 Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (delayed)");
                 self::archiveItem($pitem->ebeln, $pitem->ebelp);
             } else {
