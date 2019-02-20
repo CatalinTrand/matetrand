@@ -14,7 +14,7 @@
         @endif
         <div class="form-group row" style="width: 95%; margin-left: 1rem;">
             <textarea id="new_inquiry" type="text" name="new_inquiry" class="form-control"
-                      style="word-break: break-word; height: 4rem;" maxlength="100" value=""></textarea>
+                      style="word-break: break-word; height: 4rem;" maxlength="255" value=""></textarea>
         </div>
         <i id="new_inquiry_msg" style="color: red"></i>
     </form>

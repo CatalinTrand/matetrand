@@ -109,7 +109,7 @@ class Orders
         $filter_matnr_sql = self::processFilter($items_table . ".idnlf", $filter_matnr);
         $filter_mtext_sql = self::processFilter($items_table . ".mtext", $filter_mtext);
         $filter_lifnr_sql = self::processFilter($orders_table . ".lifnr", $filter_lifnr, 10);
-        $filter_lifnr_name_sql = self::processFilter("sap_lfa1.name1", $filter_lifnr_name);
+        $filter_lifnr_name_sql = self::processFilter(System::$table_sap_lfa1.".name1", $filter_lifnr_name);
 
         $filter_sql = $time_limit === null ? "" : "$items_table.archdate >= '$time_limit 00:00:00'";
         if ($history != 2) $filter_sql = "";
@@ -131,6 +131,7 @@ class Orders
             $filter_sql = self::addFilter($filter_sql,
                 "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         } elseif (Auth::user()->role == "Referent") {
+/*
             $refs = DB::select("select distinct users_ref.id, users.lifnr from users_ref " .
                 "join users using (id) " .
                 "where refid ='" . Auth::user()->id . "'");
@@ -151,7 +152,9 @@ class Orders
             if (!empty($filter_refs_sql))
                 $filter_refs_sql = "((" . substr($filter_refs_sql, 4) . ") or " .
                     self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
-            else $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
+            else
+*/
+            $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
             $filter_sql = self::addFilter($filter_sql, $filter_refs_sql);
         } elseif (Auth::user()->role == "CTV") {
             $clients = DB::select("select distinct kunnr from ". System::$table_user_agent_clients ." where id = '" .
@@ -242,7 +245,7 @@ class Orders
 
         if ($history == 1 && $s_order == null && $p_order == null && $refresh_dlv) {
             $items = DB::select("select ebeln, ebelp from ". System::$table_pitems_cache ." where session = '$cacheid'");
-            SAP::refreshDeliveryStatus(1, $items);
+            if ($items != null) SAP::refreshDeliveryStatus(1, $items);
         }
 
         $porders_sql = "";
@@ -311,7 +314,12 @@ class Orders
                 }
                 $_pitem->fill($_porder);
                 if (($inquirements != 1) ||
-                    ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")) && (($_pitem->owner != 0) || (Auth::user()->role == "Administrator"))))
+                    ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")) &&
+                     (($_pitem->owner != 0) || (Auth::user()->role == "Administrator") ||
+                      ((Auth::user()->role == "Furnizor") && (($_pitem->info == 4) || ($_pitem->info == 5)))
+                     )
+                    )
+                   )
                     if ($overdue == 0 || $_pitem->lfdat < $now) {
                         $_porder->appendItem($_pitem);
                         self::$overdue_items++;

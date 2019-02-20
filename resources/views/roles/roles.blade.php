@@ -267,6 +267,14 @@
                                                        value="{{$ctvData->rfc_passwd}}">
                                             </div>
                                         </div>
+                                        <div class="form-group row">
+                                            <label for="user1"
+                                                   class="col-md-4 text-md-left spaced-label">{{__('Fallback CTV user')}}</label>
+
+                                            <div class="col-md-6">
+                                                <input id="c_user1" type="text" name="user1" class="spaced-input" value="{{$ctvData->user1}}">
+                                            </div>
+                                        </div>
                                         <button id="CTV_test" style="border-top: 4px black;width: 100%;margin-bottom: 10px">{{__('Test')}} </button>
                                         <input type="hidden" name="rfc_role" value="ctv">
                                         <input type="submit" value="{{__('Save')}}"

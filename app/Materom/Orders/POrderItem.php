@@ -64,6 +64,7 @@ class POrderItem
 
     public $new_lifnr;   // new vendor, if initial one was rejected
     public $werks;       // plant
+    public $elikz;       // delivery completed
 
     // computed/determined fields
     public $sorder;      // sales order to be displayed
@@ -71,6 +72,7 @@ class POrderItem
     public $shipto_name;
     public $wtime;    // processing warning date
     public $ctime;    // processing critical date
+    public $dodays;   // delivery overdue days
 
     // external representations
     public $x_quantity;
@@ -146,6 +148,7 @@ class POrderItem
         $this->nof = $pitem->nof;
         $this->new_lifnr = $pitem->new_lifnr;
         $this->werks = $pitem->werks;
+        $this->elikz = $pitem->elikz;
         $this->changes = array();
     }
 
@@ -374,6 +377,16 @@ class POrderItem
         $this->x_purchase_price = trim($this->purch_price) . " " . trim($this->purch_curr);
         if ((Auth::user()->role == 'Furnizor') || ($this->vbeln == Orders::stockorder)) $this->x_sales_price = "";
         else $this->x_sales_price = trim($this->sales_price) . " " . trim($this->sales_curr);
+
+        $clfdat = new Carbon(substr($this->lfdat, 0, 10));
+        $cnow = new Carbon();
+        $cnow->hour = 0;
+        $cnow->minute = 0;
+        $cnow->second = 0;
+        $this->dodays = "";
+        if ($cnow > $clfdat) {
+            $this->dodays = $cnow->diffInDays($clfdat);
+        }
 
         // Post-processing options
         if (($this->stage == 'Z') && ($this->status == 'A') && ($this->grdate == null)) {

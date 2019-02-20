@@ -45,3 +45,4 @@ $table->dateTime('orig_lfdat')->default(now());
 $table->boolean('nof');
 $table->string('new_lifnr', 10)->default('');
 $table->string('werks', 4)->default('');
+$table->string('elikz', 1)->default('');

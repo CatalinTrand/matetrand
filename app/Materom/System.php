@@ -31,6 +31,7 @@ class System
     const deftable_users_agent = "users_agent";
     const deftable_users_cli = "users_cli";
     const deftable_users_sel = "users_sel";
+    const deftable_sap_client_agents = "sap_client_agents";
 
     public static $system;
     public static $system_name;
@@ -50,6 +51,7 @@ class System
     public static $table_users_agent = self::deftable_users_agent;
     public static $table_users_cli = self::deftable_users_cli;
     public static $table_users_sel = self::deftable_users_sel;
+    public static $table_sap_client_agents = self::deftable_sap_client_agents;
 
     public static function init($sap_system = "")
     {
@@ -62,7 +64,6 @@ class System
 
         $userid = "<unknown>";
         if (Auth::check()) $userid = Auth::user()->id;
-        // Log::debug("System selection: user $userid => " . self::$system_name);
 
         self::$table_global_rfc_config = self::deftable_global_rfc_config;
         self::$table_pitemchg = self::deftable_pitemchg;

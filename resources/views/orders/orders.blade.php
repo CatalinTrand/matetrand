@@ -1795,7 +1795,7 @@
                 }).then(function(result) {
                     if (result) {
                         doRejectItem(porder, item, 'G', '', 'X', 'Z');
-                        location.reload();
+                        location.reload(true);
                     } else {
                         _unused_acceptItem(porder, item, "F", true);
                     }
@@ -1919,7 +1919,7 @@
                                 $("#new_chg_val").text("");
                                 $("#new_val_hlp").text("");
                                 changeDialog.dialog("close");
-                                location.reload();
+                                location.reload(true);
                             }
                         } else {
                             alert("{{__('Enter a correct value')}}");
@@ -2090,7 +2090,7 @@
                     <label for="reject-reason"
                            class="col-md-2 col-form-label text-md-left">{{__("Explanations")}}</label>&nbsp;&nbsp;
                     <textarea id="reject-reason" type="text" name="reject-reason" class="form-control col-md-9"
-                              style="word-break: break-word; height: 4rem;" maxlength="100" value=""></textarea>
+                              style="word-break: break-word; height: 4rem;" maxlength="255" value=""></textarea>
                 </div>
             </div>
 
@@ -2229,7 +2229,11 @@
                     _status = status;
                 });
             jQuery.ajaxSetup({async: true});
-            $("#tr_I" + ebeln + "_" + ebelp + " td:eq(1)").html("");
+            @if ($filter_inquirements == 1)
+                Location.reload(true);
+            @else
+                $("#tr_I" + ebeln + "_" + ebelp + " td:eq(1)").html("");
+            @endif
         }
 
         function replyack2(ebeln) {

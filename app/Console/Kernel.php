@@ -59,6 +59,7 @@ class Kernel extends ConsoleKernel
                 MasterData::refreshPurchGroupsCache();
                 // push finally processed orders to archive
                 Data::performArchiving();
+                Data::gatherStatistics();
                 Log::info("Daily cleanup job has ended in system ". System::$system_name);
 
             }

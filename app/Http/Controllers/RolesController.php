@@ -22,7 +22,8 @@ class RolesController extends Controller
         return Roles::insertRoleData(
             Input::get("rfc_role"),
             Input::get("rfc_user"),
-            Input::get("rfc_passwd")
+            Input::get("rfc_passwd"),
+            Input::get("user1")
         );
     }
 }

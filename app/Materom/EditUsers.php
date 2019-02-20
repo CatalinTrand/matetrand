@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class EditUsers {
 
-    static function editUser($id, $role, $user, $token, $lang, $sapuser, $lifnr, $ekgrp, $active, $email, $sap_system)
+    static function editUser($id, $role, $user, $token, $lang, $lifnr, $ekgrp, $active, $email, $sap_system)
     {
 
         $prevusers = DB::select("select * from users where id ='$id'");
@@ -28,10 +28,10 @@ class EditUsers {
         if (ctype_digit($lifnr)) $lifnr = str_pad($lifnr, 10, "0", STR_PAD_LEFT);
 
         if($active == 1)
-            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser',  lifnr = '$lifnr'," .
+            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', lifnr = '$lifnr'," .
                                " ekgrp = '$ekgrp', active = '$active', deleted_at = null, activated_at = '$activated_at', sap_system = '$sap_system' where id = '$id'");
         else
-            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', sapuser ='$sapuser', ".
+            DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', ".
             "active = '$active', deleted_at = NOW(), activated_at = '$activated_at', sap_system = '$sap_system' where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");

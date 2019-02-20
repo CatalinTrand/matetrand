@@ -38,8 +38,7 @@
         if ($user->sap_system == "300") $currentsystem300 = "selected";
 
         if(is_null($user->ekgrp)) $user->ekgrp = "";
-        if(is_null($user->lifnr))  $user->lifnr = "";
-        if(is_null($user->sapuser))  $user->sapuser = "";
+        if(is_null($user->lifnr)) $user->lifnr = "";
 
         $selectedAdmin = "";
         $selectedReferent = "";
@@ -180,16 +179,6 @@
                                     <div class="col-md-6">
                                         <input id="ekgrp" type="text" name="ekgrp" class="form-control"
                                                value="{{$user->ekgrp}}">
-                                    </div>
-                                </div>
-
-                                <div class="form-group row" id="sapuser_div" style="display: none;">
-                                    <label for="sapuser"
-                                           class="col-md-3 col-form-label text-md-left">SAP User</label>
-
-                                    <div class="col-md-6">
-                                        <input id="sapuser" type="text" name="sapuser" class="form-control"
-                                               value="{{$user->sapuser}}">
                                     </div>
                                 </div>
 
@@ -405,7 +394,7 @@
                                             $table = "";
                                             foreach ($myAGENTs as $aAGENT){
                                                     $agent = $aAGENT->agent;
-                                                    $agent_name = \App\Materom\SAP\MasterData::getKunnrName($agent, 2);
+                                                    $agent_name = \App\Materom\SAP\MasterData::getAgentName($agent);
                                                     $table .= "<tr><td>$agent</td><td>$agent_name</td><td><button type='button' onclick='agentDel(\"$id\",\"$agent\");return false;'><img src='/images/delete.png' class='delete' style='height: 1.4rem;'></button></td></tr>";
                                             }
                                             echo $table;
@@ -571,7 +560,6 @@
             var ekgrp_div = document.getElementById("ekgrp_div");
             var vendor_div = document.getElementById("vendor_div");
             var token_div = document.getElementById("token_div");
-            var sapuser_div = document.getElementById("sapuser_div");
             var agent_div = document.getElementById("agent_div");
             var customer_div = document.getElementById("customers_div");
 
@@ -582,13 +570,11 @@
                         ref_div.style.display = "none";
                         lifnr_div.style.display = "none";
                         vendor_div.style.display = "none";
-                        sapuser_div.style.display = "none";
                     } else {
                         ekgrp_div.style.display = "none";
                         ref_div.style.display = "";
                         lifnr_div.style.display = "";
                         vendor_div.style.display = "";
-                        sapuser_div.style.display = "none";
                     }
                     token_div.style.display = "none";
                     agent_div.style.display = "none";
@@ -607,11 +593,9 @@
                     }
 
                     if (nameSelect == "CTV") {
-                        sapuser_div.style.display = "";
                         agent_div.style.display = "";
                         customer_div.style.display = "";
                     } else {
-                        sapuser_div.style.display = "none";
                         agent_div.style.display = "none";
                         customer_div.style.display = "none";
                     }

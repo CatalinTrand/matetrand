@@ -96,14 +96,6 @@ class WebserviceController extends Controller
         );
     }
 
-    public function reloadcache(){
-        DB::beginTransaction();
-        DB::delete("delete from porders_cache");
-        DB::delete("delete from pitems_cache");
-        DB::commit();
-        Orders::fillCache();
-    }
-
     public function deletefilters(){
 //        Session::forget('filter_status');
 //        Session::forget('filter_history');
@@ -286,7 +278,9 @@ class WebserviceController extends Controller
                 __("Fabricant"),
                 __("Quantity"), '',
                 __("Price"), '',
-                __("Delivery date")
+                __("Delivery date"),
+                __("Delivered quantity"),
+                __("Goods receipt date"),
             ]);
 
         //            array_push($itemsArray,DB::getSchemaBuilder()->getColumnListing("pitems"));
@@ -304,7 +298,9 @@ class WebserviceController extends Controller
                     $item->qty_uom,
                     $item->purch_price,
                     $item->purch_curr,
-                    substr($item->lfdat, 0, 10)
+                    substr($item->lfdat, 0, 10),
+                    explode(" ", $item->delqty)[0],
+                    ($item->grdate == null ? "" : substr($item->grdate, 0, 10))
                 ]);
             }
         }
@@ -330,8 +326,39 @@ class WebserviceController extends Controller
 
     public function impersonateAsUser() {
         $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
-        if (Auth::user()->role == "Administrator")
+        if (Auth::user()->role == "Administrator") {
             Auth::loginUsingId(Input::get("id"));
+
+            System::init(Auth::user()->sap_system);
+            Session::put('locale', strtolower(Auth::user()->lang));
+            Session::put('materomdbcache', Orders::newCacheToken());
+            Session::put("groupOrdersBy", 1);
+            if (Auth::user()->role == "CTV") {
+                $id = Auth::user()->id;
+                DB::delete("delete from ". System::$table_user_agent_clients ." where id = '$id'");
+                $clients = SAP::getAgentClients($id);
+                if (!empty($clients)) {
+                    $sql = "";
+                    foreach ($clients as $client) {
+                        $sql .= ",('$id','$client->client','$client->agent')";
+                    }
+                    $sql = substr($sql, 1);
+                    DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr, agent) values " . $sql);
+                }
+                $customers = DB::select("select * from ". System::$table_users_cli ." where id = '$id'");
+                if (!empty($customers)) {
+                    foreach ($customers as $customer) {
+                        $client = $customer->kunnr;
+                        if (!DB::table(System::$table_user_agent_clients)->where([["id", "=", $id], ["kunnr", "=", $client]])->exists())
+                            DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr) values ('$id','$client')");
+                    }
+                }
+                Session::put("groupOrdersBy", 4);
+            }
+            if (substr(Auth::user()->id, 0, 4) == "radu") Session::put("filter_ebeln", "NONE");
+            Orders::fillCache();
+        }
+
     }
 
     public function getSubTree()

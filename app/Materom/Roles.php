@@ -21,10 +21,12 @@ class Roles
         return redirect()->back();
     }
 
-    static function insertRoleData($rfc_role, $rfc_user, $rfc_passwd)
+    static function insertRoleData($rfc_role, $rfc_user, $rfc_passwd, $user1)
     {
+        if ($user1 == null) $user1 = "";
+        $user1 = trim($user1);
         DB::delete("delete from ". System::$table_roles ." where rfc_role = '$rfc_role'");
-        DB::insert("insert into ". System::$table_roles ." (rfc_role,rfc_user,rfc_passwd) values ('$rfc_role','$rfc_user','$rfc_passwd')");
+        DB::insert("insert into ". System::$table_roles ." (rfc_role,rfc_user,rfc_passwd,user1) values ('$rfc_role','$rfc_user','$rfc_passwd','$user1')");
         \Session::put("alert-success", "Role RFC data was successfully saved");
         return redirect()->back();
     }

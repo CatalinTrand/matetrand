@@ -52,6 +52,7 @@ class SendMailNotificationSalesOrderItem extends Command
             $this->error(__("The specified user id does not exist"));
             return;
         }
+        System::init($user->sap_system);
 
         $sorder = $this->argument("sorder");
         if ($sorder == null) {

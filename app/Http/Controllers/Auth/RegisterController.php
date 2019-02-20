@@ -67,8 +67,6 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        $sapuser = $data['sapuser'];
-        if (is_null($sapuser) || !isset($sapuser)) $sapuser = "";
         $ekgrp = $data['ekgrp'];
         if (is_null($ekgrp) || !isset($ekgrp)) $ekgrp = "";
         $lifnr = $data['lifnr'];
@@ -84,7 +82,6 @@ class RegisterController extends Controller
             'role' => $data['role'],
             'username' => $data['username'],
             'lang' => $data['lang'],
-            'sapuser' => $sapuser,
             'ekgrp' => $ekgrp,
             'lifnr' => $lifnr,
             'email' => $data['email'],

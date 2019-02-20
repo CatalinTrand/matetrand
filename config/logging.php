@@ -76,6 +76,11 @@ return [
             'driver' => 'errorlog',
             'level' => 'debug',
         ],
+
+        'poevent' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/materom_poevent.log'),
+        ]
     ],
 
 ];

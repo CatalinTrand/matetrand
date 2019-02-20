@@ -8,3 +8,5 @@
 $table->string('rfc_role', 20)->unique();
 $table->string('rfc_user', 12);
 $table->string('rfc_passwd', 12);
+$table->string('user1', 20)->default('');
+

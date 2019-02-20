@@ -69,49 +69,24 @@ class Maintenance extends Command
             $this->update_all_ctvs();
             return;
         }
-//      $this->info("Archiving ended (" . $okcount . "/". count($pitems) . " item(s) archived)");
     }
 
     private function update_all_ctvs()
     {
-        $globalRFCData = DB::select("select * from ". System::deftable_global_rfc_config);
-        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = 'Administrator'");
-        if($roleData) $roleData = $roleData[0]; else return;
-
-        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
-            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
-            $roleData->rfc_user, $roleData->rfc_passwd);
-        try {
-            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_CTV_FOR_CUSTOMER');
-        } catch (\SAPNWRFC\Exception $e) {
-            $this->error("SAPRFC (UpdateAllCTVs): " . $e);
-        }
-
-        $pitems = DB::select("select * from ". System::$table_pitems ." where vbeln != '!REPLENISH'");
-        DB::beginTransaction();
+        $pitems = DB::select("select * from ". System::$table_pitems
+                         ." where vbeln != '!REPLENISH' and kunnr <> ''"
+                         ." and not exists (select * from ". System::deftable_sap_client_agents ." where ".
+                         System::$table_pitems .".kunnr = ". System::deftable_sap_client_agents .".kunnr and ".
+                         System::$table_pitems .".ctv = ". System::deftable_sap_client_agents .".agent and ".
+                         System::$table_pitems .".ctv_name = ". System::deftable_sap_client_agents .".name1) ".
+                         " order by ebeln, ebelp");
         foreach ($pitems as $pitem) {
-            $ctv = null;
-            try {
-                $ctv = $sapfm->invoke(['I_KUNNR' => $pitem->kunnr])["E_CTV"];
-            } catch (\SAPNWRFC\Exception $e) {
-                $this->error("SAPRFC (UpdateAllCTVs): " . $e);
-            }
-            if (is_null($ctv)) break;
-            $ctv_name = SAP\MasterData::getKunnrName($ctv);
-            DB::update("update ". System::$table_pitems ." set ctv='$ctv', ctv_name='$ctv_name' ".
+            $ctv = SAP\MasterData::getAgentForClient($pitem->kunnr);
+            if (empty($ctv->agent)) continue;
+            $count = DB::update("update ". System::$table_pitems ." set ctv='$ctv->agent', ctv_name='$ctv->agent_name' ".
               "where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp'");
             $this->info("Purchase order item " . SAP::alpha_output($pitem->ebeln) . "/" . SAP::alpha_output($pitem->ebelp) .
-            ": CTV '" . trim($pitem->ctv) . "' => '" . trim($ctv) . "' (" . trim($ctv_name) . ")");
+                ": CTV '" . trim($pitem->ctv) . "' => '" . trim($ctv->agent) . "' (" . trim($ctv->agent_name) . ")");
         }
-        DB::commit();
-
-        try {
-            $sapconn->close();
-        } catch (\SAPNWRFC\Exception $e) {
-            $this->error("SAPRFC (UpdateAllCTVs): " . $e);
-        }
-
     }
 }

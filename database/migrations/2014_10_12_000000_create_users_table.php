@@ -23,7 +23,6 @@ class CreateUsersTable extends Migration
             $table->string('api_token')->default('');
             $table->string('lifnr', 10)->default('');
             $table->string('ekgrp', 3)->default('');
-            $table->string('sapuser', 12)->default('');
             $table->string('lang',2)->default('en');
             $table->integer('active')->default('1');
             $table->rememberToken();

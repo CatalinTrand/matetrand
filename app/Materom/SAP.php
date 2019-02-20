@@ -163,7 +163,7 @@ class SAP
 
         $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         if ($item->matnr != $item->orig_matnr && $item->vbeln == Orders::stockorder) $new_matnr = $item->matnr;
-        if ($item->idnlf != $item->orig_idnlf) $new_idnlf = $item->idnlf;
+        if (trim($item->idnlf) != trim($item->orig_idnlf)) $new_idnlf = $item->idnlf;
         if ($item->qty != $item->orig_qty) $new_menge = $item->qty;
         if ($item->purch_price != $item->orig_purch_price) $new_price = $item->purch_price;
         if ($item->lfdat != $item->orig_lfdat) $new_eindt = $item->lfdat;
@@ -234,12 +234,12 @@ class SAP
         // if (Auth::user()->role == "Administrator") Log::debug("Performance check: start refreshDeliveryStatus");
 
         if ($items == null)
-            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from ". System::$table_pitems ." order by ebeln, ebelp");
+            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz from ". System::$table_pitems ." order by ebeln, ebelp");
         else {
             $sql = "where ";
             foreach ($items as $item) $sql .= "(ebeln = '$item->ebeln' and ebelp = '$item->ebelp') or ";
             $sql = substr($sql, 0, -4);
-            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate from ". System::$table_pitems ." $sql order by ebeln, ebelp");
+            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz from ". System::$table_pitems ." $sql order by ebeln, ebelp");
         }
         $items = SAP::rfcGetDeliveryData($mode, $items);
         if ($items != null) {
@@ -251,6 +251,7 @@ class SAP
                     ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
                     ", grqty = '$item->grqty'" .
                     ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
+                    ", elikz = '$item->elikz'" .
                     " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
             }
             DB::commit();
@@ -293,11 +294,11 @@ class SAP
                 $item->grdate = SAP::date_output($item->GRDATE); unset($item->GRDATE);
                 $item->grqty = $item->GRQTY; unset($item->GRQTY);
                 $item->gidate = SAP::date_output($item->GIDATE); unset($item->GIDATE);
+                $item->elikz = trim($item->ELIKZ); unset($item->ELIKZ);
             }
             return $items;
         } catch (\SAPNWRFC\Exception $e) {
-//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            // check $e->getErrorInfo();
+            Log::error($e);
             return null;
         }
     }
@@ -413,7 +414,7 @@ class SAP
     {
         $globalRFCData = DB::select("select * from ". System::deftable_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
-        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        $roleData = DB::select("select * from ". System::deftable_roles ." where rfc_role = '" . Auth::user()->role . "'");
         if($roleData) $roleData = $roleData[0]; else return;
 
         $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
@@ -421,7 +422,7 @@ class SAP
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
             $clients = array();
-            $agents = DB::select("select agent from users_agent where id = '$ctvuserid'");
+            $agents = DB::select("select agent from ". System::$table_users_agent ." where id = '$ctvuserid'");
             if (empty($agents)) return $clients;
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
             $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_CLIENT_HIERARCHY');
@@ -539,6 +540,33 @@ class SAP
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();
         }
+    }
+
+    static public function readCTVforCustomer($kunnr) {
+
+        $globalRFCData = DB::select("select * from ". System::deftable_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
+        $roleData = DB::select("select * from ". System::deftable_roles ." where rfc_role = 'Administrator'");
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        $ctv = new \stdClass();
+        $ctv->agent = "";
+        $ctv->agent_name = "";
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_CTV_FOR_CUSTOMER');
+            $result = $sapfm->invoke(['I_KUNNR' => $kunnr]);
+            $sapconn->close();
+            $ctv->agent = trim($result["E_CTV"]);
+            $ctv->agent_name = trim($result["E_CTVNAME"]);
+            return $ctv;
+        } catch (\SAPNWRFC\Exception $e) {
+            Log::error($e);
+        }
+        return $ctv;
     }
 
 };

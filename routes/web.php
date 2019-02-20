@@ -52,7 +52,6 @@ Route::post('webservice/sortmessages','WebserviceController@sortMessages');
 Route::get('webservice/itemsOfOrder','WebserviceController@itemsOfOrder');
 Route::post('webservice/refilter','WebserviceController@refilter');
 Route::post('webservice/deletefilters','WebserviceController@deletefilters');
-Route::post('webservice/reloadcache','WebserviceController@reloadcache');
 Route::post('webservice/readproposals','WebserviceController@readProposals');
 Route::get('webservice/readpitem','WebserviceController@readPOItem');
 Route::get('webservice/processproposal','WebserviceController@processProposal');

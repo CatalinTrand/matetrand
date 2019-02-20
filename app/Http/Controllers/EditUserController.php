@@ -16,7 +16,6 @@ class EditUserController
             Input::get("username"),
             Input::get("api_token"),
             Input::get("lang"),
-            Input::get("sapuser"),
             Input::get("lifnr"),
             Input::get("ekgrp"),
             Input::get("active"),
