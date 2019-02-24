@@ -188,7 +188,10 @@ class Data
             $nitem->lfdat = $lfdat->toDateTimeString();
             $nitem->mfrnr = $sapitm["MFRNR"];
             $nitem->werks = $sapitm["WERKS"];
-            if ($nitem->werks == "D000" || $nitem->werks != "G000") $send_mail = false;
+            if ($nitem->werks == "D000" || $nitem->werks == "G000") {
+                DB::rollBack();
+                return "nOK";
+            }
             $nitem->purch_price = $sapitm["PURCH_PRICE"];
             $nitem->purch_curr = $sapitm["PURCH_CURR"];
             $nitem->purch_prun = $sapitm["PURCH_PRUN"];
@@ -248,7 +251,7 @@ class Data
         Log::channel("poevent")->info("Purchase order $ebeln successfully created/updated");
         if ("X" . System::$system != "X300") {
             foreach ($sapitms as $sapitm) {
-                SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
+//              SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
             }
         }
         if ($new_order_item) {

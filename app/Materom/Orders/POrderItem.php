@@ -84,6 +84,7 @@ class POrderItem
     public $info;     // 0=empty, 1=new item, 2=warning, 3=critical, 4=new message
     public $owner;    // 0=no, 1=direct, 2=indirect
                       // changed:  $this->changed
+    public $crefo;    // reference could be the owner
     public $accepted; // $this->status = A
     public $rejected; // $this->status = X
     public $inquired; // 0=no, 1=tentatively accepted, 2=tentatively rejected, 3=simple message
@@ -190,20 +191,32 @@ class POrderItem
         if ($groupByPO == 4 && $this->vbeln != Orders::stockorder) $this->posnr_out = SAP::alpha_output($this->posnr);
 
         $this->owner = 0;
+        $this->crefo = 0;
         if (Auth::user()->role == 'Furnizor') {
             if ($this->stage == 'F') $this->owner = 1;
         } elseif (Auth::user()->role == 'Referent') {
             if ($this->stage == 'R') $this->owner = 1;
-            elseif ($this->stage == 'F') {
-                $suppliers = DB::select("select distinct users.id from users ".
+            else {
+                $suppliers = DB::select("select distinct users.id from users " .
                     " join users_ref using (id)" .
-                    " where users.role = 'Furnizor' and users.lifnr = '$porder->lifnr' ".
+                    " where users.role = 'Furnizor' and users.lifnr = '$porder->lifnr' " .
                     "       and users_ref.refid = '" . Auth::user()->id . "'" .
                     " order by id");
                 foreach ($suppliers as $supplier) {
-                    $manufacturers = DB::select("select distinct mfrnr from ". System::$table_users_sel ." where id = '$supplier->id'");
-                    if (empty($manufacturers)) {$this->owner = 2; break;}
-                    if (isset(array_flip($manufacturers)[$porder->mfrnr])) {$this->owner = 2; break;}
+                    $manufacturers = DB::select("select distinct mfrnr from " . System::$table_users_sel . " where id = '$supplier->id'");
+                    if (empty($manufacturers)) {
+                        $this->crefo = 1;
+                        break;
+                    }
+                    if (isset(array_flip($manufacturers)[$porder->mfrnr])) {
+                        $this->crefo = 1;
+                        break;
+                    }
+                }
+                if ($this->crefo == 1) {
+                    if ($this->stage == 'F') {
+                        $this->owner = 2;
+                    }
                 }
             }
         } elseif (Auth::user()->role == 'CTV') {
@@ -279,7 +292,7 @@ class POrderItem
                 $this->inquired = 3;
 
             if ($first && ($itemchg->acknowledged == 0)
-                && (Auth::user()->role == 'Furnizor') // && $this->owner != 0
+                && ((Auth::user()->role == 'Furnizor') || ((Auth::user()->role == 'Referent') && ($this->crefo == 1)))
                 && ($this->pstage != ' ') && ($this->pstage != '')
                 && ($this->pstage != 'F')) { // } && ($this->stage != 'Z')) {
                 if ($itemchg->ctype == "A") $this->info = 4;

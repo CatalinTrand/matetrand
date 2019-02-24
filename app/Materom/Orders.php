@@ -314,9 +314,10 @@ class Orders
                 }
                 $_pitem->fill($_porder);
                 if (($inquirements != 1) ||
-                    ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")) &&
+                    ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")
+                                                || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) &&
                      (($_pitem->owner != 0) || (Auth::user()->role == "Administrator") ||
-                      ((Auth::user()->role == "Furnizor") && (($_pitem->info == 4) || ($_pitem->info == 5)))
+                      (((Auth::user()->role == "Furnizor") || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) && (($_pitem->info == 4) || ($_pitem->info == 5)))
                      )
                     )
                    )

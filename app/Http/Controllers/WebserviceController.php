@@ -270,11 +270,29 @@ class WebserviceController extends Controller
         $itemsArray = [];
 
         //Excel header
-        array_push($itemsArray, [
+        if (Auth::user()->role == "Furnizor") {
+            array_push($itemsArray, [
+                    __("Purchase order"),
+                    __("Item"),
+                    __("Vendor mat."),
+                    __("Description"),
+                    __("Fabricant"),
+                    __("Quantity"), '',
+                    __("Price"), '',
+                    __("Delivery date"),
+                    __("Delivered quantity"),
+                    __("Goods receipt date"),
+            ]);
+        } else {
+            array_push($itemsArray, [
                 __("Purchase order"),
                 __("Item"),
                 __("Vendor mat."),
                 __("Description"),
+                __("Supplier"),
+                __("Supplier name"),
+                __("Refferal"),
+                __("Refferal Name"),
                 __("Fabricant"),
                 __("Quantity"), '',
                 __("Price"), '',
@@ -282,26 +300,48 @@ class WebserviceController extends Controller
                 __("Delivered quantity"),
                 __("Goods receipt date"),
             ]);
+        }
 
         //            array_push($itemsArray,DB::getSchemaBuilder()->getColumnListing("pitems"));
 
         //Contents
         foreach ($orders as $order) {
             foreach($order->items as $item) {
-                array_push($itemsArray, [
-                    SAP::alpha_output($item->ebeln),
-                    SAP::alpha_output($item->ebelp),
-                    $item->idnlf,
-                    $item->mtext,
-                    ucfirst(strtolower(MasterData::getLifnrName($item->mfrnr))),
-                    $item->qty,
-                    $item->qty_uom,
-                    $item->purch_price,
-                    $item->purch_curr,
-                    substr($item->lfdat, 0, 10),
-                    explode(" ", $item->delqty)[0],
-                    ($item->grdate == null ? "" : substr($item->grdate, 0, 10))
-                ]);
+                if (Auth::user()->role == "Furnizor") {
+                    array_push($itemsArray, [
+                        SAP::alpha_output($item->ebeln),
+                        SAP::alpha_output($item->ebelp),
+                        $item->idnlf,
+                        $item->mtext,
+                        ucfirst(strtolower(MasterData::getLifnrName($item->mfrnr))),
+                        $item->qty,
+                        $item->qty_uom,
+                        $item->purch_price,
+                        $item->purch_curr,
+                        substr($item->lfdat, 0, 10),
+                        explode(" ", $item->delqty)[0],
+                        ($item->grdate == null ? "" : substr($item->grdate, 0, 10))
+                    ]);
+                } else {
+                    array_push($itemsArray, [
+                        SAP::alpha_output($item->ebeln),
+                        SAP::alpha_output($item->ebelp),
+                        $item->idnlf,
+                        $item->mtext,
+                        SAP::alpha_output($order->lifnr),
+                        MasterData::getLifnrName($order->lifnr),
+                        $order->ekgrp,
+                        MasterData::getEkgrpName($order->ekgrp),
+                        ucfirst(strtolower(MasterData::getLifnrName($item->mfrnr))),
+                        $item->qty,
+                        $item->qty_uom,
+                        $item->purch_price,
+                        $item->purch_curr,
+                        substr($item->lfdat, 0, 10),
+                        explode(" ", $item->delqty)[0],
+                        ($item->grdate == null ? "" : substr($item->grdate, 0, 10))
+                    ]);
+                }
             }
         }
 
