@@ -452,7 +452,10 @@ class Orders
     public static function getMessageList($sorting)
     {
 
+        $inquirements = Session::get("filter_inquirements");
+        Session::put("filter_inquirements", "0");
         $result = self::loadFromCache();
+        Session::put("filter_inquirements", $inquirements);
 
         $messages = array();
         if ($result != null && !empty($result)) {

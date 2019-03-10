@@ -75,6 +75,8 @@ Route::get('webservice/sap_reset_password','WebserviceController@changePassword'
 Route::get('webservice/sap_process_po','WebserviceController@sapProcessPO');
 Route::get('webservice/read_inforecords','WebserviceController@readInforecords');
 Route::get('webservice/read_zpretrecords','WebserviceController@readZPRETrecords');
+Route::get('webservice/get_sales_margin','WebserviceController@getSalesMargin');
+Route::get('webservice/get_message_history','WebserviceController@getMessageHistory');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');
@@ -87,3 +89,5 @@ Route::post('/orders', 'HomeController@orders_post');
 
 Route::get('/messages', 'HomeController@messages_get')->name('messages');
 Route::post('/messages', 'HomeController@messages_post');
+
+Route::get('/stats', 'HomeController@stats_get')->name('stats');

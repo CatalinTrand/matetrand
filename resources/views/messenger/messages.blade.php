@@ -104,10 +104,15 @@
                                 {{__("Messages")}}{!!$message_svg!!}
                             </p>
                             <a href="/orders">
-                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                   class="card-line">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
                                     <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
                                     {{__("Orders")}}
+                                </p>
+                            </a>
+                            <a href="/stats">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-area-chart-64.png'/>
+                                    {{__("Statistics")}}
                                 </p>
                             </a>
                         @else
@@ -253,6 +258,7 @@
                                     $vbeln = $message->vbeln;
                                     if ($vbeln == \App\Materom\Orders::stockorder) $vbeln = __("Stock");
                                     elseif (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor") $vbeln = __("Emergency");
+                                    $reason_title = __("Faceti click aici pentru istoricul mesajelor acestei pozitii");
                                     $tablerow = "<tr><td colspan='3' $sort_color_ebeln>$message->ebeln</td>
                                                      <td colspan='2'>" . App\Materom\SAP::alpha_output($message->ebelp) . "</td>
                                                      <td></td>
@@ -265,7 +271,7 @@
                                                      <td colspan='1'>$button_ack</td>
                                                      <td colspan='1'>$button_reply</td>
                                                      <td colspan='1'></td>
-                                                     <td colspan='20'>$message->reason</td></tr>";
+                                                     <td class='MessageReasonClass' colspan='20' title='$reason_title' onclick='displayMsgHistory(\"$message->ebeln\",\"$message->ebelp\"); return false;'>$message->reason</td></tr>";
 
 
                                     echo $tablerow;
@@ -276,6 +282,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="message-history" title="Message history" style="display: none;">
+        <div id="message-history-content"></div>
     </div>
 
     <script>
@@ -442,6 +452,59 @@
             replyDialog.dialog("open");
             */
         }
+
+        var msgHistDialog;
+        var msgHistContent;
+        $(function(){
+            $( ".MessageReasonClass" ).tooltip({
+                show: {effect: "fade", duration: 500},
+                tooltipClass: "MessageReasonTooltipClass"
+            });
+            msgHistContent = "";
+            msgHistDialog = $("#message-history").dialog({
+                autoOpen: false,
+                height: 400,
+                width: 840,
+                modal: true,
+                close: function () {
+                    msgHistContent = "";
+                    $("#message-history-content").html(msgHistContent);
+                },
+                open: function () {
+                    $("#message-history-content").html(msgHistContent);
+                },
+                position: {
+                    my: "right",
+                    at: "right",
+                    of: window
+                }
+            });
+        })
+
+        function displayMsgHistory(ebeln, ebelp) {
+            var _data2 = "", _status2 = "";
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.get("webservice/get_message_history",
+                {
+                    ebeln: ebeln,
+                    ebelp: ebelp
+                },
+                function (data, status) {
+                    _data2 = data;
+                    _status2 = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_status2 == "success") {
+                msgHistContent = _data2;
+                msgHistDialog.dialog("open");
+            }
+        }
+
     </script>
 
     @include("orders.inquiries")

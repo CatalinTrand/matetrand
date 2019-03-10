@@ -214,7 +214,9 @@ class POrderItem
                     }
                 }
                 if ($this->crefo == 1) {
-                    if ($this->stage == 'F') {
+                    if (($this->stage == 'F') ||
+                        (($this->stage == 'Z') && ($this->status == 'A') && ($this->pstage == 'C')))
+                    {
                         $this->owner = 2;
                     }
                 }
@@ -417,14 +419,14 @@ class POrderItem
         if ($history == 1 &&
             $this->stage == 'Z' &&
             ($this->pstage == 'R' || $this->pstage == 'C') &&
-            Auth::user()->role == 'Furnizor' &&
+            (Auth::user()->role == 'Furnizor' || (Auth::user()->role == 'Referent' && $this->owner == 2)) &&
             $this->status == 'A' &&
-            $this->changed == 1 &&
+            ($this->changed == 1 || $this->changed == 2) &&
             $this->matnr_changed == 0 &&
             $this->position_splitted == 0) {
-            $this->owner = 1;
+            if ($this->owner == 0) $this->owner = 1;
             $this->accept = 1;
-            if ($this->reject != 3) $this->reject = 1;
+            if (($this->reject != 3) && ($this->reject != 4)) $this->reject = 1;
         }
 
         if ($history == 2) {

@@ -93,8 +93,14 @@ class Mailservice
 
     static public function orderHistory($user, $vbeln, $posnr)
     {
-        $result = "";
         $item = DB::table(System::$table_pitems)->where(["vbeln" => $vbeln, "posnr" => $posnr])->first();
+        if (is_null($item)) return "";
+        return self::orderHistoryByItem($user, $item);
+    }
+
+    static public function orderHistoryByItem($user, $item, $width = "120em")
+    {
+        $result = "";
         if (is_null($item)) return $result;
         $itemhist = DB::select("select * from ".System::$table_pitemchg ." where ebeln = '$item->ebeln' and ebelp = '$item->ebelp' order by cdate desc");
         if (is_null($itemhist) || empty($itemhist)) return $result;
@@ -103,7 +109,7 @@ class Mailservice
         Session::put('locale', strtolower($user->lang));
         app('translator')->setLocale(Session::get("locale"));
         $result .= "<br>" . __("Istoricul actiunilor efectuate asupra pozitiei ") .
-            SAP::alpha_output($item->ebeln) . "/" . SAP::alpha_output($item->ebelp) . "<br><table style='width: 120em;'>";
+            SAP::alpha_output($item->ebeln) . "/" . SAP::alpha_output($item->ebelp) . "<br><table style='width: $width;'>";
 
         $result .= "<thead style='line-height: 1.3rem;'>";
         $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle;'>";
@@ -117,6 +123,7 @@ class Mailservice
         $result .= "<tbody style='line-height: 1.3rem;'>";
         $i = 0;
         foreach($itemhist as $itemh) {
+            if ((Auth::user()->role == "Furnizor") && ($itemh->internal == 1)) continue;
             $pitemchg = new POrderItemChg($itemh, true);
             $pitemchg->fill($item);
 

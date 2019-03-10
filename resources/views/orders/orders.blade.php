@@ -173,6 +173,12 @@
                                        src='/images/icons8-todo-list-96.png'/>
                                 {{__("Orders")}}
                             </p>
+                            <a href="/stats">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-area-chart-64.png'/>
+                                    {{__("Statistics")}}
+                                </p>
+                            </a>
                         @else
                             <a href="/messages">
                                 <p
@@ -2159,16 +2165,20 @@
             @if (isset($autoexplode_SO) && $autoexplode_SO != null)
             let autoexplode_so_button = $('#butt_S{{$autoexplode_SO}}');
             if (autoexplode_so_button != null && autoexplode_so_button != undefined) {
-                getSubTree(autoexplode_so_button[0]);
-                autoexplode_so_button[0].scrollIntoView();
+                $(function() {
+                    getSubTree(autoexplode_so_button[0]);
+                    autoexplode_so_button[0].scrollIntoView();
+                });
             }
             @endif
 
             @if (isset($autoexplode_PO) && $autoexplode_PO != null)
                 let autoexplode_po_button = $('#butt_P{{$autoexplode_PO}}');
                 if (autoexplode_po_button != null && autoexplode_po_button != undefined) {
-                    getSubTree(autoexplode_po_button[0]);
-                    autoexplode_po_button[0].scrollIntoView();
+                    $(function() {
+                        getSubTree(autoexplode_po_button[0]);
+                        autoexplode_po_button[0].scrollIntoView();
+                    });
                 }
             @endif
 

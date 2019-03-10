@@ -16,13 +16,13 @@ class UsersTableSeeder extends Seeder
     {
         User::truncate();
         User::create([
-            'id'       => "Admin",
+            'id'       => "Admin200",
             'username' => "Administrator (200)",
             'role'     => 'Administrator',
             'email'    => "admin@materom.ro",
             'password' => Hash::make('materom'),
             'created_at' => Carbon::now()->getTimestamp(),
-            'sap_system' => '200'
+            'sap_system' => ''
         ]);
         User::create([
             'id'       => "Admin300",
@@ -40,7 +40,7 @@ class UsersTableSeeder extends Seeder
             'email'    => "admin@materom.ro",
             'password' => Hash::make('materom'),
             'created_at' => Carbon::now()->getTimestamp(),
-            'sap_system' => '200'
+            'sap_system' => ''
         ]);
         User::create([
             'id'       => "radu300",

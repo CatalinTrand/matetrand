@@ -69,6 +69,10 @@ class Maintenance extends Command
             $this->update_all_ctvs();
             return;
         }
+        if (strtoupper($command) == "STATISTICS") {
+            Data::gatherStatistics();
+            return;
+        }
     }
 
     private function update_all_ctvs()
@@ -82,7 +86,7 @@ class Maintenance extends Command
                          " order by ebeln, ebelp");
         foreach ($pitems as $pitem) {
             $ctv = SAP\MasterData::getAgentForClient($pitem->kunnr);
-            if (empty($ctv->agent)) continue;
+            if (empty($ctv->agent) && empty($pitem->ctv) && empty($pitem->ctv_name)) continue;
             $count = DB::update("update ". System::$table_pitems ." set ctv='$ctv->agent', ctv_name='$ctv->agent_name' ".
               "where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp'");
             $this->info("Purchase order item " . SAP::alpha_output($pitem->ebeln) . "/" . SAP::alpha_output($pitem->ebelp) .

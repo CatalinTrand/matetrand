@@ -428,6 +428,28 @@ class Data
 
     public static function gatherStatistics()
     {
-
+        $lifnrs = DB::select("select lifnr, count(*) as cnt_total_orders from ". System::$table_porders ." group by lifnr order by lifnr");
+        $cdate = Carbon::now();
+        DB::beginTransaction();
+        foreach($lifnrs as $lifnr) {
+            $cursor = DB::select("select count(*) as cnt_total_items from ". System::$table_pitems. " join ". System::$table_porders ." using (ebeln) where ".
+                System::$table_porders. ".lifnr = '$lifnr->lifnr'");
+            $cnt_total_items = 0;
+            if (!empty($cursor)) $cnt_total_items = $cursor[0]->cnt_total_items;
+            $cursor = DB::select("select ebeln, count(*) as cnt_delayed_items from ". System::$table_pitems. " join ". System::$table_porders ." using (ebeln) where ".
+                System::$table_porders. ".lifnr = '$lifnr->lifnr' and ". System::$table_pitems. ".lfdat > '$cdate' ".
+                "group by ". System::$table_porders  .".ebeln");
+            $cnt_delayed_items = 0;
+            $cnt_delayed_orders = 0;
+            foreach ($cursor as $record) {
+                $cnt_delayed_orders++;
+                $cnt_delayed_items += $record->cnt_delayed_items;
+            }
+            DB::insert("insert into ". System::$table_stat_orders.
+                " (lifnr, date, cnt_total_orders, cnt_delayed_orders, cnt_total_items, cnt_delayed_items)".
+                " values ('$lifnr->lifnr', '$cdate', $lifnr->cnt_total_orders, $cnt_delayed_orders, $cnt_total_items, $cnt_delayed_items)");
+        }
+        DB::commit();
+        Log::info("Statistics level=1 collected (" . count($lifnrs) . " records)");
     }
 }

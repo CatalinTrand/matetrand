@@ -16,19 +16,17 @@ class CreateStatOrdersTable extends Migration
     public function up()
     {
         Schema::create('stat_orders', function (Blueprint $table) {
-            $table->string('lifnr',10)->default('');
-            $table->dateTime('date')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->integer("cnt_total_orders");
-            $table->integer("cnt_delayed_orders");
-            $table->integer("cnt_total_items");
-            $table->integer("cnt_delayed_items");
-            $table->primary(['lifnr', 'date']);
+            require __DIR__.'/../../app/Materom/TableStructures/stat_orders_table.php';
+        });
+        Schema::create('stat_orders_300', function (Blueprint $table) {
+            require __DIR__.'/../../app/Materom/TableStructures/stat_orders_table.php';
         });
     }
 
     public function down()
     {
         Schema::dropIfExists('stat_orders');
+        Schema::dropIfExists('stat_orders_300');
     }
 
 }

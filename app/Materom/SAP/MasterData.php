@@ -135,6 +135,35 @@ class MasterData
         return $ekgrp_name;
     }
 
+
+    static public function getSalesMargin($lifnr, $mfrnr = null, $wglif = null)
+    {
+        if (!is_null($mfrnr)) $mfrnr = trim($mfrnr); else $mfrnr = "";
+        if (!is_null($wglif)) $wglif = trim($wglif); else $wglif = "";
+        if (empty($mfrnr))
+            $margins = DB::table(System::$table_sap_zpret_adaos)->where(["lifnr" => $lifnr, "mfrnr" => ''])
+                ->orderBy("wglif", "desc")->get();
+        else
+            $margins = DB::table(System::$table_sap_zpret_adaos)->where("lifnr", $lifnr)
+                ->orderBy("mfrnr", "desc")->orderBy("wglif", "desc")->get();
+        if (empty($margins)) return "";
+        foreach($margins as $margin) {
+            $margin->mfrnr = trim($margin->mfrnr);
+            $margin->wglif = trim($margin->wglif);
+            if (empty($margin->mfrnr)) {
+                if (empty(trim($margin->zzadaos))) return "";
+                return number_format(trim($margin->zzadaos), 2, '.', '');
+            }
+            if ($margin->mfrnr == $mfrnr) {
+                if (empty($margin->wglif || trim($margin->wglif) == trim($wglif))) {
+                    if (empty(trim($margin->zzadaos))) return "";
+                    return number_format(trim($margin->zzadaos), 2, '.', '');
+                }
+            }
+        }
+        return "";
+    }
+
     static public function refreshCustomerCache()
     {
         $globalRFCData = DB::select("select * from " . System::$table_global_rfc_config);
@@ -289,6 +318,56 @@ class MasterData
         }
         DB::commit();
         Log::info("Purchase groups cache refreshed (" . count($pgroups) . " records)");
+    }
+
+    static public function refreshZPretAdaos()
+    {
+        $globalRFCData = DB::select("select * from " . System::$table_global_rfc_config);
+        if ($globalRFCData) $globalRFCData = $globalRFCData[0];
+        else {
+            Log::error("Error retrieving data from Global RFC table (" . System::$table_global_rfc_config . ")");
+            return;
+        }
+        $roleData = DB::select("select * from " . System::$table_roles . " where rfc_role = 'Administrator'");
+        if ($roleData) $roleData = $roleData[0];
+        else {
+            Log::error("Error retrieving data from Roles table (" . System::$table_roles . ")");
+            return;
+        }
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_ZPRET_ADAOS');
+            $result = json_decode($sapfm->invoke([])["E_DATA"]);
+            $data = array();
+            if (empty($result)) return;
+            foreach ($result as $record) {
+                $record->lifnr = $record->LIFNR; unset($record->LIFNR);
+                $record->mfrnr = $record->MFRNR; unset($record->MFRNR);
+                $record->wglif = $record->WGLIF; unset($record->WGLIF);
+                $record->zzadaos = "". $record->ZZADAOS; unset($record->ZZADAOS);
+                $record->zzbr = "". $record->ZZBR; unset($record->ZZBR);
+                unset($record->AENAM);
+                unset($record->AEDAT);
+                unset($record->AETIM);
+                $data[] = $record;
+            }
+            $sapconn->close();
+        } catch (\SAPNWRFC\Exception $e) {
+            Log::error($e);
+            return $e;
+        }
+        DB::beginTransaction();
+        DB::delete("delete from " . System::$table_sap_zpret_adaos);
+        foreach ($data as $record) {
+            DB::insert("insert into " . System::$table_sap_zpret_adaos . " (lifnr, mfrnr, wglif, zzadaos, zzbr) values (" .
+                "'$record->lifnr', '$record->mfrnr', '$record->wglif', '$record->zzadaos', '$record->zzbr')");
+        }
+        DB::commit();
+        Log::info("ZPRET_ADAOS cache refreshed (" . count($data) . " records)");
     }
 
     static public function getAgentForClient($kunnr)

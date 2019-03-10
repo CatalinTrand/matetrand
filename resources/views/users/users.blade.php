@@ -109,6 +109,13 @@
                                     {{__("Orders")}}
                                 </p>
                             </a>
+                            <a href="/stats">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+                                   class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-area-chart-64.png'/>
+                                    {{__("Statistics")}}
+                                </p>
+                            </a>
                         @else
                             <p style="display: inline-block;" class="card-line first">{{__('Messages')}}</p>
                             <a href="/orders"><p

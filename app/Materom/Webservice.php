@@ -209,6 +209,10 @@ class Webservice
         $pitem = DB::table(System::$table_pitems)->where([["ebeln", '=', $order], ["ebelp", '=', $item]])->first();
         $pitem->lifnr = $porder->lifnr;
         $pitem->lifnr_name = MasterData::getLifnrName($porder->lifnr);
+        $pitem->defmargin = "";
+        $pitem->defmargin = MasterData::getSalesMargin($porder->lifnr, $pitem->mfrnr);
+        $pitem->curr = $porder->curr;
+        $pitem->fxrate = $porder->fxrate;
         return json_encode($pitem);
     }
 
@@ -277,7 +281,7 @@ class Webservice
                             $result = SAP::rejectPOItem($ebeln, $ebelp);
                             if (($result != null) && strlen(trim($result)) != 0) return $result;
                             if ($item->vbeln == Orders::stockorder) {
-                                $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, "PA-99",
+                                $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, SAP::newMatnr($item->matnr),
                                     $item->qty, $item->qty_uom,
                                     $item->purch_price, $item->purch_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
@@ -287,7 +291,7 @@ class Webservice
                                 }
                             } else {
                                 $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                                    $item->qty, $item->qty_uom, $_porder->lifnr, 'PA-99',
+                                    $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr),
                                     $item->mtext, $item->idnlf, $item->purch_price, $item->purch_curr,
                                     $item->sales_price, $item->sales_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
@@ -601,7 +605,7 @@ class Webservice
                     $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
                     if (($ctvuser1 != null) && !empty($ctvuser1)) {
                         try {
-                            Mailservice::sendSalesOrderNotification($ctvuser1, $pitem->vbeln, $pitem->posnr);
+                            Mailservice::sendSalesOrderProposal($ctvuser1, $pitem->vbeln, $pitem->posnr);
                         } catch (Exception $e) {
                         }
                     }
@@ -686,7 +690,7 @@ class Webservice
                     if (strlen($proposal->purch_curr) > 3) $proposal->purch_curr = substr($proposal->purch_curr, 0, 3);
                     if (strlen($proposal->sales_curr) > 3) $proposal->sales_curr = substr($proposal->sales_curr, 0, 3);
                     $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
-                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, 'PA-99',
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr),
                         $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
                         $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
                     if (!empty(trim($result))) {
@@ -778,7 +782,7 @@ class Webservice
         $result = SAP::rejectPOItem($ebeln, $ebelp);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::processSOItem($item->vbeln, $item->posnr,
-            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, 'PA-99', // $proposal->matnr,
+            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, SAP::newMatnr($item->matnr),
             $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
             $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
         $soitem = "";
@@ -854,7 +858,7 @@ class Webservice
         $text = "";
         if ($item->vbeln == Orders::stockorder) {
             foreach($splititems as $splititem) {
-                $result = SAP::createPurchReq($splititem->lifnr, $splititem->idnlf, $splititem->mtext, $splititem->matnr,
+                $result = SAP::createPurchReq($splititem->lifnr, $splititem->idnlf, $splititem->mtext, SAP::newMatnr($item->matnr),
                     $splititem->qty, $splititem->qty_uom,
                     $splititem->purch_price, $splititem->purch_curr, $splititem->lfdat);
                 if (!empty(trim($result))) {
@@ -867,7 +871,7 @@ class Webservice
         } else {
             foreach($splititems as $splititem) {
                 $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                    $splititem->qty, $splititem->qty_uom, $splititem->lifnr, $splititem->matnr,
+                    $splititem->qty, $splititem->qty_uom, $splititem->lifnr, SAP::newMatnr($item->matnr),
                     $splititem->mtext, $splititem->idnlf, $splititem->purch_price, $splititem->purch_curr,
                     $splititem->sales_price, $splititem->sales_curr, $splititem->lfdat);
                 if (!empty(trim($result))) {

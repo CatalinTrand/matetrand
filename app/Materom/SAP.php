@@ -195,6 +195,16 @@ class SAP
         }
     }
 
+    static public function newMatnr($matnr)
+    {
+        $matnr = strtoupper(trim($matnr));
+        if (($matnr == "PA200") || ($matnr == "PA-200") || ($matnr == "PA202") || ($matnr == "PA-202"))
+            return "PA-202";
+        if (($matnr == "PA299") || ($matnr == "PA-299") || ($matnr == "PA298") || ($matnr == "PA-298"))
+            return "PA-298";
+        return "PA-99";
+    }
+
     static public function createPurchReq($lifnr, $idnlf, $mtext, $matnr,
                                           $qty, $unit, $price, $curr, $deldate, $infnr = "")
     {

@@ -79,6 +79,11 @@ class HomeController extends Controller
         return view('orders.orders');
     }
 
+    public function stats_get()
+    {
+        return view('stats.stats');
+    }
+
     public function orders_post()
     {
         Session::put("groupOrdersBy", Input::get("groupOrdersBy"));

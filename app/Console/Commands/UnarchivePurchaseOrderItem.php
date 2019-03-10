@@ -22,7 +22,7 @@ class UnarchivePurchaseOrderItem extends Command
      *
      * @var string
      */
-    protected $signature = 'materom:unarchiveitem {purch_order} {purch_item}';
+    protected $signature = 'materom:unarchiveitem {system} {purch_order} {purch_item}';
 
     /**
      * The console command description.
@@ -48,6 +48,17 @@ class UnarchivePurchaseOrderItem extends Command
      */
     public function handle()
     {
+        $system = $this->argument("system");
+        if ($system == null) {
+            $this->error(__("Please specify the system to be maintained"));
+            return;
+        }
+        if (("X".$system != "X200") && ("X".$system != "X300")) {
+            $this->error(__("Wrong system specified"));
+            return;
+        }
+        System::init($system);
+
         $purch_order = $this->argument("purch_order");
         if ($purch_order == null) {
             $this->error(__("Please specify the purchase order to be acrhived"));

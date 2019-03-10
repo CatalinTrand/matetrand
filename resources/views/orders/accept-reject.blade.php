@@ -1,4 +1,4 @@
-<div id="accept-reject-dialog" title="Accept/reject">
+<div id="accept-reject-dialog" title="Accept/reject" style="display: none;">
     <p id="initial-text" type="text" style="margin-top: 0.5rem; font-weight: bold; color: darkred;" name="initial-text" width="95%" value=""></p>
     <input type="checkbox" id="require_sr_approval" onchange="ar_switchProposalMode(this); return false;">
     <label id="label_require_sr_approval" for="require_sr_approval">{{__("Require SR approval")}}</label>
@@ -297,7 +297,7 @@
     }
 </script>
 
-<div id="add-edit-proposal" title="Add/edit proposal">
+<div id="add-edit-proposal" title="Add/edit proposal" style="display: none;">
     <div class="row">
         <label for="aep-lifnr" class="col-md-3 col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
         <input id="aep-lifnr" type="text" name="aep-lifnr" class="form-control col-md-3" value="">
@@ -484,7 +484,7 @@
 
 </script>
 
-<div id="select-proposal-dialog" title="Select a proposal">
+<div id="select-proposal-dialog" title="Select a proposal" style="display: none;">
     <p id="sel-proposal-initial-text" type="text" style="margin-top: 0.5rem; font-weight: bold; color: darkred;" name="initial-text" width="95%" value=""></p>
     <div id="sel-proposal-container" width="95%" style="margin-right: 0.5rem; overflow-y: scroll; min-height: 17rem;">
         <table id="sel-proposal-table" class="table-striped" width="100%">

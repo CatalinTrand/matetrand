@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Materom\Mailservice;
 use App\Materom\Orders;
 use App\Materom\SAP\MasterData;
 use App\Materom\System;
@@ -395,7 +396,7 @@ class WebserviceController extends Controller
                 }
                 Session::put("groupOrdersBy", 4);
             }
-            if (substr(Auth::user()->id, 0, 4) == "radu") Session::put("filter_ebeln", "NONE");
+            if (Auth::user()->role == "Administrator") Session::put("filter_ebeln", "NONE");
             Orders::fillCache();
         }
 
@@ -481,6 +482,25 @@ class WebserviceController extends Controller
             Input::get("mtext"),
             Input::get("matnr")
         );
+    }
+
+    public function getSalesMargin()
+    {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        return MasterData::getSalesMargin(
+            Input::get("lifnr"),
+            Input::get("mfrnr"),
+            Input::get("wglif")
+        );
+    }
+
+    public function getMessageHistory()
+    {
+        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $item = DB::table(System::$table_pitems)->where(["ebeln" => Input::get("ebeln"),
+                                                         "ebelp" => Input::get("ebelp")])->first();
+        if (is_null($item)) return "";
+        return Mailservice::orderHistoryByItem(Auth::user(), $item, "100%");
     }
 
 }

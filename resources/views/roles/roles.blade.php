@@ -81,6 +81,10 @@
                             <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
                             {{__("Orders")}}
                         </p></a>
+                        <a href="/stats"><p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                            <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-area-chart-64.png'/>
+                            {{__("Statistics")}}
+                        </p></a>
                     </div>
 
                     <div class="card-body">

@@ -43,8 +43,11 @@ class Kernel extends ConsoleKernel
             MasterData::refreshCustomerCache();
             MasterData::refreshVendorCache();
             MasterData::refreshPurchGroupsCache();
+            MasterData::refreshZPretAdaos();
             // push finally processed orders to archive
             Data::performArchiving();
+            // gather statistics
+            Data::gatherStatistics();
             Log::info("Daily cleanup job has ended in system ". System::$system_name);
 
             if (System::is300) {
@@ -57,8 +60,10 @@ class Kernel extends ConsoleKernel
                 MasterData::refreshCustomerCache();
                 MasterData::refreshVendorCache();
                 MasterData::refreshPurchGroupsCache();
+                MasterData::refreshZPretAdaos();
                 // push finally processed orders to archive
                 Data::performArchiving();
+                // gather statistics
                 Data::gatherStatistics();
                 Log::info("Daily cleanup job has ended in system ". System::$system_name);
 

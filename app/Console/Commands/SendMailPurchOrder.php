@@ -51,6 +51,8 @@ class SendMailPurchOrder extends Command
             $this->error(__("The specified user id does not exist"));
             return;
         }
+        System::init($user->sap_system);
+
         $porder = $this->argument("porder");
         if ($porder == null) {
             $this->error(__("Please specify the purchase order for which the mail is being sent for"));

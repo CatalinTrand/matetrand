@@ -292,6 +292,10 @@
             background-color: lightgray;
         }
 
+        .MessageReasonTooltipClass {
+            max-width: 600px;
+        }
+
     </style>
 </head>
 <body style="font-size: 12px">
@@ -306,7 +310,14 @@
                 <a class="navbar-brand" href="{{ url('http://www.materom.ro') }}">
                     <img src="/images/logo.png" class="logo">
                 </a>
-                <div style="margin-left: -4rem; font-weight: bold; font-size: 150%; color: #007bff;">
+                @php
+                    $system_color = "#007bff";
+                    if ("X".\Illuminate\Support\Facades\Auth::user()->sap_system == "X300") {
+                        $system_color = "#00a07b";
+                    }
+                @endphp
+                <div style="margin-left: -4rem; font-weight: bold; font-size: 200%; color: {{$system_color}};
+                        background-color: lightyellow; padding: 5px; border-style: double;">
                     {{__("System")}}:&nbsp{{App\Materom\System::$system_name}}
                 </div>
             @endguest
