@@ -99,6 +99,7 @@ class POrderItem
                       // 3=send message to sales representative
                       // 4=
                       // 8=
+    public $tools;
 
     // flags
     public $matnr_changeable;         // 0=no, 1=yes
@@ -427,6 +428,13 @@ class POrderItem
             if ($this->owner == 0) $this->owner = 1;
             $this->accept = 1;
             if (($this->reject != 3) && ($this->reject != 4)) $this->reject = 1;
+        }
+
+        $this->tools = 0;
+        if ($history == 1 || $history == 2) {
+            if (false // (Auth::user()->role == "Referent" && $this->owner <> 0)
+                || Auth::user()->role == "Administrator")
+                $this->tools = 1;
         }
 
         if ($history == 2) {

@@ -21,7 +21,7 @@ class WebserviceController extends Controller
     public function tryAuthAPIToken()
     {
         if (Auth::user() == null) {
-            if(Input::get("api_token") != null ){
+            if (Input::get("api_token") != null) {
                 $token = Input::get("api_token");
                 Auth::attempt(['api_token' => $token]);
             }
@@ -34,17 +34,18 @@ class WebserviceController extends Controller
     public function rfcPing()
     {
         return Webservice::rfcPing(Input::get("rfc_router"),
-                                   Input::get("rfc_server"),
-                                   Input::get("rfc_sysnr"),
-                                   Input::get("rfc_client"),
-                                   Input::get("rfc_user"),
-                                   Input::get("rfc_passwd")
-            );
+            Input::get("rfc_server"),
+            Input::get("rfc_sysnr"),
+            Input::get("rfc_client"),
+            Input::get("rfc_user"),
+            Input::get("rfc_passwd")
+        );
     }
 
     public function insertManufacturer()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::insertManufacturer(
             Input::get("user_id"),
             Input::get("mfrnr")
@@ -97,7 +98,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function deletefilters(){
+    public function deletefilters()
+    {
 //        Session::forget('filter_status');
 //        Session::forget('filter_history');
 //        Session::forget("filter_archdate");
@@ -114,12 +116,13 @@ class WebserviceController extends Controller
         Orders::fillCache();
     }
 
-    public function refilter(){
-        if(Input::get("type") == 'S'){
-            Session::put("filter_vbeln",Input::get("order"));
+    public function refilter()
+    {
+        if (Input::get("type") == 'S') {
+            Session::put("filter_vbeln", Input::get("order"));
             // Session::put("groupOrdersBy", 0);
         } else {
-            Session::put("filter_ebeln",Input::get("order"));
+            Session::put("filter_ebeln", Input::get("order"));
             // Session::put("groupOrdersBy", 1);
         }
         Orders::fillCache();
@@ -132,7 +135,8 @@ class WebserviceController extends Controller
         );
     }
 
-    public function itemsOfOrder(){
+    public function itemsOfOrder()
+    {
         return Webservice::itemsOfOrder(
             Input::get("type"),
             Input::get("order"),
@@ -197,7 +201,7 @@ class WebserviceController extends Controller
             Input::get("ebelp"),
             Input::get("cdate"),
             Input::get("pos")
-            );
+        );
     }
 
     public function rejectProposal()
@@ -245,26 +249,29 @@ class WebserviceController extends Controller
     function insertReferenceUser()
     {
         return Webservice::insertReferenceUser(
-          Input::get("id"),
-          Input::get("refid")
+            Input::get("id"),
+            Input::get("refid")
         );
     }
 
-    function insertAgent(){
+    function insertAgent()
+    {
         return Webservice::insertAgent(
             Input::get("userid"),
             Input::get("agent")
         );
     }
 
-    function insertCustomer(){
+    function insertCustomer()
+    {
         return Webservice::insertCustomer(
             Input::get("userid"),
             Input::get("kunnr")
         );
     }
 
-    public function downloadOrdersXLS(){
+    public function downloadOrdersXLS()
+    {
 
         $orders = Orders::getOrderList(1);
 
@@ -273,16 +280,16 @@ class WebserviceController extends Controller
         //Excel header
         if (Auth::user()->role == "Furnizor") {
             array_push($itemsArray, [
-                    __("Purchase order"),
-                    __("Item"),
-                    __("Vendor mat."),
-                    __("Description"),
-                    __("Fabricant"),
-                    __("Quantity"), '',
-                    __("Price"), '',
-                    __("Delivery date"),
-                    __("Delivered quantity"),
-                    __("Goods receipt date"),
+                __("Purchase order"),
+                __("Item"),
+                __("Vendor mat."),
+                __("Description"),
+                __("Fabricant"),
+                __("Quantity"), '',
+                __("Price"), '',
+                __("Delivery date"),
+                __("Delivered quantity"),
+                __("Goods receipt date"),
             ]);
         } else {
             array_push($itemsArray, [
@@ -307,7 +314,7 @@ class WebserviceController extends Controller
 
         //Contents
         foreach ($orders as $order) {
-            foreach($order->items as $item) {
+            foreach ($order->items as $item) {
                 if (Auth::user()->role == "Furnizor") {
                     array_push($itemsArray, [
                         SAP::alpha_output($item->ebeln),
@@ -348,25 +355,29 @@ class WebserviceController extends Controller
 
         //Build excel
         Excel::create(__("Materom purchase orders ") . substr(now(), 0, 10),
-            function($excel) use ($itemsArray) {
+            function ($excel) use ($itemsArray) {
                 $excel->setTitle('Items');
                 $excel->setCreator(Auth::user()->id)->setCompany('Materom');
                 $excel->setDescription('items file');
 
-                $excel->sheet(__("Purchase orders"), function($sheet) use ($itemsArray) {
+                $excel->sheet(__("Purchase orders"), function ($sheet) use ($itemsArray) {
                     $sheet->fromArray($itemsArray, null, 'A1', false, false);
                 });
             })->download('xlsx');
         return null;
     }
 
-    public function changePassword() {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+    public function changePassword()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::changePassword(Input::get("user_id"), Input::get("new_password"));
     }
 
-    public function impersonateAsUser() {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+    public function impersonateAsUser()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         if (Auth::user()->role == "Administrator") {
             Auth::loginUsingId(Input::get("id"));
 
@@ -376,7 +387,7 @@ class WebserviceController extends Controller
             Session::put("groupOrdersBy", 1);
             if (Auth::user()->role == "CTV") {
                 $id = Auth::user()->id;
-                DB::delete("delete from ". System::$table_user_agent_clients ." where id = '$id'");
+                DB::delete("delete from " . System::$table_user_agent_clients . " where id = '$id'");
                 $clients = SAP::getAgentClients($id);
                 if (!empty($clients)) {
                     $sql = "";
@@ -384,14 +395,14 @@ class WebserviceController extends Controller
                         $sql .= ",('$id','$client->client','$client->agent')";
                     }
                     $sql = substr($sql, 1);
-                    DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr, agent) values " . $sql);
+                    DB::insert("insert into " . System::$table_user_agent_clients . " (id, kunnr, agent) values " . $sql);
                 }
-                $customers = DB::select("select * from ". System::$table_users_cli ." where id = '$id'");
+                $customers = DB::select("select * from " . System::$table_users_cli . " where id = '$id'");
                 if (!empty($customers)) {
                     foreach ($customers as $customer) {
                         $client = $customer->kunnr;
                         if (!DB::table(System::$table_user_agent_clients)->where([["id", "=", $id], ["kunnr", "=", $client]])->exists())
-                            DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr) values ('$id','$client')");
+                            DB::insert("insert into " . System::$table_user_agent_clients . " (id, kunnr) values ('$id','$client')");
                     }
                 }
                 Session::put("groupOrdersBy", 4);
@@ -404,7 +415,8 @@ class WebserviceController extends Controller
 
     public function getSubTree()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::getSubTree(
             Input::get("type"),
             Input::get("sorder"),
@@ -415,30 +427,36 @@ class WebserviceController extends Controller
 
     public function getVendorUsers()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::getVendorUsers(Input::get("lifnr"));
     }
 
-    public function getCTVUsers(){
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+    public function getCTVUsers()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::getCTVUsers();
     }
 
     public function sapActivateUser()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapActivateUser(Input::get("id"));
     }
 
     public function sapDeactivateUser()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapDeactivateUser(Input::get("id"));
     }
 
     public function sapCreateUser()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapCreateUser(
             Input::get("id"),
             Input::get("username"),
@@ -452,29 +470,35 @@ class WebserviceController extends Controller
 
     public function sapDeleteUser()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapDeleteUser(Input::get("id"));
     }
 
     public function sapProcessPO()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return Webservice::sapProcessPO(Input::get("ebeln"));
     }
 
-    public function readInforecords() {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+    public function readInforecords()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return SAP::readInforecords(
             Input::get("lifnr"),
             Input::get("lifnr_name"),
             Input::get("idnlf"),
             Input::get("mtext"),
             Input::get("matnr")
-            );
+        );
     }
 
-    public function readZPRETrecords() {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+    public function readZPRETrecords()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return SAP::readZPRETrecords(
             Input::get("lifnr"),
             Input::get("lifnr_name"),
@@ -486,7 +510,8 @@ class WebserviceController extends Controller
 
     public function getSalesMargin()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         return MasterData::getSalesMargin(
             Input::get("lifnr"),
             Input::get("mfrnr"),
@@ -496,11 +521,41 @@ class WebserviceController extends Controller
 
     public function getMessageHistory()
     {
-        $this->tryAuthAPIToken(); if (Auth::user() == null) return "API authentication failed";
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
         $item = DB::table(System::$table_pitems)->where(["ebeln" => Input::get("ebeln"),
-                                                         "ebelp" => Input::get("ebelp")])->first();
+            "ebelp" => Input::get("ebelp")])->first();
         if (is_null($item)) return "";
         return Mailservice::orderHistoryByItem(Auth::user(), $item, "100%");
     }
+
+    public function getFXRate()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return MasterData::getFXRate(Input::get("curr"));
+    }
+
+    public function archiveItem()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return Webservice::archiveItem(Input::get("porder"), Input::get("item"));
+    }
+
+    public function unarchiveItem()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return Webservice::unarchiveItem(Input::get("porder"), Input::get("item"));
+    }
+
+    public function rollbackItem()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return Webservice::rollbackItem(Input::get("porder"), Input::get("item"));
+    }
+
 
 }

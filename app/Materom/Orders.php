@@ -99,11 +99,6 @@ class Orders
         $orders_table = $history == 1 ? System::$table_porders : System::$table_porders . "_arch";
         $items_table = $history == 1 ? System::$table_pitems : System::$table_pitems . "_arch";
 
-        DB::beginTransaction();
-        DB::delete("delete from ". System::$table_porders_cache ." where session = '$cacheid'");
-        DB::delete("delete from ". System::$table_pitems_cache ." where session = '$cacheid'");
-        DB::commit();
-
         $filter_vbeln_sql = self::processFilter($items_table . ".vbeln", $filter_vbeln, 10);
         $filter_ebeln_sql = self::processFilter($orders_table . ".ebeln", $filter_ebeln, 10);
         $filter_matnr_sql = self::processFilter($items_table . ".idnlf", $filter_matnr);
@@ -191,6 +186,8 @@ class Orders
         // Fill the cache
         $cache_date = now();
         DB::beginTransaction();
+        DB::delete("delete from ". System::$table_porders_cache ." where session = '$cacheid'");
+        DB::delete("delete from ". System::$table_pitems_cache ." where session = '$cacheid'");
 
         // Order cache
         $psql = "insert into ". System::$table_porders_cache ." (session, ebeln, cache_date) values ";

@@ -552,8 +552,8 @@ class SAP
         }
     }
 
-    static public function readCTVforCustomer($kunnr) {
-
+    static public function readCTVforCustomer($kunnr)
+    {
         $globalRFCData = DB::select("select * from ". System::deftable_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
         $roleData = DB::select("select * from ". System::deftable_roles ." where rfc_role = 'Administrator'");

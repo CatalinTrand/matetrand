@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
 
 
 class Webservice
@@ -310,8 +311,8 @@ class Webservice
             }
         } elseif ($item->pstage == 'Z') {
             DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval) values " .
-                "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 'F')");
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, acknowledged, oldval) values " .
+                "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 1, 'F')");
 
         }
 
@@ -801,11 +802,19 @@ class Webservice
             "('$ebeln', '$ebelp', '$now', 0, 'A', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
-        if (Auth::user()->role != "CTV") {
-            $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
-            foreach ($ctvusers as $ctvuser) {
-                Mailservice::sendSalesOrderChange($ctvuser->id, $item->vbeln, $item->posnr, $result);
+        try {
+            if (Auth::user()->role != "CTV") {
+                $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$item->kunnr'");
+                foreach ($ctvusers as $ctvuser) {
+                    Mailservice::sendSalesOrderChange($ctvuser->id, $item->vbeln, $item->posnr, $result);
+                }
             }
+        } catch (Exception $exception){
+            Log::error($exception);
+        }
+        if (Auth::user()->role == "CTV") {
+            $result = Data::archiveItem($ebeln, $ebelp);
+            Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
         }
         return "";
     }
@@ -826,19 +835,27 @@ class Webservice
             "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'D', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
-        $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
-        if (($ctvusers == null) || empty($ctvusers)) {
-            $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
-            if (($ctvuser1 != null) && !empty($ctvuser1)) {
-                try {
-                    Mailservice::sendSalesOrderNotification($ctvuser1, $item->vbeln, $item->posnr);
-                } catch (Exception $e) {
+        try {
+            $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$item->kunnr'");
+            if (($ctvusers == null) || empty($ctvusers)) {
+                $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
+                if (($ctvuser1 != null) && !empty($ctvuser1)) {
+                    try {
+                        Mailservice::sendSalesOrderNotification($ctvuser1, $item->vbeln, $item->posnr);
+                    } catch (Exception $e) {
+                    }
+                }
+            } else {
+                foreach ($ctvusers as $ctvuser) {
+                    Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
                 }
             }
-        } else {
-            foreach ($ctvusers as $ctvuser) {
-                Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
-            }
+        } catch (Exception $exception) {
+            Log::error($exception);
+        }
+        if (Auth::user()->role == "CTV") {
+            $result = Data::archiveItem($ebeln, $ebelp);
+            Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
         }
         return "";
     }
@@ -958,5 +975,23 @@ class Webservice
         DB::commit();
         return self::acceptSplit($ebeln, $ebelp, $cdate);
     }
+
+    static public function archiveItem($ebeln, $ebelp)
+    {
+        $result = Data::archiveItem($ebeln, $ebelp);
+        return $result;
+    }
+
+    static public function unarchiveItem($ebeln, $ebelp)
+    {
+        $result = Data::unarchiveItem($ebeln, $ebelp);
+        return $result;
+    }
+
+    static public function rollbackItem($ebeln, $ebelp)
+    {
+        return "Item could not be rolled back automatically";
+    }
+
 
 }

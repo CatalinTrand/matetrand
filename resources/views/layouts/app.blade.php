@@ -141,6 +141,13 @@
             background-position: center center;
         }
 
+        .order-item-tools {
+            background-image:url('/images/icons8-maintenance-30.png');
+            background-size:     90% 90%;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
         .header-fixed {
             width: 100%
         }
@@ -295,6 +302,19 @@
         .MessageReasonTooltipClass {
             max-width: 600px;
         }
+
+        .order-tools-menu {
+            width: 13em;
+            position: absolute;
+            display: none;
+        }
+
+        .ui-menu .ui-menu-item.ui-state-focus{
+            border: none;
+            background-image: none;
+            background-color: #eee;
+        }
+
 
     </style>
 </head>

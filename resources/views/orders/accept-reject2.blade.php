@@ -13,10 +13,10 @@
                     </div>
                 </td>
                 <td style="width: 50%;">
-                    <div class="row">
-                        <label for="ar-immed-defmargin2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Default margin')}}</label>&nbsp;&nbsp;
-                        <input id="ar-immed-defmargin2" style="width: 5em;" type="text" name="ar-immed-defmargin2" class="form-control" value="" disabled>&nbsp;
-                        <label for="ar-immed-perc-defmargin2"  style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>&nbsp;&nbsp;
+                    <div class="row" style="padding-top: 3px;">
+                        <label for="ar-immed-old-purch-price2" style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Initial purchase price')}}</label>&nbsp;&nbsp;
+                        <input id="ar-immed-old-purch-price2" style="width: 10em;" type="text" name="ar-immed-old-purch-price2" class="form-control" value="" disabled>&nbsp;
+                        <input id="ar-immed-old-purch-curr2" style="width: 5em;" type="text" name="ar-immed-old-purch-curr2" class="form-control" value="" disabled>
                     </div>
                 </td>
             </tr>
@@ -29,9 +29,12 @@
                 </td>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
-                        <label for="ar-immed-old-purch-price2" style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Initial purchase price')}}</label>&nbsp;&nbsp;
-                        <input id="ar-immed-old-purch-price2" style="width: 10em;" type="text" name="ar-immed-old-purch-price2" class="form-control" value="" disabled>&nbsp;
-                        <input id="ar-immed-old-purch-curr2" style="width: 5em;" type="text" name="ar-immed-old-purch-curr2" class="form-control" value="" disabled>
+                        <label for="ar-immed-old-sales-margin-amt2" style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Initial sales margin')}}</label>&nbsp;&nbsp;
+                        <input id="ar-immed-old-sales-margin-amt2"  style="width: 10em;" type="text" name="ar-immed-old-sales-margin-amt2" class="form-control" value="" disabled>&nbsp;
+                        <input id="ar-immed-old-sales-margin-amt-curr2" style="width: 5em;" type="text" name="ar-immed-old-sales-margin-amt-curr2" class="form-control" value="" disabled>
+                        <label for="ar-immed-old-sales-margin-perc2" style="margin-left: 0.4em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
+                        <input id="ar-immed-old-sales-margin-perc2" style="width: 5em;" type="text" name="ar-immed-old-sales-margin-perc2" class="form-control" value="" disabled>
+                        <label for="ar-immed-old-perc2-margin" style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>
                     </div>
                 </td>
             </tr>
@@ -59,11 +62,10 @@
                 </td>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
-                        <label for="ar-immed-old-sales-margin-amt2" style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Initial sales margin')}}</label>&nbsp;&nbsp;
-                        <input id="ar-immed-old-sales-margin-amt2"  style="width: 7em;" type="text" name="ar-immed-old-sales-margin-amt2" class="form-control" value="" disabled>&nbsp;
-                        <label for="ar-immed-old-sales-margin-perc2" style="margin-left: 0.1em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
-                        <input id="ar-immed-old-sales-margin-perc2" style="width: 5em;" type="text" name="ar-immed-old-sales-margin-perc2" class="form-control" value="" disabled>
-                        <label for="ar-immed-old-perc2-margin" style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>
+                        <label for="ar-immed-purch-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New purchase price')}}</label>&nbsp;&nbsp;
+                        <input id="ar-immed-purch-price2" style="width: 10em;" type="text" name="ar-immed-purch-price2" class="form-control" value=""
+                               onfocus="this.oldvalue = this.value;" oninput="ar_immed_purch_price2_check(event, this);">&nbsp;
+                        <input id="ar-immed-purch-curr2" style="width: 5em;" type="text" name="ar-immed-purch-curr2" class="form-control" value="">
                     </div>
                 </td>
             </tr>
@@ -75,11 +77,13 @@
                     </div>
                 </td>
                 <td style="width: 50%;">
-                    <div class="row" style="padding-top: 3px;">
-                        <label for="ar-immed-purch-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New purchase price')}}</label>&nbsp;&nbsp;
-                        <input id="ar-immed-purch-price2" style="width: 10em;" type="text" name="ar-immed-purch-price2" class="form-control" value=""
-                               onfocus="this.oldvalue = this.value;" oninput="ar_immed_purch_price2_check(event, this);">&nbsp;
-                        <input id="ar-immed-purch-curr2" style="width: 5em;" type="text" name="ar-immed-purch-curr2" class="form-control" value="">
+                    <div class="row">
+                        <label for="ar-immed-defmargin-amt2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Default margin')}}</label>&nbsp;&nbsp;
+                        <input id="ar-immed-defmargin-amt2"  style="width: 10em;" type="text" name="ar-immed-defmargin-amt2" class="form-control" value="" disabled>&nbsp;
+                        <input id="ar-immed-defmargin-curr2" style="width: 5em;" type="text" name="ar-immed-defmargin-curr2" class="form-control" value="" disabled>
+                        <label for="ar-immed-defmargin-perc2" style="margin-left: 0.4em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
+                        <input id="ar-immed-defmargin-perc2" style="width: 5em;" type="text" name="ar-immed-defmargin-perc2" class="form-control" value="" disabled>&nbsp;
+                        <label for="ar-immed-perc-defmargin2"  style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>&nbsp;&nbsp;
                     </div>
                 </td>
             </tr>
@@ -108,9 +112,10 @@
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
                         <label for="ar-immed-new-sales-margin-amt2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Extra sales margin')}}</label>&nbsp;&nbsp;
-                        <input id="ar-immed-new-sales-margin-amt2"  style="width: 7em;" type="text" name="ar-immed-new-sales-margin-amt2" class="form-control" value=""
+                        <input id="ar-immed-new-sales-margin-amt2"  style="width: 10em;" type="text" name="ar-immed-new-sales-margin-amt2" class="form-control" value=""
                                onfocus="this.oldvalue = this.value;" oninput="ar_immed_new_sales_margin_amt2_check(event, this);">&nbsp;
-                        <label for="ar-immed-new-sales-margin-perc2" style="margin-left: 0.1em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
+                        <input id="ar-immed-new-sales-margin-curr2" style="width: 5em;" type="text" name="ar-immed-new-sales-margin-curr2" class="form-control" value="" disabled>
+                        <label for="ar-immed-new-sales-margin-perc2" style="margin-left: 0.4em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
                         <input id="ar-immed-new-sales-margin-perc2" style="width: 5em;" type="text" name="ar-immed-new-sales-margin-perc2" class="form-control" value=""
                                onfocus="this.oldvalue = this.value;" oninput="ar_immed_new_sales_margin_perc2_check(event, this);">
                         <label for="ar-immed-new-perc2-margin" style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>
@@ -185,6 +190,7 @@
     var arDialog2, arForm2, _ar_type2, _ar_this2, _ar_itemdata2;
     var proposal_last_selected_line2;
     var proposal_last_color2;
+    var fxtable;
 
     function ar_switchProposalMode2(_this) {
         if ($(_this).is(":checked")) {
@@ -341,6 +347,8 @@
         _ar_type2 = type;
         _ar_this2 = this0;
         _ar_itemdata2 = itemdata;
+        fxtable = [{curr:_ar_itemdata2.curr, fxrate:parseFloat(_ar_itemdata2.fxrate)}];
+
         if (type == 1) {
             $("#ar-immed-lifnr2").val(conv_exit_alpha_output(itemdata.lifnr));
             $("#ar-immed-idnlf2").val(itemdata.idnlf);
@@ -356,12 +364,16 @@
             $("#ar-immed-old-sales-price2").val(itemdata.sales_price);
             $("#ar-immed-sales-price2").val(itemdata.sales_price);
             $("#ar-immed-old-sales-curr2").val(itemdata.sales_curr);
+            $("#ar-immed-old-sales-margin-amt-curr2").val(itemdata.sales_curr);
             $("#ar-immed-sales-curr2").val(itemdata.sales_curr);
+            $("#ar-immed-defmargin-amt2").val((itemdata.sales_price - itemdata.purch_price).toFixed(2));
             $("#ar-immed-new-sales-curr2").val(itemdata.sales_curr);
+            $("#ar-immed-new-sales-margin-curr2").val(itemdata.sales_curr);
             let defmargin = itemdata.defmargin.trim();
             if (defmargin.length == 0) defmargin = "<>";
             else defmargin = parseFloat(defmargin).toFixed(2);
-            $("#ar-immed-defmargin2").val(defmargin + " %");
+            $("#ar-immed-defmargin-perc2").val(defmargin);
+            $("#ar-immed-defmargin-curr2").val(itemdata.sales_curr);
             if (itemdata.purch_curr == itemdata.sales_curr) {
                 let amt = itemdata.sales_price - itemdata.purch_price;
                 let perc = 0;
@@ -396,7 +408,7 @@
             $("#ar-immed-purch-curr2").val("");
             $("#ar-immed-sales-price2").val("");
             $("#ar-immed-sales-curr2").val("");
-            $("#ar-immed-defmargin2").val(itemdata.defmargin);
+            $("#ar-immed-defmargin-perc2").val(itemdata.defmargin);
             $("#ar-immed-new-sales-price2").val("");
             $("#ar-immed-new-sales-curr2").val("");
         }
@@ -707,10 +719,10 @@
     function ar_immed_lifnr2_check(_this) {
         let new_margin = "";
         new_margin = get_sales_margin2(_ar_itemdata2.lifnr, _ar_itemdata2.mfrnr, null) + " %";
-        if (new_margin == $("#ar-immed-defmargin2").val()) return;
-        $("#ar-immed-defmargin2").val(new_margin);
-        var original_color = $("#ar-immed-defmargin2").css('border-left-color');
-        $("#ar-immed-defmargin2")
+        if (new_margin == $("#ar-immed-defmargin-perc2").val()) return;
+        $("#ar-immed-defmargin-perc2").val(new_margin);
+        var original_color = $("#ar-immed-defmargin-perc2").css('border-left-color');
+        $("#ar-immed-defmargin-perc2")
             .animate({borderColor:'red'}, 200, 'linear')
             .delay(200)
             .animate({borderColor:original_color}, 200, 'easeOutCirc')
@@ -721,11 +733,12 @@
     }
 
     function ar_immed_purch_price2_check(event, _this) {
-        let margin = $("#ar-immed-defmargin2").val().trim();
+        let margin = $("#ar-immed-defmargin-perc2").val().trim();
         if (margin == "<>") margin = 0; else margin = parseFloat(margin);
         let pprice = $("#ar-immed-purch-price2").val().trim();
         if (pprice.length == 0) {
             $("#ar-immed-sales-price2").val("");
+            $("#ar-immed-defmargin-amt2").val("0.00");
             _this.oldvalue = "";
             return;
         }
@@ -735,37 +748,46 @@
         }
         pprice = parseFloat(pprice);
         _this.oldvalue = pprice.toFixed(2);
-        $("#ar-immed-sales-price2").val((pprice * (1 + margin / 100)).toFixed(2));
+        sprice = (pprice * (1 + margin / 100));
+        $("#ar-immed-sales-price2").val(sprice.toFixed(2));
+        $("#ar-immed-defmargin-amt2").val((sprice - pprice).toFixed(2));
         $("#ar-immed-new-sales-margin-amt2").val("");
         $("#ar-immed-new-sales-margin-perc2").val("");
         $("#ar-immed-new-sales-price2").val("");
         $("#ar-immed-choose-sales-price2").prop("checked", true);
-        ar_immed_choose_sales_price2_checkbox(_this);
+        ar_immed_choose_sales_price2_checkbox(_this, false);
         $("#ar-immed-choose-sales-price2").prop("disabled", true);
         $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
     }
 
     function ar_immed_sales_price2_check(event, _this) {
-        let margin = $("#ar-immed-defmargin2").val().trim();
+        let margin = $("#ar-immed-defmargin-perc2").val().trim();
         if (margin == "<>") margin = 0; else margin = parseFloat(margin);
+        let pprice = $("#ar-immed-purch-price2").val().trim();
+        if (pprice.length == 0 || !$.isNumeric(pprice)) pprice = 0;
+        else pprice = parseFloat(pprice);
         let sprice = $("#ar-immed-sales-price2").val().trim();
         if (sprice.length == 0) {
-            let pprice = $("#ar-immed-purch-price2").val().trim();
-            if ((pprice.length == 0) || !$.isNumeric(pprice)) return;
-            pprice = parseFloat(pprice);
-            $("#ar-immed-sales-price2").val((pprice * (1 + margin / 100)).toFixed(2));
+            sprice = (pprice * (1 + margin / 100));
+            $("#ar-immed-sales-price2").val(sprice.toFixed(2));
+            _this.oldvalue = sprice.toFixed(2);
+            $("#ar-immed-defmargin-amt2").val((sprice - pprice).toFixed(2));
+            return;
         } else {
             if (!$.isNumeric(sprice)) {
                 $("#ar-immed-sales-price2").val(_this.oldvalue);
+                $("#ar-immed-defmargin-amt2").val("0.00");
                 return;
             }
         }
-        _this.oldvalue = parseFloat(sprice).toFixed(2);
+        sprice = parseFloat(sprice);
+        $("#ar-immed-defmargin-amt2").val((sprice - pprice).toFixed(2));
+        _this.oldvalue = sprice.toFixed(2);
         $("#ar-immed-new-sales-margin-amt2").val("");
         $("#ar-immed-new-sales-margin-perc2").val("");
         $("#ar-immed-new-sales-price2").val("");
         $("#ar-immed-choose-sales-price2").prop("checked", true);
-        ar_immed_choose_sales_price2_checkbox(_this);
+        ar_immed_choose_sales_price2_checkbox(_this, false);
         $("#ar-immed-choose-sales-price2").prop("disabled", true);
         $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
     }
@@ -795,7 +817,7 @@
         }
         _this.oldvalue = nsprice.toFixed(2);
         $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-        ar_immed_choose_new_sales_price2_checkbox(_this);
+        ar_immed_choose_new_sales_price2_checkbox(_this, false);
         $("#ar-immed-choose-sales-price2").prop("disabled", false);
         $("#ar-immed-choose-new-sales-price2").prop("disabled", false);
     }
@@ -813,11 +835,11 @@
             $("#ar-immed-choose-sales-price2").prop("disabled", true);
             $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
         }
-        if (!$.isNumeric(newamt)) {
+        if (!$.isNumeric(newamt) && newamt != "-") {
             __this.val(_this.oldvalue);
             return;
         }
-        newamt = parseFloat(newamt);
+        if (newamt == "-") newperc = 0; else newamt = parseFloat(newamt);
         _this.oldvalue = newamt.toFixed(2);
         let sprice = $("#ar-immed-sales-price2").val().trim();
         if (sprice.length == 0) sprice = "0";
@@ -830,7 +852,7 @@
         sprice += newamt;
         $("#ar-immed-new-sales-price2").val(sprice.toFixed(2));
         $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-        ar_immed_choose_new_sales_price2_checkbox(_this);
+        ar_immed_choose_new_sales_price2_checkbox(_this, false);
         $("#ar-immed-choose-sales-price2").prop("disabled", false);
         $("#ar-immed-choose-new-sales-price2").prop("disabled", false);
     }
@@ -848,11 +870,11 @@
             $("#ar-immed-choose-sales-price2").prop("disabled", true);
             $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
         }
-        if (!$.isNumeric(newperc)) {
+        if (!$.isNumeric(newperc) && newperc != "-") {
             __this.val(_this.oldvalue);
             return;
         }
-        newperc = parseFloat(newperc);
+        if (newperc == "-") newperc = 0; else newperc = parseFloat(newperc);
         _this.oldvalue = newperc.toFixed(2);
         let sprice = $("#ar-immed-sales-price2").val().trim();
         if (sprice.length == 0) sprice = "0";
@@ -862,38 +884,48 @@
         $("#ar-immed-new-sales-margin-amt2").oldvalue = (newamt - sprice).toFixed(2);
         $("#ar-immed-new-sales-price2").val(newamt.toFixed(2));
         $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-        ar_immed_choose_new_sales_price2_checkbox(_this);
+        ar_immed_choose_new_sales_price2_checkbox(_this, false);
         $("#ar-immed-choose-sales-price2").prop("disabled", false);
         $("#ar-immed-choose-new-sales-price2").prop("disabled", false);
     }
 
     function ar_immed_sales_curr2_check() {
-        $("#ar-immed-new-sales-curr2").val($("#ar-immed-sales-curr2").val().trim());
+        let curr = $("#ar-immed-sales-curr2").val().trim();
+        $("#ar-immed-new-sales-margin-curr2").val(curr);
+        $("#ar-immed-new-sales-curr2").val(curr);
     }
 
-    function ar_immed_choose_sales_price2_checkbox(_this) {
+    function ar_immed_choose_sales_price2_checkbox(_this, goto = true) {
         if ($("#ar-immed-choose-sales-price2").is(":checked")) {
             $("#ar-immed-choose-new-sales-price2").prop("checked", false);
             $("#ar-immed-icon-save-new-sales-price2").hide();
             $("#ar-immed-save-new-sales-price2").hide();
             $("#ar-immed-icon-save-sales-price2").show();
             $("#ar-immed-save-sales-price2").show();
+            if (goto) {
+                $("#ar-immed-sales-price2").focus();
+                $("#ar-immed-sales-price2").select();
+            }
         } else {
             $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-            ar_immed_choose_new_sales_price2_checkbox(_this);
+            ar_immed_choose_new_sales_price2_checkbox(_this, goto);
         }
     }
 
-    function ar_immed_choose_new_sales_price2_checkbox(_this) {
+    function ar_immed_choose_new_sales_price2_checkbox(_this, goto = true) {
         if ($("#ar-immed-choose-new-sales-price2").is(":checked")) {
             $("#ar-immed-choose-sales-price2").prop("checked", false);
             $("#ar-immed-icon-save-new-sales-price2").show();
             $("#ar-immed-save-new-sales-price2").show();
             $("#ar-immed-icon-save-sales-price2").hide();
             $("#ar-immed-save-sales-price2").hide();
+            if (goto) {
+                $("#ar-immed-new-sales-price2").focus();
+                $("#ar-immed-new-sales-price2").select();
+            }
         } else {
             $("#ar-immed-choose-sales-price2").prop("checked", true);
-            ar_immed_choose_sales_price2_checkbox(_this);
+            ar_immed_choose_sales_price2_checkbox(_this, goto);
         }
     }
 
@@ -905,6 +937,29 @@
     function ar_immed_choose_save_new_sales_price2_checkbox(_this) {
         $("#ar-immed-save-sales-price2").prop("checked",
             $("#ar-immed-save-new-sales-price2").is(":checked"));
+    }
+
+    function get_fx_rate(curr) {
+        if (curr == "RON") return 1;
+        for (i = 0; i < fxtable.length; i++)
+            if (curr == fxtable[i].curr) return fxtable[i].fxrate;
+        jQuery.ajaxSetup({async: false});
+        var _dataFX, _statusFX;
+        $.get("webservice/get_fx_rate",
+            {
+                curr: curr
+            },
+            function (data, status) {
+                _dataFX = data;
+                _statusFX = status;
+            });
+        jQuery.ajaxSetup({async: true});
+        if (_dataFX != null && _dataFX != undefined && _dataFX.trim().length != 0) {
+            let fx = {curr: curr, fxrate: parseFloat(dataFX)};
+            fxtable.push(fx);
+            return fx.fxrate;
+        }
+        return 0;
     }
 
 </script>

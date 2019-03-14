@@ -661,6 +661,18 @@
         </div>
     </div>
 
+    @if ($filter_history == 1)
+        <ul class="order-tools-menu" id="order-tools-menu">
+            <li><div id="order-tools-menu-archive" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-disk"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Arhivare pozitie")}}</div></li>
+            <li>-</li>
+            <li><div id="order-tools-menu-rollback" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-arrowreturnthick-1-w"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Rollback pozitie")}}</div></li>
+        </ul>
+    @elseif ($filter_history == 2)
+        <ul class="order-tools-menu" id="order-tools-menu">
+            <li><div id="order-tools-menu-unarchive" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-disk"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Dezarhivare pozitie")}}</div></li>
+        </ul>
+    @endif
+
     <script>
         function delete_filters() {
             $.ajaxSetup({
@@ -1271,6 +1283,10 @@
                 if (pitem.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
                         "onclick='inquirePItem(this);return false;'/>";
+                let button_tools = "";
+                if (pitem.tools == 1)
+                    button_tools = "<button type='button' class='order-item-tools' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='orderItemTools(event, this);return false;'/>";
 
                 var newRow = $("<tr>");
                 var cols = "";
@@ -1289,7 +1305,8 @@
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_accept + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_reject + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_inquire + '</td>';
-                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '"></td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_tools + '</td>';
+                    cols += '<td class="coloured" style="' + po_style + '">' + pitem.posnr_out + '</td>';
                 @else
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + info_icon + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '">' + owner_icon + '</td>';
@@ -1300,8 +1317,8 @@
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_accept + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
+                    cols += '<td class="coloured td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_tools + '</td>';
                 @endif
-                cols += '<td class="coloured" style="' + po_style + '">' + pitem.posnr_out + '</td>';
                 cols += "<td colspan='1'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.werks + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + conv_exit_alpha_output(pitem.mfrnr) + '</td>';
@@ -1797,12 +1814,16 @@
                     title: "{{__('MATEROM has requested cancellation of this item')}}",
                     text: "{{__('This item was previously confirmed by you, but MATEROM asks you now to cancel it. Do you agree?')}}",
                     icon: 'warning',
-                    buttons: ["{{__('No')}}", "{{__('Agree with cancellation')}}"]
+                    dangerMode: true,
+                    buttons: {cancel: "Not yet",
+                              no: "{{__('Do not agree')}}",
+                              yes: "{{__('Agree with cancellation')}}"}
                 }).then(function(result) {
-                    if (result) {
+                    if (result == "yes") {
                         doRejectItem(porder, item, 'G', '', 'X', 'Z');
                         location.reload(true);
-                    } else {
+                    } else
+                    if (result == "no") {
                         _unused_acceptItem(porder, item, "F", true);
                     }
                 })
@@ -2249,6 +2270,124 @@
         function replyack2(ebeln) {
             var _data, _status = "";
         }
+
+        function orderItemTools(e, _this) {
+            var currentrow;
+            let rowid = (currentrow = $(_this).parent().parent()).attr('id').toUpperCase();
+            let rowtype = rowid.substr(3, 1); // I
+            let porder = rowid.substr(4, 10);
+            let item = rowid.substr(15, 5);
+            $("#order-tools-menu-archive").click(function(){item_tools_archive(porder, item, currentrow)});
+            $("#order-tools-menu-unarchive").click(function(){item_tools_unarchive(porder, item, currentrow)});
+            $("#order-tools-menu-rollback").click(function(){item_tools_rollback(porder, item, currentrow)});
+            e.stopPropagation();
+            $("#order-tools-menu").menu().toggle().position({
+                my: "left top",
+                at: "right-8px top+8px",
+                of: $(_this),
+                collision: "fit flip"}
+            );
+        }
+
+        function item_tools_archive(porder, item, currentrow) {
+            $("#order-tools-menu-archive").unbind("click");
+            swal({
+                title: "{{__('Confirmation')}}",
+                text: "{{__('Are you sure you want to archive this item now?')}}",
+                icon: 'warning',
+                buttons: ["{{__('No')}}", "{{__('Archive it')}}"],
+            }).then(function(result) {
+                if (result) {
+                    jQuery.ajaxSetup({async: false});
+                    var _data, _status;
+                    $.get("webservice/archive_item",
+                        {
+                            porder: porder,
+                            item: item
+                        },
+                        function (data, status) {
+                            _data = data;
+                            _status = status;
+                        });
+                    jQuery.ajaxSetup({async: true});
+                    if (_status == null || _status == undefined)
+                        _data = '{{__("An error occurred archiving this item")}}';
+                    if (_data != "OK") {
+                        alert(_data);
+                        return;
+                    }
+                    $(currentrow).fadeOut('slow', function(){$(currentrow).remove();});
+                }
+            })
+        }
+
+        function item_tools_unarchive(porder, item, currentrow) {
+            $("#order-tools-menu-unarchive").unbind("click");
+            swal({
+                title: "{{__('Confirmation')}}",
+                text: "{{__('Are you sure you want to unarchive this item now?')}}",
+                icon: 'warning',
+                buttons: ["{{__('No')}}", "{{__('Unarchive it')}}"],
+            }).then(function(result) {
+                if (result) {
+                    jQuery.ajaxSetup({async: false});
+                    var _data, _status;
+                    $.get("webservice/unarchive_item",
+                        {
+                            porder: porder,
+                            item: item
+                        },
+                        function (data, status) {
+                            _data = data;
+                            _status = status;
+                        });
+                    jQuery.ajaxSetup({async: true});
+                    if (_status == null || _status == undefined)
+                        _data = '{{__("An error occurred unarchiving this item")}}';
+                    if (_data != "OK") {
+                        alert(_data);
+                        return;
+                    }
+                    $(currentrow).fadeOut('slow', function(){$(currentrow).remove();});
+                }
+            })
+        }
+
+        function item_tools_rollback(porder, item, currentrow) {
+            $("#order-tools-menu-rollback").unbind("click");
+            swal({
+                title: "{{__('Confirmation')}}",
+                text: "{{__('Are you sure you want to rollback this item now?')}}",
+                icon: 'warning',
+                buttons: ["{{__('No')}}", "{{__('Rollback it')}}"],
+            }).then(function(result) {
+                if (result) {
+                    jQuery.ajaxSetup({async: false});
+                    var _data, _status;
+                    $.get("webservice/rollback_item",
+                        {
+                            porder: porder,
+                            item: item
+                        },
+                        function (data, status) {
+                            _data = data;
+                            _status = status;
+                        });
+                    jQuery.ajaxSetup({async: true});
+                    if (_status == null || _status == undefined)
+                        _data = '{{__("An error occurred rolling back this item")}}';
+                    if (_data != "OK") {
+                        alert(_data);
+                        return;
+                    }
+                    location.reload();
+                }
+            })
+        }
+
+        $(document).on("click", function(e){
+            $("#order-tools-menu").hide();
+        });
 
     </script>
 

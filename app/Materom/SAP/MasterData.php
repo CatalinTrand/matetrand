@@ -390,4 +390,29 @@ class MasterData
         return $record;
     }
 
+    static public function getFXRate($curr)
+    {
+        $curr = strtoupper(trim($curr));
+        if ($curr == "RON") return 1;
+        $globalRFCData = DB::select("select * from ". System::deftable_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return 0;
+        $roleData = DB::select("select * from ". System::deftable_roles ." where rfc_role = 'Administrator'");
+        if($roleData) $roleData = $roleData[0]; else return 0;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_FX_RATE');
+            $result = $sapfm->invoke(['I_WAERS' => $curr])["E_KKURS"];
+            $sapconn->close();
+            return trim($result);
+        } catch (\SAPNWRFC\Exception $e) {
+            Log::error($e);
+        }
+        return 0;
+    }
+
+
 }

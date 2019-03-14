@@ -77,6 +77,10 @@ Route::get('webservice/read_inforecords','WebserviceController@readInforecords')
 Route::get('webservice/read_zpretrecords','WebserviceController@readZPRETrecords');
 Route::get('webservice/get_sales_margin','WebserviceController@getSalesMargin');
 Route::get('webservice/get_message_history','WebserviceController@getMessageHistory');
+Route::get('webservice/get_fx_rate','WebserviceController@getFXRate');
+Route::get('webservice/archive_item','WebserviceController@archiveItem');
+Route::get('webservice/unarchive_item','WebserviceController@unarchiveItem');
+Route::get('webservice/rollback_item','WebserviceController@rollbackItem');
 
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');
