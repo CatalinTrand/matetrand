@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 
 class EditUsers {
 
-    static function editUser($id, $role, $user, $token, $lang, $lifnr, $ekgrp, $active, $email, $sap_system)
+    static function editUser($id, $role, $user, $token, $lang, $lifnr, $ekgrp, $active, $email, $sap_system, $readonly)
     {
 
         $prevusers = DB::select("select * from users where id ='$id'");
@@ -17,6 +17,7 @@ class EditUsers {
         if ($sap_system == null) $sap_system = "";
         $sap_system = trim($sap_system);
         if ("X".$sap_system == "X200") $sap_system = "";
+        if (strtoupper($readonly) == "ON") $readonly = 1; else $readonly = 0;
 
         if(strcmp($active,"Active") == 0) {
             $active = 1;
@@ -29,10 +30,10 @@ class EditUsers {
 
         if($active == 1)
             DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', lifnr = '$lifnr'," .
-                               " ekgrp = '$ekgrp', active = '$active', deleted_at = null, activated_at = '$activated_at', sap_system = '$sap_system' where id = '$id'");
+                               " ekgrp = '$ekgrp', active = '$active', deleted_at = null, activated_at = '$activated_at', sap_system = '$sap_system', readonly = '$readonly'  where id = '$id'");
         else
             DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', ".
-            "active = '$active', deleted_at = NOW(), activated_at = '$activated_at', sap_system = '$sap_system' where id = '$id'");
+            "active = '$active', deleted_at = NOW(), activated_at = '$activated_at', sap_system = '$sap_system', readonly = '$readonly' where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");
         if ($prevdata->role == "Administrator" && $prevdata->api_token != $token && !empty($token)) {

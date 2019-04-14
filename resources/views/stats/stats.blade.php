@@ -60,7 +60,25 @@
                         @endif
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body" style="padding-bottom: 0px;">
+                        <div style="border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 2.2rem;">
+                            <div class="container row" style="display: block; max-width: 100%;">
+                                <table style="border: none; width: 100%;">
+                                    <tr>
+                                        <td>
+                                            {{__('Supplier')}}:
+                                            <select id="selected-supplier" class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                                    onchange="return false;">
+                                                <option value="1">21376 Test</option>
+                                            </select>
+                                        </td>
+                                        <td width="100px" style="text-align: right;">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>

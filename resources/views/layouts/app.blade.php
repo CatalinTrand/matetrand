@@ -13,6 +13,7 @@
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery-ui.1.12.1.min.js') }}"></script>
+    <script src="{{ asset('js/d3.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/jquery-ui.1.12.1.min.css') }}" />
 
     <!-- Fonts -->
@@ -374,7 +375,7 @@
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" style="margin-top: 4px;" class="nav-link dropdown-toggle" href="#" role="button"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ __(Auth::user()->role) . " " . Auth::user()->username }} <span class="caret"></span>
+                                {{ __(Auth::user()->role) . " " . (Auth::user()->readonly == 1? "R/O ": "") . Auth::user()->username }} <span class="caret"></span>
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">

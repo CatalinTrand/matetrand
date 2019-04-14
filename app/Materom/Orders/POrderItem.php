@@ -227,6 +227,15 @@ class POrderItem
                 if (DB::table(System::$table_user_agent_clients)->where([["id", "=", Auth::user()->id],
                     ["kunnr", "=", $this->kunnr]])->exists())
                     $this->owner = 1;
+                else {
+                    if (!DB::table(System::$table_user_agent_clients)
+                            ->where([["id", "<>", Auth::user()->id],
+                                     ["kunnr", "=", $this->kunnr]])->exists()
+                        &&
+                        Auth::user()->id == DB::table(System::$table_roles)
+                                                ->where("rfc_role", "=", "CTV")->value("user1"))
+                        $this->owner = 1; // fallback CTV
+                }
             }
         }
 
@@ -432,12 +441,11 @@ class POrderItem
 
         $this->tools = 0;
         if ($history == 1 || $history == 2) {
-            if (false // (Auth::user()->role == "Referent" && $this->owner <> 0)
-                || Auth::user()->role == "Administrator")
+            if (Auth::user()->role == "Administrator" && Auth::user()->readonly != 1)
                 $this->tools = 1;
         }
 
-        if ($history == 2) {
+        if ($history == 2 || Auth::user()->readonly != 0) {
             $this->info = 0;
             $this->accept = 0;
             $this->reject = 0;

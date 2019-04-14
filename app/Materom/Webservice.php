@@ -979,19 +979,260 @@ class Webservice
     static public function archiveItem($ebeln, $ebelp)
     {
         $result = Data::archiveItem($ebeln, $ebelp);
+        Log::info("Order item $ebeln/$ebelp was manually archived by ". Auth::user()->id);
         return $result;
     }
 
     static public function unarchiveItem($ebeln, $ebelp)
     {
         $result = Data::unarchiveItem($ebeln, $ebelp);
+        Log::info("Order item $ebeln/$ebelp was manually unarchived by ". Auth::user()->id);
         return $result;
     }
 
     static public function rollbackItem($ebeln, $ebelp)
     {
-        return "Item could not be rolled back automatically";
+        $pitem = DB::table(System::$table_pitems)->where(["ebeln" => $ebeln, "ebelp" => $ebelp])->first();
+        if ($pitem != null) {
+            $pitemchgs = DB::select("select * from ". System::$table_pitemchg .
+                    " where ebeln = '$ebeln' and ebelp = '$ebelp' and ctype <> 'E' order by cdate desc");
+            $pitemchg = null;
+            if ($pitemchgs != null && count($pitemchgs) > 0) {
+                $pitemchg = $pitemchgs[0];
+            }
+            if ($pitemchg != null && ($pitemchg->acknowledged < 2)) {
+                $cdate = $pitemchg->cdate;
+                $status = $pitem->status;
+                $now = now();
+                if ((($pitem->stage == "R") && ($pitemchg->stage == "R")) &&
+                    ($pitem->pstage == "F" || $pitem->pstage == " ") &&
+                    ((($pitem->status == "T") && ($pitemchg->ctype == "T")) ||
+                     (($pitem->status == "A") && ($pitemchg->ctype == "A")))
+                   ) {
+                    $message = __("Rolled back");
+                    if ($pitem->status == "T") {
+                        $message += " " + __("from supplier acceptance proposal on") + " " + $cdate;
+                    } elseif ($pitem->status == "A") {
+                        $message += " " + __("from supplier rejection on") + " " + $cdate;
+                    }
+                    DB::beginTransaction();
+                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update ". System::$table_pitems ." set stage = 'F', status = ' ', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                        "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
+                    DB::commit();
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 1) by ". Auth::user()->id);
+                    return "OK";
+                 }
+                if ((($pitem->stage == "C") && ($pitemchg->stage == "C")) &&
+                     $pitem->pstage == "R" &&
+                     (($pitem->status == "T") || ($pitem->status == "A")) &&
+                     ($pitemchg->ctype == "O")
+                ) {
+                    $message = __("Rolled back from proposal on") . " " . $cdate;
+                    DB::beginTransaction();
+                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update ". System::$table_pitems ." set stage = 'R', status = '$status', pstage = 'C' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                        "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
+                    DB::commit();
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 2) by ". Auth::user()->id);
+                    return "OK";
+                }
+            }
+        }
+        return __("Item could not be rolled back automatically");
     }
 
+    static public function processProposal2($proposal)
+    {
+        $cdate = now();
+        $stage = $proposal->itemdata->stage;
+        $ebeln = $proposal->itemdata->ebeln;
+        $ebelp = $proposal->itemdata->ebelp;
+        $newstage = 'C';
+        if (Auth::user()->role == "Furnizor") $newstage ='R';
+        if (isset($proposal->items)) {
+            DB::beginTransaction();
+            DB::update("update ". System::$table_pitems ." set stage = '$newstage', pstage = '$stage', status = 'T' " .
+                "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                "('$ebeln', '$ebelp', '$cdate', 1, '$proposal->type', '$newstage', '" .
+                Auth::user()->id . "', '" . Auth::user()->username . "')");
+            $counter = 0;
+            foreach ($proposal->items as $propitem) {
+                $propitem->lifnr = SAP::alpha_input($propitem->lifnr);
+                if (strlen($propitem->purch_curr) > 3) $propitem->purch_curr = substr($propitem->purch_curr, 0, 3);
+                if (strlen($propitem->sales_curr) > 3) $propitem->sales_curr = substr($propitem->sales_curr, 0, 3);
+                $propitem->mtext = str_replace("'", "\'", $propitem->mtext);
+                DB::insert("insert into ". System::$table_pitemchg_proposals ." (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+                    "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
+                    "'$ebeln', '$ebelp', '$cdate', $counter, " .
+                    "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
+                    "'$propitem->quantity', '$propitem->quantity_unit', '$propitem->purch_price', '$propitem->purch_curr', " .
+                    "'$propitem->sales_price', '$propitem->sales_curr', '')");
+                $counter++;
+                if ($propitem->sales_save == 1) {
+                    SAP::writeZPRET($propitem->lifnr, $propitem->idnlf, $propitem->quantity_unit,
+                        $propitem->purch_price, $propitem->purch_curr,
+                        $propitem->sales_price, $propitem->sales_curr);
+                }
+            }
+            DB::commit();
+            $pitem = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+            if ($newstage == 'C') {
+                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$pitem->kunnr'");
+                if (($ctvusers == null) || empty($ctvusers)) {
+                    $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
+                    if (($ctvuser1 != null) && !empty($ctvuser1)) {
+                        try {
+                            Mailservice::sendSalesOrderProposal($ctvuser1, $pitem->vbeln, $pitem->posnr);
+                        } catch (Exception $e) {
+                        }
+                    }
+                } else {
+                    foreach ($ctvusers as $ctvuser) {
+                        try {
+                            Mailservice::sendSalesOrderProposal($ctvuser->id, $pitem->vbeln, $pitem->posnr);
+                        } catch (Exception $e) {
+                        }
+                    }
+                }
+            }
+        } else {
+            $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
+            if (($proposal->lifnr == $proposal->itemdata->lifnr) &&
+                (trim($proposal->idnlf) == trim($proposal->itemdata->orig_idnlf))) {
+                // keeping the same supplier and material code, just update PO & SO
+                $tmp_idnlf = $proposal->idnlf;
+                $tmp_mtext = str_replace("'", "\'", $proposal->mtext);
+                $tmp_matnr = $proposal->matnr;
+                $tmp_lfdat = $proposal->lfdat;
+                $tmp_qty = $proposal->quantity;
+                $tmp_qty_unit = $proposal->quantity_unit;
+                $tmp_purch_price = $proposal->purch_price;
+                $tmp_purch_curr = $proposal->purch_curr;
+                $tmp_sales_price = $proposal->sales_price;
+                $tmp_sales_curr = $proposal->sales_curr;
+                if (strlen($tmp_purch_curr) > 3) $tmp_purch_curr = substr($tmp_purch_curr, 0, 3);
+                DB::beginTransaction();
+                DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$stage', status = 'A', " .
+                    "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
+                    "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
+                    "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr', " .
+                    "sales_price = '$tmp_sales_price', sales_curr = '$tmp_sales_curr' " .
+                    "where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                    "('$ebeln', '$ebelp', '$cdate', 1, 'A', 'Z', '" .
+                    Auth::user()->id . "', '" . Auth::user()->username . "')");
+                $result = SAP::savePOItem($ebeln, $ebelp);
+                if (!empty(trim($result))) {
+                    DB::rollBack();
+                    return $result;
+                }
+                if (trim($proposal->sales_price) != trim($proposal->itemdata->sales_price)) {
+                    $result = SAP::changeSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
+                        "", "", "", "", "", "",
+                        $proposal->sales_price, $proposal->sales_curr, "");
+                    if (!empty(trim($result))) {
+                        DB::rollBack();
+                        return $result;
+                    }
+                    if ($proposal->sales_save == 1) {
+                        SAP::writeZPRET($proposal->lifnr, $proposal->idnlf, $proposal->quantity_unit,
+                            $proposal->purch_price, $proposal->purch_curr,
+                            $proposal->sales_price, $proposal->sales_curr);
+                    }
+                }
+                DB::commit();
+            } else {
+                // change supplier/material or change in SO
+                $result = SAP::rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
+                if (($result != null) && strlen(trim($result)) != 0) return $result;
+                $set_new_lifnr = "";
+                if ($proposal->lifnr != $proposal->itemdata->lifnr) $set_new_lifnr = " new_lifnr ='" . $proposal->lifnr . "', ";
+                if (strlen($proposal->purch_curr) > 3) $proposal->purch_curr = substr($proposal->purch_curr, 0, 3);
+                if ($proposal->itemdata->vbeln == Orders::stockorder) {
+                    $result = SAP::createPurchReq($proposal->lifnr, $proposal->idnlf, $proposal->mtext, $proposal->matnr,
+                        $proposal->quantity, $proposal->quantity_unit,
+                        $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat);
+                    if (!empty(trim($result))) {
+                        if (substr($result, 0, 2) == "OK")
+                            $banfn = __("New purchase requisition ") . SAP::alpha_output(substr($result, 2));
+                        else return $result;
+                    }
+                    $tmp_stage = $proposal->itemdata->stage;
+                    $tmp_idnlf = trim($proposal->itemdata->orig_idnlf);
+                    $tmp_purch_price = $proposal->itemdata->orig_purch_price;
+                    $tmp_qty = $proposal->itemdata->orig_qty;
+                    $tmp_lfdat = $proposal->itemdata->orig_lfdat;
+                    $tmp_matnr = $proposal->itemdata->orig_matnr;
+                    $newstatus = 'X';
+                    if ($proposal->lifnr == $proposal->itemdata->lifnr) $newstatus = 'A';
+                    DB::beginTransaction();
+                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
+                        "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
+                        "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
+                        "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
+                        "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 1, '$newstatus', 'Z', '" .
+                        Auth::user()->id . "', '" . Auth::user()->username . "', '$banfn')");
+                    DB::commit();
+                    if ($proposal->sales_save == 1) {
+                        SAP::writeZPRET($proposal->lifnr, $proposal->idnlf, $proposal->quantity_unit,
+                            $proposal->purch_price, $proposal->purch_curr,
+                            $proposal->sales_price, $proposal->sales_curr);
+                    }
+                } else {
+                    $tmp_stage = $proposal->itemdata->stage;
+                    $tmp_idnlf = trim($proposal->itemdata->orig_idnlf);
+                    $tmp_purch_price = $proposal->itemdata->orig_purch_price;
+                    $tmp_qty = $proposal->itemdata->orig_qty;
+                    $tmp_lfdat = $proposal->itemdata->orig_lfdat;
+                    $tmp_matnr = $proposal->itemdata->orig_matnr;
+                    if (strlen($proposal->purch_curr) > 3) $proposal->purch_curr = substr($proposal->purch_curr, 0, 3);
+                    if (strlen($proposal->sales_curr) > 3) $proposal->sales_curr = substr($proposal->sales_curr, 0, 3);
+                    $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr),
+                        $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
+                        $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
+                    if (!empty(trim($result))) {
+                        if (substr($result, 0, 2) == "OK")
+                            $soitem = __("New sales order item") . " " . substr($result, 2);
+                        else return $result;
+                    }
+                    DB::beginTransaction();
+                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
+                        "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
+                        "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
+                        "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+                        "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 0, 'X', 'Z', 'C', '" .
+                        Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
+                    DB::commit();
+                    if ($proposal->sales_save == 1) {
+                        SAP::writeZPRET($proposal->lifnr, $proposal->idnlf, $proposal->quantity_unit,
+                            $proposal->purch_price, $proposal->purch_curr,
+                            $proposal->sales_price, $proposal->sales_curr);
+                    }
+                    if (Auth::user()->role != "CTV") {
+                        $kunnr = $proposal->itemdata->kunnr;
+                        $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$kunnr'");
+                        foreach ($ctvusers as $ctvuser) {
+                            Mailservice::sendSalesOrderChange($ctvuser->id, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
+                        }
+                    }
+                    if (Auth::user()->role != "Referent") {
+                        $ekgrp = DB::table(System::$table_porders)->where("ebeln", $proposal->itemdata->ebeln)->value("ekgrp");
+                        $refuser = DB::table("users")->where(["ekgrp" => $ekgrp, "role" => "Referent", "active" => 1, "sap_system" => Auth::user()->sap_system])->first();
+                        if ($refuser != null)
+                            Mailservice::sendSalesOrderChange($refuser->id, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
+                    }
+                }
+                // if (!empty($set_new_lifnr)) Data::archiveItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
+            }
+        }
+        return "";
+    }
 
 }

@@ -25,6 +25,7 @@ class CreateUsersTable extends Migration
             $table->string('ekgrp', 3)->default('');
             $table->string('lang',2)->default('en');
             $table->integer('active')->default('1');
+            $table->integer('readonly')->default('1');
             $table->rememberToken();
             $table->timestamps();
             $table->timestamp('deleted_at')->nullable();

@@ -20,7 +20,8 @@ class EditUserController
             Input::get("ekgrp"),
             Input::get("active"),
             Input::get("email"),
-            Input::get("sap_system")
+            Input::get("sap_system"),
+            Input::get("readonly")
         );
     }
 

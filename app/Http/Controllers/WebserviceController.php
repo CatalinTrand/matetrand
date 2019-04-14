@@ -194,6 +194,11 @@ class WebserviceController extends Controller
         return Webservice::processProposal(json_decode(Input::get("proposal")));
     }
 
+    public function processProposal2()
+    {
+        return Webservice::processProposal2(json_decode(Input::get("proposal")));
+    }
+
     public function acceptProposal()
     {
         return Webservice::acceptProposal(
@@ -407,7 +412,8 @@ class WebserviceController extends Controller
                 }
                 Session::put("groupOrdersBy", 4);
             }
-            if (Auth::user()->role == "Administrator") Session::put("filter_ebeln", "NONE");
+            if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1)
+                Session::put("filter_ebeln", "NONE");
             Orders::fillCache();
         }
 

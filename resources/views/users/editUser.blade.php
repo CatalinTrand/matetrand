@@ -89,6 +89,9 @@
             break;
         }
 
+        $readonly = "";
+        if ($user->readonly == 1) $readonly = "checked";
+
     @endphp
     <div class="container-fluid">
         <div class="container" style="width: 40%;">
@@ -135,7 +138,6 @@
                                         </select>
                                     </div>
                                 </div>
-
 
                                 <div class="form-group row">
                                     <label for="username"
@@ -224,6 +226,15 @@
                                             <option {{$selectedON}}>Active</option>
                                             <option {{$selectedOFF}}>Inactive</option>
                                         </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="readonly"
+                                           class="col-md-3 col-form-label text-md-left">{{ __('Read-only') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input id="readonly" type="checkbox" name="readonly" style="float: left; margin-top: 1em;" {{$readonly}}>
                                     </div>
                                 </div>
 

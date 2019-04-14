@@ -579,4 +579,36 @@ class SAP
         return $ctv;
     }
 
+
+    static public function writeZPRET($lifnr, $idnlf, $meins, $purch_price, $purch_curr, $sales_price, $sales_curr) {
+
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_WRITE_ZPRET');
+            $result = $sapfm->invoke(['I_LIFNR' => $lifnr,
+                                      'I_IDNLF' => $idnlf,
+                                      'I_MEINS' => $meins,
+                                      'I_FBETR' => $purch_price,
+                                      'I_FONWA' => $purch_curr,
+                                      'I_CBETR' => $sales_price,
+                                      'I_CONWA' => $sales_curr
+                                      ])["E_MESSAGE"];
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+        return "Internal error";
+    }
+
+
 };

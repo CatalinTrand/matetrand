@@ -76,6 +76,8 @@ class RegisterController extends Controller
         if ($sap_system == null) $sap_system = "";
         $sap_system = trim($sap_system);
         if ("X".$sap_system == "X200") $sap_system = "";
+        $readonly = 0;
+        if (isset($data['readonly']) && strtoupper($data['readonly']) == "ON") $readonly = 1;
 
         return User::create([
             'id' => $data['id'],
@@ -86,6 +88,7 @@ class RegisterController extends Controller
             'lifnr' => $lifnr,
             'email' => $data['email'],
             'sap_system' => $sap_system,
+            'readonly'   => $readonly,
             'password' => Hash::make($data['password']),
             'created_at' => Carbon::now()->getTimestamp()
         ]);

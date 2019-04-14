@@ -8,6 +8,8 @@
         $currentsystem300 = "";
         if ($sap_system == "200") $currentsystem200 = "selected";
         if ($sap_system == "300") $currentsystem300 = "selected";
+        $readonly = "";
+        if (Auth::user()->readonly == 1) $readonly = "checked";
     @endphp
     @if (Auth::user() && Auth::user()->role == 'Administrator')
         <div class="container">
@@ -112,6 +114,15 @@
                                             <option>DE</option>
                                             <option>EN</option>
                                         </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="readonly"
+                                           class="col-md-4 col-form-label text-md-right">{{ __('Read-only') }}</label>
+
+                                    <div class="col-md-6">
+                                        <input type="checkbox" style="float: left; margin-top: 1em;" id="readonly" name="readonly" {{$readonly}}>
                                     </div>
                                 </div>
 

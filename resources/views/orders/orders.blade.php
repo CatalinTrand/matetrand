@@ -139,7 +139,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
-                        @if (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
+                        @if (\Illuminate\Support\Facades\Auth::user()->role == "Administrator" && \Illuminate\Support\Facades\Auth::user()->readonly != 1)
                             <a href="/roles">
                                 <p
                                         style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
@@ -736,6 +736,15 @@
                 $("#ar-immed-purch-price").val(result_purch_price);
                 $("#ar-immed-purch-curr").val(result_purch_currency);
             }
+            if (caller == 11) {
+                $("#ar-immed-lifnr2").val(result_lifnr);
+                $("#ar-immed-idnlf2").val(result_idnlf);
+                $("#ar-immed-mtext2").val(result_mtext);
+                $("#ar-immed-matnr2").val(result_matnr);
+                $("#ar-immed-purch-price2").val(result_purch_price);
+                $("#ar-immed-purch-curr2").val(result_purch_currency);
+                ar_immed_purch_price2_check(null, $("#ar-immed-purch-price2")[0]);
+            }
             if (caller == 2) {
                 $("#aep-lifnr").val(result_lifnr);
                 $("#aep-idnlf").val(result_idnlf);
@@ -743,6 +752,15 @@
                 $("#aep-matnr").val(result_matnr);
                 $("#aep-purch-price").val(result_purch_price);
                 $("#aep-purch-curr").val(result_purch_currency);
+            }
+            if (caller == 12) {
+                $("#aep-lifnr2").val(result_lifnr);
+                $("#aep-idnlf2").val(result_idnlf);
+                $("#aep-mtext2").val(result_mtext);
+                $("#aep-matnr2").val(result_matnr);
+                $("#aep-purch-price2").val(result_purch_price);
+                $("#aep-purch-curr2").val(result_purch_currency);
+                aep_purch_price2_check(null, $("#aep-purch-price2")[0]);
             }
             if (caller == 3) {
                 $("#aes-lifnr").val(result_lifnr);
@@ -767,6 +785,18 @@
                 $("#ar-immed-sales-price").val(result_sales_price);
                 $("#ar-immed-sales-curr").val(result_sales_currency);
             }
+            if (caller == 11) {
+                $("#ar-immed-lifnr2").val(result_lifnr);
+                $("#ar-immed-idnlf2").val(result_idnlf);
+                $("#ar-immed-mtext2").val(result_mtext);
+                $("#ar-immed-matnr2").val(result_matnr);
+                $("#ar-immed-purch-price2").val(result_purch_price);
+                $("#ar-immed-purch-curr2").val(result_purch_currency);
+                ar_immed_purch_price2_check(null, $("#ar-immed-purch-price2")[0]);
+                $("#ar-immed-sales-price").val(result_sales_price);
+                $("#ar-immed-sales-curr").val(result_sales_currency);
+                ar_immed_sales_price2_check(null, $("#ar-immed-sales-price2")[0]);
+            }
             if (caller == 2) {
                 $("#aep-lifnr").val(result_lifnr);
                 $("#aep-idnlf").val(result_idnlf);
@@ -776,6 +806,17 @@
                 $("#aep-purch-curr").val(result_purch_currency);
                 $("#aep-sales-price").val(result_sales_price);
                 $("#aep-sales-curr").val(result_sales_currency);
+            }
+            if (caller == 12) {
+                $("#aep-lifnr2").val(result_lifnr);
+                $("#aep-idnlf2").val(result_idnlf);
+                $("#aep-mtext2").val(result_mtext);
+                $("#aep-matnr2").val(result_matnr);
+                $("#aep-purch-price2").val(result_purch_price);
+                $("#aep-purch-curr2").val(result_purch_currency);
+                $("#aep-sales-price2").val(result_sales_price);
+                $("#aep-sales-curr2").val(result_sales_currency);
+                aep_sales_price2_check(null, $("#aep-sales-price2")[0]);
             }
             if (caller == 3) {
                 $("#aes-lifnr").val(result_lifnr);
@@ -921,7 +962,7 @@
                 });
             jQuery.ajaxSetup({async: true});
             if (_data != null && _data != undefined && _data.trim().length != 0) {
-                alert(_2data);
+                alert(_data);
                 return;
             }
             if (_status == "success") {
@@ -1844,7 +1885,7 @@
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
                 else
                 select_proposal(mode, thisbtn, _dataIR, "Decizie split item", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, decideti daca acceptati");
-            @elseif (\Illuminate\Support\Facades\Auth::user()->id == "radu")
+            @elseif (\Illuminate\Support\Facades\Auth::user()->id == "radu" || \Illuminate\Support\Facades\Auth::user()->role == "Administrator")
             if (_dataIR.stage == 'R') {
                 if (mode == 1) {
                     accept_reject_dialog2(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
@@ -2295,7 +2336,7 @@
                 title: "{{__('Confirmation')}}",
                 text: "{{__('Are you sure you want to archive this item now?')}}",
                 icon: 'warning',
-                buttons: ["{{__('No')}}", "{{__('Archive it')}}"],
+                buttons: ["{{__('No')}}", "{{__('Yes, archive it')}}"],
             }).then(function(result) {
                 if (result) {
                     jQuery.ajaxSetup({async: false});
@@ -2327,7 +2368,7 @@
                 title: "{{__('Confirmation')}}",
                 text: "{{__('Are you sure you want to unarchive this item now?')}}",
                 icon: 'warning',
-                buttons: ["{{__('No')}}", "{{__('Unarchive it')}}"],
+                buttons: ["{{__('No')}}", "{{__('Yes, unarchive it')}}"],
             }).then(function(result) {
                 if (result) {
                     jQuery.ajaxSetup({async: false});
@@ -2359,7 +2400,7 @@
                 title: "{{__('Confirmation')}}",
                 text: "{{__('Are you sure you want to rollback this item now?')}}",
                 icon: 'warning',
-                buttons: ["{{__('No')}}", "{{__('Rollback it')}}"],
+                buttons: ["{{__('No')}}", "{{__('Yes, roll it back')}}"],
             }).then(function(result) {
                 if (result) {
                     jQuery.ajaxSetup({async: false});

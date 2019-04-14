@@ -5,11 +5,13 @@
     <br><br>
     <div id="ar-proposals-immed2" width="95%" style="margin-right: 0.5rem;">
         <table style="width: 100%; border-style: none">
+
             <tr>
                 <td style="width: 50%;">
                     <div class="row">
                         <label for="ar-immed-lifnr2" style="margin-left: 2em; width: 10em;" class="col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
-                        <input id="ar-immed-lifnr2" type="text" name="ar-immediate-lifnr2" style="width: 15em;" class="form-control" value="">
+                        <input id="ar-immed-lifnr2" type="text" name="ar-immediate-lifnr2" style="width: 15em;" class="form-control" value=""
+                            onkeypress="arf_lifnr2_check(event, this, 'ar-immed');" onblur="arf_lifnr2_check(event, this, 'ar-immed');">
                     </div>
                 </td>
                 <td style="width: 50%;">
@@ -20,6 +22,7 @@
                     </div>
                 </td>
             </tr>
+
             <tr>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
@@ -38,6 +41,7 @@
                     </div>
                 </td>
             </tr>
+
             <tr>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
@@ -53,6 +57,7 @@
                     </div>
                 </td>
             </tr>
+
             <tr>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
@@ -64,11 +69,13 @@
                     <div class="row" style="padding-top: 3px;">
                         <label for="ar-immed-purch-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New purchase price')}}</label>&nbsp;&nbsp;
                         <input id="ar-immed-purch-price2" style="width: 10em;" type="text" name="ar-immed-purch-price2" class="form-control" value=""
-                               onfocus="this.oldvalue = this.value;" oninput="ar_immed_purch_price2_check(event, this);">&nbsp;
-                        <input id="ar-immed-purch-curr2" style="width: 5em;" type="text" name="ar-immed-purch-curr2" class="form-control" value="">
+                               onfocus="this.oldvalue = this.value;" oninput="ar2_purch_price2_check(event, this, 'ar-immed');">&nbsp;
+                        <input id="ar-immed-purch-curr2" style="width: 5em;" type="text" name="ar-immed-purch-curr2" class="form-control" value=""
+                            onblur="ar2_purch_curr2_check(event, this, 'ar-immed');">
                     </div>
                 </td>
             </tr>
+
             <tr>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
@@ -87,6 +94,7 @@
                     </div>
                 </td>
             </tr>
+
             <tr>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
@@ -99,43 +107,47 @@
                     <div class="row" style="padding-top: 3px;">
                         <label for="ar-immed-sales-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New sales price (1)')}}</label>&nbsp;&nbsp;
                         <input id="ar-immed-sales-price2" style="width: 10em;" type="text" name="ar-immed-sales-price2" class="form-control" value=""
-                               onfocus="this.oldvalue = this.value;" oninput="ar_immed_sales_price2_check(event, this);">&nbsp;
-                        <input id="ar-immed-sales-curr2" style="width: 5em;" type="text" name="ar-immed-sales-curr2" class="form-control" value="" oninput="ar_immed_sales_curr2_check();">
-                        <input type="checkbox" id="ar-immed-choose-sales-price2" style="margin-left: 0.5em; border: none;" onchange="ar_immed_choose_sales_price2_checkbox(this);">
+                               onfocus="this.oldvalue = this.value;" oninput="ar2_sales_price2_check(event, this, 'ar-immed');">&nbsp;
+                        <input id="ar-immed-sales-curr2" style="width: 5em;" type="text" name="ar-immed-sales-curr2" class="form-control" value=""
+                               onblur="ar2_sales_curr2_check(event, this, 'ar-immed');">
+                        <input type="checkbox" id="ar-immed-choose-sales-price2" style="margin-left: 0.5em; border: none;" onchange="ar2_choose_sales_price2_checkbox(this, true, 'ar-immed');">
                         <image id="ar-immed-icon-save-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
-                        <input type="checkbox" id="ar-immed-save-sales-price2" onchange="ar_immed_choose_save_sales_price2_checkbox(this);">
+                        <input type="checkbox" id="ar-immed-save-sales-price2" onchange="ar2_choose_save_sales_price2_checkbox(this, 'ar-immed');">
                     </div>
                 </td>
             </tr>
+
             <tr>
                 <td style="width: 50%;"></td>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
                         <label for="ar-immed-new-sales-margin-amt2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Extra sales margin')}}</label>&nbsp;&nbsp;
                         <input id="ar-immed-new-sales-margin-amt2"  style="width: 10em;" type="text" name="ar-immed-new-sales-margin-amt2" class="form-control" value=""
-                               onfocus="this.oldvalue = this.value;" oninput="ar_immed_new_sales_margin_amt2_check(event, this);">&nbsp;
+                               onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_margin_amt2_check(event, this, 'ar-immed');">&nbsp;
                         <input id="ar-immed-new-sales-margin-curr2" style="width: 5em;" type="text" name="ar-immed-new-sales-margin-curr2" class="form-control" value="" disabled>
                         <label for="ar-immed-new-sales-margin-perc2" style="margin-left: 0.4em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
                         <input id="ar-immed-new-sales-margin-perc2" style="width: 5em;" type="text" name="ar-immed-new-sales-margin-perc2" class="form-control" value=""
-                               onfocus="this.oldvalue = this.value;" oninput="ar_immed_new_sales_margin_perc2_check(event, this);">
+                               onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_margin_perc2_check(event, this, 'ar-immed');">
                         <label for="ar-immed-new-perc2-margin" style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>
                     </div>
                 </td>
             </tr>
+
             <tr>
                 <td style="width: 50%;"></td>
                 <td style="width: 50%;">
                     <div class="row" style="padding-top: 3px;">
                         <label for="ar-immed-new-sales-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New sales price (2)')}}</label>&nbsp;&nbsp;
                         <input id="ar-immed-new-sales-price2" style="width: 10em;" type="text" name="ar-immed-new-sales-price2" class="form-control" value=""
-                               onfocus="this.oldvalue = this.value;" oninput="ar_immed_new_sales_price2_check(event, this);">&nbsp;
+                               onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_price2_check(event, this, 'ar-immed');">&nbsp;
                         <input id="ar-immed-new-sales-curr2" style="width: 5em;" type="text" name="ar-immed-new-sales-curr2" class="form-control" value="" disabled>
-                        <input type="checkbox" id="ar-immed-choose-new-sales-price2" style="margin-left: 0.5em;" onchange="ar_immed_choose_new_sales_price2_checkbox(this);">
+                        <input type="checkbox" id="ar-immed-choose-new-sales-price2" style="margin-left: 0.5em;" onchange="ar2_choose_new_sales_price2_checkbox(this, true, 'ar-immed');">
                         <image id="ar-immed-icon-save-new-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
-                        <input type="checkbox" id="ar-immed-save-new-sales-price2" onchange="ar_immed_choose_save_new_sales_price2_checkbox(this);">
+                        <input type="checkbox" id="ar-immed-save-new-sales-price2" onchange="ar2_choose_save_new_sales_price2_checkbox(this, 'ar-immed');">
                     </div>
                 </td>
             </tr>
+
         </table>
         <div class="row" style="padding-top: 0.5rem;">
             <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
@@ -235,8 +247,15 @@
                                 item.quantity_unit = row.cells[6].textContent.split(" ")[1];
                                 item.purch_price = row.cells[7].textContent.split(" ")[0] ;
                                 item.purch_curr = row.cells[7].textContent.split(" ")[1];
-                                item.sales_price = row.cells[8].textContent.split(" ")[0];
-                                item.sales_curr = row.cells[8].textContent.split(" ")[1];
+                                // item.sales_price = row.cells[8].textContent.split(" ")[0];
+                                // item.sales_curr = row.cells[8].textContent.split(" ")[1];
+                                item.sales_curr = $(row).data("sales_curr");
+                                if ($(row).data("sales_choice") == 1) {
+                                    item.sales_price = $(row).data("sales_price");
+                                } else {
+                                    item.sales_price = $(row).data("new_sales_price");
+                                }
+                                item.sales_save = $(row).data("sales_save");
                                 result.items.push(item);
                             }
                         } else {
@@ -250,8 +269,13 @@
                             result.quantity_unit = $("#ar-immed-quantity-unit2").val().trim();
                             result.purch_price = $("#ar-immed-purch-price2").val().trim();
                             result.purch_curr = $("#ar-immed-purch-curr2").val().trim().toUpperCase();
-                            result.sales_price = $("#ar-immed-sales-price2").val().trim();
+//                          result.sales_price = $("#ar-immed-sales-price2").val().trim();
                             result.sales_curr = $("#ar-immed-sales-curr2").val().trim().toUpperCase();
+                            if ($("#ar-immed-choose-sales-price2").is(":checked")) {
+                                result.sales_price = $("#ar-immed-sales-price2").val().trim();
+                            } else {
+                                result.sales_price = $("#ar-immed-new-sales-price2").val().trim();
+                            }
                             if (result.lifnr.length == 0 ||
                                 result.idnlf.length == 0 ||
                                 result.mtext.length == 0 ||
@@ -266,6 +290,8 @@
                                      result.sales_curr.length == 0)
                                 )
                             ) return;
+                            result.sales_save = 0;
+                            if ($("#ar-immed-save-sales-price2").is(":checked")) result.sales_save = 1;
                         }
                         $.ajaxSetup({
                             headers: {
@@ -335,6 +361,10 @@
     });
 
     function accept_reject_dialog2(type, this0, itemdata, title, initial_text) {
+        if (itemdata.vbeln == "!REPLENISH") {
+            accept_reject_dialog(type, this0, itemdata, title, initial_text);
+            return;
+        }
         $("#new_rej_msg2").text("");
         $("#initial-text2").text(initial_text);
         $("#proposals-table-2").find("tr:gt(0)").remove();
@@ -349,6 +379,10 @@
         _ar_itemdata2 = itemdata;
         fxtable = [{curr:_ar_itemdata2.curr, fxrate:parseFloat(_ar_itemdata2.fxrate)}];
 
+        let defmargin = itemdata.defmargin.trim();
+        if (defmargin.length == 0) defmargin = "<>";
+        else defmargin = parseFloat(defmargin).toFixed(2);
+
         if (type == 1) {
             $("#ar-immed-lifnr2").val(conv_exit_alpha_output(itemdata.lifnr));
             $("#ar-immed-idnlf2").val(itemdata.idnlf);
@@ -357,32 +391,28 @@
             $("#ar-immed-lfdat2").val(itemdata.lfdat.substring(0, 10));
             $("#ar-immed-quantity2").val(itemdata.qty);
             $("#ar-immed-quantity-unit2").val(itemdata.qty_uom);
-            $("#ar-immed-old-purch-price2").val(itemdata.purch_price);
+            $("#ar-immed-old-purch-price2").val(itemdata.orig_purch_price);
             $("#ar-immed-purch-price2").val(itemdata.purch_price);
             $("#ar-immed-old-purch-curr2").val(itemdata.purch_curr);
-            $("#ar-immed-purch-curr2").val(itemdata.purch_curr);
+            let pcurr = $("#ar-immed-purch-curr2");
+            pcurr.val(itemdata.purch_curr); check_currency(pcurr[0]);
             $("#ar-immed-old-sales-price2").val(itemdata.sales_price);
             $("#ar-immed-sales-price2").val(itemdata.sales_price);
             $("#ar-immed-old-sales-curr2").val(itemdata.sales_curr);
             $("#ar-immed-old-sales-margin-amt-curr2").val(itemdata.sales_curr);
-            $("#ar-immed-sales-curr2").val(itemdata.sales_curr);
-            $("#ar-immed-defmargin-amt2").val((itemdata.sales_price - itemdata.purch_price).toFixed(2));
+            let scurr = $("#ar-immed-sales-curr2");
+            scurr.val(itemdata.sales_curr); check_currency(scurr[0]);
+            let pp = cvfx(itemdata.orig_purch_price, itemdata.purch_curr, itemdata.sales_curr);
+            let amt = itemdata.sales_price - pp;
+            $("#ar-immed-defmargin-amt2").val(amt.toFixed(2));
+            $("#ar-immed-old-sales-margin-amt2").val(amt.toFixed(2));
             $("#ar-immed-new-sales-curr2").val(itemdata.sales_curr);
             $("#ar-immed-new-sales-margin-curr2").val(itemdata.sales_curr);
-            let defmargin = itemdata.defmargin.trim();
-            if (defmargin.length == 0) defmargin = "<>";
-            else defmargin = parseFloat(defmargin).toFixed(2);
             $("#ar-immed-defmargin-perc2").val(defmargin);
             $("#ar-immed-defmargin-curr2").val(itemdata.sales_curr);
-            if (itemdata.purch_curr == itemdata.sales_curr) {
-                let amt = itemdata.sales_price - itemdata.purch_price;
-                let perc = 0;
-                if (itemdata.purch_price != 0) {
-                    perc = amt * 100 / itemdata.purch_price;
-                }
-                $("#ar-immed-old-sales-margin-amt2").val(amt.toFixed(2));
-                $("#ar-immed-old-sales-margin-perc2").val(perc.toFixed(2));
-            }
+            let perc = 0;
+            if (pp != 0) perc = amt * 100 / pp;
+            $("#ar-immed-old-sales-margin-perc2").val(perc.toFixed(2));
 
             var newRow = $("<tr style='height: 1.2rem;' onclick='proposal_selected2(this);return false;'>");
             var cols = "<td>" + conv_exit_alpha_output(itemdata.lifnr) + "</td>" +
@@ -394,6 +424,13 @@
                 "<td colspan='2' style='text-align: right;'>" + itemdata.qty + " " + itemdata.qty_uom + "</td>" +
                 "<td colspan='2' style='text-align: right;'>" + itemdata.purch_price + " " + itemdata.purch_curr + "</td>" +
                 "<td colspan='2' style='text-align: right;'>" + itemdata.sales_price + " " + itemdata.sales_curr + "</td>";
+            newRow.data("sales_choice", 1);
+            newRow.data("sales_save", 0);
+            newRow.data("sales_price", itemdata.sales_price);
+            newRow.data("sales_curr", itemdata.sales_curr);
+            newRow.data("new_sales_amt", "");
+            newRow.data("new_sales_perc", "");
+            newRow.data("new_sales_price", "");
             newRow.append(cols);
             $("#proposals-table-2").append(newRow);
         } else {
@@ -408,7 +445,7 @@
             $("#ar-immed-purch-curr2").val("");
             $("#ar-immed-sales-price2").val("");
             $("#ar-immed-sales-curr2").val("");
-            $("#ar-immed-defmargin-perc2").val(itemdata.defmargin);
+            $("#ar-immed-defmargin-perc2").val(defmargin);
             $("#ar-immed-new-sales-price2").val("");
             $("#ar-immed-new-sales-curr2").val("");
         }
@@ -418,82 +455,151 @@
 
 <div id="add-edit-proposal2" title="Add/edit proposal" style="display: none;">
     <table style="width: 100%; border-style: none">
+
         <tr>
             <td style="width: 50%;">
                 <div class="row">
-                    <label for="aep-lifnr2" class="col-md-2 col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
-                    <input id="aep-lifnr2" type="text" name="aep-lifnr2" class="form-control col-md-3" value="">
+                    <label for="aep-lifnr2" style="margin-left: 2em; width: 10em;" class="col-form-label text-md-left">{{__('Vendor')}}</label>&nbsp;&nbsp;
+                    <input id="aep-lifnr2" type="text" name="aep-lifnr2" style="width: 15em;" class="form-control" value=""
+                           onkeypress="arf_lifnr2_check(event, this, 'aep');" onblur="arf_lifnr2_check(event, this, 'aep');">
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-old-purch-price2" style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Initial purchase price')}}</label>&nbsp;&nbsp;
+                    <input id="aep-old-purch-price2" style="width: 10em;" type="text" name="aep-old-purch-price2" class="form-control" value="" disabled>&nbsp;
+                    <input id="aep-old-purch-curr2" style="width: 5em;" type="text" name="aep-old-purch-curr2" class="form-control" value="" disabled>
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-idnlf2"  style="margin-left: 2em; width: 10em;" class="col-form-label text-md-left">{{__('Vendor mat.')}}</label>&nbsp;&nbsp;
+                    <input id="aep-idnlf2" style="width: 15em;" type="text" name="aep-idnlf2" class="form-control" value="">
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-old-sales-margin-amt2" style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Initial sales margin')}}</label>&nbsp;&nbsp;
+                    <input id="aep-old-sales-margin-amt2"  style="width: 10em;" type="text" name="aep-old-sales-margin-amt2" class="form-control" value="" disabled>&nbsp;
+                    <input id="aep-old-sales-margin-amt-curr2" style="width: 5em;" type="text" name="aep-old-sales-margin-amt-curr2" class="form-control" value="" disabled>
+                    <label for="aep-old-sales-margin-perc2" style="margin-left: 0.4em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
+                    <input id="aep-old-sales-margin-perc2" style="width: 5em;" type="text" name="aep-old-sales-margin-perc2" class="form-control" value="" disabled>
+                    <label for="aep-old-perc2-margin" style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>
+                </div>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-mtext2"  style="margin-left: 2em; width: 10em;" class="col-form-label text-md-left">{{__('Material description')}}</label>&nbsp;&nbsp;
+                    <input id="aep-mtext2" style="width: 22em;" type="text" name="aep-mtext2" class="form-control" value="">
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-old-sales-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Initial sales price')}}</label>&nbsp;&nbsp;
+                    <input id="aep-old-sales-price2"  style="width: 10em;" type="text" name="aep-old-sales-price2" class="form-control" value="" disabled>&nbsp;
+                    <input id="aep-old-sales-curr2" style="width: 5em;" type="text" name="aep-old-sales-curr2" class="form-control" value="" disabled>
+                </div>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-matnr2"  style="margin-left: 2em; width: 10em;" class="col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
+                    <input id="aep-matnr2" style="width: 10em;" type="text" name="aep-matnr2" class="form-control" value="">
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-purch-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New purchase price')}}</label>&nbsp;&nbsp;
+                    <input id="aep-purch-price2" style="width: 10em;" type="text" name="aep-purch-price2" class="form-control" value=""
+                           onfocus="this.oldvalue = this.value;" oninput="ar2_purch_price2_check(event, this, 'aep');">&nbsp;
+                    <input id="aep-purch-curr2" style="width: 5em;" type="text" name="aep-purch-curr2" class="form-control" value=""
+                           onblur="ar2_purch_curr2_check(event, this, 'aep');">
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-lfdat2" style="margin-left: 2em; width: 10em;" class="col-form-label text-md-left">{{__('Delivery date')}}</label>&nbsp;&nbsp;
+                    <input id="aep-lfdat2" style="width: 10em;" type="text" name="aep-lfdat2" class="form-control" value="">
                 </div>
             </td>
             <td style="width: 50%;">
                 <div class="row">
-                    <label for="aep-defmargin2" style="margin-left: 7.3em;" class="col-md-2 col-form-label text-md-left">{{__('Default margin')}}</label>&nbsp;&nbsp;
-                    <input id="aep-defmargin2" style="margin-left: -2em;" type="text" name="aep-defmargin2" class="form-control col-md-1" value="" disabled>&nbsp;
+                    <label for="aep-defmargin-amt2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Default margin')}}</label>&nbsp;&nbsp;
+                    <input id="aep-defmargin-amt2"  style="width: 10em;" type="text" name="aep-defmargin-amt2" class="form-control" value="" disabled>&nbsp;
+                    <input id="aep-defmargin-curr2" style="width: 5em;" type="text" name="aep-defmargin-curr2" class="form-control" value="" disabled>
+                    <label for="aep-defmargin-perc2" style="margin-left: 0.4em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
+                    <input id="aep-defmargin-perc2" style="width: 5em;" type="text" name="aep-defmargin-perc2" class="form-control" value="" disabled>&nbsp;
+                    <label for="aep-perc-defmargin2"  style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>&nbsp;&nbsp;
                 </div>
             </td>
         </tr>
+
         <tr>
             <td style="width: 50%;">
                 <div class="row" style="padding-top: 3px;">
-                    <label for="aep-idnlf2" class="col-md-2 col-form-label text-md-left">{{__('Vendor mat.')}}</label>&nbsp;&nbsp;
-                    <input id="aep-idnlf2" type="text" name="aep-idnlf2" class="form-control col-md-3" value="">
+                    <label for="aep-quantity2"  style="margin-left: 2em; width: 10em;" class="col-form-label text-md-left">{{__('Quantity')}}</label>&nbsp;&nbsp;
+                    <input id="aep-quantity2" style="width: 10em;" type="text" name="aep-quantity2" class="form-control" value="">&nbsp;
+                    <input id="aep-quantity-unit2" style="width: 5em;" type="text" name="aep-quantity-unit2" class="form-control" value="">
                 </div>
             </td>
             <td style="width: 50%;">
                 <div class="row" style="padding-top: 3px;">
-                    <label for="aep-purch-price2" style="margin-left: 7.3em;" class="col-md-2 col-form-label text-md-left">{{__('Initial purchase price')}}</label>&nbsp;&nbsp;
-                    <input id="aep-purch-price2"  style="margin-left: -2em;" type="text" name="aep-purch-price2" class="form-control col-md-2" value="" disabled>&nbsp;
-                    <input id="aep-purch-curr2" type="text" name="aep-purch-curr2" class="form-control col-md-1" value="" disabled>
+                    <label for="aep-sales-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New sales price (1)')}}</label>&nbsp;&nbsp;
+                    <input id="aep-sales-price2" style="width: 10em;" type="text" name="aep-sales-price2" class="form-control" value=""
+                           onfocus="this.oldvalue = this.value;" oninput="ar2_sales_price2_check(event, this, 'aep');">&nbsp;
+                    <input id="aep-sales-curr2" style="width: 5em;" type="text" name="aep-sales-curr2" class="form-control" value=""
+                           onblur="ar2_sales_curr2_check(event, this, 'aep');">
+                    <input type="checkbox" id="aep-choose-sales-price2" style="margin-left: 0.5em; border: none;" onchange="ar2_choose_sales_price2_checkbox(this, true, 'aep');">
+                    <image id="aep-icon-save-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
+                    <input type="checkbox" id="aep-save-sales-price2" onchange="ar2_choose_save_sales_price2_checkbox(this, 'aep');">
                 </div>
             </td>
         </tr>
+
         <tr>
+            <td style="width: 50%;"></td>
             <td style="width: 50%;">
                 <div class="row" style="padding-top: 3px;">
-                    <label for="aep-mtext2" class="col-md-2 col-form-label text-md-left">{{__('Material description')}}</label>&nbsp;&nbsp;
-                    <input id="aep-mtext2" type="text" name="aep-mtext2" class="form-control col-md-4" value="">
-                </div>
-            </td>
-            <td style="width: 50%;">
-                <div class="row" style="padding-top: 3px;">
-                    <label for="aep-sales-price2"  style="margin-left: 1em;" class="col-md-2 col-form-label text-md-left">{{__('Initial sales price')}}</label>&nbsp;&nbsp;
-                    <input id="aep-sales-price2"  style="margin-left: -2em;" type="text" name="aep-sales-price2" class="form-control col-md-2" value="" disabled>&nbsp;
-                    <input id="aep-sales-curr2" type="text" name="aep-sales-curr2" class="form-control col-md-1" value="" disabled>
+                    <label for="aep-new-sales-margin-amt2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Extra sales margin')}}</label>&nbsp;&nbsp;
+                    <input id="aep-new-sales-margin-amt2"  style="width: 10em;" type="text" name="aep-new-sales-margin-amt2" class="form-control" value=""
+                           onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_margin_amt2_check(event, this, 'aep');">&nbsp;
+                    <input id="aep-new-sales-margin-curr2" style="width: 5em;" type="text" name="aep-new-sales-margin-curr2" class="form-control" value="" disabled>
+                    <label for="aep-new-sales-margin-perc2" style="margin-left: 0.4em;" class="col-form-label text-md-left">=</label>&nbsp;&nbsp;
+                    <input id="aep-new-sales-margin-perc2" style="width: 5em;" type="text" name="aep-new-sales-margin-perc2" class="form-control" value=""
+                           onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_margin_perc2_check(event, this, 'aep');">
+                    <label for="aep-new-perc2-margin" style="margin-left: 0.2em;" class="col-form-label text-md-left">%</label>
                 </div>
             </td>
         </tr>
+
         <tr>
+            <td style="width: 50%;"></td>
             <td style="width: 50%;">
                 <div class="row" style="padding-top: 3px;">
-                    <label for="aep-matnr2" class="col-md-2 col-form-label text-md-left">{{__('Material')}}</label>&nbsp;&nbsp;
-                    <input id="aep-matnr2" type="text" name="aep-matnr2" class="form-control col-md-3" value="">
+                    <label for="aep-new-sales-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('New sales price (2)')}}</label>&nbsp;&nbsp;
+                    <input id="aep-new-sales-price2" style="width: 10em;" type="text" name="aep-new-sales-price2" class="form-control" value=""
+                           onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_price2_check(event, this, 'aep');">&nbsp;
+                    <input id="aep-new-sales-curr2" style="width: 5em;" type="text" name="aep-new-sales-curr2" class="form-control" value="" disabled>
+                    <input type="checkbox" id="aep-choose-new-sales-price2" style="margin-left: 0.5em;" onchange="ar2_choose_new_sales_price2_checkbox(this, true, 'aep');">
+                    <image id="aep-icon-save-new-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
+                    <input type="checkbox" id="aep-save-new-sales-price2" onchange="ar2_choose_save_new_sales_price2_checkbox(this, 'aep');">
                 </div>
             </td>
-            <td style="width: 50%;">
-            </td>
         </tr>
-        <tr>
-            <td style="width: 50%;">
-                <div class="row" style="padding-top: 3px;">
-                    <label for="aep-lfdat2" class="col-md-2 col-form-label text-md-left">{{__('Delivery date')}}</label>&nbsp;&nbsp;
-                    <input id="aep-lfdat2" type="text" name="aep-lfdat2" class="form-control col-md-3" value="">
-                </div>
-            </td>
-            <td style="width: 50%;">
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 50%;">
-                <div class="row" style="padding-top: 3px;">
-                    <label for="aep-quantity2" class="col-md-2 col-form-label text-md-left">{{__('Quantity')}}</label>&nbsp;&nbsp;
-                    <input id="aep-quantity2" type="text" name="aep-quantity2" class="form-control col-md-3" value="">&nbsp;
-                    <input id="aep-quantity-unit2" type="text" name="aep-quantity-unit2" class="form-control col-md-1"
-                           value="">
-                </div>
-            </td>
-            <td style="width: 50%;">
-            </td>
-        </tr>
+
     </table>
     <div class="row" style="padding-top: 0.5rem;">
         <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
@@ -509,8 +615,8 @@
     $(function () {
         add_edit_Dialog2 = $("#add-edit-proposal2").dialog({
             autoOpen: false,
-            height: 420,
-            width: 910,
+            height: 450,
+            width: 930,
             modal: true,
             buttons: {
                 Save: function () {
@@ -523,8 +629,13 @@
                     let quantity_uom = $("#aep-quantity-unit2").val().trim();
                     let purch_price = $("#aep-purch-price2").val().trim();
                     let purch_curr = $("#aep-purch-curr2").val().trim().toUpperCase();
+                    let sales_choice = $("#aep-choose-sales-price2").is(":checked")?1:2;
+                    let sales_save = $("#aep-save-sales-price2").is(":checked")?1:0;
                     let sales_price = $("#aep-sales-price2").val().trim();
                     let sales_curr = $("#aep-sales-curr2").val().trim().toUpperCase();
+                    let new_sales_amt = $("#aep-new-sales-margin-amt2").val().trim();
+                    let new_sales_perc = $("#aep-new-sales-margin-perc2").val().trim();
+                    let new_sales_price = $("#aep-new-sales-price2").val().trim();
                     if (lifnr.length == 0 ||
                         idnlf.length == 0 ||
                         mtext.length == 0 ||
@@ -534,9 +645,10 @@
                         quantity_uom.length == 0 ||
                         purch_price.length == 0 ||
                         purch_curr.length == 0 ||
-                        ((_ar_itemdata2.vbeln != "!REPLENISH") &&
-                            (sales_price.length == 0 ||
-                             sales_curr.length == 0)
+                        sales_curr.length == 0 ||
+                        (
+                          ((sales_choice == 1) && (sales_price.length == 0)) ||
+                          ((sales_choice == 2) && (new_sales_price.length == 0))
                         )
                     ) return;
                     if (add_edit_caller2 == 1) {
@@ -549,7 +661,15 @@
                             add_edit_current_row2.cells[5].innerHTML = lfdat;
                             add_edit_current_row2.cells[6].innerHTML = quantity + " " + quantity_uom;
                             add_edit_current_row2.cells[7].innerHTML = purch_price + " " + purch_curr;
-                            add_edit_current_row2.cells[8].innerHTML = sales_price + " " + sales_curr;
+                            add_edit_current_row2.cells[8].innerHTML = (sales_choice == 1 ? sales_price : new_sales_price) + " " + sales_curr;
+                            let crow = $(add_edit_current_row2);
+                            crow.data("sales_choice", sales_choice);
+                            crow.data("sales_save", sales_save);
+                            crow.data("sales_price", sales_price);
+                            crow.data("sales_curr", sales_curr);
+                            crow.data("new_sales_amt", new_sales_amt);
+                            crow.data("new_sales_perc", new_sales_perc);
+                            crow.data("new_sales_price", new_sales_price);
                             add_edit_Dialog2.dialog("close");
                         } else {
                             var newRow = $("<tr style='height: 1.2rem;' onclick='proposal_selected2(this);return false;'>");
@@ -561,7 +681,14 @@
                                 "<td>" + lfdat + "</td>" +
                                 "<td colspan='2' style='text-align: right;'>" + quantity + " " + quantity_uom + "</td>" +
                                 "<td colspan='2' style='text-align: right;'>" + purch_price + " " + purch_curr + "</td>" +
-                                "<td colspan='2' style='text-align: right;'>" + sales_price + " " + sales_curr + "</td>";
+                                "<td colspan='2' style='text-align: right;'>" + (sales_choice == 1 ? sales_price : new_sales_price) + " " + sales_curr + "</td>";
+                            newRow.data("sales_choice", sales_choice);
+                            newRow.data("sales_save", sales_save);
+                            newRow.data("sales_price", sales_price);
+                            newRow.data("sales_curr", sales_curr);
+                            newRow.data("new_sales_amt", new_sales_amt);
+                            newRow.data("new_sales_perc", new_sales_perc);
+                            newRow.data("new_sales_price", new_sales_price);
                             newRow.append(cols);
                             $("#proposals-table-2").append(newRow);
                             add_edit_Dialog2.dialog("close");
@@ -574,7 +701,7 @@
             },
             position: {
                 my: "center",
-                at: "center",
+                at: "center+30",
                 of: window
             }
         });
@@ -597,8 +724,17 @@
         let quantity_unit = "";
         let purch_price = "";
         let purch_curr = "";
+
+        let sales_choice = 1;
+        let sales_save = 0;
         let sales_price = "";
         let sales_curr = "";
+        let new_sales_amt = "";
+        let new_sales_perc = "";
+        let new_sales_price = "";
+
+        let pcurr = $("#aep-purch-curr2");
+        let scurr = $("#aep-sales-curr2");
 
         if (caller == 1) {
             if (mode == 1) {
@@ -608,6 +744,10 @@
                 mtext = $("#ar-immed-mtext2").val();
                 quantity  = $("#ar-immed-quantity2").val();
                 quantity_unit = $("#ar-immed-quantity-unit2").val();
+                pcurr.val(purch_curr = $("#ar-immed-old-purch-curr2").val()); check_currency(pcurr[0]);
+                scurr.val(sales_curr = $("#ar-immed-old-sales-curr2").val()); check_currency(scurr[0]);
+                purch_price = $("#ar-immed-old-purch-price2").val();
+                sales_price = $("#ar-immed-old-sales-price2").val();
             } else {
                 title = "Edit existing proposal";
                 let current_row = proposal_last_selected_line2;
@@ -619,10 +759,19 @@
                 lfdat = current_row.cells[5].innerHTML;
                 quantity = current_row.cells[6].innerHTML.split(" ")[0];
                 quantity_unit = current_row.cells[6].innerHTML.split(" ")[1];
+
                 purch_price = current_row.cells[7].innerHTML.split(" ")[0];
                 purch_curr = current_row.cells[7].innerHTML.split(" ")[1];
-                sales_price = current_row.cells[8].innerHTML.split(" ")[0];
-                sales_curr = current_row.cells[8].innerHTML.split(" ")[1];
+                pcurr.val(purch_curr);
+                let crow = $(proposal_last_selected_line2);
+                sales_choice = crow.data("sales_choice");
+                sales_save = crow.data("sales_save");
+                sales_price = crow.data("sales_price");
+                sales_curr = crow.data("sales_curr");
+                scurr.val(sales_curr);
+                new_sales_amt = crow.data("new_sales_amt");
+                new_sales_perc = crow.data("new_sales_perc");
+                new_sales_price = crow.data("new_sales_price");
             }
         }
 
@@ -633,13 +782,50 @@
         $("#aep-lfdat2").val(lfdat);
         $("#aep-quantity2").val(quantity);
         $("#aep-quantity-unit2").val(quantity_unit);
+
+        $("#aep-old-purch-price2").val($("#ar-immed-old-purch-price2").val());
+        $("#aep-old-purch-curr2").val($("#ar-immed-old-purch-curr2").val());
+        $("#aep-old-sales-price2").val($("#ar-immed-old-sales-price2").val());
+        $("#aep-old-sales-curr2").val($("#ar-immed-old-sales-curr2").val());
+        $("#aep-old-sales-margin-amt2").val($("#ar-immed-old-sales-margin-amt2").val());
+        $("#aep-old-sales-margin-amt-curr2").val($("#ar-immed-old-sales-margin-amt-curr2").val());
+        $("#aep-old-sales-margin-perc2").val($("#ar-immed-old-sales-margin-perc2").val());
+
+        $("#aep-defmargin-amt2").val($("#ar-immed-defmargin-amt2").val());
+        $("#aep-defmargin-perc2").val($("#ar-immed-defmargin-perc2").val());
+        $("#aep-defmargin-curr2").val(sales_curr);
+
         $("#aep-purch-price2").val(purch_price);
-        $("#aep-purch-curr2").val(purch_curr);
         $("#aep-sales-price2").val(sales_price);
-        $("#aep-sales-curr2").val(sales_curr);
+        $("#aep-new-sales-price2").val(new_sales_price);
+        $("#aep-new-sales-curr2").val(sales_curr);
+        $("#aep-new-sales-margin-amt2").val(new_sales_amt);
+        $("#aep-new-sales-margin-perc2").val(new_sales_perc);
+        $("#aep-new-sales-margin-curr2").val(sales_curr);
 
         $("#add-edit-proposal2").dialog('option', 'title', title);
         $('#add-edit-proposal2').css('overflow', 'hidden');
+
+        $("#aep-choose-sales-price2").prop("checked", sales_choice == 1);
+        $("#aep-choose-sales-price2").prop("disabled", false);
+        $("#aep-choose-new-sales-price2").prop("checked", sales_choice == 2);
+        $("#aep-choose-new-sales-price2").prop("disabled", new_sales_price.trim().length == 0);
+        if (sales_choice == 1) {
+            $("#aep-save-sales-price2").show();
+            $("#aep-save-sales-price2").prop("checked", sales_save == 1);
+            $("#aep-icon-save-sales-price2").show();
+            $("#aep-icon-save-new-sales-price2").hide();
+            $("#aep-save-new-sales-price2").hide();
+            $("#aep-save-new-sales-price2").prop("checked", sales_save == 1);
+        } else {
+            $("#aep-save-sales-price2").hide();
+            $("#aep-save-sales-price2").prop("checked", sales_save == 1);
+            $("#aep-icon-save-sales-price2").hide();
+            $("#aep-icon-save-new-sales-price2").show();
+            $("#aep-save-new-sales-price2").show();
+            $("#aep-save-new-sales-price2").prop("checked", sales_save == 1);
+        }
+
         add_edit_Dialog2.dialog("open");
     }
 
@@ -663,7 +849,7 @@
             lifnr = $("#aep-lifnr2").val();
             idnlf = $("#aep-idnlf2").val();
         }
-        read_inforecords(caller, lifnr, idnlf);
+        read_inforecords(caller + 10, lifnr, idnlf);
     }
 
     function get_zpret2(caller)
@@ -678,7 +864,7 @@
             lifnr = $("#aep-lifnr2").val();
             idnlf = $("#aep-idnlf2").val();
         }
-        read_zpretrecords(caller, lifnr, idnlf);
+        read_zpretrecords(caller + 10, lifnr, idnlf);
     }
 
     function delete_proposal2(mode)
@@ -711,18 +897,22 @@
         return _dataSM;
     }
 
-    $(function(){
-        $("#ar-immed-lifnr2").on("keypress", function(e){if (e.which == 13) {ar_immed_lifnr2_check(this);e.preventDefault();}});
-        $("#ar-immed-lifnr2").blur(ar_immed_lifnr2_check(this));
-    });
-
-    function ar_immed_lifnr2_check(_this) {
-        let new_margin = "";
-        new_margin = get_sales_margin2(_ar_itemdata2.lifnr, _ar_itemdata2.mfrnr, null) + " %";
-        if (new_margin == $("#ar-immed-defmargin-perc2").val()) return;
-        $("#ar-immed-defmargin-perc2").val(new_margin);
-        var original_color = $("#ar-immed-defmargin-perc2").css('border-left-color');
-        $("#ar-immed-defmargin-perc2")
+    function arf_lifnr2_check(ev, _this, dlg) {
+        if (ev.type == "keypress") {
+            if (ev.which != 13) return;
+            ev.preventDefault();
+        }
+        let new_margin = 0;
+        let new_margin_d = "<>";
+        new_margin = get_sales_margin2(_ar_itemdata2.lifnr, _ar_itemdata2.mfrnr, null);
+        if (new_margin.length > 0) {
+            new_margin = parseFloat(new_margin);
+            new_margin_d = new_margin.toFixed(2);
+        } else new_margin = 0;
+        if (new_margin_d == $("#"+dlg+"-defmargin-perc2").val()) return;
+        $("#"+dlg+"-defmargin-perc2").val(new_margin_d);
+        var original_color = $("#"+dlg+"-defmargin-perc2").css('border-left-color');
+        $("#"+dlg+"-defmargin-perc2")
             .animate({borderColor:'red'}, 200, 'linear')
             .delay(200)
             .animate({borderColor:original_color}, 200, 'easeOutCirc')
@@ -732,108 +922,121 @@
             .animate({borderColor:original_color}, 200, 'easeOutCirc');
     }
 
-    function ar_immed_purch_price2_check(event, _this) {
-        let margin = $("#ar-immed-defmargin-perc2").val().trim();
+    function ar2_purch_price2_check(event, _this, dlg) {
+        let margin = $("#"+dlg+"-defmargin-perc2").val().trim();
         if (margin == "<>") margin = 0; else margin = parseFloat(margin);
-        let pprice = $("#ar-immed-purch-price2").val().trim();
+        let pprice = $("#"+dlg+"-purch-price2").val().trim();
         if (pprice.length == 0) {
-            $("#ar-immed-sales-price2").val("");
-            $("#ar-immed-defmargin-amt2").val("0.00");
+            $("#"+dlg+"-sales-price2").val("");
+            $("#"+dlg+"-defmargin-amt2").val("0.00");
             _this.oldvalue = "";
             return;
         }
         if (!$.isNumeric(pprice)) {
-            $("#ar-immed-purch-price2").val(_this.oldvalue);
+            $("#"+dlg+"-purch-price2").val(_this.oldvalue);
             return;
         }
+        if (margin == 0) margin = parseFloat($("#"+dlg+"-old-sales-margin-perc2").val());
         pprice = parseFloat(pprice);
         _this.oldvalue = pprice.toFixed(2);
-        sprice = (pprice * (1 + margin / 100));
-        $("#ar-immed-sales-price2").val(sprice.toFixed(2));
-        $("#ar-immed-defmargin-amt2").val((sprice - pprice).toFixed(2));
-        $("#ar-immed-new-sales-margin-amt2").val("");
-        $("#ar-immed-new-sales-margin-perc2").val("");
-        $("#ar-immed-new-sales-price2").val("");
-        $("#ar-immed-choose-sales-price2").prop("checked", true);
-        ar_immed_choose_sales_price2_checkbox(_this, false);
-        $("#ar-immed-choose-sales-price2").prop("disabled", true);
-        $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
+        let cpprice = cvfx(pprice, $("#"+dlg+"-purch-curr2").val(), $("#"+dlg+"-sales-curr2").val());
+        let sprice = (cpprice * (1 + margin / 100));
+        $("#"+dlg+"-sales-price2").val(sprice.toFixed(2));
+        $("#"+dlg+"-defmargin-amt2").val((sprice - cpprice).toFixed(2));
+        $("#"+dlg+"-new-sales-margin-amt2").val("");
+        $("#"+dlg+"-new-sales-margin-perc2").val("");
+        $("#"+dlg+"-new-sales-price2").val("");
+        $("#"+dlg+"-choose-sales-price2").prop("checked", true);
+        ar2_choose_sales_price2_checkbox(_this, false, dlg);
+        $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
+        $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
     }
 
-    function ar_immed_sales_price2_check(event, _this) {
-        let margin = $("#ar-immed-defmargin-perc2").val().trim();
+    function ar2_purch_curr2_check(event, _this, dlg) {
+        if (check_currency(_this))
+            ar2_purch_price2_check(event, $("#"+dlg+"-purch-price2")[0], dlg);
+    }
+
+    function ar2_sales_price2_check(event, _this, dlg) {
+        let margin = $("#"+dlg+"-defmargin-perc2").val().trim();
         if (margin == "<>") margin = 0; else margin = parseFloat(margin);
-        let pprice = $("#ar-immed-purch-price2").val().trim();
+        if (margin == 0) margin = parseFloat($("#"+dlg+"-old-sales-margin-perc2").val());
+        let pprice = $("#"+dlg+"-purch-price2").val().trim();
+        let cpprice = 0;
         if (pprice.length == 0 || !$.isNumeric(pprice)) pprice = 0;
-        else pprice = parseFloat(pprice);
-        let sprice = $("#ar-immed-sales-price2").val().trim();
+        else {
+            pprice = parseFloat(pprice);
+            cpprice = cvfx(pprice, $("#"+dlg+"-purch-curr2").val(), $("#"+dlg+"-sales-curr2").val());
+        }
+        let sprice = $("#"+dlg+"-sales-price2").val().trim();
         if (sprice.length == 0) {
-            sprice = (pprice * (1 + margin / 100));
-            $("#ar-immed-sales-price2").val(sprice.toFixed(2));
+            sprice = (cpprice * (1 + margin / 100));
+            $("#"+dlg+"-sales-price2").val(sprice.toFixed(2));
             _this.oldvalue = sprice.toFixed(2);
-            $("#ar-immed-defmargin-amt2").val((sprice - pprice).toFixed(2));
+            $("#"+dlg+"-defmargin-amt2").val((sprice - cpprice).toFixed(2));
             return;
         } else {
             if (!$.isNumeric(sprice)) {
-                $("#ar-immed-sales-price2").val(_this.oldvalue);
-                $("#ar-immed-defmargin-amt2").val("0.00");
+                $("#"+dlg+"-sales-price2").val(_this.oldvalue);
+                $("#"+dlg+"-defmargin-amt2").val("0.00");
                 return;
             }
         }
         sprice = parseFloat(sprice);
-        $("#ar-immed-defmargin-amt2").val((sprice - pprice).toFixed(2));
+        $("#"+dlg+"-defmargin-amt2").val((sprice - cpprice).toFixed(2));
         _this.oldvalue = sprice.toFixed(2);
-        $("#ar-immed-new-sales-margin-amt2").val("");
-        $("#ar-immed-new-sales-margin-perc2").val("");
-        $("#ar-immed-new-sales-price2").val("");
-        $("#ar-immed-choose-sales-price2").prop("checked", true);
-        ar_immed_choose_sales_price2_checkbox(_this, false);
-        $("#ar-immed-choose-sales-price2").prop("disabled", true);
-        $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
+        $("#"+dlg+"-new-sales-margin-amt2").val("");
+        $("#"+dlg+"-new-sales-margin-perc2").val("");
+        $("#"+dlg+"-new-sales-price2").val("");
+        $("#"+dlg+"-choose-sales-price2").prop("checked", true);
+        ar2_choose_sales_price2_checkbox(_this, false, dlg);
+        $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
+        $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
     }
 
-    function ar_immed_new_sales_price2_check(event, _this) {
-        let nsprice = $("#ar-immed-new-sales-price2").val().trim();
+    function ar2_new_sales_price2_check(event, _this, dlg) {
+        let nsprice = $("#"+dlg+"-new-sales-price2").val().trim();
         if (nsprice.length == 0) {
-            let amt2 = $("#ar-immed-new-sales-margin-amt2").val().trim();
+            let amt2 = $("#"+dlg+"-new-sales-margin-amt2").val().trim();
             if (amt2.length == 0) {
-                $("#ar-immed-new-sales-margin-amt2").val("");
-                $("#ar-immed-new-sales-margin-perc2").val("");
-                $("#ar-immed-new-sales-price2").val("");
-                $("#ar-immed-choose-sales-price2").prop("checked", true);
-                $("#ar-immed-choose-sales-price2").prop("disabled", true);
-                $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
+                $("#"+dlg+"-new-sales-margin-amt2").val("");
+                $("#"+dlg+"-new-sales-margin-perc2").val("");
+                $("#"+dlg+"-new-sales-price2").val("");
+                $("#"+dlg+"-choose-sales-price2").prop("checked", true);
+                $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
+                ar2_choose_sales_price2_checkbox(_this, true, dlg);
+                $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
                 return;
             }
-            let sprice = $("#ar-immed-sales-price2").val().trim();
+            let sprice = $("#"+dlg+"-sales-price2").val().trim();
             nsprice = parseFloat(sprice) + parseFloat(amt2);
-            $("#ar-immed-new-sales-price2").val(nsprice.toFixed(2));
+            $("#"+dlg+"-new-sales-price2").val(nsprice.toFixed(2));
         } else {
             if (!$.isNumeric(nsprice)) {
-                $("#ar-immed-new-sales-price2").val(_this.oldvalue);
+                $("#"+dlg+"-new-sales-price2").val(_this.oldvalue);
                 return;
             }
             nsprice = parseFloat(nsprice);
         }
         _this.oldvalue = nsprice.toFixed(2);
-        $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-        ar_immed_choose_new_sales_price2_checkbox(_this, false);
-        $("#ar-immed-choose-sales-price2").prop("disabled", false);
-        $("#ar-immed-choose-new-sales-price2").prop("disabled", false);
+        $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
+        ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
+        $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
+        $("#"+dlg+"-choose-new-sales-price2").prop("disabled", false);
     }
 
-    function ar_immed_new_sales_margin_amt2_check(event, _this) {
+    function ar2_new_sales_margin_amt2_check(event, _this, dlg) {
         let __this = $(_this);
         let newamt = __this.val().trim();
         if (newamt.length == 0) {
-            $("#ar-immed-new-sales-margin-perc2").val("");
+            $("#"+dlg+"-new-sales-margin-perc2").val("");
             __this.val("");
             _this.oldvalue = "";
-            $("#ar-immed-choose-sales-price2").prop("checked", true);
-            ar_immed_choose_sales_price2_checkbox(_this);
-            $("#ar-immed-new-sales-price2").val("");
-            $("#ar-immed-choose-sales-price2").prop("disabled", true);
-            $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
+            $("#"+dlg+"-choose-sales-price2").prop("checked", true);
+            ar2_choose_sales_price2_checkbox(_this, true, dlg);
+            $("#"+dlg+"-new-sales-price2").val("");
+            $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
+            $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
         }
         if (!$.isNumeric(newamt) && newamt != "-") {
             __this.val(_this.oldvalue);
@@ -841,34 +1044,34 @@
         }
         if (newamt == "-") newperc = 0; else newamt = parseFloat(newamt);
         _this.oldvalue = newamt.toFixed(2);
-        let sprice = $("#ar-immed-sales-price2").val().trim();
+        let sprice = $("#"+dlg+"-sales-price2").val().trim();
         if (sprice.length == 0) sprice = "0";
         sprice = parseFloat(sprice);
         let newperc = 0;
         if (sprice != 0) newperc = (newamt / sprice * 100);
         newperc = newperc.toFixed(2);
-        $("#ar-immed-new-sales-margin-perc2").val(newperc);
-        $("#ar-immed-new-sales-margin-perc2").oldvalue = newperc;
+        $("#"+dlg+"-new-sales-margin-perc2").val(newperc);
+        $("#"+dlg+"-new-sales-margin-perc2").oldvalue = newperc;
         sprice += newamt;
-        $("#ar-immed-new-sales-price2").val(sprice.toFixed(2));
-        $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-        ar_immed_choose_new_sales_price2_checkbox(_this, false);
-        $("#ar-immed-choose-sales-price2").prop("disabled", false);
-        $("#ar-immed-choose-new-sales-price2").prop("disabled", false);
+        $("#"+dlg+"-new-sales-price2").val(sprice.toFixed(2));
+        $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
+        ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
+        $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
+        $("#"+dlg+"-choose-new-sales-price2").prop("disabled", false);
     }
 
-    function ar_immed_new_sales_margin_perc2_check(event, _this) {
+    function ar2_new_sales_margin_perc2_check(event, _this, dlg) {
         let __this = $(_this);
         let newperc = __this.val().trim();
         if (newperc.length == 0) {
-            $("#ar-immed-new-sales-margin-amt2").val("");
+            $("#"+dlg+"-new-sales-margin-amt2").val("");
             __this.val("");
             _this.oldvalue = "";
-            $("#ar-immed-choose-sales-price2").prop("checked", true);
-            ar_immed_choose_sales_price2_checkbox(_this);
-            $("#ar-immed-new-sales-price2").val("");
-            $("#ar-immed-choose-sales-price2").prop("disabled", true);
-            $("#ar-immed-choose-new-sales-price2").prop("disabled", true);
+            $("#"+dlg+"-choose-sales-price2").prop("checked", true);
+            ar2_choose_sales_price2_checkbox(_this, true, dlg);
+            $("#"+dlg+"-new-sales-price2").val("");
+            $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
+            $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
         }
         if (!$.isNumeric(newperc) && newperc != "-") {
             __this.val(_this.oldvalue);
@@ -876,67 +1079,81 @@
         }
         if (newperc == "-") newperc = 0; else newperc = parseFloat(newperc);
         _this.oldvalue = newperc.toFixed(2);
-        let sprice = $("#ar-immed-sales-price2").val().trim();
+        let sprice = $("#"+dlg+"-sales-price2").val().trim();
         if (sprice.length == 0) sprice = "0";
         sprice = parseFloat(sprice);
         let newamt = sprice * (100 + newperc) / 100;
-        $("#ar-immed-new-sales-margin-amt2").val((newamt - sprice).toFixed(2));
-        $("#ar-immed-new-sales-margin-amt2").oldvalue = (newamt - sprice).toFixed(2);
-        $("#ar-immed-new-sales-price2").val(newamt.toFixed(2));
-        $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-        ar_immed_choose_new_sales_price2_checkbox(_this, false);
-        $("#ar-immed-choose-sales-price2").prop("disabled", false);
-        $("#ar-immed-choose-new-sales-price2").prop("disabled", false);
+        $("#"+dlg+"-new-sales-margin-amt2").val((newamt - sprice).toFixed(2));
+        $("#"+dlg+"-new-sales-margin-amt2").oldvalue = (newamt - sprice).toFixed(2);
+        $("#"+dlg+"-new-sales-price2").val(newamt.toFixed(2));
+        $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
+        ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
+        $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
+        $("#"+dlg+"-choose-new-sales-price2").prop("disabled", false);
     }
 
-    function ar_immed_sales_curr2_check() {
-        let curr = $("#ar-immed-sales-curr2").val().trim();
-        $("#ar-immed-new-sales-margin-curr2").val(curr);
-        $("#ar-immed-new-sales-curr2").val(curr);
-    }
-
-    function ar_immed_choose_sales_price2_checkbox(_this, goto = true) {
-        if ($("#ar-immed-choose-sales-price2").is(":checked")) {
-            $("#ar-immed-choose-new-sales-price2").prop("checked", false);
-            $("#ar-immed-icon-save-new-sales-price2").hide();
-            $("#ar-immed-save-new-sales-price2").hide();
-            $("#ar-immed-icon-save-sales-price2").show();
-            $("#ar-immed-save-sales-price2").show();
-            if (goto) {
-                $("#ar-immed-sales-price2").focus();
-                $("#ar-immed-sales-price2").select();
+    function ar2_sales_curr2_check(event, _this, dlg) {
+        if (check_currency(_this)) {
+            ar2_sales_price2_check(event, $("#"+dlg+"-sales-price2")[0], dlg);
+            $("#"+dlg+"-new-sales-margin-curr2").val(_this.value);
+            $("#"+dlg+"-new-sales-curr2").val(_this.value);
+            $("#"+dlg+"-defmargin-curr2").val(_this.value);
+            let margin = $("#"+dlg+"-defmargin-perc2").val().trim();
+            if (margin == "<>") margin = 0; else margin = parseFloat(margin);
+            if (margin == 0) margin = parseFloat($("#"+dlg+"-old-sales-margin-perc2").val());
+            let pprice = $("#"+dlg+"-purch-price2").val().trim();
+            let cpprice = 0;
+            if (pprice.length == 0 || !$.isNumeric(pprice)) pprice = 0;
+            else {
+                pprice = parseFloat(pprice);
+                cpprice = cvfx(pprice, $("#"+dlg+"-purch-curr2").val(), $("#"+dlg+"-sales-curr2").val());
             }
-        } else {
-            $("#ar-immed-choose-new-sales-price2").prop("checked", true);
-            ar_immed_choose_new_sales_price2_checkbox(_this, goto);
+            $("#"+dlg+"-defmargin-amt2").val((cpprice * ( 1 + margin) / 100).toFixed(2));
         }
     }
 
-    function ar_immed_choose_new_sales_price2_checkbox(_this, goto = true) {
-        if ($("#ar-immed-choose-new-sales-price2").is(":checked")) {
-            $("#ar-immed-choose-sales-price2").prop("checked", false);
-            $("#ar-immed-icon-save-new-sales-price2").show();
-            $("#ar-immed-save-new-sales-price2").show();
-            $("#ar-immed-icon-save-sales-price2").hide();
-            $("#ar-immed-save-sales-price2").hide();
+    function ar2_choose_sales_price2_checkbox(_this, goto, dlg) {
+        if ($("#"+dlg+"-choose-sales-price2").is(":checked")) {
+            $("#"+dlg+"-choose-new-sales-price2").prop("checked", false);
+            $("#"+dlg+"-icon-save-new-sales-price2").hide();
+            $("#"+dlg+"-save-new-sales-price2").hide();
+            $("#"+dlg+"-icon-save-sales-price2").show();
+            $("#"+dlg+"-save-sales-price2").show();
             if (goto) {
-                $("#ar-immed-new-sales-price2").focus();
-                $("#ar-immed-new-sales-price2").select();
+                $("#"+dlg+"-sales-price2").focus();
+                $("#"+dlg+"-sales-price2").select();
             }
         } else {
-            $("#ar-immed-choose-sales-price2").prop("checked", true);
-            ar_immed_choose_sales_price2_checkbox(_this, goto);
+            $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
+            ar2_choose_new_sales_price2_checkbox(_this, goto, dlg);
         }
     }
 
-    function ar_immed_choose_save_sales_price2_checkbox(_this) {
-        $("#ar-immed-save-new-sales-price2").prop("checked",
-            $("#ar-immed-save-sales-price2").is(":checked"));
+    function ar2_choose_new_sales_price2_checkbox(_this, goto, dlg) {
+        if ($("#"+dlg+"-choose-new-sales-price2").is(":checked")) {
+            $("#"+dlg+"-choose-sales-price2").prop("checked", false);
+            $("#"+dlg+"-icon-save-new-sales-price2").show();
+            $("#"+dlg+"-save-new-sales-price2").show();
+            $("#"+dlg+"-icon-save-sales-price2").hide();
+            $("#"+dlg+"-save-sales-price2").hide();
+            if (goto) {
+                $("#"+dlg+"-new-sales-price2").focus();
+                $("#"+dlg+"-new-sales-price2").select();
+            }
+        } else {
+            $("#"+dlg+"-choose-sales-price2").prop("checked", true);
+            ar2_choose_sales_price2_checkbox(_this, goto, dlg);
+        }
     }
 
-    function ar_immed_choose_save_new_sales_price2_checkbox(_this) {
-        $("#ar-immed-save-sales-price2").prop("checked",
-            $("#ar-immed-save-new-sales-price2").is(":checked"));
+    function ar2_choose_save_sales_price2_checkbox(_this, dlg) {
+        $("#"+dlg+"-save-new-sales-price2").prop("checked",
+            $("#"+dlg+"-save-sales-price2").is(":checked"));
+    }
+
+    function ar2_choose_save_new_sales_price2_checkbox(_this, dlg) {
+        $("#"+dlg+"-save-sales-price2").prop("checked",
+            $("#"+dlg+"-save-new-sales-price2").is(":checked"));
     }
 
     function get_fx_rate(curr) {
@@ -955,11 +1172,36 @@
             });
         jQuery.ajaxSetup({async: true});
         if (_dataFX != null && _dataFX != undefined && _dataFX.trim().length != 0) {
-            let fx = {curr: curr, fxrate: parseFloat(dataFX)};
+            let fx = {curr: curr, fxrate: parseFloat(_dataFX)};
             fxtable.push(fx);
             return fx.fxrate;
         }
         return 0;
+    }
+
+    function cvfx(amt, fromcurr, tocurr) {
+        fromcurr = fromcurr.trim().toUpperCase();
+        tocurr = tocurr.trim().toUpperCase();
+        if (fromcurr == tocurr) return amt;
+        fxf = get_fx_rate(fromcurr);
+        fxt = get_fx_rate(tocurr);
+        if (fxf == 0 || fxt == 0) return amt;
+        amt = parseFloat(amt);
+        return amt * fxf / fxt;
+    }
+
+    function check_currency(_this) {
+        let curr = _this.value.trim().toUpperCase();
+        if (curr != "RON" && curr != "EUR" && curr != "USD"
+                          && curr != "CHF" && curr != "GBP"
+                          && curr != "HUF" && curr != "BGN") {
+            $(_this).val(_this.oldvalue);
+            return false;
+        }
+        if (_this.oldvalue == curr) return false;
+        _this.oldvalue = curr;
+        $(_this).val(curr);
+        return true;
     }
 
 </script>

@@ -55,6 +55,7 @@ Route::post('webservice/deletefilters','WebserviceController@deletefilters');
 Route::post('webservice/readproposals','WebserviceController@readProposals');
 Route::get('webservice/readpitem','WebserviceController@readPOItem');
 Route::get('webservice/processproposal','WebserviceController@processProposal');
+Route::get('webservice/processproposal2','WebserviceController@processProposal2');
 Route::get('webservice/acceptproposal','WebserviceController@acceptProposal');
 Route::get('webservice/rejectproposal','WebserviceController@rejectProposal');
 Route::get('webservice/readlifnrname','WebserviceController@readLifnrName');

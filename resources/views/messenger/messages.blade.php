@@ -83,7 +83,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
-                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
+                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0 && \Illuminate\Support\Facades\Auth::user()->readonly != 1)
                             <a href="/roles">
                                 <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                    class="card-line first">
