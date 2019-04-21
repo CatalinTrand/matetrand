@@ -74,9 +74,9 @@ class MasterData
         if (empty(trim($lifnr))) return "";
         if (Auth::user()->role == "CTV") return "Furnizor " . SAP::alpha_output($lifnr);
         $lifnr_name = DB::table(System::$table_sap_lfa1)->where("lifnr", $lifnr)->value("name1");
-        if (isset($lifnr_name)) return $lifnr_name;
+        if (isset($lifnr_name) && $lifnr_name != null) return $lifnr_name;
         $lifnr_name = self::getData("LIFNR_NAME", $lifnr);
-        if (!isset($lifnr_name)) {
+        if (!isset($lifnr_name) || $lifnr_name == null) {
             $lifnr_name = __("Undefined supplier");
         }
         if ($cover_error == 2) {

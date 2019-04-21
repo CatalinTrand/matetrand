@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Materom\Mailservice;
 use App\Materom\Orders;
 use App\Materom\SAP\MasterData;
+use App\Materom\Statistics;
 use App\Materom\System;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -561,6 +562,18 @@ class WebserviceController extends Controller
         $this->tryAuthAPIToken();
         if (Auth::user() == null) return "API authentication failed";
         return Webservice::rollbackItem(Input::get("porder"), Input::get("item"));
+    }
+
+    public function getStatData()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return Statistics::getStatData(
+            Input::get("type"),
+            Input::get("lifnr"),
+            Input::get("sdate"),
+            Input::get("interval")
+        );
     }
 
 

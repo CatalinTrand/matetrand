@@ -64,6 +64,7 @@ Route::get('webservice/downloadordersxls','WebserviceController@downloadOrdersXL
 Route::get('webservice/processsplit','WebserviceController@processSplit');
 Route::get('webservice/acceptsplit','WebserviceController@acceptSplit');
 Route::get('webservice/rejectsplit','WebserviceController@rejectSplit');
+Route::get('webservice/get_stat_data','WebserviceController@getStatData');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');
@@ -83,16 +84,21 @@ Route::get('webservice/archive_item','WebserviceController@archiveItem');
 Route::get('webservice/unarchive_item','WebserviceController@unarchiveItem');
 Route::get('webservice/rollback_item','WebserviceController@rollbackItem');
 
+// Global data
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');
 
+// Roles
 Route::get('/roles', 'HomeController@roles')->name('roles');
 Route::post('/roles', 'HomeController@save_roles')->name('save_roles');
 
+// Orders
 Route::get('/orders', 'HomeController@orders_get')->name('orders');
 Route::post('/orders', 'HomeController@orders_post');
 
+// Messages
 Route::get('/messages', 'HomeController@messages_get')->name('messages');
 Route::post('/messages', 'HomeController@messages_post');
 
+// Statistics
 Route::get('/stats', 'HomeController@stats_get')->name('stats');

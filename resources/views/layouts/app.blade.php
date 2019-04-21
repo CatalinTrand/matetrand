@@ -13,7 +13,6 @@
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/jquery-ui.1.12.1.min.js') }}"></script>
-    <script src="{{ asset('js/d3.min.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/jquery-ui.1.12.1.min.css') }}" />
 
     <!-- Fonts -->
@@ -339,7 +338,7 @@
                 @endphp
                 <div style="margin-left: -4rem; font-weight: bold; font-size: 200%; color: {{$system_color}};
                         background-color: lightyellow; padding: 5px; border-style: double;">
-                    {{__("System")}}:&nbsp{{App\Materom\System::$system_name}}
+                    {{__("System")}}:&nbsp;{{App\Materom\System::$system_name}}
                 </div>
             @endguest
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"

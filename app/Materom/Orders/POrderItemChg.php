@@ -120,7 +120,8 @@ class POrderItemChg
                 $this->text = __("Delivery date modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
                 break;
             case "E":
-                $this->text = __("Message to") . " ". $this->duser;
+                if (empty($this->duser)) $this->text = __("Generic message");
+                else $this->text = __("Message to") . " ". $this->duser;
                 break;
             case "S":
                 $this->text = __("Item split proposed");
