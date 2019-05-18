@@ -70,6 +70,19 @@ class LoginController extends Controller
                         DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr) values ('$id','$client')");
                 }
             }
+            if ($id == DB::table(System::$table_roles)->where("rfc_role", "CTV")->value("user1")) {
+                // fallback CTV - get all non-assigned customers
+                $customers = DB::select("select distinct kunnr from " . System::$table_pitems .
+                    " where not exists (select * from " . System::$table_user_agent_clients .
+                                        " where " . System::$table_user_agent_clients .".kunnr = ".System::$table_pitems.".kunnr)");
+                if (!empty($customers)) {
+                    foreach ($customers as $customer) {
+                        $client = $customer->kunnr;
+                        if (!empty(trim($client)) && !DB::table(System::$table_user_agent_clients)->where([["id", "=", $id], ["kunnr", "=", $client]])->exists())
+                            DB::insert("insert into ". System::$table_user_agent_clients ." (id, kunnr) values ('$id','$client')");
+                    }
+                }
+            }
             Session::put("groupOrdersBy", 4);
         }
         if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1)

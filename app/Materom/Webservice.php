@@ -189,7 +189,7 @@ class Webservice
         if ($to[0] == 'C') {
             $stage = 'C';
             $kunnr = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count");
+            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count, id");
             if ($dusers == null || empty($dusers))
                 $duser = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
             else $duser = $dusers[0]->id;
@@ -552,7 +552,7 @@ class Webservice
                 $order = SAP::alpha_output($pitem->vbeln) . "/" . SAP::alpha_output($pitem->posnr);
             $stage = 'C';
             $kunnr = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count");
+            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count, id");
             if ($dusers == null || empty($dusers))
                 $duser = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
             else $duser = $dusers[0]->id;

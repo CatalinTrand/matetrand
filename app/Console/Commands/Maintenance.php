@@ -12,6 +12,7 @@ use App\Materom\Data;
 use App\Materom\RFCData;
 use App\Materom\SAP;
 use App\Materom\System;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -73,6 +74,35 @@ class Maintenance extends Command
             Data::gatherStatistics();
             return;
         }
+        if (strtoupper($command) == "UPDATE_SAP_CLIENT_AGENTS") {
+            $this->update_all_sap_client_agents();
+            return;
+        }
+    }
+
+    private function update_all_sap_client_agents()
+    {
+        $customers = DB::select("select distinct kunnr from ". System::$table_pitems
+                         . " where vbeln != '!REPLENISH' and kunnr <> ''");
+        DB:: beginTransaction();
+        $count = 0;
+        foreach($customers as $customer) {
+            $kunnr = $customer->kunnr;
+            DB::delete("delete from " . System::deftable_sap_client_agents . " where kunnr = '$kunnr'");
+            $record = SAP::readCTVforCustomer($kunnr);
+            if (!empty($record->agent)) {
+                $count++;
+                try {
+                    DB::insert("insert into " . System::deftable_sap_client_agents . " (kunnr, agent, name1) " .
+                        "values ('$kunnr', '$record->agent', '$record->agent_name')");
+                } catch (Exception $e) {
+                    Log::error($e);
+                }
+
+            }
+        }
+        DB::commit();
+        Log::info("Table sap_client_agents refreshed: " . count($customers) . " customers checked, $count customers updated.");
     }
 
     private function update_all_ctvs()

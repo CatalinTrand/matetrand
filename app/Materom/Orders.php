@@ -58,7 +58,7 @@ class Orders
 
     private static function processFilter($field, $filter_val, $mode = 0)
     {
-        if (is_null($filter_val) || empty($filter_val)) return "";
+        if (is_null($filter_val) || empty(trim($filter_val))) return "";
         $val = trim($filter_val);
         if ($mode != 0) {
             if (ctype_digit($val))
@@ -89,9 +89,13 @@ class Orders
         $filter_vbeln = Session::get("filter_vbeln");
         $filter_ebeln = Session::get("filter_ebeln");
         $filter_matnr = Session::get("filter_matnr");
-        $filter_mtext = Session::get("filter_mtext");
+        $filter_mtext = trim(Session::get("filter_mtext"));
+        if (!empty($filter_mtext) && strpos($filter_mtext, "*") === false)
+            $filter_mtext = "*" . $filter_mtext . "*";
         $filter_lifnr = Session::get("filter_lifnr");
-        $filter_lifnr_name = Session::get("filter_lifnr_name");
+        $filter_lifnr_name = trim(Session::get("filter_lifnr_name"));
+        if (!empty($filter_lifnr_name) && strpos($filter_lifnr_name, "*") === false)
+            $filter_lifnr_name = "*" . $filter_lifnr_name . "*";
 
         $cacheid = Session::get('materomdbcache');
         if (!isset($cacheid) || empty($cacheid)) return;
@@ -175,13 +179,12 @@ class Orders
         $sql = "select " . $items_table . ".ebeln, " . $items_table . ".ebelp, " . $items_table . ".vbeln " .
             " from " . $items_table .
             " join " . $orders_table . " using (ebeln)";
-        if (!empty($filter_lifnr_name_sql)) $sql .= " join sap_lfa1 using (lifnr)";
+        if (!empty($filter_lifnr_name_sql)) $sql .= " join " .System::$table_sap_lfa1. " using (lifnr)";
         if (!empty($filter_sql)) $sql .= " where " . $filter_sql;
         $sql .= " order by " . $items_table . ".ebeln, " . $items_table . ".ebelp";
 //      Log::debug($sql);
         // ...and run
         $items = DB::select($sql);
-        if (empty($items)) return;
 
         // Fill the cache
         $cache_date = now();
@@ -189,22 +192,27 @@ class Orders
         DB::delete("delete from ". System::$table_porders_cache ." where session = '$cacheid'");
         DB::delete("delete from ". System::$table_pitems_cache ." where session = '$cacheid'");
 
-        // Order cache
-        $psql = "insert into ". System::$table_porders_cache ." (session, ebeln, cache_date) values ";
-        $isql = "insert into ". System::$table_pitems_cache ." (session, ebeln, ebelp, vbeln, cache_date) values ";
+        if (!empty($items)) {
 
-        $prev_ebeln = '$#$#$#$#$#';
-        foreach ($items as $item) {
-            if ($item->ebeln != $prev_ebeln) {
-                $prev_ebeln = $item->ebeln;
-                $psql .= " ('$cacheid', '$prev_ebeln', '$cache_date'),";
+            // Order cache
+            $psql = "insert into " . System::$table_porders_cache . " (session, ebeln, cache_date) values ";
+            $isql = "insert into " . System::$table_pitems_cache . " (session, ebeln, ebelp, vbeln, cache_date) values ";
+
+            $prev_ebeln = '$#$#$#$#$#';
+            foreach ($items as $item) {
+                if ($item->ebeln != $prev_ebeln) {
+                    $prev_ebeln = $item->ebeln;
+                    $psql .= " ('$cacheid', '$prev_ebeln', '$cache_date'),";
+                }
+                $isql .= " ('$cacheid', '$item->ebeln', '$item->ebelp', '$item->vbeln', '$cache_date'),";
             }
-            $isql .= " ('$cacheid', '$item->ebeln', '$item->ebelp', '$item->vbeln', '$cache_date'),";
+
+            DB::insert(substr($psql, 0, -1) . ';');
+            DB::insert(substr($isql, 0, -1) . ';');
         }
 
-        DB::insert(substr($psql, 0, -1) . ';');
-        DB::insert(substr($isql, 0, -1) . ';');
         DB::commit();
+
     }
 
     static public function loadFromCache($s_order = null, $p_order = null, $refresh_dlv = false)
