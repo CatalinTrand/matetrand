@@ -19,7 +19,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'id','role', 'username', 'email', 'password','lang','ekgrp','lifnr','sap_system', 'readonly'
+        'id','role', 'username', 'email', 'password','lang','ekgrp','lifnr','sap_system', 'readonly',
+        'none', 'mirror_user1', 'ctvadmin'
     ];
 
     /**

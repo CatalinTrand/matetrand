@@ -1,12 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (!(Auth::user() && Auth::user()->role == 'Administrator'))
+    @if (!Auth::user() || Auth::user()->role == "CTV")
         @php
-            header("/");
+            header("Location: /users");
             exit();
         @endphp
     @endif
+
+    @php
+        $message_count = App\Materom\Orders::unreadMessageCount();
+        $message_svg = "";
+        if ($message_count > 0) {
+            if ($message_count > 99) $message_count = '>99';
+            else $message_count = "&nbsp;" . $message_count;
+            $message_svg = '&nbsp;<svg style="vertical-align: middle;" width="41" height="38">
+                  <g>
+                  <rect x="2" y="2" rx="8" ry="8" width="35" height="32" style="fill:red;stroke:black;stroke-width:2;opacity:0.99" />
+                  <text x="5" y="23" font-family="Arial" font-size="16" fill="white">' . $message_count . '</text>
+                  </g>
+                </svg>';
+    }
+    @endphp
 
     <script src="{{ asset('js/Chart.bundle.min.js') }}"></script>
 
@@ -15,51 +30,65 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
-                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0)
+                        @if(\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
                             <a href="/roles">
-                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                   class="card-line first">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-administrative-tools-48.png'/>
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-administrative-tools-48.png'/>
                                     {{__("Roles")}}
                                 </p>
                             </a>
                             <a href="/users">
-                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                   class="card-line selector">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-user-account-80.png'/>
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line selector">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
                                     {{__("Users")}}
                                 </p>
                             </a>
                             <a href="/messages">
-                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                   class="card-line">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-chat-80.png'/>
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
                                     {{__("Messages")}}
                                 </p>
                             </a>
                             <a href="/orders">
-                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                   class="card-line">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-todo-list-96.png'/>
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
                                     {{__("Orders")}}
                                 </p>
                             </a>
-                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                               class="card-line selector">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                       src='/images/icons8-area-chart-64.png'/>
-                                {{__("Statistics")}}
-                            </p>
                         @else
-                            <p style="display: inline-block;" class="card-line first">{{__('Messages')}}</p>
-                            <a href="/orders"><p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line">{{__('Orders')}}</p></a>
+                            @if (\Illuminate\Support\Facades\Auth::user()->role == "CTV" && \Illuminate\Support\Facades\Auth::user()->ctvadmin == 1)
+                                <a href="/users">
+                                    <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">
+                                        <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
+                                        {{__("Users")}}
+                                    </p>
+                                </a>
+                                <a href="/messages">
+                                    <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                        <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                        {{__('Messages')}}{!!$message_svg!!}
+                                    </p>
+                                </a>
+                            @else
+                                <a href="/messages">
+                                    <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">
+                                        <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                        {{__('Messages')}}{!!$message_svg!!}
+                                    </p>
+                                </a>
+                            @endif
+
+                            <a href="/orders">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                    {{__("Orders")}}
+                                </p>
+                            </a>
                         @endif
+                        <p style="display: inline-block;" class="card-line selector">
+                            <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-area-chart-64.png'/>
+                            {{__("Statistics")}}
+                        </p>
                     </div>
 
                     <div class="card-body" style="padding-bottom: 0px;">
@@ -87,14 +116,22 @@
                                             <select id="selected-supplier" class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
                                                     onchange="return false;">
                                             @php
-                                                $lifnrs = \Illuminate\Support\Facades\DB::select("select distinct lifnr from ".
-                                                    \App\Materom\System::$table_stat_orders);
-                                                foreach($lifnrs as $lifnr) {
-                                                    $lifnr = $lifnr->lifnr;
+
+                                                if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor") {
+                                                    $lifnr = \Illuminate\Support\Facades\Auth::user()->lifnr;
                                                     $lifnr_name = trim(\App\Materom\SAP\MasterData::getLifnrName($lifnr));
                                                     $xlifnr = \App\Materom\SAP::alpha_output($lifnr);
                                                     echo "<option value='$lifnr'>$xlifnr $lifnr_name</option>";
-                                                }
+                                                } else {
+                                                    $lifnrs = \Illuminate\Support\Facades\DB::select("select distinct lifnr from ".
+                                                        \App\Materom\System::$table_stat_orders);
+                                                    foreach($lifnrs as $lifnr) {
+                                                        $lifnr = $lifnr->lifnr;
+                                                        $lifnr_name = trim(\App\Materom\SAP\MasterData::getLifnrName($lifnr));
+                                                        $xlifnr = \App\Materom\SAP::alpha_output($lifnr);
+                                                        echo "<option value='$lifnr'>$xlifnr $lifnr_name</option>";
+                                                    }
+                                            }
                                             @endphp
                                             </select>
                                         </td>

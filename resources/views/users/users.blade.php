@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (!(Auth::user() && Auth::user()->role == 'Administrator'))
+    @if (!(\Illuminate\Support\Facades\Auth::user() && (\Illuminate\Support\Facades\Auth::user()->role == 'Administrator' || (\Illuminate\Support\Facades\Auth::user()->role == 'CTV' && \Illuminate\Support\Facades\Auth::user()->ctvadmin == 1))))
         @php
-            header("/");
+            header("Location: /login");
             exit();
         @endphp
     @endif
@@ -78,7 +78,7 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header" style="border-bottom-width: 0px;">
-                        @if(strcmp( (\Illuminate\Support\Facades\Auth::user()->role), "Administrator" ) == 0 && \Illuminate\Support\Facades\Auth::user()->readonly != 1)
+                        @if(\Illuminate\Support\Facades\Auth::user()->role == "Administrator" && \Illuminate\Support\Facades\Auth::user()->readonly != 1)
                             <a href="/roles">
                                 <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                    class="card-line first">
@@ -109,18 +109,33 @@
                                     {{__("Orders")}}
                                 </p>
                             </a>
+                        @else
+                            @if(\Illuminate\Support\Facades\Auth::user()->role == "CTV" && \Illuminate\Support\Facades\Auth::user()->ctvadmin == 1)
+                                <p style="display: inline-block;" class="card-line first selector">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
+                                    {{__("Users")}}
+                                </p>
+                            @endif
+                            <a href="/messages">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                    {{__("Messages")}}{!!$message_svg!!}
+                                </p>
+                            </a>
+                            <a href="/orders">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                    {{__('Orders')}}
+                                </p>
+                            </a>
+                        @endif
+                        @if(\Illuminate\Support\Facades\Auth::user()->role != "CTV")
                             <a href="/stats">
-                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                   class="card-line">
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
                                     <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-area-chart-64.png'/>
                                     {{__("Statistics")}}
                                 </p>
                             </a>
-                        @else
-                            <p style="display: inline-block;" class="card-line first">{{__('Messages')}}</p>
-                            <a href="/orders"><p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line">{{__('Orders')}}</p></a>
                         @endif
                     </div>
 
@@ -131,7 +146,7 @@
                             </div>
                         @endif
 
-                        @if (Auth::user() && Auth::user()->role == 'Administrator')
+                        @if (\Illuminate\Support\Facades\Auth::user() && (\Illuminate\Support\Facades\Auth::user()->role == 'Administrator' ||(\Illuminate\Support\Facades\Auth::user()->role == 'CTV' && \Illuminate\Support\Facades\Auth::user()->ctvadmin == 1)))
                             <a href="{{ route('register') }}">+ {{trans('strings.create_user')}} +</a>
                             <br><br>
                             <form method="{{Request::url()}}" method="get" class="filterForm">
@@ -192,21 +207,23 @@
                                 </thead>
                                 <tbody>
                                 @php
-                                    $sap_system = Auth::user()->sap_system;
+                                    $sap_system = \Illuminate\Support\Facades\Auth::user()->sap_system;
+                                    $andctvrole = "";
+                                    if (\Illuminate\Support\Facades\Auth::user()->role == 'CTV') $andctvrole = "and role = 'CTV'";
                                     if(isset($_GET['id']) && strcmp($_GET['id'],"") != 0){
                                         $id = $_GET['id'];
-                                        $users = DB::select("select * from users where id='$id' and sap_system = '$sap_system'");
+                                        $users = DB::select("select * from users where id='$id' and sap_system = '$sap_system' $andctvrole");
                                     }else if (isset($_GET['role']) && strcmp($_GET['role'],"") != 0){
                                         $role = $_GET['role'];
-                                        $users = DB::select("select * from users where role like '%$role%' and sap_system = '$sap_system'");
+                                        $users = DB::select("select * from users where role like '%$role%' and sap_system = '$sap_system' $andctvrole");
                                     }else if (isset($_GET['user']) && strcmp($_GET['user'],"") != 0){
                                         $user = $_GET['user'];
-                                        $users = DB::select("select * from users where username like '%$user%' and sap_system = '$sap_system'");
+                                        $users = DB::select("select * from users where username like '%$user%' and sap_system = '$sap_system' $andctvrole");
                                     }else if (isset($_GET['email']) && strcmp($_GET['email'],"") != 0){
                                         $email = $_GET['email'];
-                                        $users = DB::select("select * from users where email like '%$email%' and sap_system = '$sap_system'");
+                                        $users = DB::select("select * from users where email like '%$email%' and sap_system = '$sap_system' $andctvrole");
                                     } else {
-                                        $users = DB::select("select * from users where sap_system = '$sap_system'");
+                                        $users = DB::select("select * from users where sap_system = '$sap_system' $andctvrole");
                                     }
 
                                     if($users != null && count($users) > 1)
@@ -235,12 +252,14 @@
                                         $editUser = __('Change user data');
                                         $deleteUser = __('Delete user');
                                         $impersonateAsUser = __('Impersonate as user');
+                                        $impersonateButton = "<button type='button' onclick='impersonateAsUser(\"$id\");return false;' title='$impersonateAsUser'><img src='images/icons8-circled-up-right-50-2.png' style='height: 1.5rem; padding-left: 0.2rem;' class='edit_user_button' title='".__("Impersonate as user")."'></button>";
+                                        if (\Illuminate\Support\Facades\Auth::user()->role == 'CTV') $impersonateButton = "";
 
                                         $table .= "<tr><td>$id</td><td>$sap_system</td><td>$role</td><td>$name</td><td>$email</td><td>$lang</td><td>$active</td><td>$readonly</td>".
                                         "<td style='padding-top: 0px; padding-bottom: 0px; vertical-align: middle;'><button type='button' onclick='change_user_password(\"$id\");return false;' title='$chPass'><img id='edit_button_$id' src='images/icons8-password-reset-80.png' style='height: 1.5rem; padding-left: 0.2rem;' class='edit_user_button' title='Change password'></button>".
                                         "<button type='button' onclick='editUser(\"$id\");return false;' title='$editUser'><img id='edit_button_$id' src='images/edit.png' style='height: 1.5rem; padding-left: 0.2rem;' class='edit_user_button' title='Change user data'></button>".
                                         "<button type='button' onclick='deleteUser(\"$id\");return false;' title='$deleteUser'><img src='images/delete.png' style='height: 1.5rem; padding-left: 0.2rem;' class='delete' title='".__("Delete user")."'></button>".
-                                        "<button type='button' onclick='impersonateAsUser(\"$id\");return false;' title='$impersonateAsUser'><img src='images/icons8-circled-up-right-50-2.png' style='height: 1.5rem; padding-left: 0.2rem;' class='edit_user_button' title='".__("Impersonate as user")."'></button>".
+                                        "$impersonateButton".
                                         "</td></tr>";
                                     }
 
@@ -248,9 +267,6 @@
                                 @endphp
                                 </tbody>
                             </table>
-                        @elseif (Auth::user() && Auth::user()->role == 'Administrator')
-                            {{trans('strings.welcome_msg')}}<br>
-                            <a href="/messages">{{__('Messages')}}</a>
                         @else
                             {{trans('strings.welcome_msg')}}<br>
                             <a href="/messages">{{__('Messages')}}</a>

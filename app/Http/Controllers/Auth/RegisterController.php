@@ -78,6 +78,14 @@ class RegisterController extends Controller
         if ("X".$sap_system == "X200") $sap_system = "";
         $readonly = 0;
         if (isset($data['readonly']) && strtoupper($data['readonly']) == "ON") $readonly = 1;
+        $none = 1;
+        if (!isset($data['none']) || strtoupper($data['none']) != "ON") $none = 0;
+        $mirror_user1 = "";
+        if (isset($data['mirror_user1'])) $mirror_user1 = $data['mirror_user1'];
+        if ($mirror_user1 == null) $mirror_user1 = "";
+        $mirror_user1 = trim($mirror_user1);
+        $ctvadmin = 0;
+        if (isset($data['ctvadmin']) && strtoupper($data['ctvadmin']) == "ON") $ctvadmin = 1;
 
         return User::create([
             'id' => $data['id'],
@@ -89,6 +97,9 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'sap_system' => $sap_system,
             'readonly'   => $readonly,
+            'none'   => $none,
+            'mirror_user1'  => $mirror_user1,
+            'ctvadmin'   => $ctvadmin,
             'password' => Hash::make($data['password']),
             'created_at' => Carbon::now()->getTimestamp()
         ]);

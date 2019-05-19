@@ -2,19 +2,24 @@
 
 @section('content')
     @php
-        $sap_system = trim(Auth::user()->sap_system);
+        $sap_system = trim(\Illuminate\Support\Facades\Auth::user()->sap_system);
         if(empty($sap_system)) $sap_system = "200";
         $currentsystem200 = "";
         $currentsystem300 = "";
         if ($sap_system == "200") $currentsystem200 = "selected";
         if ($sap_system == "300") $currentsystem300 = "selected";
         $readonly = "";
-        if (Auth::user()->readonly == 1) $readonly = "checked";
+        if (\Illuminate\Support\Facades\Auth::user()->readonly == 1) $readonly = "checked";
+        $none = "";
+        if (\Illuminate\Support\Facades\Auth::user()->none == 1) $none = "checked";
+        $mirror_user1 = trim(\Illuminate\Support\Facades\Auth::user()->mirror_user1);
+        $ctvrole = "";
+        if (\Illuminate\Support\Facades\Auth::user()->role == "CTV") $ctvrole = "selected";
     @endphp
-    @if (Auth::user() && Auth::user()->role == 'Administrator')
-        <div class="container">
+    @if (\Illuminate\Support\Facades\Auth::user() && (\Illuminate\Support\Facades\Auth::user()->role == 'Administrator' ||(\Illuminate\Support\Facades\Auth::user()->role == 'CTV' && \Illuminate\Support\Facades\Auth::user()->ctvadmin == 1)))
+        <div class="container" style="width: 60%;">
             <div class="row justify-content-center">
-                <div class="col-md-8">
+                <div class="col-md-9">
                     <div class="card input-group input-group-lg">
                         <div class="card-header"><a style="padding-right: 20px" href="/users">&larr; Back</a>{{ __('Register Panel') }}</div>
 
@@ -23,36 +28,42 @@
                                 @csrf
 
                                 <div class="form-group row">
-                                    <label for="role"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('User Type') }}</label>
-
-                                    <div class="col-md-6">
+                                    <label for="role" class="col-md-2 col-form-label text-md-left">{{ __('User Type') }}</label>
+                                    <div class="col-md-4">
                                         <select id="role" type="text" class="form-control" name="role" required
                                                 autofocus onchange="selectCheck(this);">
-                                            <option>Administrator</option>
-                                            <option>Furnizor</option>
-                                            <option>Referent</option>
-                                            <option>CTV</option>
+                                            @if($ctvrole == "")
+                                                <option>Administrator</option>
+                                                <option>Furnizor</option>
+                                                <option>Referent</option>
+                                            @endif
+                                            <option {{$ctvrole}}>CTV</option>
                                         </select>
                                     </div>
+
+                                    <div id="ctvadmin_div" class="col-md-5" style="display: block;">
+                                        <input type="checkbox" style="float: left; margin-top: 1em;" id="ctvadmin" name="ctvadmin">
+                                        <label for="ctvadmin" style="padding-left: 5px; padding-top: 0.75em;"
+                                               class="col-form-label text-md-left">{{ __('Limited CTV administrator') }}</label>
+                                    </div>
+
                                 </div>
 
                                 <div class="form-group row">
                                     <label for="username"
-                                           class="col-md-4 col-form-label text-md-right">User ID</label>
+                                           class="col-md-2 col-form-label text-md-left">User ID</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <input class="form-control" id="id" type="text" name="id" required>
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <label for="sap_system"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('System') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('System') }}</label>
 
-                                    <div class="col-md-6">
-                                        <select id="sap_system" type="text" class="form-control" name="sap_system" required
-                                                onchange="selectCheck(this);">
+                                    <div class="col-md-2">
+                                        <select id="sap_system" type="text" class="form-control" name="sap_system" required>
                                             <option value="200" {{$currentsystem200}}>200</option>
                                             <option value="300" {{$currentsystem300}}>300</option>
                                         </select>
@@ -61,34 +72,34 @@
 
                                 <div class="form-group row">
                                     <label for="username"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('Username') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Username') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <input class="form-control" id="username" type="text" name="username" required>
                                     </div>
                                 </div>
 
                                 <div class="form-group row" id="lifnr_div" style="display: none;">
                                     <label for="lifnr"
-                                           class="col-md-4 col-form-label text-md-right">Vendor</label>
+                                           class="col-md-2 col-form-label text-md-left">Vendor</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <input class="form-control" id="lifnr" type="text" name="lifnr">
                                     </div>
                                 </div>
 
                                 <div class="form-group row" id="ekgrp_div" style="display: none;">
                                     <label for="ekgrp"
-                                           class="col-md-4 col-form-label text-md-right">Purchasing group</label>
+                                           class="col-md-2 col-form-label text-md-left">Purchasing group</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-2">
                                         <input class="form-control" id="ekgrp" type="text" name="ekgrp">
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <label for="email"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('E-Mail Address') }}</label>
 
                                     <div class="col-md-6">
                                         <input id="email" type="email"
@@ -105,9 +116,9 @@
 
                                 <div class="form-group row">
                                     <label for="lang"
-                                           class="col-md-4 col-form-label text-md-right">Language</label>
+                                           class="col-md-2 col-form-label text-md-left">Language</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <select id="lang" type="text" class="form-control" name="lang" required>
                                             <option>RO</option>
                                             <option>HU</option>
@@ -119,18 +130,25 @@
 
                                 <div class="form-group row">
                                     <label for="readonly"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('Read-only') }}</label>
-
-                                    <div class="col-md-6">
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Read-only') }}</label>
+                                    <div class="col-md-5">
                                         <input type="checkbox" style="float: left; margin-top: 1em;" id="readonly" name="readonly" {{$readonly}}>
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
-                                    <label for="password"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
+                                    <label for="none"
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Empty list (NONE)') }}</label>
+                                    <div class="col-md-5">
+                                        <input id="none" type="checkbox" name="none" style="float: left; margin-top: 1em;" {{$none}}>
+                                    </div>
+                                </div>
 
-                                    <div class="col-md-6">
+                                <div class="form-group row">
+                                    <label for="password"
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Password') }}</label>
+
+                                    <div class="col-md-5">
                                         <input id="password" type="password"
                                                class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}"
                                                name="password" required>
@@ -145,9 +163,9 @@
 
                                 <div class="form-group row">
                                     <label for="password-confirm"
-                                           class="col-md-4 col-form-label text-md-right">{{ __('Confirm Password') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Confirm Password') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="password-confirm" type="password" class="form-control"
                                                name="password_confirmation" required>
                                     </div>
@@ -178,10 +196,14 @@
         </div>
     @endif
     <script>
+        $(document).ready(function () {
+            selectCheck(document.getElementById("role"));
+        });
         function selectCheck(nameSelect)
         {
             var lifnr_div = document.getElementById("lifnr_div");
             var ekgrp_div = document.getElementById("ekgrp_div");
+            var ctvadmin_div = document.getElementById("ctvadmin_div");
 
             if(nameSelect){
                 if(nameSelect.value == "Referent" || nameSelect.value == "Furnizor"){
@@ -192,15 +214,19 @@
                         ekgrp_div.style.display = "none";
                         lifnr_div.style.display = "";
                     }
+                    ctvadmin_div.style.display = "none";
                 }
                 else {
                     lifnr_div.style.display = "none";
                     ekgrp_div.style.display = "none";
+                    if (nameSelect.value == "CTV") ctvadmin_div.style.display = "";
+                    else ctvadmin_div.style.display = "none";
                 }
             }
             else{
                 lifnr_div.style.display = "none";
                 ekgrp_div.style.display = "none";
+                ctvadmin_div.style.display = "none";
             }
         }
     </script>

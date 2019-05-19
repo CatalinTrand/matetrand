@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (!(Auth::user() && Auth::user()->role == 'Administrator' && (isset($_POST['id']) || isset($_GET['id']))))
+    @if (!(\Illuminate\Support\Facades\Auth::user() && (\Illuminate\Support\Facades\Auth::user()->role == 'Administrator' || (\Illuminate\Support\Facades\Auth::user()->role == 'CTV' && \Illuminate\Support\Facades\Auth::user()->ctvadmin == 1)) && (isset($_POST['id']) || isset($_GET['id']))))
         @php
-            header("/");
+            header("Location: /users");
             exit();
         @endphp
     @endif
@@ -21,15 +21,18 @@
             $id = $_GET['id'];
 
         //load user data
-        $users = DB::select("select * from users where id='$id'");
+        $users = DB::select("select * from users where id = '$id'");
 
         if(!$users){
-            echo "<h2>Error - no such user!</h2>";
-            header("/");
+            header("Location: /users");
             exit();
         }
 
         $user = $users[0];
+        if (\Illuminate\Support\Facades\Auth::user()->role == 'CTV' && $user->role != 'CTV') { // CTV Admin
+            header("Location: /users");
+            exit();
+        }
 
         if(empty(trim($user->sap_system))) $user->sap_system = "200";
         $currentsystem200 = "";
@@ -91,12 +94,19 @@
 
         $readonly = "";
         if ($user->readonly == 1) $readonly = "checked";
+        $none = "";
+        if ($user->none == 1) $none = "checked";
+        $ctvadmin = "";
+        if ($user->ctvadmin == 1) $ctvadmin = "checked";
+        $userctvadmin = "disabled";
+        if (\Illuminate\Support\Facades\Auth::user()->role == 'Administrator'
+        || (\Illuminate\Support\Facades\Auth::user()->ctvadmin == 1 && \Illuminate\Support\Facades\Auth::user()->id != $user->id)) $userctvadmin = "";
 
     @endphp
     <div class="container-fluid">
-        <div class="container" style="width: 40%;">
+        <div class="container" style="width: 60%;">
             <div class="row justify-content-center">
-                <div class="col-md-8">
+                <div class="col-md-9">
                     <div class="card">
                         <div class="card-header"><a style="padding-right: 20px" href="/users">&larr; Back</a>Edit User
                             Panel
@@ -109,9 +119,9 @@
 
                                 <div class="form-group row">
                                     <label for="__userid"
-                                           class="col-md-3 col-form-label text-md-left">{{ __('User ID') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('User ID') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="__userid" type="text" name="__userid" class="form-control" required
                                                value="{{$user->id}}" disabled>
                                     </div>
@@ -119,19 +129,25 @@
 
                                 <div class="form-group row">
                                     <label for="__role"
-                                           class="col-md-3 col-form-label text-md-left">{{ __('User Type') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('User Type') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="__role" type="text" name="__role" class="form-control" required
                                                value="{{$user->role}}" disabled>
+                                    </div>
+
+                                    <div id="ctvadmin_div" class="col-md-5" style="display: block;">
+                                        <input type="checkbox" style="float: left; margin-top: 1em;" id="ctvadmin" name="ctvadmin" {{$ctvadmin}} {{$userctvadmin}}>
+                                        <label for="ctvadmin" style="padding-left: 5px; padding-top: 0.75em;"
+                                               class="col-form-label text-md-left">{{ __('Limited CTV administrator') }}</label>
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <label for="sap_system"
-                                           class="col-md-3 col-form-label text-md-left">{{ __('System') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('System') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <select id="sap_system" type="text" class="form-control" name="sap_system" required>
                                             <option value="200" {{$currentsystem200}}>200</option>
                                             <option value="300" {{$currentsystem300}}>300</option>
@@ -141,34 +157,36 @@
 
                                 <div class="form-group row">
                                     <label for="username"
-                                           class="col-md-3 col-form-label text-md-left">{{ __('Username') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Username') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="username" type="text" name="username" class="form-control" required
                                                value="{{$user->username}}">
                                     </div>
                                 </div>
 
-                                <div class="row" id="token_div" style="margin-left: -2.5vw; display: none;">
+                                <div id="token_div" style="display: none;">
                                     <div class="form-group row">
                                         <label for="api_token"
-                                               class="col-md-4 col-form-label text-md-right">API Token</label>
+                                               class="col-md-2 col-form-label text-md-left">API Token</label>
 
-                                        <div class="col-md-6" style="padding-left: 5.9vw;">
+                                        <div class="col-md-5">
                                             <input id="api_token" type="text" name="api_token" class="form-control"
                                                    value="{{$user->api_token}}">
                                         </div>
+                                        <div class="col-md-2">
+                                            <button type="button" style="height: 30px" onclick="generateNew(); return false;">
+                                                Generate new
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button type="button" style="height: 30px" onclick="generateNew(); return false;">
-                                        Generate new
-                                    </button>
                                 </div>
 
                                 <div class="form-group row" id="lifnr_div" style="display: none;">
                                     <label for="lifnr"
-                                           class="col-md-3 col-form-label text-md-left">Vendor</label>
+                                           class="col-md-2 col-form-label text-md-left">Vendor</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="lifnr" type="text" name="lifnr" class="form-control"
                                                value="{{App\Materom\SAP::alpha_output($user->lifnr)}}">
                                     </div>
@@ -176,9 +194,9 @@
 
                                 <div class="form-group row" id="ekgrp_div" style="display: none;">
                                     <label for="ekgrp"
-                                           class="col-md-3 col-form-label text-md-left">Purchasing group</label>
+                                           class="col-md-2 col-form-label text-md-left">Purchasing group</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="ekgrp" type="text" name="ekgrp" class="form-control"
                                                value="{{$user->ekgrp}}">
                                     </div>
@@ -186,9 +204,9 @@
 
                                 <div class="form-group row">
                                     <label for="email"
-                                           class="col-md-3 col-form-label text-md-left">{{ __('E-Mail Address') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('E-Mail Address') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="email" type="email"
                                                class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}"
                                                name="email" value="{{$user->email}}" required>
@@ -203,9 +221,9 @@
 
                                 <div class="form-group row">
                                     <label for="lang"
-                                           class="col-md-3 col-form-label text-md-left">Language</label>
+                                           class="col-md-2 col-form-label text-md-left">Language</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <select id="lang" type="text" class="form-control" name="lang" required
                                                 autofocus>
                                             <option {{$selectedRO}}>RO</option>
@@ -218,9 +236,9 @@
 
                                 <div class="form-group row">
                                     <label for="active"
-                                           class="col-md-3 col-form-label text-md-left">Status</label>
+                                           class="col-md-2 col-form-label text-md-left">Status</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <select id="active" type="text" class="form-control" name="active" required
                                                 autofocus>
                                             <option {{$selectedON}}>Active</option>
@@ -231,10 +249,18 @@
 
                                 <div class="form-group row">
                                     <label for="readonly"
-                                           class="col-md-3 col-form-label text-md-left">{{ __('Read-only') }}</label>
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Read-only') }}</label>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <input id="readonly" type="checkbox" name="readonly" style="float: left; margin-top: 1em;" {{$readonly}}>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="none"
+                                           class="col-md-2 col-form-label text-md-left">{{ __('Empty list (NONE)') }}</label>
+                                    <div class="col-md-5">
+                                        <input id="none" type="checkbox" name="none" style="float: left; margin-top: 1em;" {{$none}}>
                                     </div>
                                 </div>
 
@@ -545,22 +571,14 @@
             location.replace(location.pathname + "?id=" + id);
         }
 
-    </script>
-
-    <script>
         function generateNew() {
             var api_token = document.getElementById("api_token");
             api_token.value = Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30) + Math.random().toString(36).substring(2, 30);
         }
-    </script>
 
-    <script>
         $(document).ready(function () {
             selectCheck('{{$user->role}}');
         });
-    </script>
-
-    <script>
 
         function selectCheck(nameSelect) {
             if (nameSelect == null)
@@ -573,6 +591,7 @@
             var token_div = document.getElementById("token_div");
             var agent_div = document.getElementById("agent_div");
             var customer_div = document.getElementById("customers_div");
+            var ctvadmin_div = document.getElementById("ctvadmin_div");
 
             if (nameSelect) {
                 if (nameSelect == "Referent" || nameSelect == "Furnizor") {
@@ -590,6 +609,7 @@
                     token_div.style.display = "none";
                     agent_div.style.display = "none";
                     customer_div.style.display = "none";
+                    ctvadmin_div.style.display = "none";
                 }
                 else {
                     ref_div.style.display = "none";
@@ -599,8 +619,10 @@
 
                     if (nameSelect == "Administrator") {
                         token_div.style.display = "";
+                        ctvadmin_div.style.display = "none";
                     } else {
                         token_div.style.display = "none";
+                        ctvadmin_div.style.display = "";
                     }
 
                     if (nameSelect == "CTV") {

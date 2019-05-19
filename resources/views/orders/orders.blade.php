@@ -3,7 +3,7 @@
 @section('content')
     @guest
         @php
-            header("/");
+            header("Location: /");
             exit();
         @endphp
     @endguest
@@ -141,60 +141,62 @@
                     <div class="card-header" style="border-bottom-width: 0px;">
                         @if (\Illuminate\Support\Facades\Auth::user()->role == "Administrator" && \Illuminate\Support\Facades\Auth::user()->readonly != 1)
                             <a href="/roles">
-                                <p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line first">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-administrative-tools-48.png'/>
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-administrative-tools-48.png'/>
                                     {{__("Roles")}}
                                 </p>
                             </a>
                             <a href="/users">
-                                <p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-user-account-80.png'/>
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
                                     {{__("Users")}}
                                 </p>
                             </a>
                             <a href="/messages">
-                                <p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-chat-80.png'/>
+                                <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                    <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
                                     {{__("Messages")}}{!!$message_svg!!}
                                 </p>
                             </a>
                             <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
                                class="card-line selector">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                       src='/images/icons8-todo-list-96.png'/>
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
                                 {{__("Orders")}}
                             </p>
+                        @else
+                            @if (\Illuminate\Support\Facades\Auth::user()->role == "CTV" && \Illuminate\Support\Facades\Auth::user()->ctvadmin == 1)
+                                <a href="/users">
+                                    <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">
+                                        <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-user-account-80.png'/>
+                                        {{__("Users")}}
+                                    </p>
+                                </a>
+                                <a href="/messages">
+                                    <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
+                                        <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                        {{__('Messages')}}{!!$message_svg!!}
+                                    </p>
+                                </a>
+                            @else
+                                <a href="/messages">
+                                    <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line first">
+                                        <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-chat-80.png'/>
+                                        {{__('Messages')}}{!!$message_svg!!}
+                                    </p>
+                                </a>
+                            @endif
+                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line selector">
+                                <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-todo-list-96.png'/>
+                                {{__("Orders")}}
+                            </p>
+                        @endif
+                        @if(\Illuminate\Support\Facades\Auth::user()->role != "CTV")
                             <a href="/stats">
                                 <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;" class="card-line">
                                     <image style='height: 2.2rem; margin-left: -1.5rem;' src='/images/icons8-area-chart-64.png'/>
                                     {{__("Statistics")}}
                                 </p>
                             </a>
-                        @else
-                            <a href="/messages">
-                                <p
-                                        style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                                        class="card-line first">
-                                    <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                           src='/images/icons8-chat-80.png'/>
-                                    {{__('Messages')}}{!!$message_svg!!}
-                                </p>
-                            </a>
-                            <p style="display: inline-block; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
-                               class="card-line selector">
-                                <image style='height: 2.2rem; margin-left: -1.5rem;'
-                                       src='/images/icons8-todo-list-96.png'/>
-                                {{__("Orders")}}
-                            </p>
                         @endif
                     </div>
                     <div class="card-body" style="padding-bottom: 0px;">

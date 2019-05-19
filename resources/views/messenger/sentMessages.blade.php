@@ -3,7 +3,7 @@
 @section('content')
     @guest
         @php
-            header("/");
+            header("Location: /");
             exit();
         @endphp
     @endguest

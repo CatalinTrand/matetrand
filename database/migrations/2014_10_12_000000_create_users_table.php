@@ -31,6 +31,9 @@ class CreateUsersTable extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->timestamp('activated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->string('sap_system',3)->default('');
+            $table->integer('none')->default('1');
+            $table->string('mirror_user1', 20)->default('');
+            $table->integer('ctvadmin')->default('0');
         });
     }
 

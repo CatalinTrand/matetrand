@@ -85,7 +85,7 @@ class LoginController extends Controller
             }
             Session::put("groupOrdersBy", 4);
         }
-        if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1)
+        if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
             Session::put("filter_ebeln", "NONE");
         Orders::fillCache();
     }

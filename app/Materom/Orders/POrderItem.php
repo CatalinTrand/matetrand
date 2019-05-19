@@ -294,11 +294,11 @@ class POrderItem
             if (($itemchg->stage == Auth::user()->role[0]) && ($itemchg->acknowledged == 0)) {
                 // $this->inquired = 3;
             }
-            if ($itemchg->ctype == "M") $this->matnr_changed = 1;
-            if ($itemchg->ctype == "Q") $this->quantity_changed = 1;
-            if ($itemchg->ctype == "P") $this->price_changed = 1;
-            if ($itemchg->ctype == "D") $this->delivery_date_changed = 1;
-            if ($itemchg->ctype == "S") $this->position_splitted = 1;
+            if ($itemchg->ctype == "M") {if ($itemchg->acknowledged == 2) continue; else $this->matnr_changed = 1;}
+            if ($itemchg->ctype == "Q") {if ($itemchg->acknowledged == 2) continue; else $this->quantity_changed = 1;}
+            if ($itemchg->ctype == "P") {if ($itemchg->acknowledged == 2) continue; else $this->price_changed = 1;}
+            if ($itemchg->ctype == "D") {if ($itemchg->acknowledged == 2) continue; else $this->delivery_date_changed = 1;}
+            if ($itemchg->ctype == "S") {if ($itemchg->acknowledged == 2) continue; else $this->position_splitted = 1;}
 
             if ($first && ($itemchg->ctype == "S") && ($this->inquired == 1) && ($this->inq_reply == 1))
                 $this->inquired = 3;

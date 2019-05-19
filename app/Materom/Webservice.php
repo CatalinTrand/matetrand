@@ -1003,7 +1003,41 @@ class Webservice
             if ($pitemchg != null && ($pitemchg->acknowledged < 2)) {
                 $cdate = $pitemchg->cdate;
                 $status = $pitem->status;
+                $ctype = $pitemchg->ctype;
                 $now = now();
+
+                if ((($pitem->stage == "F") || ($pitem->stage == "R")) && (trim($pitem->pstage) == "") && (trim($pitem->status) == "") &&
+                    ($pitemchg->ctype == "M" || $pitemchg->ctype == "Q" || $pitemchg->ctype == "P" || $pitemchg->ctype == "D")) {
+                    DB::beginTransaction();
+                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    $message = __("Rolled back");
+                    if ($pitemchg->ctype == "M") {
+                        $message .= " " . __("from material code change");
+                        $idnlf = $pitemchg->oldval;
+                        DB::update("update ". System::$table_pitems ." set idnlf = '$idnlf' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    }
+                    if ($pitemchg->ctype == "Q") {
+                        $message .= " " . __("from quantity change");
+                        $purch_price = explode(" ", $pitemchg->oldval)[0];
+                        DB::update("update ". System::$table_pitems ." set purch_price = '$purch_price' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    }
+                    if ($pitemchg->ctype == "P") {
+                        $message .= " " . __("from price change");
+                        $qty = explode(" ", $pitemchg->oldval)[0];
+                        DB::update("update ". System::$table_pitems ." set qty = '$qty' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    }
+                    if ($pitemchg->ctype == "D") {
+                        $message .= " " . __("from delivery date change");
+                        $lfdat = $pitemchg->oldval;
+                        DB::update("update ". System::$table_pitems ." set lfdat = '$lfdat' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    }
+                    $message .= " (previous = " . $pitemchg->oldval . ", current = " . $pitemchg->newval . ")";
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                        "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
+                    DB::commit();
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 0$ctype) by ". Auth::user()->id);
+                    return "OK";
+                }
 
                 if ((($pitem->stage == "R") && ($pitemchg->stage == "R")) &&
                     ($pitem->pstage == "F" || $pitem->pstage == " ") &&

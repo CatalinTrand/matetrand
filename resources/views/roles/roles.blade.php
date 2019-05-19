@@ -3,7 +3,7 @@
 @section('content')
     @if (!(Auth::user() && Auth::user()->role == 'Administrator'))
         @php
-            header("/");
+            header("Location: /");
             exit();
         @endphp
     @endif

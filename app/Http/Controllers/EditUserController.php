@@ -21,7 +21,10 @@ class EditUserController
             Input::get("active"),
             Input::get("email"),
             Input::get("sap_system"),
-            Input::get("readonly")
+            Input::get("readonly"),
+            Input::get("none"),
+            Input::get("mirror_user1"),
+            Input::get("ctvadmin")
         );
     }
 
