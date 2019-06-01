@@ -389,7 +389,7 @@ class Webservice
         }
     }
 
-    public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp)
+    public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp, $backorder)
     {
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
@@ -399,6 +399,7 @@ class Webservice
             return;
         }
         $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        if ($pitem->backorder != 0) $backorder = 1;
         $pitem->changed = 1;
         $new_stage = $pitem->stage;
         if ($pitem->stage == 'Z') {
@@ -407,15 +408,26 @@ class Webservice
             $pitem->changed = 2;
         }
         DB::beginTransaction();
-        DB::update("update ". System::$table_pitems ." set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::update("update ". System::$table_pitems ." set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder where ebeln = '$ebeln' and ebelp = '$ebelp'");
         DB::update("update ". System::$table_porders ." set changed = '1' where ebeln = '$ebeln'");
         if ($column == 'idnlf') $type = 'M';
         if ($column == 'qty') $type = 'Q';
         if ($column == 'lfdat') $type = 'D';
+        if ($column == 'etadt') $type = 'J';
         if ($column == 'purch_price') $type = 'P';
         $newval = trim($value . " " . $valuehlp);
         $cdate = now();
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage, cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        if ($pitem->backorder == 0 && $backorder == 1 && $type == "D") {
+            $cdate->addSeconds(1);
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+        }
+        if ($type == "D") {
+            DB::update("update ". System::$table_pitems ." set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            $cdate->addSeconds(1);
+            $oldetadt = substr($pitem->etadt, 0, 10);
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
+        }
         DB::commit();
         return "";
     }
@@ -1007,7 +1019,7 @@ class Webservice
                 $now = now();
 
                 if ((($pitem->stage == "F") || ($pitem->stage == "R")) && (trim($pitem->pstage) == "") && (trim($pitem->status) == "") &&
-                    ($pitemchg->ctype == "M" || $pitemchg->ctype == "Q" || $pitemchg->ctype == "P" || $pitemchg->ctype == "D")) {
+                    ($pitemchg->ctype == "M" || $pitemchg->ctype == "Q" || $pitemchg->ctype == "P" || $pitemchg->ctype == "D" || $pitemchg->ctype == "J")) {
                     DB::beginTransaction();
                     DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
                     $message = __("Rolled back");
@@ -1030,6 +1042,11 @@ class Webservice
                         $message .= " " . __("from delivery date change");
                         $lfdat = $pitemchg->oldval;
                         DB::update("update ". System::$table_pitems ." set lfdat = '$lfdat' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    }
+                    if ($pitemchg->ctype == "J") {
+                        $message .= " " . __("from ETA date change");
+                        $etadt = $pitemchg->oldval;
+                        DB::update("update ". System::$table_pitems ." set etadt = '$etadt' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
                     $message .= " (previous = " . $pitemchg->oldval . ", current = " . $pitemchg->newval . ")";
                     DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .

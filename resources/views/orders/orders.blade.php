@@ -88,6 +88,16 @@
         $tmp = \Illuminate\Support\Facades\Session::get("filter_overdue");
         if (isset($tmp)) $filter_overdue = intval($tmp);
         if ($filter_overdue == 1) $overdue_checked = "checked";
+        $filter_overdue_low = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_overdue_low");
+        if (isset($tmp)) $filter_overdue_low = intval($tmp);
+        if ($filter_overdue_low <= 0) $filter_overdue_low = "";
+        $filter_overdue_high = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_overdue_high");
+        if (isset($tmp)) $filter_overdue_high = intval($tmp);
+        if ($filter_overdue_high <= 0) $filter_overdue_high = "";
 
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
@@ -248,7 +258,13 @@
                                                onchange="this.form.submit()">
                                     @else
                                         <input type="checkbox" id="filter_overdue" name="filter_overdue" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$overdue_checked}}>
-                                        <label for="filter_overdue" class="col-form-label text-md-left">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;&nbsp;
+                                        <label for="filter_overdue" class="col-form-label text-md-left">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;
+                                        <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
+                                               style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_low"
+                                               maxlength="2" value="{{$filter_overdue_low}}">&nbsp;-&nbsp;
+                                        <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
+                                               style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_high"
+                                               maxlength="2" value="{{$filter_overdue_high}}">&nbsp;
                                     @endif
                                 </div>
                                 <br>
@@ -315,36 +331,41 @@
                                     <col style="width:1.6%;">
                                     <col style="width:1.6%;">
                                     <col style="width:1.6%;">
-                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;"> <!-- 16 -->
+
                                     <col style="width:2%;">
                                     <col style="width:4%;">
-                                    <col width="4%">
-                                    <col width="4%">
-                                    <col width="4%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="2%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="3%">
-                                    <col width="2%">
-                                    <col width="3%">
-                                    <col width="2%">
-                                    <col width="3%">
-                                    <col width="2%">
-                                    <col width="1%">
-                                    <col width="3%">
-                                    <col width="3%">
+                                    <col style="width:3.5%;">
+                                    <col style="width:4%;">
+                                    <col style="width:4%;">
+                                    <col style="width:2.8%;">
+                                    <col style="width:2.8%;">
+                                    <col style="width:2.8%;">
+                                    <col style="width:2.8%;">
+                                    <col style="width:2.8%;"> <!-- 31.5 -->
+
+                                    <col style="width:2.8%;">
+                                    <col style="width:3.5%;">
+                                    <col style="width:3.5%;">
+                                    <col style="width:1.8%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:2.4%;">
+                                    <col style="width:2.8%;">
+                                    <col style="width:2.8%;">
+                                    <col style="width:2.8%;">
+                                    <col style="width:2.8%;"> <!-- 28.2 -->
+
+                                    <col style="width:2.8%;">
+                                    <col style="width:2%;">
+                                    <col style="width:2.9%;">
+                                    <col style="width:2%;">
+                                    <col style="width:2.9%;">
+                                    <col style="width:2%;">
+                                    <col style="width:1%;">
+                                    <col style="width:2.5%;">
+                                    <col style="width:2.6%;">
+                                    <col style="width:3.5%;"> <!-- 24,2 -->
+
                                 </colgroup>
                                 <tr>
                                     <th colspan="1" class="td01">
@@ -388,6 +409,7 @@
                                             $th6 = __("Moneda");
                                             $th7 = __("Rata schimb");
                                             $th8 = __("Data cda.");
+                                            $th8 = "";
                                         } else {
                                             echo '<th class="td02" colspan="3">' . __('Sales order') . '</th>';
                                             if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
@@ -418,7 +440,7 @@
                                         echo "<th colspan=2>$th6</th>";
                                         echo "<th colspan=2>$th7</th>";
                                         echo "<th colspan=2>$th8</th>";
-                                        for ($i = 0; $i < 4; $i++) echo "<th>&nbsp;</th>";
+                                        for ($i = 0; $i < 5; $i++) echo "<th>&nbsp;</th>";
                                     } else {
                                         echo "<th colspan=2>$th1</th>";
                                         echo "<th colspan=5>$th2</th>";
@@ -463,7 +485,7 @@
                                                     "<td class='td02' colspan=3>$order->erdat_out</td>" .
                                                     "<td class='td02' colspan=2>$order->curr</td>" .
                                                     "<td class='td02' colspan=2>$order->fxrate</td>".
-                                                    "<td class='td02' colspan=2>$order->bedat_out</td>";
+                                                    "<td class='td02' colspan=2></td>"; // $order->bedat_out
 
                                             switch ($order->info) {
                                                 case 0:
@@ -551,7 +573,7 @@
                                                  "<td class='td01' style='padding: 0;'>$button_reject</td>" .
                                                  "<td class='td01' style='padding: 0;'>$button_inquire</td>" .
                                                  "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
-                                                 "$data<td colspan='6'></td></tr>";
+                                                 "$data<td colspan='5'></td></tr>";
                                         } else {
                                             $oid = "S" . $order->vbeln;
                                             if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
@@ -1072,7 +1094,7 @@
             cols += '<td colspan="3"><b>{{__("Data creare")}}</b></td>';
             cols += '<td colspan="2"><b>{{__("Moneda")}}</b></td>';
             cols += '<td colspan="3"><b>{{__("Rata de schimb")}}</b></td>';
-            cols += '<td colspan="3"><b>{{__("Data cda.")}}</b></td>';
+            cols += '<td colspan="3"><b></b></td>';
             cols += '<td colspan="2"><b></b></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
@@ -1184,7 +1206,7 @@
                 cols += '<td class="td02" colspan="3">' + porder.erdat_out + '</td>';
                 cols += '<td class="td02" colspan="2">' + porder.curr + '</td>';
                 cols += '<td class="td02" colspan="3">' + porder.fxrate + '</td>';
-                cols += '<td class="td02" colspan="3">' + porder.bedat_out + '</td>';
+                cols += '<td class="td02" colspan="3">' + '' + '</td>';
                 cols += '<td class="td02" colspan="2"></td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
@@ -1205,10 +1227,10 @@
             var first_style = "background-color:" + first_color;
             @if ($groupByPO == 4)
                 cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
-            colsafter = 0;
+                colsafter = 0;
             @else
                 cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
-            colsafter = 1;
+                colsafter = 1;
             @endif
             cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="1"><b>{{__("Position")}}</b></td>';
@@ -1216,20 +1238,24 @@
             cols += '<td class="td02" colspan="1"><b>{{__("Fabricant")}}</b></td>';
             cols += '<td class="td02" colspan="3"><b>{{__("Material")}}</b></td>';
             cols += '<td class="td02" colspan="4"><b>{{__("Material description")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Quantity")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="padding-left: 0.5rem;"><b>{{__("Delivery date")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="padding-left: 0.1rem;"><b>{{__("Dly")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="padding-left: 0.1rem;"><b>{{__("ETA date")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Purchase price")}}</b></td>';
             @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-            let sales_price_hdr = '{{__("Sales price")}}';
-            if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
+                let sales_price_hdr = '{{__("Sales price")}}';
+                if (sorder == '{{\App\Materom\Orders::stockorder}}') sales_price_hdr = '';
+                cols += '<td class="td02" colspan="2" style="text-align: right;"><b>' + sales_price_hdr + '</b></td>';
             @else
                 cols += '<td class="td02" colspan="2"><b>&nbsp;</b></td>';
             @endif
-                cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
-            cols += '<td class="td02" colspan="3" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
-            cols += '<td class="td02" colspan="3" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
+            // cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
+            // cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b></b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b></b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
             if (colsafter > 0)
                 cols += '<td class="td02" colspan="' + colsafter + '"></td>';
             newRow.append(cols).hide();
@@ -1266,6 +1292,9 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/icons8-shipped-48.png'>";
                         break;
                 }
+                if (pitem.backorder == 1)
+                    info_icon = "<image style='height: 1.2rem;' src='/images/icons8-next-page-48.png' title='Backorder'>";
+
                 let owner_icon = "";
                 switch (pitem.owner) {
                     case 0:
@@ -1381,11 +1410,11 @@
                 if (pitem.quantity_changeable == 1) {
                     let quantity_class = "td02h";
                     if (pitem.quantity_changed == 1) quantity_class += "_c";
-                    cols += '<td class="' + quantity_class + '" colspan="2" onclick="change_quantity(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_quantity + '</td>';
+                    cols += '<td class="' + quantity_class + '" colspan="1" onclick="change_quantity(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="text-align: right;">' + pitem.x_quantity + '</td>';
                 } else {
                     let quantity_class = "td02";
                     if (pitem.quantity_changed == 1) quantity_class += "_c";
-                    cols += '<td class="' + quantity_class + '" colspan="2" style="text-align: right;">' + pitem.x_quantity + '</td>';
+                    cols += '<td class="' + quantity_class + '" colspan="1" style="text-align: right;">' + pitem.x_quantity + '</td>';
                 }
 
                 if ((pitem.delivery_date_changeable == 1) || ((pitem.delivery_date_changeable == 2))) {
@@ -1393,11 +1422,25 @@
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
                     let change_delivery_date_func = "change_delivery_date";
                     if (pitem.delivery_date_changeable == 2) change_delivery_date_func = "change_delivery_date2";
-                    cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="' + change_delivery_date_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
+                    cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="' + change_delivery_date_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\', ' + pitem.backorder + ');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 } else {
                     let delivery_date_class = "td02";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
                     cols += '<td class="' + delivery_date_class + '" colspan="2" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
+                }
+
+                let dodays = pitem.dodays;
+                if (dodays > 99) dodays = ">99";
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + dodays + '</td>';
+
+                if (pitem.eta_date_changeable != 0) {
+                    let eta_date_class = "td02h";
+                    if (pitem.eta_date_changed == 1) eta_date_class += "_c";
+                    cols += '<td class="' + eta_date_class + '" colspan="2" style="text-align: left; padding-left: 0.1rem;" onclick="change_eta_date(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');">' + pitem.etadt_out + '</td>';
+                } else {
+                    let eta_date_class = "td02";
+                    if (pitem.eta_date_changed == 1) eta_date_class += "_c";
+                    cols += '<td class="' + eta_date_class + '" colspan="2" style="text-align: left; padding-left: 0.1rem;">' + pitem.etadt_out + '</td>';
                 }
 
                 if ((pitem.price_changeable == 1) || ((pitem.price_changeable == 2))) {
@@ -1422,10 +1465,10 @@
                 if (pitem.grdate != null)
                     grdate = pitem.grdate.split(' ')[0];
 
-                cols += '<td class="td02" colspan="2" style="text-align: left;">' + deldate + '</td>';
-                cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.delqty + '</td>';
-                cols += '<td class="td02" colspan="3" style="text-align: left;">' + grdate + '</td>';
-                cols += '<td class="td02" colspan="3" style="text-align: right;">' + pitem.grqty + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + '' + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' + '' + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + grdate + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
 
 
                 @if ($groupByPO != 4)
@@ -1465,12 +1508,12 @@
             var first_style = "background-color:" + first_color;
             cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
             @if ($groupByPO == 4)
-            let colsafter = "8";
-            cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                    @else
-            let colsafter = "9";
+                let colsafter = "8";
+                cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+            @else
+                let colsafter = "9";
             @endif
-                cols += '<td class="coloured" style="' + last_style + '"></td>';
+            cols += '<td class="coloured" style="' + last_style + '"></td>';
             cols += '<td style="' + po_style + '"></td>';
             cols += '<td class="td02" colspan="3"><b>{{__("Data")}}</b></td>';
             cols += '<td class="td02" colspan="6"><b>{{__("Utilizator")}}</b></td>';
@@ -1496,21 +1539,21 @@
                 let first_style = "background-color:" + first_color;
                 cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
                 @if ($groupByPO == 4)
-                let colsreason = "10";
-                cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
-                        @else
-                let colsreason = "11";
+                    let colsreason = "10";
+                    cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
+                @else
+                    let colsreason = "10";
                 @endif
-                    cols += '<td class="coloured" style="' + last_style + '"></td>';
+                cols += '<td class="coloured" style="' + last_style + '"></td>';
                 cols += '<td style="' + pi_style + '"></td>';
                 cols += '<td class="td02" colspan="3">' + pitemchg.cdate + '</td>';
                 cols += '<td class="td02" colspan="2">' + pitemchg.cuser + '</td>';
                 cols += '<td class="td02" colspan="4">' + pitemchg.cuser_name + '</td>';
                 cols += '<td class="td02" colspan="8">' + pitemchg.text + '</td>';
                 @if ($groupByPO != 4)
-                    colsreason = colsreason + 1;
+                    colsreason = (parseInt(colsreason) + 1).toString();
                 @endif
-                    cols += '<td class="td02" colspan="' + colsreason + '">' + pitemchg.reason + '</td>';
+                cols += '<td class="td02" colspan="' + colsreason + '">' + pitemchg.reason + '</td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
                 if (i % 2 == 0)
@@ -1912,10 +1955,11 @@
             @endif
         }
 
-        function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp) {
+        function doChangeItem(c_type, c_value, c_value_hlp, old_value, c_ebeln, c_ebelp, c_backorder) {
             var c_string = "";
             let comma_count = 0;
             let dot_count = 0;
+            let v_backorder = 0;
             if (c_value.indexOf(",") >= 0) comma_count = 1;
             if (c_value.indexOf(".") >= 0) dot_count = 1;
             switch (c_type) {
@@ -1933,12 +1977,19 @@
                     var d = new Date(c_value);
                     if (isNaN(d.valueOf()))
                         return false;
+                    v_backorder = c_backorder ? 1 : 0;
                     break;
                 case 5:
                     c_string = "purch_price";
                     if ((comma_count + dot_count) > 1) return false;
                     if (comma_count == 1) c_value = c_value.replace(/,/g, '.');
                     if (!($.isNumeric(c_value)) || c_value.startsWith('-'))
+                        return false;
+                    break;
+                case 6:
+                    c_string = "etadt";
+                    var d = new Date(c_value);
+                    if (isNaN(d.valueOf()))
                         return false;
                     break;
             }
@@ -1958,7 +2009,8 @@
                     valuehlp: c_value_hlp,
                     oldvalue: old_value,
                     ebeln: c_ebeln,
-                    ebelp: c_ebelp
+                    ebelp: c_ebelp,
+                    backorder: v_backorder,
                 },
                 function (data, status) {
                     _dataC = data;
@@ -1976,15 +2028,15 @@
         $(function () {
             changeDialog = $("#change-dialog").dialog({
                 autoOpen: false,
-                height: 200,
-                width: 400,
+                height: 220,
+                width: 420,
                 modal: true,
                 buttons: {
                     Change: function () {
                         let new_val = $("#new_chg_val").val().trim();
                         if (new_val.length > 0) {
                             if (doChangeItem(change_type, new_val, $("#new_val_hlp").text(),
-                                change_cell.innerHTML, change_ebeln, change_ebelp)) {
+                                change_cell.innerHTML, change_ebeln, change_ebelp, $("#item_backorder").is(":checked"))) {
                                 change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
                                 $("#new_chg_val").text("");
                                 $("#new_val_hlp").text("");
@@ -2037,6 +2089,7 @@
             $("#new_val_txt").text("Introduceti noul cod:");
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare cod material pozitia ' + ebelp);
+            $("#backorder-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2055,10 +2108,11 @@
             $("#new_val_txt").text("Introduceti noua cantitate:");
             $("#new_val_hlp").text(values[1]);
             $("#change-dialog").dialog('option', 'title', 'Modificare cantitate pozitia ' + ebelp);
+            $("#backorder-row").hide();
             changeDialog.dialog("open");
         }
 
-        function change_delivery_date2(cell, ebeln, ebelp) {
+        function change_delivery_date2(cell, ebeln, ebelp, backorder) {
             swal({
                 title: "{{__('Please confirm changing the delivery date for this item')}}",
                 text: "{{__('You have issued earlier a confirmation for this item. Are you sure you want now to change its delivery date? ')}}",
@@ -2066,12 +2120,12 @@
                 buttons: ["{{__('No')}}", "{{__('Ask MATEROM to check a new delivery date')}}"],
             }).then(function(result) {
                 if (result) {
-                    change_delivery_date(cell, ebeln, ebelp)
+                    change_delivery_date(cell, ebeln, ebelp, backorder)
                 }
             })
         }
 
-        function change_delivery_date(cell, ebeln, ebelp) {
+        function change_delivery_date(cell, ebeln, ebelp, backorder) {
 
             change_cell = cell;
             change_type = 4;
@@ -2086,6 +2140,28 @@
             $("#new_val_txt").text("Introduceti noua data de livrare:");
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare data livrare pentru pozitia ' + ebelp);
+            $("#backorder-row").show();
+            $("#item_backorder").prop("checked", backorder != 0);
+            $("#item_backorder").prop("disabled", backorder != 0);
+            changeDialog.dialog("open");
+        }
+
+        function change_eta_date(cell, ebeln, ebelp) {
+
+            change_cell = cell;
+            change_type = 6;
+            let old_value = cell.innerHTML;
+            change_ebeln = ebeln;
+            change_ebelp = ebelp;
+
+            type_string = "ETADT";
+            $("#old_chg_val").text("Data estimata curenta: " + old_value);
+            $("#new_chg_val").val("");
+            $("#new_chg_val").datepicker({dateFormat: "yy-mm-dd"});
+            $("#new_val_txt").text("Introduceti noua data estimata:");
+            $("#new_val_hlp").text("");
+            $("#change-dialog").dialog('option', 'title', 'Modificare data estimata pentru pozitia ' + ebelp);
+            $("#backorder-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2117,6 +2193,7 @@
             $("#new_val_txt").text("Introduceti noul pret de achizitie:");
             $("#new_val_hlp").text(values[1]);
             $("#change-dialog").dialog('option', 'title', 'Modificare pret achizitie pentru pozitia ' + ebelp);
+            $("#backorder-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2133,8 +2210,13 @@
                     <tr>
                         <td><input id="new_chg_val" type="text" name="new_chg_val" size="20"
                                    class="form-control col-md-8" value=""></td>
-                        <td style="text-align: left;" width="4rem"><b style="text-align: left;  margin-left: -5rem;"
-                                                                      id="new_val_hlp"></b></td>
+                        <td style="text-align: left;" width="4rem"><b style="text-align: left;  margin-left: -5rem;" id="new_val_hlp"></b></td>
+                    </tr>
+                    <tr id="backorder-row">
+                        <td>
+                            <input type="checkbox" style="float: left; margin-top: 0.5em;" id="item_backorder" name="item_backorder">
+                            <label for="item_backorder" style="margin-left: 0.7em; margin-top: 0.5em;">{{ __('Backorder') }}</label>
+                        </td>
                     </tr>
                 </table>
             </div>

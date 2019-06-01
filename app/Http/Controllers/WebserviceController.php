@@ -164,7 +164,8 @@ class WebserviceController extends Controller
             Input::get("valuehlp"),
             Input::get("oldvalue"),
             Input::get("ebeln"),
-            Input::get("ebelp")
+            Input::get("ebelp"),
+            Input::get("backorder")
         );
     }
 

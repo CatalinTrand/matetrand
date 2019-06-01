@@ -35,6 +35,8 @@ class POrderItem
     public $qty;         // EKPO-MENGE
     public $qty_uom;     // EKPO-MEINS
     public $lfdat;       // EKET-EINDT
+    public $etadt;       // ETA
+    public $backorder;
     public $purch_price; // EKPO-NETPR
     public $purch_curr;  // EKPO-WAERS
     public $purch_prun;  // EKPO-PEINH
@@ -109,7 +111,9 @@ class POrderItem
     public $price_changeable;         // 0=no, 1=yes
     public $price_changed;            // 0=no, 1=yes
     public $delivery_date_changeable; // 0=no, 1=yes
+    public $eta_date_changeable;      // 0=no, 1=yes
     public $delivery_date_changed;    // 0=no, 1=yes
+    public $eta_date_changed;         // 0=no, 1=yes
     public $position_splittable;      // 0=no, 1=yes
     public $position_splitted;        // 0=no, 1=yes
 
@@ -126,6 +130,9 @@ class POrderItem
         $this->qty = $pitem->qty;
         $this->qty_uom = $pitem->qty_uom;
         $this->lfdat = $pitem->lfdat;
+        $this->etadt = $pitem->etadt;
+        $this->etadt_out = (new Carbon($this->etadt))->format("Y-m-d");
+        $this->backorder = $pitem->backorder;
         $this->purch_price = $pitem->purch_price;
         $this->purch_curr = $pitem->purch_curr;
         $this->purch_prun = $pitem->purch_prun;
@@ -286,6 +293,7 @@ class POrderItem
         $this->quantity_changed = 0;
         $this->price_changed = 0;
         $this->delivery_date_changed = 0;
+        $this->eta_date_changed = 0;
         $this->position_splitted = 0;
 
         $first = true;
@@ -298,6 +306,7 @@ class POrderItem
             if ($itemchg->ctype == "Q") {if ($itemchg->acknowledged == 2) continue; else $this->quantity_changed = 1;}
             if ($itemchg->ctype == "P") {if ($itemchg->acknowledged == 2) continue; else $this->price_changed = 1;}
             if ($itemchg->ctype == "D") {if ($itemchg->acknowledged == 2) continue; else $this->delivery_date_changed = 1;}
+            if ($itemchg->ctype == "J") {if ($itemchg->acknowledged == 2) continue; else $this->eta_date_changed = 1;}
             if ($itemchg->ctype == "S") {if ($itemchg->acknowledged == 2) continue; else $this->position_splitted = 1;}
 
             if ($first && ($itemchg->ctype == "S") && ($this->inquired == 1) && ($this->inq_reply == 1))
@@ -317,11 +326,21 @@ class POrderItem
         $this->reject = 0;
         $this->inquire = 1;
 
+        $clfdat = new Carbon(substr($this->lfdat, 0, 10));
+        $cnow = new Carbon();
+        $cnow->hour = 0;
+        $cnow->minute = 0;
+        $cnow->second = 0;
+        $this->dodays = "";
+        if ($cnow > $clfdat) {
+            $this->dodays = $cnow->diffInDays($clfdat);
+        }
 
         $this->matnr_changeable = 0;
         $this->quantity_changeable = 0;
         $this->price_changeable = 0;
         $this->delivery_date_changeable = 0;
+        $this->eta_date_changeable = 0;
         $this->position_splittable = 0;
         if ($history == 1) {
             if (Auth::user()->role == 'Furnizor') {
@@ -367,6 +386,7 @@ class POrderItem
                         $this->reject = 2;
                         if ($this->inquired != 0 ) $this->inq_reply = 1;
                     }
+                    if ($this->dodays <> "") $this->eta_date_changeable = 1;
                 }
             } elseif (Auth::user()->role == 'Administrator') {
                 if (empty($this->status)) {
@@ -389,12 +409,13 @@ class POrderItem
                     $this->reject = 2;
                     if ($this->inquired != 0 ) $this->inq_reply = 1;
                 }
-            }  elseif (Auth::user()->role == 'CTV') {
+                if ($this->dodays <> "") $this->eta_date_changeable = 1;
+            } elseif (Auth::user()->role == 'CTV') {
 
             }
         } elseif (($history == 2) && (Auth::user()->role == 'Administrator')) {
-            if ($this->status == 'A')
-                $this->matnr_changeable = 1;
+//            if ($this->status == 'A')
+//                $this->matnr_changeable = 1;
         }
 
         $this->x_delivery_date = substr($this->lfdat, 0, 10);
@@ -402,16 +423,6 @@ class POrderItem
         $this->x_purchase_price = trim($this->purch_price) . " " . trim($this->purch_curr);
         if ((Auth::user()->role == 'Furnizor') || ($this->vbeln == Orders::stockorder)) $this->x_sales_price = "";
         else $this->x_sales_price = trim($this->sales_price) . " " . trim($this->sales_curr);
-
-        $clfdat = new Carbon(substr($this->lfdat, 0, 10));
-        $cnow = new Carbon();
-        $cnow->hour = 0;
-        $cnow->minute = 0;
-        $cnow->second = 0;
-        $this->dodays = "";
-        if ($cnow > $clfdat) {
-            $this->dodays = $cnow->diffInDays($clfdat);
-        }
 
         // Post-processing options
         if (($this->stage == 'Z') && ($this->status == 'A') && ($this->grdate == null)) {

@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Maintenance;
 use App\Materom\Data;
 use App\Materom\SAP\MasterData;
 use App\Materom\System;
@@ -48,6 +49,8 @@ class Kernel extends ConsoleKernel
             Data::performArchiving();
             // gather statistics
             Data::gatherStatistics();
+            Maintenance::update_all_sap_client_agents();
+            Maintenance::update_all_ctvs();
             Log::info("Daily cleanup job has ended in system ". System::$system_name);
 
             if (System::is300) {

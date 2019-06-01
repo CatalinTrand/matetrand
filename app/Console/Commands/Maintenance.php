@@ -67,7 +67,7 @@ class Maintenance extends Command
             return;
         }
         if (strtoupper($command) == "UPDATE_CTVS") {
-            $this->update_all_ctvs();
+            self::update_all_ctvs($this);
             return;
         }
         if (strtoupper($command) == "STATISTICS") {
@@ -75,12 +75,12 @@ class Maintenance extends Command
             return;
         }
         if (strtoupper($command) == "UPDATE_SAP_CLIENT_AGENTS") {
-            $this->update_all_sap_client_agents();
+            self::update_all_sap_client_agents($this);
             return;
         }
     }
 
-    private function update_all_sap_client_agents()
+    public static function update_all_sap_client_agents($command = null)
     {
         $customers = DB::select("select distinct kunnr from ". System::$table_pitems
                          . " where vbeln != '!REPLENISH' and kunnr <> ''");
@@ -105,7 +105,7 @@ class Maintenance extends Command
         Log::info("Table sap_client_agents refreshed: " . count($customers) . " customers checked, $count customers updated.");
     }
 
-    private function update_all_ctvs()
+    public static function update_all_ctvs($command = null)
     {
         $pitems = DB::select("select * from ". System::$table_pitems
                          ." where vbeln != '!REPLENISH' and kunnr <> ''"
@@ -119,8 +119,10 @@ class Maintenance extends Command
             if (empty($ctv->agent) && empty($pitem->ctv) && empty($pitem->ctv_name)) continue;
             $count = DB::update("update ". System::$table_pitems ." set ctv='$ctv->agent', ctv_name='$ctv->agent_name' ".
               "where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp'");
-            $this->info("Purchase order item " . SAP::alpha_output($pitem->ebeln) . "/" . SAP::alpha_output($pitem->ebelp) .
-                ": CTV '" . trim($pitem->ctv) . "' => '" . trim($ctv->agent) . "' (" . trim($ctv->agent_name) . ")");
+            if ($command != null)
+                $command->info("Purchase order item " . SAP::alpha_output($pitem->ebeln) . "/" . SAP::alpha_output($pitem->ebelp) .
+                    ": CTV '" . trim($pitem->ctv) . "' => '" . trim($ctv->agent) . "' (" . trim($ctv->agent_name) . ")");
         }
+        Log::info("Agents of table items refreshed: " . count($pitems) . " items updated.");
     }
 }

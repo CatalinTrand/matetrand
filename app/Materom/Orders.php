@@ -229,6 +229,10 @@ class Orders
         $inquirements = Session::get("filter_inquirements");
         $overdue = Session::get("filter_overdue");
         if (!isset($overdue) || $overdue == null) $overdue = 0;
+        $overdue_low = Session::get("filter_overdue_low");
+        if (!isset($overdue_low) || $overdue_low == null || $overdue_low == "") $overdue_low = 0;
+        $overdue_high = Session::get("filter_overdue_high");
+        if (!isset($overdue_high) || $overdue_high == null || $overdue_high == "") $overdue_high = 99999;
 
         if ($history == null) $history = 1;
         else $history = intval($history);
@@ -326,7 +330,7 @@ class Orders
                      )
                     )
                    )
-                    if ($overdue == 0 || $_pitem->lfdat < $now) {
+                    if ($overdue == 0 || (($_pitem->lfdat < $now) && (($_pitem->dodays > $overdue_low) && ($_pitem->dodays < $overdue_high)))) {
                         $_porder->appendItem($_pitem);
                         self::$overdue_items++;
                         $overdueitems = true;

@@ -119,6 +119,12 @@ class POrderItemChg
             case "D":
                 $this->text = __("Delivery date modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
                 break;
+            case "J":
+                $this->text = __("ETA date modified from") . " " . $this->oldval . " " . __("to") . " " . $this->newval;
+                break;
+            case "B":
+                $this->text = __("Termen incert de livrare, s-au cerut informatii suplimentare de la furnizor");
+                break;
             case "E":
                 if (empty($this->duser)) $this->text = __("Generic message");
                 else $this->text = __("Message to") . " ". $this->duser;
