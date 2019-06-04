@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (!Auth::user() || Auth::user()->role == "CTV")
+    @if (!\Illuminate\Support\Facades\Auth::user() || \Illuminate\Support\Facades\Auth::user()->role == "CTV")
         @php
             header("Location: /users");
             exit();
@@ -95,26 +95,29 @@
                         <div style="border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 8rem;">
                             <div class="container row" style="display: block; max-width: 100%;">
                                 <table style="border: none; width: 100%;">
+                                    <colgroup>
+                                        <col style="width: 10rem; padding: 2px;">
+                                        <col style="width: 24rem; padding: 2px;">
+                                        <col style="width: 30rem; padding: 2px;">
+                                        <col style="padding: 2px;">
+                                        <col style="width: 100px;">
+
+                                    </colgroup>
                                     <tr>
-                                        <td style="width: 10rem; padding: 2px;">
-                                            {{__('Graphical chart type')}}:
-                                        </td>
-                                        <td style="padding: 2px;">
+                                        <td>{{__('Graphical chart type')}}:</td>
+                                        <td>
                                             <select id="graphical-chart-type" class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
                                                     onchange="return false;">
                                                 <option value="A" selected>{{__("Delayed vs. open number of purchase orders/items")}}</option>
                                             </select>
                                         </td>
-                                        <td width="100px" style="text-align: right; padding: 2px;">
-                                        </td>
+                                        <td colspan="3"></td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 10rem; padding: 2px;">
-                                            {{__('Supplier')}}:
-                                        </td>
-                                        <td style="padding: 2px;">
+                                        <td>{{__('Supplier')}}:</td>
+                                        <td>
                                             <select id="selected-supplier" class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                                    onchange="return false;">
+                                                    onchange="fill_ekgrp_of_lifnr();return false;" required>
                                             @php
 
                                                 if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor") {
@@ -135,28 +138,36 @@
                                             @endphp
                                             </select>
                                         </td>
-                                        <td width="100px" style="text-align: right; padding: 2px;">
+                                        <td>
+                                            {{__('Refferal')}}:&nbsp;
+                                            <select id="selected-ekgrp" class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                                    onchange="return false;">
+                                                <option value="***" selected>{{__("Toti")}}</option>
+                                            </select>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            {{__('Order type')}}:&nbsp;
+                                            <select id="selected-otype" class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;">
+                                                <option value="A" selected>{{__("All")}}</option>
+                                                <option value="S">{{__("Stock order")}}</option>
+                                                <option value="C">{{__("Client order")}}</option>
+                                            </select>
                                         </td>
+                                        <td colspan="2"></td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 10rem; padding: 2px;">
-                                            {{__('Starting date')}}:
-                                        </td>
-                                        <td style="padding: 2px;">
+                                        <td>{{__('Starting date')}}:</td>
+                                        <td>
                                             @php
                                                 $now = substr(now(), 0, 10);
                                             @endphp
                                             <input type="text" id="starting-date" class="form-control-sm"
                                                    style="height: 1.6rem; width: 6rem;" value="{{$now}}">
                                         </td>
-                                        <td width="100px" style="text-align: right; padding: 2px;">
-                                        </td>
+                                        <td colspan="3"></td>
                                     </tr>
                                     <tr>
-                                        <td style="width: 10rem; padding: 2px;">
-                                            {{__('Interval')}}:
-                                        </td>
-                                        <td style="padding: 2px;">
+                                        <td>{{__('Interval')}}:</td>
+                                        <td>
                                             <select id="reporting-interval" class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
                                                     onchange="return false;">
                                                 <option value="A">{{__("One week")}}</option>
@@ -164,6 +175,7 @@
                                                 <option value="C">{{__("One month")}}</option>
                                             </select>
                                         </td>
+                                        <td colspan="2"></td>
                                         <td width="100px" style="text-align: right; padding: 2px;">
                                             <button type="button" style="margin-left: 2px; height: 1.5rem; "
                                                     onclick="redraw_canvas();return false;">{{__('Display')}}</button>
@@ -228,15 +240,19 @@
                     }
                 }
             });
+            fill_ekgrp_of_lifnr();
         });
 
         function redraw_canvas() {
             var _data, _status;
-            var type, lifnr, sdate, interval;
+            var type, lifnr, sdate, interval, ekgrp, otype;
             type = $("#graphical-chart-type").val();
             lifnr = $("#selected-supplier").val();
             sdate = $("#starting-date").val().trim().substr(0, 10);
             interval = $("#reporting-interval").val();
+            ekgrp = $("#selected-ekgrp").val();
+            otype = $("#selected-otype").val();
+            $('body').addClass('ajaxloading');
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -244,6 +260,50 @@
             });
             jQuery.ajaxSetup({async: false});
             $.get("webservice/get_stat_data",
+                {
+                    type: type,
+                    lifnr: lifnr,
+                    sdate: sdate,
+                    interval: interval,
+                    ekgrp: ekgrp,
+                    otype: otype
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                }, "json");
+            jQuery.ajaxSetup({async: true});
+            $('body').removeClass('ajaxloading');
+            if (_status == undefined || _status == null) {
+                alert("An error occurred loading chart data");
+                return;
+            }
+            m1chart.options.title.text = _data.title;
+            m1chart.data = _data.data;
+            m1chart.update();
+            if (_data.debug != undefined && _data.debug != null)
+                alert(_data.debug);
+        }
+
+        function fill_ekgrp_of_lifnr() {
+            var _data, _status;
+            let type = $("#graphical-chart-type").val();
+            let lifnr = $("#selected-supplier").val();
+            let sdate = $("#starting-date").val().trim().substr(0, 10);
+            let interval = $("#reporting-interval").val();
+            $('#selected-ekgrp')
+                .find('option')
+                .remove()
+                .end()
+                .append('<option value="***" selected>{{__("Toti")}}</option>')
+                .val('***');
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.get("webservice/get_stat_ekgrp_of_lifnr",
                 {
                     type: type,
                     lifnr: lifnr,
@@ -256,15 +316,13 @@
                 }, "json");
             jQuery.ajaxSetup({async: true});
             if (_status == undefined || _status == null) {
-                alert("An error occurred loading chart data");
                 return;
             }
-            m1chart.options.title.text = _data.title;
-            m1chart.data = _data.data;
-            m1chart.update();
-            if (_data.debug != undefined && _data.debug != null)
-                alert(_data.debug);
+            for (i = 0; i < _data.length; i++)
+                $('#selected-ekgrp')
+                    .append('<option value="' + _data[i].ekgrp + '">' + _data[i].ekgrp + ' ' + _data[i].name+ '</option>');
         }
+
     </script>
 
 @endsection

@@ -251,20 +251,61 @@ class SAP
             $sql = substr($sql, 0, -4);
             $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz from ". System::$table_pitems ." $sql order by ebeln, ebelp");
         }
-        $items = SAP::rfcGetDeliveryData($mode, $items);
-        if ($items != null) {
-            DB::beginTransaction();
-            foreach ($items as $item) {
-                db::update("update ". System::$table_pitems ." set" .
-                    " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
-                    ", delqty = '$item->delqty'" .
-                    ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
-                    ", grqty = '$item->grqty'" .
-                    ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
-                    ", elikz = '$item->elikz'" .
-                    " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
+        if ($items == null) return;
+        $sqlh = "where ";
+        $ebeln = "";
+        foreach ($items as $item) {
+            if ($ebeln <> $item->ebeln) {
+                $ebeln = $item->ebeln;
+                $sqlh .= "ebeln = '$item->ebeln' or ";
             }
-            DB::commit();
+        }
+        $sqlh = substr($sqlh, 0, -4);
+        $orders = DB::select("select ebeln, qty_ordered, qty_delivered, qty_open, qty_invoiced from ". System::$table_porders ." $sqlh order by ebeln");
+        foreach ($orders as $order) {
+            $orders[$order->ebeln] = $order;
+        }
+        foreach ($items as $item) {
+            $order = $orders[$item->ebeln];
+            $item->hdrqty_ordered = $order->qty_ordered;
+            $item->hdrqty_delivered = $order->qty_delivered;
+            $item->hdrqty_open = $order->qty_open;
+            $item->hdrqty_invoiced = $order->qty_invoiced;
+        }
+        while (count($items) > 0 ) {
+            $vitems = array();
+            $i = 0;
+            foreach($items as $itemkey => $itemval) {
+                $vitems[$itemkey] = $itemval;
+                if (++$i >= 1000) break;
+            }
+            array_splice($items, 0, $i);
+            $vitems = SAP::rfcGetDeliveryData($mode, $vitems);
+            if ($vitems != null) {
+                DB::beginTransaction();
+                $ebeln = "";
+                foreach ($vitems as $item) {
+                    db::update("update " . System::$table_pitems . " set" .
+                        " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
+                        ", delqty = '$item->delqty'" .
+                        ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
+                        ", grqty = '$item->grqty'" .
+                        ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
+                        ", elikz = '$item->elikz'" .
+                        " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
+                    if ($ebeln <> $item->ebeln) {
+                        $ebeln = $item->ebeln;
+                        db::update("update " . System::$table_porders . " set" .
+                            " qty_ordered = '$item->hdrqty_ordered'" .
+                            ", qty_delivered = '$item->hdrqty_delivered'" .
+                            ", qty_open = '$item->hdrqty_open'" .
+                            ", qty_invoiced = '$item->hdrqty_invoiced'" .
+                            " where ebeln = '$item->ebeln';");
+                    }
+                }
+                DB::commit();
+            }
+            unset($vitems);
         }
 
         // if (Auth::user()->role == "Administrator") Log::debug("Performance check: end refreshDeliveryStatus");
@@ -305,7 +346,15 @@ class SAP
                 $item->grqty = $item->GRQTY; unset($item->GRQTY);
                 $item->gidate = SAP::date_output($item->GIDATE); unset($item->GIDATE);
                 $item->elikz = trim($item->ELIKZ); unset($item->ELIKZ);
+                $item->hdrqty_ordered = trim($item->HDRQTY_ORDERED); unset($item->HDRQTY_ORDERED);
+                $item->hdrqty_delivered = trim($item->HDRQTY_DELIVERED); unset($item->HDRQTY_DELIVERED);
+                $item->hdrqty_open = trim($item->HDRQTY_OPEN); unset($item->HDRQTY_OPEN);
+                $item->hdrqty_invoiced = trim($item->HDRQTY_INVOICED); unset($item->HDRQTY_INVOICED);
             }
+            usort($items, function($item_a, $item_b)
+            {
+                return strcmp($item_a->ebeln . $item_a->ebelp, $item_b->ebeln . $item_b->ebelp);
+            });
             return $items;
         } catch (\SAPNWRFC\Exception $e) {
             Log::error($e);

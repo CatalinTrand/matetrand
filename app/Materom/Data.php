@@ -312,10 +312,12 @@ class Data
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr,
                 $pitem->elikz, $pitem->etadt, $archdate]);
 
-        DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
                 $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
-                $porder->fxrate, $porder->changed, $porder->status, $archdate]);
+                $porder->fxrate, $porder->changed, $porder->status,
+                $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced,
+                $archdate]);
 
         DB::commit();
 
@@ -370,10 +372,11 @@ class Data
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr, $pitem->elikz, $pitem->etadt]);
 
         if (!DB::table(System::$table_porders)->where("ebeln", $ebeln)->exists())
-            DB::insert("INSERT INTO " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
                     $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
-                    $porder->fxrate, $porder->changed, $porder->status]);
+                    $porder->fxrate, $porder->changed, $porder->status,
+                    $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced]);
 
         DB::commit();
 
@@ -428,16 +431,23 @@ class Data
 
     public static function gatherStatistics()
     {
-        $lifnrs = DB::select("select lifnr, count(*) as cnt_total_orders from ". System::$table_porders ." group by lifnr order by lifnr");
+        $lifnrs = DB::select("select lifnr, ekgrp, count(*) as cnt_all_orders from ". System::$table_porders ." group by lifnr, ekgrp order by lifnr, ekgrp");
         $cdate = Carbon::now();
         DB::beginTransaction();
         foreach($lifnrs as $lifnr) {
-            $cursor = DB::select("select count(*) as cnt_total_items from ". System::$table_pitems. " join ". System::$table_porders ." using (ebeln) where ".
-                System::$table_porders. ".lifnr = '$lifnr->lifnr'");
+            // Stock orders
+            $cursor = DB::select("select ebeln, count(*) as cnt_items from ". System::$table_pitems. " join ". System::$table_porders ." using (ebeln) where ".
+                System::$table_porders. ".lifnr = '$lifnr->lifnr' and ". System::$table_porders. ".ekgrp = '$lifnr->ekgrp' and ". System::$table_pitems. ".vbeln = '" .Orders::stockorder. "' ".
+                "group by ebeln");
+            $cnt_total_orders = 0;
             $cnt_total_items = 0;
-            if (!empty($cursor)) $cnt_total_items = $cursor[0]->cnt_total_items;
+            foreach ($cursor as $record) {
+                $cnt_total_orders++;
+                $cnt_total_items += $record->cnt_items;
+            }
             $cursor = DB::select("select ebeln, count(*) as cnt_delayed_items from ". System::$table_pitems. " join ". System::$table_porders ." using (ebeln) where ".
-                System::$table_porders. ".lifnr = '$lifnr->lifnr' and ". System::$table_pitems. ".lfdat > '$cdate' ".
+                System::$table_porders. ".lifnr = '$lifnr->lifnr' and ". System::$table_porders. ".ekgrp = '$lifnr->ekgrp' and ".
+                System::$table_pitems. ".vbeln = '" .Orders::stockorder. "' and " . System::$table_pitems. ".lfdat > '$cdate' ".
                 "group by ". System::$table_porders  .".ebeln");
             $cnt_delayed_items = 0;
             $cnt_delayed_orders = 0;
@@ -446,8 +456,32 @@ class Data
                 $cnt_delayed_items += $record->cnt_delayed_items;
             }
             DB::insert("insert into ". System::$table_stat_orders.
-                " (lifnr, date, cnt_total_orders, cnt_delayed_orders, cnt_total_items, cnt_delayed_items)".
-                " values ('$lifnr->lifnr', '$cdate', $lifnr->cnt_total_orders, $cnt_delayed_orders, $cnt_total_items, $cnt_delayed_items)");
+                " (lifnr, ekgrp, otype, date, cnt_total_orders, cnt_delayed_orders, cnt_total_items, cnt_delayed_items)".
+                " values ('$lifnr->lifnr', '$lifnr->ekgrp', 'S', '$cdate', $cnt_total_orders, $cnt_delayed_orders, $cnt_total_items, $cnt_delayed_items)");
+
+            // Client orders
+            $cursor = DB::select("select ebeln, count(*) as cnt_items from ". System::$table_pitems. " join ". System::$table_porders ." using (ebeln) where ".
+                System::$table_porders. ".lifnr = '$lifnr->lifnr' and ". System::$table_porders. ".ekgrp = '$lifnr->ekgrp' and ".
+                System::$table_pitems. ".vbeln <> '" .Orders::stockorder. "' group by ebeln");
+            $cnt_total_orders = 0;
+            $cnt_total_items = 0;
+            foreach ($cursor as $record) {
+                $cnt_total_orders++;
+                $cnt_total_items += $record->cnt_items;
+            }
+            $cursor = DB::select("select ebeln, count(*) as cnt_delayed_items from ". System::$table_pitems. " join ". System::$table_porders ." using (ebeln) where ".
+                System::$table_porders. ".lifnr = '$lifnr->lifnr' and ". System::$table_porders. ".ekgrp = '$lifnr->ekgrp' and ".
+                System::$table_pitems. ".vbeln <> '" .Orders::stockorder. "' and " . System::$table_pitems. ".lfdat > '$cdate' ".
+                "group by ". System::$table_porders  .".ebeln");
+            $cnt_delayed_items = 0;
+            $cnt_delayed_orders = 0;
+            foreach ($cursor as $record) {
+                $cnt_delayed_orders++;
+                $cnt_delayed_items += $record->cnt_delayed_items;
+            }
+            DB::insert("insert into ". System::$table_stat_orders.
+                " (lifnr, ekgrp, otype, date, cnt_total_orders, cnt_delayed_orders, cnt_total_items, cnt_delayed_items)".
+                " values ('$lifnr->lifnr', '$lifnr->ekgrp', 'C', '$cdate', $cnt_total_orders, $cnt_delayed_orders, $cnt_total_items, $cnt_delayed_items)");
         }
         DB::commit();
         Log::info("Statistics level=1 collected (" . count($lifnrs) . " records)");

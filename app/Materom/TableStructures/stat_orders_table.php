@@ -6,6 +6,8 @@
  * Time: 12:19
  */
 $table->string('lifnr',10)->default('');
+$table->string('ekgrp',3)->default('');
+$table->string('otype',1)->default('');
 $table->dateTime('date')->default(DB::raw('CURRENT_TIMESTAMP'));
 $table->integer("cnt_total_orders")->default(0);
 $table->integer("cnt_delayed_orders")->default(0);

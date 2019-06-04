@@ -9,6 +9,7 @@
 namespace App\Materom;
 
 
+use App\Materom\SAP\MasterData;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,15 +17,23 @@ use Illuminate\Support\Facades\DB;
 class Statistics
 {
 
-    static public function getStatData($type, $lifnr, $sdate, $interval)
+    static public function getStatData($type, $lifnr, $sdate, $interval, $ekgrp, $otype)
     {
         $result = "";
         if ($type == "A")
-            $result = json_encode(self::getOrderStatistics($lifnr, $sdate, $interval));
+            $result = json_encode(self::getOrderStatistics($lifnr, $sdate, $interval, $ekgrp, $otype));
         return $result;
     }
 
-    static public function getOrderStatistics($lifnr, $sdate, $interval)
+    static public function getStatEkgrpOfLifnr($type, $lifnr, $sdate, $interval)
+    {
+        $result = "";
+        if ($type == "A")
+            $result = json_encode(self::getEkgrpListOfLifnr($lifnr, $sdate, $interval));
+        return $result;
+    }
+
+    static public function getOrderStatistics($lifnr, $sdate, $interval, $ekgrp, $otype)
     {
         $result = new \stdClass();
         $result->title = __("Delayed vs. open number of purchase orders/items");
@@ -80,15 +89,30 @@ class Statistics
         while ($cdate <= $sdate) {
             array_push($result->data->labels, substr($cdate, 0, 10));
             $rec = null;
+            $date0 = new Carbon("" . $cdate);
+            $date0->hour = 0;
+            $date0->minute = 0;
+            $date0->second = 0;
             $date1 = new Carbon("" . $cdate);
-            $date1->addDay();
-            $rec = DB::table(System::$table_stat_orders)->where([["lifnr", "=", $lifnr], ["date", ">", $cdate], ["date", "<", $date1]])->first();
-            if ($rec == null) {
+            $date1->hour = 23;
+            $date1->minute = 59;
+            $date1->second = 59;
+            $where = "lifnr = '$lifnr' and date >= '$date0' and date <= '$date1'";
+            if ($ekgrp <> "***") $where .= " and ekgrp = '$ekgrp'";
+            if ($otype <> "A") $where .= " and otype = '$otype'";
+            $recs = DB::select("select sum(cnt_total_orders) as cnt_total_orders, ".
+                                             "sum(cnt_total_items) as cnt_total_items, ".
+                                             "sum(cnt_delayed_orders) as cnt_delayed_orders, ".
+                                             "sum(cnt_delayed_items) as cnt_delayed_items from "
+                . System::$table_stat_orders . " where " .$where);
+            if ($recs != null) $rec = $recs[0];
+            if ($rec == null ||
+                ($rec->cnt_total_items == null && $rec->cnt_total_orders == null &&
+                 $rec->cnt_delayed_items == null && $rec->cnt_delayed_orders == null)) {
                 array_push($dataset1->data, 0);
                 array_push($dataset2->data, 0);
                 array_push($dataset3->data, 0);
                 array_push($dataset4->data, 0);
-
             } else {
                 array_push($dataset1->data, $rec->cnt_total_items - $rec->cnt_delayed_items);
                 array_push($dataset2->data, $rec->cnt_delayed_items);
@@ -102,6 +126,33 @@ class Statistics
         array_push($result->data->datasets, $dataset3);
         array_push($result->data->datasets, $dataset4);
         return $result;
+    }
+
+    static public function getEkgrpListOfLifnr($lifnr, $sdate, $interval)
+    {
+        $date_from = new Carbon($sdate);
+        $date_to = new Carbon($sdate);
+        switch ($interval) {
+            case "A":
+                $date_from->subDays(7);
+                break;
+            case "B":
+                $date_from->subDays(14);
+                break;
+            case "C":
+                $date_from->subMonth(1);
+                break;
+        }
+        $date_from->hour = 0;
+        $date_from->minute = 0;
+        $date_from->second = 0;
+        $date_to->hour = 23;
+        $date_to->minute = 59;
+        $date_to->second = 59;
+        $ekgrps = DB::select("select distinct ekgrp from ". System::$table_stat_orders . " where " .
+                             " lifnr = '$lifnr' and date >= '$date_from' and date <= '$date_to'");
+        foreach($ekgrps as $ekgrp) $ekgrp->name = MasterData::getEkgrpName($ekgrp->ekgrp);
+        return $ekgrps;
     }
 
 }

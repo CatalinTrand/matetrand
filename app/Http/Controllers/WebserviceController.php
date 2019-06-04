@@ -586,6 +586,20 @@ class WebserviceController extends Controller
             Input::get("type"),
             Input::get("lifnr"),
             Input::get("sdate"),
+            Input::get("interval"),
+            Input::get("ekgrp"),
+            Input::get("otype")
+        );
+    }
+
+    public function getStatEkgrpOfLifnr()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return Statistics::getStatEkgrpOfLifnr(
+            Input::get("type"),
+            Input::get("lifnr"),
+            Input::get("sdate"),
             Input::get("interval")
         );
     }

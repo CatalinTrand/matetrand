@@ -78,6 +78,10 @@ class Maintenance extends Command
             self::update_all_sap_client_agents($this);
             return;
         }
+        if (strtoupper($command) == "REFRESH_DELIVERY_STATUS") {
+            self::refresh_delivery_status($this);
+            return;
+        }
     }
 
     public static function update_all_sap_client_agents($command = null)
@@ -124,5 +128,11 @@ class Maintenance extends Command
                     ": CTV '" . trim($pitem->ctv) . "' => '" . trim($ctv->agent) . "' (" . trim($ctv->agent_name) . ")");
         }
         Log::info("Agents of table items refreshed: " . count($pitems) . " items updated.");
+    }
+
+    public static function refresh_delivery_status($command = null)
+    {
+        SAP::refreshDeliveryStatus(2);
+        if ($command != null) $command->info("Delivery status successfully refreshed.");
     }
 }

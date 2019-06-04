@@ -64,7 +64,9 @@ Route::get('webservice/downloadordersxls','WebserviceController@downloadOrdersXL
 Route::get('webservice/processsplit','WebserviceController@processSplit');
 Route::get('webservice/acceptsplit','WebserviceController@acceptSplit');
 Route::get('webservice/rejectsplit','WebserviceController@rejectSplit');
+// Statistics
 Route::get('webservice/get_stat_data','WebserviceController@getStatData');
+Route::get('webservice/get_stat_ekgrp_of_lifnr','WebserviceController@getStatEkgrpOfLifnr');
 
 // SAP webservices
 Route::get('webservice/get_vendor_users','WebserviceController@getVendorUsers');

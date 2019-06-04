@@ -225,7 +225,7 @@
                                         <option value="3"{{$groupBySelPOs}}>{{__('Purchase orders (stock)')}}</option>
                                         <option value="4"{{$groupBySelSO}}>{{__('Sales orders')}}</option>
                                     </select>
-                                    {{__('Filter by status')}}:
+                                    &nbsp;{{__('Filter by status')}}:
                                     <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
                                             name="filter_status" onchange="this.form.submit(); return false;">
                                         <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
@@ -348,7 +348,7 @@
                                     <col style="width:3.5%;">
                                     <col style="width:3.5%;">
                                     <col style="width:1.8%;">
-                                    <col style="width:3.0%;">
+                                    <col style="width:2.9%;">
                                     <col style="width:2.4%;">
                                     <col style="width:2.8%;">
                                     <col style="width:2.8%;">
@@ -357,14 +357,14 @@
 
                                     <col style="width:2.8%;">
                                     <col style="width:2%;">
-                                    <col style="width:2.9%;">
+                                    <col style="width:2.5%;">
                                     <col style="width:2%;">
-                                    <col style="width:2.9%;">
-                                    <col style="width:2%;">
-                                    <col style="width:1%;">
+                                    <col style="width:2.5%;">
+                                    <col style="width:2.5%;">
+                                    <col style="width:2.5%;">
                                     <col style="width:2.5%;">
                                     <col style="width:2.6%;">
-                                    <col style="width:3.5%;"> <!-- 24,2 -->
+                                    <col style="width:2.5%;"> <!-- 24,3 -->
 
                                 </colgroup>
                                 <tr>
@@ -406,10 +406,11 @@
                                             $th3 = __("Referent");
                                             $th4 = ""; // "Aprovizionare";
                                             $th5 = __("Data creare");
-                                            $th6 = __("Moneda");
-                                            $th7 = __("Rata schimb");
-                                            $th8 = __("Data cda.");
-                                            $th8 = "";
+                                            $th6 = __("Moneda/Curs schimb");
+                                            $th7a = __("Comandat");
+                                            $th7b = __("Livrat");
+                                            $th7c = __("Inca de livrat");
+                                            $th7d = __("Facturat");
                                         } else {
                                             echo '<th class="td02" colspan="3">' . __('Sales order') . '</th>';
                                             if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor" ) {
@@ -432,15 +433,17 @@
 
                                         }
                                     if ($groupByPO != 4) {
-                                        echo "<th colspan=2>$th1</th>";
+                                        echo "<th colspan=1>$th1</th>";
                                         echo "<th colspan=5>$th2</th>";
                                         echo "<th colspan=2>$th3</th>";
-                                        echo "<th colspan=4>$th4</th>";
+                                        echo "<th colspan=3>$th4</th>";
                                         echo "<th colspan=3>$th5</th>";
-                                        echo "<th colspan=2>$th6</th>";
-                                        echo "<th colspan=2>$th7</th>";
-                                        echo "<th colspan=2>$th8</th>";
-                                        for ($i = 0; $i < 5; $i++) echo "<th>&nbsp;</th>";
+                                        echo "<th colspan=3>$th6</th>";
+                                        echo "<th colspan=2>$th7a</th>";
+                                        echo "<th colspan=2>$th7b</th>";
+                                        echo "<th colspan=2>$th7c</th>";
+                                        echo "<th colspan=2>$th7d</th>";
+                                        for ($i = 0; $i < 2; $i++) echo "<th>&nbsp;</th>";
                                     } else {
                                         echo "<th colspan=2>$th1</th>";
                                         echo "<th colspan=5>$th2</th>";
@@ -478,14 +481,17 @@
 
                                         if ($groupByPO != 4) {
                                             $oid = "P" . $order->ebeln;
-                                            $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
+                                            $data = "<td class='td02' colspan=1>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
                                                     "<td class='td02' colspan=5>$order->lifnr_name</td>" .
                                                     "<td class='td02' colspan=1>$order->ekgrp</td>" .
-                                                    "<td class='td02' colspan=5>$order->ekgrp_name</td>" .
+                                                    "<td class='td02' colspan=4>$order->ekgrp_name</td>" .
                                                     "<td class='td02' colspan=3>$order->erdat_out</td>" .
-                                                    "<td class='td02' colspan=2>$order->curr</td>" .
+                                                    "<td class='td02' colspan=1>$order->curr</td>" .
                                                     "<td class='td02' colspan=2>$order->fxrate</td>".
-                                                    "<td class='td02' colspan=2></td>"; // $order->bedat_out
+                                                    "<td class='td02' colspan=2>$order->qty_ordered</td>".
+                                                    "<td class='td02' colspan=2>$order->qty_delivered</td>".
+                                                    "<td class='td02' colspan=2>$order->qty_open</td>".
+                                                    "<td class='td02' colspan=2>$order->qty_invoiced</td>";
 
                                             switch ($order->info) {
                                                 case 0:
@@ -573,7 +579,7 @@
                                                  "<td class='td01' style='padding: 0;'>$button_reject</td>" .
                                                  "<td class='td01' style='padding: 0;'>$button_inquire</td>" .
                                                  "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
-                                                 "$data<td colspan='5'></td></tr>";
+                                                 "$data<td colspan='2'></td></tr>";
                                         } else {
                                             $oid = "S" . $order->vbeln;
                                             if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
@@ -1087,15 +1093,17 @@
             var so_style = "background-color:" + $(currentrow).css("background-color") + ";";
             cols += '<td class="first_color" style="' + so_style + '" colspan="11"></td>';
             cols += '<td colspan="3"><b>{{__("Purchase order")}}</b></td>';
-            cols += '<td colspan="2"><b>{{__("Supplier")}}</b></td>';
+            cols += '<td colspan="1"><b>{{__("Supplier")}}</b></td>';
             cols += '<td colspan="5"><b>&nbsp;</b></td>';
             cols += '<td colspan="2"><b>{{__("Referent")}}</b></td>';
-            cols += '<td colspan="4"><b>&nbsp;</b></td>';
+            cols += '<td colspan="3"><b>&nbsp;</b></td>';
             cols += '<td colspan="3"><b>{{__("Data creare")}}</b></td>';
-            cols += '<td colspan="2"><b>{{__("Moneda")}}</b></td>';
-            cols += '<td colspan="3"><b>{{__("Rata de schimb")}}</b></td>';
-            cols += '<td colspan="3"><b></b></td>';
-            cols += '<td colspan="2"><b></b></td>';
+            cols += '<td colspan="3"><b>{{__("Moneda/Curs schimb")}}</b></td>';
+            cols += '<td colspan="2"><b>{{__("Comandat")}}</b></td>';
+            cols += '<td colspan="2"><b>{{__("Livrat")}}</b></td>';
+            cols += '<td colspan="2"><b>{{__("Inca de livrat")}}</b></td>';
+            cols += '<td colspan="2"><b>{{__("Facturat")}}</b></td>';
+            cols += '<td colspan="1"></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
@@ -1199,15 +1207,18 @@
                 cols += "<td colspan='3'><button type='button' id='butt_P" + porder.ebeln + "' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " +
                     "<p onclick='re_filter(\"P\",\"" + porder.ebeln + "\")' style='display:inline' class='resetfilters'>" + conv_exit_alpha_output(porder.ebeln) + "</p>"
                     + "</td>";
-                cols += '<td class="td02" colspan="2">' + conv_exit_alpha_output(porder.lifnr) + '</td>';
+                cols += '<td class="td02" colspan="1">' + conv_exit_alpha_output(porder.lifnr) + '</td>';
                 cols += '<td class="td02" colspan="5">' + porder.lifnr_name + '</td>';
                 cols += '<td class="td02" colspan="1">' + porder.ekgrp + '</td>';
-                cols += '<td class="td02" colspan="5">' + porder.ekgrp_name + '</td>';
+                cols += '<td class="td02" colspan="4">' + porder.ekgrp_name + '</td>';
                 cols += '<td class="td02" colspan="3">' + porder.erdat_out + '</td>';
-                cols += '<td class="td02" colspan="2">' + porder.curr + '</td>';
-                cols += '<td class="td02" colspan="3">' + porder.fxrate + '</td>';
-                cols += '<td class="td02" colspan="3">' + '' + '</td>';
-                cols += '<td class="td02" colspan="2"></td>';
+                cols += '<td class="td02" colspan="1">' + porder.curr + '</td>';
+                cols += '<td class="td02" colspan="2">' + porder.fxrate + '</td>';
+                cols += '<td class="td02" colspan="2">' + porder.qty_ordered + '</td>';
+                cols += '<td class="td02" colspan="2">' + porder.qty_delivered + '</td>';
+                cols += '<td class="td02" colspan="2">' + porder.qty_open + '</td>';
+                cols += '<td class="td02" colspan="2">' + porder.qty_invoiced + '</td>';
+                cols += '<td class="td02" colspan="1"></td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
                 if (i % 2 == 0)

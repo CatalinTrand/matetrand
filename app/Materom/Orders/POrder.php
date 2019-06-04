@@ -36,6 +36,11 @@ class POrder
     public $changed;  // 0=no, 1=direct, 2=indirect
     public $status;   // empty/Z
 
+    public $qty_ordered;   // header status
+    public $qty_delivered; // header status
+    public $qty_open;      // header status
+    public $qty_invoiced;  // header status
+
     // computed/determined fields
     public $lifnr_name;
     public $ekgrp_name;
@@ -74,6 +79,10 @@ class POrder
         $this->ctime = $porder->ctime;
         $this->changed = $porder->changed;
         $this->status = $porder->status;
+        $this->qty_ordered = $porder->qty_ordered;
+        $this->qty_delivered = $porder->qty_delivered;
+        $this->qty_open = $porder->qty_open;
+        $this->qty_invoiced = $porder->qty_invoiced;
         $this->items = array();
     }
 

@@ -18,4 +18,7 @@ $table->string('curr', 3)->default('');
 $table->string('fxrate', 10)->default('');
 $table->string('changed', 1)->default('');
 $table->string("status", 1)->default("");
-
+$table->string('qty_ordered', 12)->default("");
+$table->string('qty_delivered', 12)->default("");
+$table->string('qty_open', 12)->default("");
+$table->string('qty_invoiced', 12)->default("");
