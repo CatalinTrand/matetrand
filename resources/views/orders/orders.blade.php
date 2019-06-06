@@ -238,6 +238,9 @@
                                     <td width="100px" style="text-align: right;">
                                         <button title="Download the xls report for shown orders" type="button" style="margin-left: 2px; height: 1.5rem;"
                                                 onclick="download_orders_xls();return false;">{{__('XLS Report')}}</button>
+                                        @if (\Illuminate\Support\Facades\Auth::user()->id == "radu" && 1 == 2)
+                                            <button type="button" onclick="debug_job();return false;">d</button>
+                                        @endif
                                     </td>
                                     </tr>
                                     </table>
@@ -704,6 +707,25 @@
     @endif
 
     <script>
+        function debug_job() {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var df_data, df_status;
+            $.post("webservice/debug_job",
+                {
+                    empty: null
+                },
+                function (data, status) {
+                    df_data = data;
+                    df_status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+        }
+
         function delete_filters() {
             $.ajaxSetup({
                 headers: {

@@ -104,3 +104,6 @@ Route::post('/messages', 'HomeController@messages_post');
 
 // Statistics
 Route::get('/stats', 'HomeController@stats_get')->name('stats');
+
+// Debug
+Route::post('webservice/debug_job','WebserviceController@debug');

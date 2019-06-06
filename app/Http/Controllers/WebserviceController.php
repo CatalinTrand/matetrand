@@ -32,6 +32,13 @@ class WebserviceController extends Controller
         }
     }
 
+    public function debug()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        // Mailservice::sendCTVReminders();
+    }
+
     public function rfcPing()
     {
         return Webservice::rfcPing(Input::get("rfc_router"),

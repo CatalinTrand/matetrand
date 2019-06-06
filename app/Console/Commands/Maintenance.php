@@ -134,5 +134,6 @@ class Maintenance extends Command
     {
         SAP::refreshDeliveryStatus(2);
         if ($command != null) $command->info("Delivery status successfully refreshed.");
+        else Log::info("Delivery status successfully refreshed.");
     }
 }
