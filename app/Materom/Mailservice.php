@@ -207,10 +207,15 @@ class Mailservice
         $adminctvs = DB::table("users")->where([["ctvadmin", "=", 1],["role", "=", "CTV"],["active", "=", 1],["sap_system", "=", System::$system]])->get();
         if (!empty($mails) && !empty($adminctvs)) {
             foreach($adminctvs as $adminctv) {
-                // $adminctv->email = "radu@etrandafir.ro";
                 Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $mails],
                     function ($message) use ($adminctv) {
-                        $message->to($adminctv->email, $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV");
+                        $message->to($adminctv->email, $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
+                        $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
+                    });
+                if (1 == 2)
+                Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $mails],
+                    function ($message) use ($adminctv) {
+                        $message->to("radu@etrandafir.ro", $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                     });
                 Log::debug("Sent mail 'Notificare Admin CTV de pozitii in lucru' to '$adminctv->id ($adminctv->email)'");
@@ -229,7 +234,7 @@ class Mailservice
         $result .= "<table style='width: $width;'>";
         $result .= "<thead style='line-height: 1.3rem;'>";
         $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle;'>";
-        $result .= "<th style='width: 30%; text-align: left; padding: 2px;'><b>". __('Comanda') . "</b></th>";
+        $result .= "<th style='width: 30%; text-align: left; padding: 2px;'><b>". __('Comanda')." (".__("sistem")." ".System::$system_name.")</b></th>";
         $result .= "<th style='width: 70%; text-align: left; padding: 2px;'><b>". __('Client') . "</b></th>";
         $result .= "</tr>";
         $result .= "</thead>";
@@ -263,11 +268,11 @@ class Mailservice
         Session::put('locale', strtolower($user->lang));
         app('translator')->setLocale(Session::get("locale"));
 
-        $result .= "<table style='width: $width;'>";
+        $result .= "<table style='border-collapse: collapse; border: 1px solid black; width: $width;'>";
         $result .= "<thead style='line-height: 1.3rem;'>";
-        $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle;'>";
-        $result .= "<th style='width: 70%; text-align: left; padding: 2px;'><b>". __('CTV') . "</b></th>";
-        $result .= "<th style='width: 30%; text-align: left; padding: 2px;'><b>". __('Comanda') . "</b></th>";
+        $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle; border: 1px solid black;'>";
+        $result .= "<th style='border: 1px solid black; width: 70%; text-align: left; padding: 2px;'><b>". __('CTV') . "</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 30%; text-align: left; padding: 2px;'><b>". __('Comanda')." (".__("sistem")." ".System::$system_name.")</b></th>";
         $result .= "</tr>";
         $result .= "</thead>";
         $result .= "<tbody style='line-height: 1.3rem;'>";
@@ -281,12 +286,12 @@ class Mailservice
             $count = count($mail);
             $firstrow = true;
             foreach($mail as $item) {
-                $result .= "<tr style='background-color:$bgcolor; vertical-align: middle; text-align: left;'>";
+                $result .= "<tr style='border: 1px solid black; background-color:$bgcolor; vertical-align: middle; text-align: left;'>";
                 if ($firstrow) {
-                    $result .= "<td rowspan='$count' style='padding: 2px;'>" . $ctv->id . " " . $ctv->username . "</td>";
+                    $result .= "<td rowspan='$count' style='padding: 2px; border: 1px solid black;'>" . $ctv->id . " " . $ctv->username . "</td>";
                     $firstrow = false;
                 }
-                $result .= "<td style='padding: 2px;'>" . SAP::alpha_output($item->vbeln) . "/" . SAP::alpha_output($item->posnr) . "</td>";
+                $result .= "<td style='padding: 2px; border: 1px solid black;'>" . SAP::alpha_output($item->vbeln) . "/" . SAP::alpha_output($item->posnr) . "</td>";
                 $result .= "</tr>";
             }
         }

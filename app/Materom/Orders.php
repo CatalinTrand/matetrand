@@ -85,6 +85,8 @@ class Orders
         if (!isset($history)) $history = 1;
         else $history = intval($history);
 
+        $backorders = Session::get("filter_backorders");
+
         $time_limit = Session::get("filter_archdate");
         $filter_vbeln = Session::get("filter_vbeln");
         $filter_ebeln = Session::get("filter_ebeln");
@@ -174,6 +176,14 @@ class Orders
 
         if ($groupByPO == 2) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln <> '" . Orders::stockorder . "'");
         elseif ($groupByPO == 3) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln = '" . Orders::stockorder . "'");
+
+        $backorder_sql = "";
+        if ($backorders == "1") $backorder_sql = "$items_table.backorder = 1";
+        if ($backorders == "2") $backorder_sql = "$items_table.backorder = 0";
+        if (!empty($backorder_sql)) {
+            if (empty($filter_sql)) $filter_sql = $backorder_sql;
+            else $filter_sql .= " and " . $backorder_sql;
+        }
 
         // final sql build
         $sql = "select " . $items_table . ".ebeln, " . $items_table . ".ebelp, " . $items_table . ".vbeln " .

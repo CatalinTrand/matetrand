@@ -82,6 +82,17 @@
         if (isset($tmp)) $filter_inquirements = intval($tmp);
         if ($filter_inquirements == 1) $inquirements_checked = "checked";
 
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_backorders");
+        if ($tmp != "1" && $tmp != "2") $tmp = "0";
+        $filter_backorders = $tmp;
+        $filter_backorders_0 = "";
+        if ($tmp == "0") $filter_backorders_0 = "selected";
+        $filter_backorders_1 = "";
+        if ($tmp == "1") $filter_backorders_1 = "selected";
+        $filter_backorders_2 = "";
+        if ($tmp == "2") $filter_backorders_2 = "selected";
+
         $filter_overdue = 0;
         $overdue_checked = "";
         unset($tmp);
@@ -217,23 +228,36 @@
                                     <table style="border: none; width: 100%;">
                                     <tr>
                                     <td>
-                                    {{__('Show by')}}:
-                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                            name="groupOrdersBy" onchange="this.form.submit()">
-                                        <option value="1"{{$groupBySelPOa}}>{{__('Purchase orders (urgent & stock)')}}</option>
-                                        <option value="2"{{$groupBySelPOu}}>{{__('Purchase orders (urgent)')}}</option>
-                                        <option value="3"{{$groupBySelPOs}}>{{__('Purchase orders (stock)')}}</option>
-                                        <option value="4"{{$groupBySelSO}}>{{__('Sales orders')}}</option>
-                                    </select>
-                                    &nbsp;{{__('Filter by status')}}:
-                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                            name="filter_status" onchange="this.form.submit(); return false;">
-                                        <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
-                                        <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
-                                        <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
-                                    </select>
-                                    <input type="checkbox" id="filter_inquirements" name="filter_inquirements" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$inquirements_checked}}>
-                                    <label for="filter_inquirements" class="col-form-label text-md-left">{{__('Only inquirements')}}</label>&nbsp;&nbsp;
+
+                                        {{__('Show by')}}:
+                                        <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                                name="groupOrdersBy" onchange="this.form.submit()">
+                                            <option value="1"{{$groupBySelPOa}}>{{__('Purchase orders (urgent & stock)')}}</option>
+                                            <option value="2"{{$groupBySelPOu}}>{{__('Purchase orders (urgent)')}}</option>
+                                            <option value="3"{{$groupBySelPOs}}>{{__('Purchase orders (stock)')}}</option>
+                                            <option value="4"{{$groupBySelSO}}>{{__('Sales orders')}}</option>
+                                        </select>
+
+                                        &nbsp;{{__('Filter by status')}}:
+                                        <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                                name="filter_status" onchange="this.form.submit(); return false;">
+                                            <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
+                                            <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
+                                            <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
+                                        </select>
+
+                                        <input type="checkbox" id="filter_inquirements" name="filter_inquirements" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$inquirements_checked}}>
+                                        <label for="filter_inquirements" class="col-form-label text-md-left">{{__('Only inquirements')}}</label>&nbsp;&nbsp;
+
+                                        &nbsp;{{__('Backorders')}}:
+                                        <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
+                                                name="filter_backorders" onchange="this.form.submit(); return false;">
+                                            <option value="0"{{$filter_backorders_0}}>{{__('Nicio filtrare')}}</option>
+                                            <option value="1"{{$filter_backorders_1}}>{{__('Doar backorders')}}</option>
+                                            <option value="2"{{$filter_backorders_2}}>{{__('Fara backorders')}}</option>
+                                        </select>
+
+
                                     </td>
                                     <td width="100px" style="text-align: right;">
                                         <button title="Download the xls report for shown orders" type="button" style="margin-left: 2px; height: 1.5rem;"
