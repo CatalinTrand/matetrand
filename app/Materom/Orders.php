@@ -87,6 +87,18 @@ class Orders
 
         $backorders = Session::get("filter_backorders");
 
+        $filter_deldate_low = Session::get("filter_deldate_low");
+        if (!isset($filter_deldate_low) || $filter_deldate_low == null || $filter_deldate_low == "") $filter_deldate_low = "2000-01-01";
+        $filter_deldate_high = Session::get("filter_deldate_high");
+        if (!isset($filter_deldate_high) || $filter_deldate_high == null || $filter_deldate_high == "") $filter_deldate_high = "2199-12-31";
+        $filter_deldate_high .= " 23:59:59";
+
+        $filter_etadate_low = Session::get("filter_etadate_low");
+        if (!isset($filter_etadate_low) || $filter_etadate_low == null || $filter_etadate_low == "") $filter_etadate_low = "2000-01-01";
+        $filter_etadate_high = Session::get("filter_etadate_high");
+        if (!isset($filter_etadate_high) || $filter_etadate_high == null || $filter_etadate_high == "") $filter_etadate_high = "2199-12-31";
+        $filter_etadate_high .= " 23:59:59";
+
         $time_limit = Session::get("filter_archdate");
         $filter_vbeln = Session::get("filter_vbeln");
         $filter_ebeln = Session::get("filter_ebeln");
@@ -184,6 +196,12 @@ class Orders
             if (empty($filter_sql)) $filter_sql = $backorder_sql;
             else $filter_sql .= " and " . $backorder_sql;
         }
+        $deldate_sql = "lfdat between '$filter_deldate_low' and '$filter_deldate_high'";
+        if (empty($filter_sql)) $filter_sql = $deldate_sql;
+        else $filter_sql .= " and " . $deldate_sql;
+        $etadate_sql = "etadt between '$filter_etadate_low' and '$filter_etadate_high'";
+        if (empty($filter_sql)) $filter_sql = $etadate_sql;
+        else $filter_sql .= " and " . $etadate_sql;
 
         // final sql build
         $sql = "select " . $items_table . ".ebeln, " . $items_table . ".ebelp, " . $items_table . ".vbeln " .

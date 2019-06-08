@@ -126,6 +126,24 @@ class HomeController extends Controller
             Session::put("filter_overdue_high", $tmp);
         }
 
+        Session::put("filter_deldate_low", "");
+        unset($tmp);
+        $tmp = Input::get("filter_deldate_low");
+        if (isset($tmp) && $tmp != null) Session::put("filter_deldate_low", $tmp);
+        Session::put("filter_deldate_high", "");
+        unset($tmp);
+        $tmp = Input::get("filter_deldate_high");
+        if (isset($tmp) && $tmp != null) Session::put("filter_deldate_high", $tmp);
+
+        Session::put("filter_etadate_low", "");
+        unset($tmp);
+        $tmp = Input::get("filter_etadate_low");
+        if (isset($tmp) && $tmp != null) Session::put("filter_etadate_low", $tmp);
+        Session::put("filter_etadate_high", "");
+        unset($tmp);
+        $tmp = Input::get("filter_etadate_high");
+        if (isset($tmp) && $tmp != null) Session::put("filter_etadate_high", $tmp);
+
         Orders::fillCache();
         return redirect()->back();
     }

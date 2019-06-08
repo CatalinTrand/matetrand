@@ -73,7 +73,7 @@
 
         $filter_time_val = null;
         $tmp = \Illuminate\Support\Facades\Session::get("filter_archdate");
-        if(isset($tmp) && $filter_history == 2) $filter_time_val = $tmp;
+        if(isset($tmp) && !empty($tmp) && $filter_history == 2) $filter_time_val = $tmp;
 
         $filter_inquirements = 0;
         $inquirements_checked = "";
@@ -109,6 +109,20 @@
         $tmp = \Illuminate\Support\Facades\Session::get("filter_overdue_high");
         if (isset($tmp)) $filter_overdue_high = intval($tmp);
         if ($filter_overdue_high <= 0) $filter_overdue_high = "";
+
+        $filter_deldate_low = "";
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_deldate_low");
+        if(isset($tmp) && !empty($tmp) && $filter_history == 1) $filter_deldate_low = $tmp;
+        $filter_deldate_high = "";
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_deldate_high");
+        if(isset($tmp) && !empty($tmp) && $filter_history == 1) $filter_deldate_high = $tmp;
+
+        $filter_etadate_low = "";
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_etadate_low");
+        if(isset($tmp) && !empty($tmp) && $filter_history == 1) $filter_etadate_low = $tmp;
+        $filter_etadate_high = "";
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_etadate_high");
+        if(isset($tmp) && !empty($tmp) && $filter_history == 1) $filter_etadate_high = $tmp;
 
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
@@ -288,10 +302,26 @@
                                         <label for="filter_overdue" class="col-form-label text-md-left">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;
                                         <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
                                                style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_low"
-                                               maxlength="2" value="{{$filter_overdue_low}}">&nbsp;-&nbsp;
+                                               maxlength="2" value="{{$filter_overdue_low}}">&nbsp;-
                                         <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
                                                style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_high"
                                                maxlength="2" value="{{$filter_overdue_high}}">&nbsp;
+                                        &nbsp;&nbsp;
+                                        &nbsp;{{__('Delivery date')}}:
+                                        <input type="text" id="filter_deldate_low" class="form-control-sm"
+                                               style="height:1.6rem; width: 6rem;" name="filter_deldate_low"
+                                               value="{{$filter_deldate_low}}">&nbsp;-
+                                        <input type="text" id="filter_deldate_high" class="form-control-sm"
+                                               style="height:1.6rem; width: 6rem;" name="filter_deldate_high"
+                                               value="{{$filter_deldate_high}}">
+                                        &nbsp;&nbsp;
+                                        &nbsp;{{__('ETA')}}:
+                                        <input type="text" id="filter_etadate_low" class="form-control-sm"
+                                               style="height:1.6rem; width: 6rem;" name="filter_etadate_low"
+                                               value="{{$filter_etadate_low}}">&nbsp;-
+                                        <input type="text" id="filter_etadate_high" class="form-control-sm"
+                                               style="height:1.6rem; width: 6rem;" name="filter_etadate_high"
+                                               value="{{$filter_etadate_high}}">
                                     @endif
                                 </div>
                                 <br>
@@ -908,6 +938,10 @@
 
         $(function () {
             $("#time_search").datepicker({dateFormat: "yy-mm-dd"});
+            $("#filter_deldate_low").datepicker({dateFormat: "yy-mm-dd"});
+            $("#filter_deldate_high").datepicker({dateFormat: "yy-mm-dd"});
+            $("#filter_etadate_low").datepicker({dateFormat: "yy-mm-dd"});
+            $("#filter_etadate_high").datepicker({dateFormat: "yy-mm-dd"});
         });
 
         var checkedList = [];
