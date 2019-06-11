@@ -611,5 +611,16 @@ class WebserviceController extends Controller
         );
     }
 
-
+    public function getSalesPrice()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return json_encode(
+            SAP::rfcGetSalesOrderNetPrice(
+                Input::get("vbeln"),
+                Input::get("posnr"),
+                Input::get("price"),
+                Input::get("curr")
+        ));
+    }
 }

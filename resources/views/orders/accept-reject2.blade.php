@@ -110,9 +110,9 @@
                                onfocus="this.oldvalue = this.value;" oninput="ar2_sales_price2_check(event, this, 'ar-immed');">&nbsp;
                         <input id="ar-immed-sales-curr2" style="width: 5em;" type="text" name="ar-immed-sales-curr2" class="form-control" value=""
                                onblur="ar2_sales_curr2_check(event, this, 'ar-immed');">
-                        <input type="checkbox" id="ar-immed-choose-sales-price2" style="margin-left: 0.5em; border: none;" onchange="ar2_choose_sales_price2_checkbox(this, true, 'ar-immed');">
+                        <input type="checkbox" id="ar-immed-choose-sales-price2" style="margin-left: 0.5em; border: none; align-self: center;" onchange="ar2_choose_sales_price2_checkbox(this, true, 'ar-immed');">
                         <image id="ar-immed-icon-save-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
-                        <input type="checkbox" id="ar-immed-save-sales-price2" onchange="ar2_choose_save_sales_price2_checkbox(this, 'ar-immed');">
+                        <input type="checkbox" id="ar-immed-save-sales-price2" style="align-self: center;" onchange="ar2_choose_save_sales_price2_checkbox(this, 'ar-immed');">
                     </div>
                 </td>
             </tr>
@@ -141,20 +141,35 @@
                         <input id="ar-immed-new-sales-price2" style="width: 10em;" type="text" name="ar-immed-new-sales-price2" class="form-control" value=""
                                onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_price2_check(event, this, 'ar-immed');">&nbsp;
                         <input id="ar-immed-new-sales-curr2" style="width: 5em;" type="text" name="ar-immed-new-sales-curr2" class="form-control" value="" disabled>
-                        <input type="checkbox" id="ar-immed-choose-new-sales-price2" style="margin-left: 0.5em;" onchange="ar2_choose_new_sales_price2_checkbox(this, true, 'ar-immed');">
+                        <input type="checkbox" id="ar-immed-choose-new-sales-price2" style="margin-left: 0.5em; align-self: center;" onchange="ar2_choose_new_sales_price2_checkbox(this, true, 'ar-immed');">
                         <image id="ar-immed-icon-save-new-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
-                        <input type="checkbox" id="ar-immed-save-new-sales-price2" onchange="ar2_choose_save_new_sales_price2_checkbox(this, 'ar-immed');">
+                        <input type="checkbox" id="ar-immed-save-new-sales-price2" style="align-self: center;" onchange="ar2_choose_save_new_sales_price2_checkbox(this, 'ar-immed');">
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="width: 50%;">
+                    <div class="row" style="padding-top: 0.5rem;">
+                        <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                                onclick="get_infnr2(1);return false;">{{__('Inforecord')}}</button>
+                        <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget" id="accept-reject-zpret2"
+                                onclick="get_zpret2(1);return false;">ZPRET</button>
+                    </div>
+                </td>
+                <td style="width: 50%;">
+                    <div class="row" style="padding-top: 3px;">
+                        <label for="ar-immed-net-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Net price')}}</label>&nbsp;&nbsp;
+                        <input id="ar-immed-net-price2" style="width: 10em;" type="text" name="ar-immed-net-price2" class="form-control" value=""
+                               onfocus="this.oldvalue = this.value;" disabled>&nbsp;
+                        <input id="ar-immed-net-curr2" style="width: 5em;" type="text" name="ar-immed-net-curr2" class="form-control" value="" disabled>
+                        <image id="icon-immed-net-price2" style="width: 32px; height: 32px; margin-left: 1em;" src='/images/icons8-calculator-48.png'
+                            onclick="net_price_calculation(this);return false;"/>
                     </div>
                 </td>
             </tr>
 
         </table>
-        <div class="row" style="padding-top: 0.5rem;">
-            <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
-                    onclick="get_infnr2(1);return false;">{{__('Inforecord')}}</button>
-            <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget" id="accept-reject-zpret2"
-                    onclick="get_zpret2(1);return false;">ZPRET</button>
-        </div>
     </div>
     <div id="ar-proposals-approval2" width="95%" style="margin-right: 0.5rem;">
         <div id="ar-proposals-table-2" style="overflow-y: scroll; min-height: 17rem;" width="95%">
@@ -347,6 +362,8 @@
                 $("#ar-immed-new-sales-margin-amt2").val("");
                 $("#ar-immed-new-sales-margin-perc2").val("");
                 $("#ar-immed-new-sales-price2").val("");
+                $("#ar-immed-net-price2").val("");
+                update_net_price("ar-immed");
             },
             position: {
                 my: "center",
@@ -407,6 +424,7 @@
             $("#ar-immed-defmargin-amt2").val(amt.toFixed(2));
             $("#ar-immed-old-sales-margin-amt2").val(amt.toFixed(2));
             $("#ar-immed-new-sales-curr2").val(itemdata.sales_curr);
+            $("#ar-immed-net-curr2").val(itemdata.sales_curr);
             $("#ar-immed-new-sales-margin-curr2").val(itemdata.sales_curr);
             $("#ar-immed-defmargin-perc2").val(defmargin);
             $("#ar-immed-defmargin-curr2").val(itemdata.sales_curr);
@@ -447,15 +465,17 @@
             $("#ar-immed-sales-curr2").val("");
             $("#ar-immed-defmargin-perc2").val(defmargin);
             $("#ar-immed-new-sales-price2").val("");
+            $("#ar-immed-net-price2").val("");
             $("#ar-immed-new-sales-curr2").val("");
+            $("#ar-immed-net-curr2").val("");
         }
+        $('#icon-immed-net-price2').css('cursor', 'pointer');
         arDialog2.dialog("open");
     }
 </script>
 
 <div id="add-edit-proposal2" title="Add/edit proposal" style="display: none;">
     <table style="width: 100%; border-style: none">
-
         <tr>
             <td style="width: 50%;">
                 <div class="row">
@@ -562,9 +582,9 @@
                            onfocus="this.oldvalue = this.value;" oninput="ar2_sales_price2_check(event, this, 'aep');">&nbsp;
                     <input id="aep-sales-curr2" style="width: 5em;" type="text" name="aep-sales-curr2" class="form-control" value=""
                            onblur="ar2_sales_curr2_check(event, this, 'aep');">
-                    <input type="checkbox" id="aep-choose-sales-price2" style="margin-left: 0.5em; border: none;" onchange="ar2_choose_sales_price2_checkbox(this, true, 'aep');">
+                    <input type="checkbox" id="aep-choose-sales-price2" style="margin-left: 0.5em; border: none; align-self: center;" onchange="ar2_choose_sales_price2_checkbox(this, true, 'aep');">
                     <image id="aep-icon-save-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
-                    <input type="checkbox" id="aep-save-sales-price2" onchange="ar2_choose_save_sales_price2_checkbox(this, 'aep');">
+                    <input type="checkbox" id="aep-save-sales-price2" style="align-self: center;" onchange="ar2_choose_save_sales_price2_checkbox(this, 'aep');">
                 </div>
             </td>
         </tr>
@@ -593,22 +613,48 @@
                     <input id="aep-new-sales-price2" style="width: 10em;" type="text" name="aep-new-sales-price2" class="form-control" value=""
                            onfocus="this.oldvalue = this.value;" oninput="ar2_new_sales_price2_check(event, this, 'aep');">&nbsp;
                     <input id="aep-new-sales-curr2" style="width: 5em;" type="text" name="aep-new-sales-curr2" class="form-control" value="" disabled>
-                    <input type="checkbox" id="aep-choose-new-sales-price2" style="margin-left: 0.5em;" onchange="ar2_choose_new_sales_price2_checkbox(this, true, 'aep');">
+                    <input type="checkbox" id="aep-choose-new-sales-price2" style="margin-left: 0.5em; align-self: center;" onchange="ar2_choose_new_sales_price2_checkbox(this, true, 'aep');">
                     <image id="aep-icon-save-new-sales-price2" style="width: 32px; margin-left: 1em;" src='/images/icons8-save-40.png'/>
-                    <input type="checkbox" id="aep-save-new-sales-price2" onchange="ar2_choose_save_new_sales_price2_checkbox(this, 'aep');">
+                    <input type="checkbox" id="aep-save-new-sales-price2" style="align-self: center;" onchange="ar2_choose_save_new_sales_price2_checkbox(this, 'aep');">
                 </div>
             </td>
         </tr>
 
+        <tr>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 0.5rem;">
+                    <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                            onclick="get_infnr2(2);return false;">{{__('Inforecord')}}</button>
+                    <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
+                            onclick="get_zpret2(2);return false;">ZPRET</button>
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="row" style="padding-top: 3px;">
+                    <label for="aep-net-price2"  style="margin-left: 1em; width: 10em;" class="col-form-label text-md-left">{{__('Net price')}}</label>&nbsp;&nbsp;
+                    <input id="aep-net-price2" style="width: 10em;" type="text" name="aep-net-price2" class="form-control" value="" disabled>
+                    <input id="aep-net-curr2" style="width: 5em;" type="text" name="aep-net-curr2" class="form-control" value="" disabled>
+                    <image id="icon-aep-net-price2" style="width: 32px; height: 32px; margin-left: 1em;" src='/images/icons8-calculator-48.png'
+                           onclick="net_price_calculation(this);return false;"/>
+                </div>
+            </td>
+        </tr>
     </table>
-    <div class="row" style="padding-top: 0.5rem;">
-        <button type="button" style="float:left; margin-left: 1rem; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
-                onclick="get_infnr2(2);return false;">{{__('Inforecord')}}</button>
-        <button type="button" style="float:left; margin-right: 1rem; " class="ui-button ui-corner-all ui-widget"
-                onclick="get_zpret2(2);return false;">ZPRET</button>
-    </div>
 </div>
 
+<div id="net-price-calculation" title="Net price calculation" style="display: none;">
+    <table id="net-price-calculation-table" class="table-striped" width="100%">
+        <colgroup>
+            <col width="10%">
+            <col width="70%">
+            <col width="20%">
+        </colgroup>
+        <tr>
+            <th colspan="2">{{__('Conditie')}}</th>
+            <th>{{__('Pret/Discount')}}</th>
+        </tr>
+    </table>
+</div>
 <script>
     var add_edit_Dialog2, add_edit_Form2, add_edit_current_row2, add_edit_caller2;
 
@@ -698,6 +744,9 @@
                 Cancel: function () {
                     add_edit_Dialog2.dialog("close");
                 }
+            },
+            open: function() {
+                update_net_price("aep");
             },
             position: {
                 my: "center",
@@ -799,6 +848,7 @@
         $("#aep-sales-price2").val(sales_price);
         $("#aep-new-sales-price2").val(new_sales_price);
         $("#aep-new-sales-curr2").val(sales_curr);
+        $("#aep-net-curr2").val(sales_curr);
         $("#aep-new-sales-margin-amt2").val(new_sales_amt);
         $("#aep-new-sales-margin-perc2").val(new_sales_perc);
         $("#aep-new-sales-margin-curr2").val(sales_curr);
@@ -826,6 +876,7 @@
             $("#aep-save-new-sales-price2").prop("checked", sales_save == 1);
         }
 
+        $('#icon-aep-net-price2').css('cursor', 'pointer');
         add_edit_Dialog2.dialog("open");
     }
 
@@ -950,11 +1001,13 @@
         ar2_choose_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
         $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
+        update_net_price(dlg);
     }
 
     function ar2_purch_curr2_check(event, _this, dlg) {
         if (check_currency(_this))
             ar2_purch_price2_check(event, $("#"+dlg+"-purch-price2")[0], dlg);
+        update_net_price(dlg);
     }
 
     function ar2_sales_price2_check(event, _this, dlg) {
@@ -992,6 +1045,7 @@
         ar2_choose_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
         $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
+        update_net_price(dlg);
     }
 
     function ar2_new_sales_price2_check(event, _this, dlg) {
@@ -1023,6 +1077,7 @@
         ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
         $("#"+dlg+"-choose-new-sales-price2").prop("disabled", false);
+        update_net_price(dlg);
     }
 
     function ar2_new_sales_margin_amt2_check(event, _this, dlg) {
@@ -1058,6 +1113,7 @@
         ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
         $("#"+dlg+"-choose-new-sales-price2").prop("disabled", false);
+        update_net_price(dlg);
     }
 
     function ar2_new_sales_margin_perc2_check(event, _this, dlg) {
@@ -1090,6 +1146,7 @@
         ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
         $("#"+dlg+"-choose-new-sales-price2").prop("disabled", false);
+        update_net_price(dlg);
     }
 
     function ar2_sales_curr2_check(event, _this, dlg) {
@@ -1110,6 +1167,7 @@
             }
             $("#"+dlg+"-defmargin-amt2").val((cpprice * ( 1 + margin) / 100).toFixed(2));
         }
+        update_net_price(dlg);
     }
 
     function ar2_choose_sales_price2_checkbox(_this, goto, dlg) {
@@ -1127,6 +1185,7 @@
             $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
             ar2_choose_new_sales_price2_checkbox(_this, goto, dlg);
         }
+        update_net_price(dlg);
     }
 
     function ar2_choose_new_sales_price2_checkbox(_this, goto, dlg) {
@@ -1144,6 +1203,7 @@
             $("#"+dlg+"-choose-sales-price2").prop("checked", true);
             ar2_choose_sales_price2_checkbox(_this, goto, dlg);
         }
+        update_net_price(dlg);
     }
 
     function ar2_choose_save_sales_price2_checkbox(_this, dlg) {
@@ -1202,6 +1262,81 @@
         _this.oldvalue = curr;
         $(_this).val(curr);
         return true;
+    }
+
+    var net_price_calc, net_price_discounts;
+    function update_net_price(dlg) {
+        var sales_price, sales_curr;
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+//        jQuery.ajaxSetup({async: false});
+        sales_curr = $("#"+dlg+"-sales-curr2").val().trim().toUpperCase();
+        if ($("#"+dlg+"-choose-sales-price2").is(":checked")) {
+            sales_price = $("#"+dlg+"-sales-price2").val().trim();
+        } else {
+            sales_price = $("#"+dlg+"-new-sales-price2").val().trim();
+        }
+        $.get("webservice/get_sales_price",
+            {
+                vbeln: _ar_itemdata2.vbeln,
+                posnr: _ar_itemdata2.posnr,
+                price: sales_price,
+                curr: sales_curr
+            },
+            function (data, status) {
+                if (status == "success" && data != undefined && data != null) {
+                    $("#"+dlg+"-net-price2").val(data.price);
+                    $("#"+dlg+"-net-curr2").val(data.curr);
+                    net_price_discounts = data.discounts;
+                }
+            }, "json");
+//        jQuery.ajaxSetup({async: true});
+    }
+
+    $(function () {
+        net_price_calc = $("#net-price-calculation").dialog({
+            autoOpen: false,
+            height: 240,
+            width: 400,
+            modal: true,
+            buttons: [
+                {
+                    text: '{{__("Close")}}',
+                    click: function () {
+                        net_price_calc.dialog("close");
+                    }
+                }
+            ],
+            position: {
+                my: "center",
+                at: "center+30",
+                of: window
+            }
+        });
+    });
+
+    function net_price_calculation(_this) {
+        $("#net-price-calculation-table").find("tr:gt(0)").remove();
+        let n = net_price_discounts.length;
+        for (i = 0; i < n; i++) {
+            var newRow = $("<tr style='height: 1.2rem;'>");
+            var cols = "<td>" + net_price_discounts[i].condition + "</td>" +
+                       "<td>" + net_price_discounts[i].description + "</td>" +
+                       "<td>" + parseFloat(net_price_discounts[i].price).toFixed(2) + " " + net_price_discounts[i].curr + "</td>";
+            newRow.append(cols);
+            $("#net-price-calculation-table").append(newRow);
+        }
+        net_price_calc.dialog({
+            position: {
+                my: "center center",
+                at: "center-140 center-100",
+                of: _this
+            }
+        });
+        net_price_calc.dialog("open");
     }
 
 </script>

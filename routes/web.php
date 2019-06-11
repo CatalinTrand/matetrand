@@ -80,6 +80,7 @@ Route::get('webservice/sap_process_po','WebserviceController@sapProcessPO');
 Route::get('webservice/read_inforecords','WebserviceController@readInforecords');
 Route::get('webservice/read_zpretrecords','WebserviceController@readZPRETrecords');
 Route::get('webservice/get_sales_margin','WebserviceController@getSalesMargin');
+Route::get('webservice/get_sales_price','WebserviceController@getSalesPrice');
 Route::get('webservice/get_message_history','WebserviceController@getMessageHistory');
 Route::get('webservice/get_fx_rate','WebserviceController@getFXRate');
 Route::get('webservice/archive_item','WebserviceController@archiveItem');

@@ -659,5 +659,49 @@ class SAP
         return "Internal error";
     }
 
+    static public function rfcGetSalesOrderNetPrice($vbeln, $posnr, $price, $curr) {
+
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            // \SAPNWRFC\Connection::setTraceLevel(3);
+            // \SAPNWRFC\Connection::setTraceDir("/home/srm.materom.ro/public/storage/logs");
+            // \SAPNWRFC\Connection::setTraceDir("C:\Users\Radu\Apache24\htdocs\matetrand\storage\logs");
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_SO_PRICING2');
+            $price = number_format($price, 2, ".", "");
+            $result = $sapfm->invoke(['I_VBELN' => $vbeln, 'I_POSNR' => $posnr, 'I_KBETR' => $price, 'I_WAERS' => $curr]);
+            $sapconn->close();
+            // \SAPNWRFC\Connection::setTraceLevel(0);
+            $netprice = new \stdClass();
+            $netprice->price = $result["E_NETPR"];
+            $netprice->curr = $result["E_WAERS"];
+            $netprice->discounts = json_decode($result["E_DISCOUNTS"]);
+            foreach ($netprice->discounts as $discount) {
+                $discount->condition = $discount->KSCHL; unset($discount->KSCHL);
+                $discount->description = $discount->VTEXT; unset($discount->VTEXT);
+                $discount->type = $discount->KRECH; unset($discount->KRECH);
+                $discount->price = $discount->KBETR; unset($discount->KBETR);
+                $discount->curr = trim($discount->WAERS); unset($discount->WAERS);
+                if ($discount->curr == "") {
+                    $discount->curr = "%";
+                    $discount->price = $discount->price / 10;
+                }
+                $discount->price = number_format($discount->price, 2, ",", "");
+            }
+            return $netprice;
+        } catch (\SAPNWRFC\Exception $e) {
+            Log::error($e);
+            Log::error("GetErrorInfo:".json_encode($e->getErrorInfo()));
+            return null;
+        }
+    }
+
 
 };
