@@ -136,11 +136,20 @@
         $filter_mtext = \Illuminate\Support\Facades\Session::get("filter_mtext");
         if (!isset($filter_mtext)) $filter_mtext = "";
 
+        $filter_ekgrp = \Illuminate\Support\Facades\Session::get("filter_ekgrp");
+        if (!isset($filter_ekgrp) || is_null($filter_ekgrp)) $filter_ekgrp = "";
+
         $filter_lifnr = \Illuminate\Support\Facades\Session::get("filter_lifnr");
-        if (!isset($filter_lifnr)) $filter_lifnr = "";
+        if (!isset($filter_lifnr) || is_null($filter_lifnr)) $filter_lifnr = "";
 
         $filter_lifnr_name = \Illuminate\Support\Facades\Session::get("filter_lifnr_name");
-        if (!isset($filter_lifnr_name)) $filter_lifnr_name = "";
+        if (!isset($filter_lifnr_name) || is_null($filter_lifnr_name)) $filter_lifnr_name = "";
+
+        $filter_kunnr = \Illuminate\Support\Facades\Session::get("filter_kunnr");
+        if (!isset($filter_kunnr) || is_null($filter_kunnr)) $filter_kunnr = "";
+
+        $filter_kunnr_name = \Illuminate\Support\Facades\Session::get("filter_kunnr_name");
+        if (!isset($filter_kunnr_name) || is_null($filter_kunnr_name)) $filter_kunnr_name = "";
 
         $autoexplode_PO = \Illuminate\Support\Facades\Session::get("autoexplode_PO");
         $autoexplode_SO = null;
@@ -235,137 +244,236 @@
                         @endif
                     </div>
                     <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 8.2rem;">
+                        <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 7.7rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}
-                                <div class="container row" style="display: block; max-width: 100%;">
+                                <div class="container" style="display: block; max-width: 100%;">
                                     <table style="border: none; width: 100%;">
-                                    <tr>
-                                    <td>
-
-                                        {{__('Show by')}}:
-                                        <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                                name="groupOrdersBy" onchange="this.form.submit()">
-                                            <option value="1"{{$groupBySelPOa}}>{{__('Purchase orders (urgent & stock)')}}</option>
-                                            <option value="2"{{$groupBySelPOu}}>{{__('Purchase orders (urgent)')}}</option>
-                                            <option value="3"{{$groupBySelPOs}}>{{__('Purchase orders (stock)')}}</option>
-                                            <option value="4"{{$groupBySelSO}}>{{__('Sales orders')}}</option>
-                                        </select>
-
-                                        &nbsp;{{__('Filter by status')}}:
-                                        <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                                name="filter_status" onchange="this.form.submit(); return false;">
-                                            <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
-                                            <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
-                                            <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
-                                        </select>
-
-                                        <input type="checkbox" id="filter_inquirements" name="filter_inquirements" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$inquirements_checked}}>
-                                        <label for="filter_inquirements" class="col-form-label text-md-left">{{__('Only inquirements')}}</label>&nbsp;&nbsp;
-
-                                        &nbsp;{{__('Backorders')}}:
-                                        <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                                name="filter_backorders" onchange="this.form.submit(); return false;">
-                                            <option value="0"{{$filter_backorders_0}}>{{__('Nicio filtrare')}}</option>
-                                            <option value="1"{{$filter_backorders_1}}>{{__('Doar backorders')}}</option>
-                                            <option value="2"{{$filter_backorders_2}}>{{__('Fara backorders')}}</option>
-                                        </select>
-
-
-                                    </td>
-                                    <td width="100px" style="text-align: right;">
-                                        <button title="Download the xls report for shown orders" type="button" style="margin-left: 2px; height: 1.5rem;"
-                                                onclick="download_orders_xls();return false;">{{__('XLS Report')}}</button>
-                                        @if (\Illuminate\Support\Facades\Auth::user()->id == "radu" && 1 == 2)
-                                            <button type="button" onclick="debug_job();return false;">d</button>
-                                        @endif
-                                    </td>
-                                    </tr>
+                                        <colgroup>
+                                            <col style="width:10rem;">
+                                            <col style="width:16rem;">
+                                            <col style="width:10rem;">
+                                            <col style="width:18rem;">
+                                            <col style="width:10rem;">
+                                            <col style="width:14rem;">
+                                            <col style="width:10rem;">
+                                            <col style="width:25rem;">
+                                            <col>
+                                            <col style="width: 100px;">
+                                        </colgroup>
+                                        <tbody>
+                                            <tr style="height: 1.6rem;">
+                                                <td>
+                                                    {{__('Show by')}}:
+                                                </td>
+                                                <td>
+                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                            name="groupOrdersBy" onchange="this.form.submit()">
+                                                        <option value="1"{{$groupBySelPOa}}>{{__('Purchase orders (urgent & stock)')}}</option>
+                                                        <option value="2"{{$groupBySelPOu}}>{{__('Purchase orders (urgent)')}}</option>
+                                                        <option value="3"{{$groupBySelPOs}}>{{__('Purchase orders (stock)')}}</option>
+                                                        <option value="4"{{$groupBySelSO}}>{{__('Sales orders')}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    {{__('Displayed orders')}}:
+                                                </td>
+                                                <td>
+                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                            name="filter_history" onchange="this.form.submit()">
+                                                        <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
+                                                        <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    {{__("Purchase order")}}:
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control-sm input-sm"
+                                                           style="width: 6rem; height: 1.4rem;" maxlength="10" name="filter_ebeln"
+                                                           value="{{$filter_ebeln}}">&nbsp;&nbsp;
+                                                </td>
+                                                <td>
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                                                        {{__("Sales order")}}:
+                                                     @endif
+                                                </td>
+                                                <td>
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                                                        <input type="text" class="form-control-sm input-sm"
+                                                               style="width: 6rem; height: 1.4rem;" maxlength="10" name="filter_vbeln"
+                                                               value="{{$filter_vbeln}}">&nbsp;&nbsp;
+                                                     @endif
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                    <button title="Download the xls report for shown orders" type="button" style="margin-left: 2px; height: 1.5rem;"
+                                                            onclick="download_orders_xls();return false;">{{__('XLS Report')}}</button>
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->id == "radu" && 1 == 2)
+                                                        <button type="button" onclick="debug_job();return false;">d</button>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 1.6rem;">
+                                                <td>
+                                                    {{__('Filter by status')}}:
+                                                </td>
+                                                <td>
+                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                            name="filter_status" onchange="this.form.submit(); return false;">
+                                                        <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
+                                                        <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
+                                                        <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
+                                                    </select>
+                                                </td>
+                                                @if ($filter_history == 2)
+                                                    <td>
+                                                        {{__('Documents archived since')}}:
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="time_search" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="time_search"
+                                                               value="{{$filter_time_val}}"
+                                                               onchange="this.form.submit()">
+                                                    </td>
+                                                @else
+                                                    <td colspan="2">
+                                                        <input type="checkbox" id="filter_overdue" name="filter_overdue" style="vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$overdue_checked}}>
+                                                        <label for="filter_overdue">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;
+                                                        <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
+                                                               style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_low"
+                                                               maxlength="2" value="{{$filter_overdue_low}}">&nbsp;-
+                                                        <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
+                                                               style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_high"
+                                                               maxlength="2" value="{{$filter_overdue_high}}">
+                                                    </td>
+                                                @endif
+                                                <td>
+                                                    {{__("Referent")}}:
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control-sm input-sm" title="{{__('Filtrare dupa codul referentului')}}"
+                                                           style="width: 3rem; height: 1.4rem;" maxlength="3" name="filter_ekgrp"
+                                                           value="{{$filter_ekgrp}}">
+                                                </td>
+                                                <td>
+                                                    @if ((\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") && (\Illuminate\Support\Facades\Auth::user()->role != "CTV"))
+                                                        {{__("Supplier")}}:
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ((\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") && (\Illuminate\Support\Facades\Auth::user()->role != "CTV"))
+                                                        <input type="text" class="form-control-sm input-sm"  title="{{__('Filtrare dupa codul furnizorului')}}"
+                                                               style="width: 6rem; height: 1.4rem;" maxlength="10" name="filter_lifnr"
+                                                               value="{{$filter_lifnr}}">&nbsp;&nbsp;
+                                                        <input type="text" class="form-control-sm input-sm"  title="{{__('Filtrare dupa numele furnizorului')}}"
+                                                               style="width: 10rem; height: 1.4rem;" maxlength="20" name="filter_lifnr_name"
+                                                               value="{{$filter_lifnr_name}}">
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 1.6rem;">
+                                                <td colspan="2" style="padding-top: 0.4rem;">
+                                                    <input type="checkbox" id="filter_inquirements" style="vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="this.form.submit();" {{$inquirements_checked}}>
+                                                    <label for="filter_inquirements">{{__('Only inquirements')}}</label>
+                                                </td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        {{__('Delivery date')}}:
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        <input type="text" id="filter_deldate_low" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_deldate_low"
+                                                               value="{{$filter_deldate_low}}">&nbsp;-
+                                                        <input type="text" id="filter_deldate_high" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_deldate_high"
+                                                               value="{{$filter_deldate_high}}">
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    {{__("Material")}}:
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control-sm input-sm"
+                                                           style="width: 6rem; height: 1.4rem;" maxlength="15" name="filter_matnr"
+                                                           value="{{$filter_matnr}}">&nbsp;&nbsp;
+                                                </td>
+                                                <td>
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                                                        {{__("Customer")}}:
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                                                        <input type="text" class="form-control-sm input-sm"
+                                                               style="width: 6rem; height: 1.4rem;" maxlength="10" name="filter_kunnr"
+                                                               value="{{$filter_kunnr}}">&nbsp;&nbsp;
+                                                        <input type="text" class="form-control-sm input-sm"
+                                                               style="width: 10rem; height: 1.4rem;" maxlength="20" name="filter_kunnr_name"
+                                                               value="{{$filter_kunnr_name}}">&nbsp;&nbsp;
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 1.6rem;">
+                                                <td>
+                                                    {{__('Backorders')}}:
+                                                </td>
+                                                <td>
+                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                            name="filter_backorders" onchange="this.form.submit(); return false;">
+                                                        <option value="0"{{$filter_backorders_0}}>{{__('Nicio filtrare')}}</option>
+                                                        <option value="1"{{$filter_backorders_1}}>{{__('Doar backorders')}}</option>
+                                                        <option value="2"{{$filter_backorders_2}}>{{__('Fara backorders')}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        {{__('ETA')}}:
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        <input type="text" id="filter_etadate_low" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_etadate_low"
+                                                               value="{{$filter_etadate_low}}">&nbsp;-
+                                                        <input type="text" id="filter_etadate_high" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_etadate_high"
+                                                               value="{{$filter_etadate_high}}">
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    {{__("Material description")}}:
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control-sm input-sm"
+                                                           style="width: 10rem; height: 1.4rem;" maxlength="20" name="filter_mtext"
+                                                           value="{{$filter_mtext}}">&nbsp;&nbsp;
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                </td>
+                                                <td>
+                                                    <button type="button" style="margin-left: 2px; height: 1.5rem; "
+                                                            onclick="reset_filters();return false;">{{__('Reset')}}</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </div>
-                                <br>
-                                <div class="container row" style="display: block; max-width: 100%;">
-                                    {{__('Displayed orders')}}:
-                                    <select class="form-control-sm input-sm" style="height: 1.6rem; padding: 2px;"
-                                            name="filter_history" onchange="this.form.submit()">
-                                        <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
-                                        <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
-                                    </select>
-                                    @if ($filter_history == 2)
-                                        &nbsp;{{__('Documents archived since')}}:
-                                        <input type="text" id="time_search" class="form-control-sm"
-                                               style="height:1.6rem; width: 6rem;" name="time_search"
-                                               value="{{$filter_time_val}}"
-                                               onchange="this.form.submit()">
-                                    @else
-                                        <input type="checkbox" id="filter_overdue" name="filter_overdue" style="margin-left: 8px; padding: 2px;" onchange="this.form.submit();" {{$overdue_checked}}>
-                                        <label for="filter_overdue" class="col-form-label text-md-left">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;
-                                        <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
-                                               style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_low"
-                                               maxlength="2" value="{{$filter_overdue_low}}">&nbsp;-
-                                        <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
-                                               style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_high"
-                                               maxlength="2" value="{{$filter_overdue_high}}">&nbsp;
-                                        &nbsp;&nbsp;
-                                        &nbsp;{{__('Delivery date')}}:
-                                        <input type="text" id="filter_deldate_low" class="form-control-sm"
-                                               style="height:1.6rem; width: 6rem;" name="filter_deldate_low"
-                                               value="{{$filter_deldate_low}}">&nbsp;-
-                                        <input type="text" id="filter_deldate_high" class="form-control-sm"
-                                               style="height:1.6rem; width: 6rem;" name="filter_deldate_high"
-                                               value="{{$filter_deldate_high}}">
-                                        &nbsp;&nbsp;
-                                        &nbsp;{{__('ETA')}}:
-                                        <input type="text" id="filter_etadate_low" class="form-control-sm"
-                                               style="height:1.6rem; width: 6rem;" name="filter_etadate_low"
-                                               value="{{$filter_etadate_low}}">&nbsp;-
-                                        <input type="text" id="filter_etadate_high" class="form-control-sm"
-                                               style="height:1.6rem; width: 6rem;" name="filter_etadate_high"
-                                               value="{{$filter_etadate_high}}">
-                                    @endif
-                                </div>
-                                <br>
-                                <div class="container row" style="display: block; max-width: 100%;">
-                                    <table style="border: none; width: 100%;">
-                                    <tr>
-                                    <td>
-                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                                        {{__("Sales order")}}:
-                                        <input type="text" class="form-control-sm input-sm"
-                                               style="width: 6rem; height: 1.4rem;" name="filter_vbeln"
-                                               value="{{$filter_vbeln}}">&nbsp;&nbsp;
-                                    @endif
-                                    {{__("Purchase order")}}:
-                                    <input type="text" class="form-control-sm input-sm"
-                                           style="width: 6rem; height: 1.4rem;" name="filter_ebeln"
-                                           value="{{$filter_ebeln}}">&nbsp;&nbsp;
-                                    {{__("Material")}}:
-                                    <input type="text" class="form-control-sm input-sm"
-                                           style="width: 6rem; height: 1.4rem;" name="filter_matnr"
-                                           value="{{$filter_matnr}}">&nbsp;&nbsp;
-                                    {{__("Material description")}}:
-                                    <input type="text" class="form-control-sm input-sm"
-                                           style="width: 12rem; height: 1.4rem;" name="filter_mtext"
-                                           value="{{$filter_mtext}}">&nbsp;&nbsp;
-                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                                        {{__("Supplier")}}:
-                                        <input type="text" class="form-control-sm input-sm"
-                                               style="width: 6rem; height: 1.4rem;" name="filter_lifnr"
-                                               value="{{$filter_lifnr}}">&nbsp;&nbsp;
-                                        {{__("Supplier name")}}:
-                                        <input type="text" class="form-control-sm input-sm"
-                                               style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name"
-                                               value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
-                                    @endif
-                                    </td>
-                                    <td width="100px" style="text-align: right;">
-                                        <button type="button" style="margin-left: 2px; height: 1.5rem; "
-                                            onclick="reset_filters();return false;">{{__('Reset')}}</button>
-                                    </td>
-                                    </tr>
-                                    </table>
-                                </div>
-
                                 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
                                        tabindex="-1">
                             </form>

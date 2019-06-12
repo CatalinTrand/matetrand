@@ -106,10 +106,15 @@ class Orders
         $filter_mtext = trim(Session::get("filter_mtext"));
         if (!empty($filter_mtext) && strpos($filter_mtext, "*") === false)
             $filter_mtext = "*" . $filter_mtext . "*";
+        $filter_ekgrp = Session::get("filter_ekgrp");
         $filter_lifnr = Session::get("filter_lifnr");
         $filter_lifnr_name = trim(Session::get("filter_lifnr_name"));
         if (!empty($filter_lifnr_name) && strpos($filter_lifnr_name, "*") === false)
             $filter_lifnr_name = "*" . $filter_lifnr_name . "*";
+        $filter_kunnr = Session::get("filter_kunnr");
+        $filter_kunnr_name = trim(Session::get("filter_kunnr_name"));
+        if (!empty($filter_kunnr_name) && strpos($filter_kunnr_name, "*") === false)
+            $filter_kunnr_name = "*" . $filter_kunnr_name . "*";
 
         $cacheid = Session::get('materomdbcache');
         if (!isset($cacheid) || empty($cacheid)) return;
@@ -121,12 +126,16 @@ class Orders
         $filter_ebeln_sql = self::processFilter($orders_table . ".ebeln", $filter_ebeln, 10);
         $filter_matnr_sql = self::processFilter($items_table . ".idnlf", $filter_matnr);
         $filter_mtext_sql = self::processFilter($items_table . ".mtext", $filter_mtext);
+        $filter_ekgrp_sql = self::processFilter($orders_table . ".ekgrp", $filter_ekgrp);
         $filter_lifnr_sql = self::processFilter($orders_table . ".lifnr", $filter_lifnr, 10);
         $filter_lifnr_name_sql = self::processFilter(System::$table_sap_lfa1.".name1", $filter_lifnr_name);
+        $filter_kunnr_sql = self::processFilter($items_table . ".kunnr", $filter_kunnr, 10);
+        $filter_kunnr_name_sql = self::processFilter(System::$table_sap_kna1.".name1", $filter_kunnr_name);
 
         $filter_sql = $time_limit === null ? "" : "$items_table.archdate >= '$time_limit 00:00:00'";
         if ($history != 2) $filter_sql = "";
-        $filter_sql = self::addFilters($filter_sql, $filter_ebeln_sql, $filter_lifnr_sql, $filter_lifnr_name_sql);
+        $filter_sql = self::addFilters($filter_sql, $filter_ebeln_sql, $filter_ekgrp_sql,
+            $filter_lifnr_sql, $filter_lifnr_name_sql, $filter_kunnr_sql, $filter_kunnr_name_sql);
         $filter_sql = self::addFilters($filter_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql);
 
         if (Auth::user()->role == "Furnizor") {
@@ -196,10 +205,10 @@ class Orders
             if (empty($filter_sql)) $filter_sql = $backorder_sql;
             else $filter_sql .= " and " . $backorder_sql;
         }
-        $deldate_sql = "lfdat between '$filter_deldate_low' and '$filter_deldate_high'";
+        $deldate_sql = "$items_table.lfdat between '$filter_deldate_low' and '$filter_deldate_high'";
         if (empty($filter_sql)) $filter_sql = $deldate_sql;
         else $filter_sql .= " and " . $deldate_sql;
-        $etadate_sql = "etadt between '$filter_etadate_low' and '$filter_etadate_high'";
+        $etadate_sql = "$items_table.etadt between '$filter_etadate_low' and '$filter_etadate_high'";
         if (empty($filter_sql)) $filter_sql = $etadate_sql;
         else $filter_sql .= " and " . $etadate_sql;
 
@@ -208,6 +217,7 @@ class Orders
             " from " . $items_table .
             " join " . $orders_table . " using (ebeln)";
         if (!empty($filter_lifnr_name_sql)) $sql .= " join " .System::$table_sap_lfa1. " using (lifnr)";
+        if (!empty($filter_kunnr_name_sql)) $sql .= " join " .System::$table_sap_kna1. " using (kunnr)";
         if (!empty($filter_sql)) $sql .= " where " . $filter_sql;
         $sql .= " order by " . $items_table . ".ebeln, " . $items_table . ".ebelp";
 //      Log::debug($sql);

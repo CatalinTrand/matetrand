@@ -94,8 +94,11 @@ class HomeController extends Controller
         Session::put("filter_ebeln", Input::get("filter_ebeln"));
         Session::put("filter_matnr", Input::get("filter_matnr"));
         Session::put("filter_mtext", Input::get("filter_mtext"));
+        Session::put("filter_ekgrp", Input::get("filter_ekgrp"));
         Session::put("filter_lifnr", Input::get("filter_lifnr"));
         Session::put("filter_lifnr_name", Input::get("filter_lifnr_name"));
+        Session::put("filter_kunnr", Input::get("filter_kunnr"));
+        Session::put("filter_kunnr_name", Input::get("filter_kunnr_name"));
 
         Session::put("filter_inquirements", "0");
         $tmp = Input::get("filter_inquirements");
@@ -159,8 +162,11 @@ class HomeController extends Controller
         Session::put("filter_ebeln", Input::get("filter_ebeln"));
         Session::put("filter_matnr", Input::get("filter_matnr"));
         Session::put("filter_mtext", Input::get("filter_mtext"));
+        Session::put("filter_ekgrp", Input::get("filter_ekgrp"));
         Session::put("filter_lifnr", Input::get("filter_lifnr"));
         Session::put("filter_lifnr_name", Input::get("filter_lifnr_name"));
+        Session::put("filter_kunnr", Input::get("filter_kunnr"));
+        Session::put("filter_kunnr_name", Input::get("filter_kunnr_name"));
         Session::put("filter_history", Input::get("filter_history"));
         Session::put("filter_archdate", Input::get("time_search"));
         Orders::fillCache();

@@ -117,8 +117,11 @@ class WebserviceController extends Controller
         Session::forget("filter_ebeln");
         Session::forget("filter_matnr");
         Session::forget("filter_mtext");
+        Session::forget("filter_ekgrp");
         Session::forget("filter_lifnr");
         Session::forget("filter_lifnr_name");
+        Session::forget("filter_kunnr");
+        Session::forget("filter_kunnr_name");
         Session::forget("autoexplode_PO");
         Session::forget("autoexplode_SO");
         Orders::fillCache();

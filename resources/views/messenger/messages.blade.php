@@ -58,11 +58,20 @@
         $filter_mtext = \Illuminate\Support\Facades\Session::get("filter_mtext");
         if (!isset($filter_mtext)) $filter_mtext = "";
 
+        $filter_ekgrp = \Illuminate\Support\Facades\Session::get("filter_ekgrp");
+        if (!isset($filter_ekgrp) || is_null($filter_ekgrp)) $filter_ekgrp = "";
+
         $filter_lifnr = \Illuminate\Support\Facades\Session::get("filter_lifnr");
-        if (!isset($filter_lifnr)) $filter_lifnr = "";
+        if (!isset($filter_lifnr) || is_null($filter_lifnr)) $filter_lifnr = "";
 
         $filter_lifnr_name = \Illuminate\Support\Facades\Session::get("filter_lifnr_name");
-        if (!isset($filter_lifnr_name)) $filter_lifnr_name = "";
+        if (!isset($filter_lifnr_name) || is_null($filter_lifnr_name)) $filter_lifnr_name = "";
+
+        $filter_kunnr = \Illuminate\Support\Facades\Session::get("filter_kunnr");
+        if (!isset($filter_kunnr) || is_null($filter_kunnr)) $filter_kunnr = "";
+
+        $filter_kunnr_name = \Illuminate\Support\Facades\Session::get("filter_kunnr_name");
+        if (!isset($filter_kunnr_name) || is_null($filter_kunnr_name)) $filter_kunnr_name = "";
 
         $message_count = App\Materom\Orders::unreadMessageCount();
         $message_svg = "";
@@ -184,7 +193,10 @@
                     <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_lifnr" value="{{$filter_lifnr}}">&nbsp;&nbsp;
                     {{__("Supplier name")}}:
                     <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_lifnr_name" value="{{$filter_lifnr_name}}">&nbsp;&nbsp;
-
+                    {{__("Customer")}}:
+                    <input type="text" class="form-control-sm input-sm" style="width: 6rem; height: 1.4rem;" name="filter_kunnr" value="{{$filter_kunnr}}">&nbsp;&nbsp;
+                    {{__("Customer name")}}:
+                    <input type="text" class="form-control-sm input-sm" style="width: 12rem; height: 1.4rem;" name="filter_kunnr_name" value="{{$filter_kunnr_name}}">&nbsp;&nbsp;
                 @endif
             </div>
             <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"
