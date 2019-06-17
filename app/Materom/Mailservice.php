@@ -4,6 +4,7 @@ namespace App\Materom;
 
 use App\Materom\Orders\POrderItemChg;
 use App\Materom\SAP\MasterData;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -171,6 +172,7 @@ class Mailservice
         $mails = array();
         foreach($kunnrs as $kunnr) $nukunnrs[$kunnr->kunnr] = clone $kunnr;
         if (!empty($fallbackctv)) array_push($ctvs, $fallbackctv);
+        $now = now();
         foreach ($ctvs as $ctv) {
             if (!empty($fallbackctv) && $fallbackctv->id == $ctv->id) {
                 $ckunnrs = $nukunnrs;
@@ -194,7 +196,22 @@ class Mailservice
             $items = DB::select("select distinct vbeln, posnr, kunnr from ". System::$table_pitems.
                 " where stage = 'C' and vbeln <> '$stockorder' and $sql");
             if (empty($items)) continue;
-            $mails[$ctv->id] = $items;
+            foreach($items as $item) {
+                $pitem = DB::table(System::$table_pitems)->where([["vbeln", "=", $item->vbeln],["posnr", "=", $item->posnr]])->first();
+                $cdate = DB::select("select cdate from ".System::$table_pitemchg.
+                    " where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' and stage = 'C' order by cdate desc")[0]->cdate;
+                $item->delayhours = $now->diffInHours($cdate);
+            }
+            usort($items, function($item_a, $item_b)
+            {
+                if ($item_a->delayhours > $item_b->delayhours) return -1;
+                if ($item_a->delayhours < $item_b->delayhours) return 1;
+                return 0;
+            });
+            $mail = new \stdClass();
+            $mail->ctv = $ctv;
+            $mail->items = $items;
+            array_push($mails, $mail);
             // $ctv->email = "radu@etrandafir.ro";
             Mail::send('email.ctvreminder',['user' => $ctv,'items' => $items],
                 function($message) use ($ctv, $items) {
@@ -206,7 +223,14 @@ class Mailservice
 
         $adminctvs = DB::table("users")->where([["ctvadmin", "=", 1],["role", "=", "CTV"],["active", "=", 1],["sap_system", "=", System::$system]])->get();
         if (!empty($mails) && !empty($adminctvs)) {
+            usort($mails, function($mail_a, $mail_b)
+            {
+                if ($mail_a->items[0]->delayhours > $mail_b->items[0]->delayhours) return -1;
+                if ($mail_a->items[0]->delayhours < $mail_b->items[0]->delayhours) return 1;
+                return strcmp($mail_a->ctv->id, $mail_b->ctv->id);
+            });
             foreach($adminctvs as $adminctv) {
+                if (1 == 1)
                 Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $mails],
                     function ($message) use ($adminctv) {
                         $message->to($adminctv->email, $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
@@ -234,8 +258,9 @@ class Mailservice
         $result .= "<table style='width: $width;'>";
         $result .= "<thead style='line-height: 1.3rem;'>";
         $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle;'>";
-        $result .= "<th style='width: 30%; text-align: left; padding: 2px;'><b>". __('Comanda')." (".__("sistem")." ".System::$system_name.")</b></th>";
-        $result .= "<th style='width: 70%; text-align: left; padding: 2px;'><b>". __('Client') . "</b></th>";
+//      $result .= "<th style='width: 20%; text-align: left; padding: 2px;'><b>". __('Timp scurs [h]')."</b></th>";
+        $result .= "<th style='width: 35%; text-align: left; padding: 2px;'><b>". __('Comanda')." (".__("sistem")." ".System::$system_name.")</b></th>";
+        $result .= "<th style='width: 65%; text-align: left; padding: 2px;'><b>". __('Client') . "</b></th>";
         $result .= "</tr>";
         $result .= "</thead>";
         $result .= "<tbody style='line-height: 1.3rem;'>";
@@ -247,6 +272,7 @@ class Mailservice
                 $result .= "<tr style='background-color:Azure; vertical-align: middle; text-align: left;'>";
             else
                 $result .= "<tr style='background-color:LightCyan; vertical-align: middle; text-align: left;'>";
+//            $result .= "<td style='padding: 2px;'>". $item->delayhours ."</td>";
             $result .= "<td style='padding: 2px;'>". SAP::alpha_output($item->vbeln)."/".SAP::alpha_output($item->posnr). "</td>";
             $result .= "<td style='padding: 2px;'>". SAP::alpha_output($item->kunnr)." ".MasterData::getKunnrName($item->kunnr). "</td>";
             $result .= "</tr>";
@@ -271,26 +297,27 @@ class Mailservice
         $result .= "<table style='border-collapse: collapse; border: 1px solid black; width: $width;'>";
         $result .= "<thead style='line-height: 1.3rem;'>";
         $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle; border: 1px solid black;'>";
-        $result .= "<th style='border: 1px solid black; width: 70%; text-align: left; padding: 2px;'><b>". __('CTV') . "</b></th>";
-        $result .= "<th style='border: 1px solid black; width: 30%; text-align: left; padding: 2px;'><b>". __('Comanda')." (".__("sistem")." ".System::$system_name.")</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 55%; text-align: left; padding: 2px;'><b>". __('CTV') . "</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 20%; text-align: left; padding: 2px;'><b>". __('Timp scurs [h]')."</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 25%; text-align: left; padding: 2px;'><b>". __('Comanda')." (".__("sistem")." ".System::$system_name.")</b></th>";
         $result .= "</tr>";
         $result .= "</thead>";
         $result .= "<tbody style='line-height: 1.3rem;'>";
 
         $i = 0;
-        foreach($mails as $ctvid => $mail) {
-            $ctv = DB::table("users")->where("id", $ctvid)->first();
-            if (empty($ctv)) continue;
+        foreach($mails as $mail) {
+            $ctv = $mail->ctv; if (empty($ctv)) continue;
             $i++;
             if (($i % 2) == 0) $bgcolor = "Azure"; else $bgcolor = "Cyan";
-            $count = count($mail);
+            $count = count($mail->items);
             $firstrow = true;
-            foreach($mail as $item) {
+            foreach($mail->items as $item) {
                 $result .= "<tr style='border: 1px solid black; background-color:$bgcolor; vertical-align: middle; text-align: left;'>";
                 if ($firstrow) {
                     $result .= "<td rowspan='$count' style='padding: 2px; border: 1px solid black;'>" . $ctv->id . " " . $ctv->username . "</td>";
                     $firstrow = false;
                 }
+                $result .= "<td style='padding: 2px; border: 1px solid black;'>" . $item->delayhours . "</td>";
                 $result .= "<td style='padding: 2px; border: 1px solid black;'>" . SAP::alpha_output($item->vbeln) . "/" . SAP::alpha_output($item->posnr) . "</td>";
                 $result .= "</tr>";
             }
@@ -299,6 +326,150 @@ class Mailservice
         $result .= "</tbody>";
         $result .= "</table><br>";
 
+        Session::put('locale', $locale);
+        app('translator')->setLocale(Session::get("locale"));
+        return $result;
+    }
+
+    public static function sendRefSupReminderMail($info)
+    {
+        $userid = null;
+        $mode = 0;
+
+        if ($info != null) {
+            if (isset($info["mode"])) $mode = $info["mode"];
+            if (isset($info["user"])) $userid = $info["user"];
+        }
+        $sqlrole = "(role = 'Furnizor' or role = 'Referent')";
+        if ($mode == 1) $sqlrole = "(role = 'Referent')";
+        elseif ($mode == 2) $sqlrole = "(role = 'Furnizor')";
+        if ($userid == null)
+            $users = DB::select("select * from users where $sqlrole and sap_system = '".
+                System::$system. "' and active = 1");
+        else
+            $users = DB::select("select * from users where id = '$userid' and $sqlrole and sap_system = '".
+                System::$system. "' and active = 1");
+        if (empty($users)) {
+            Log::info("No Reference/Supplier users selected/suitable for sending reminder mails");
+            return;
+        }
+
+        $reminders = array();
+        foreach($users as $user) {
+            $oldest = now();
+            if ($user->role == "Furnizor") {
+                    $orders = DB::select("select ebeln, erdat from " . System::$table_porders . " where lifnr = '$user->lifnr'");
+                $stage = "F";
+            }
+            elseif ($user->role == "Referent") {
+                $orders = DB::select("select ebeln, erdat from " . System::$table_porders . " where ekgrp = '$user->ekgrp'");
+                $stage = "R";
+            }
+            if (empty($orders)) continue;
+            $norders = 0;
+            $nitems = 0;
+            foreach($orders as $order) {
+                $items = DB::select("select ebelp from ".System::$table_pitems.
+                    " where ebeln = '$order->ebeln' and stage = '$stage'");
+                if (!empty($items)) $nitems += count($items); else continue;
+                $norders++;
+                if ($oldest > $order->erdat) $oldest = $order->erdat;
+                foreach($items as $item) {
+                    $cdate = DB::table(System::$table_pitemchg)->where([["ebeln", "=", $order->ebeln], ["ebelp", "=", $item->ebelp], ["ctype", "<>", "E"], ["stage", "=", "R"]])->orderBy("cdate", "desc")->value("cdate");
+                    if ($cdate != null && $oldest > $cdate) $oldest = $cdate;
+                }
+            }
+            if ($nitems == 0) continue;
+            // $user->email = "radu@etrandafir.ro";
+            Mail::send('email.refsupreminder',['user' => $user, 'norders' => $norders, 'nitems' => $nitems],
+                function($message) use ($user, $norders, $nitems) {
+                    $message->to($user->email, $user->username)->subject("Notificare SRM de pozitii ce necesita atentia dv.");
+                    $message->from('no_reply_srm@materom.ro','MATEROM SRM');
+                });
+            $reminder = new \stdClass();
+            $reminder->user = $user;
+            $reminder->norders = $norders;
+            $reminder->nitems = $nitems;
+            $reminder->oldest = $oldest;
+            array_push($reminders, $reminder);
+            Log::debug("Sent mail 'Notificare furnizor/referent de comenzi/pozitii deschise' to '$user->id ($user->email)'");
+        }
+        if (!empty($reminders)) {
+            // Notificare Admini SRM de pozitii deschise la referenti/furnizori
+            usort($reminders, function($rem_a, $rem_b)
+            {
+                if ($rem_a->user->role < $rem_b->user->role) return -1;
+                if ($rem_a->user->role > $rem_b->user->role) return 1;
+                if ($rem_a->oldest < $rem_b->oldest) return -1;
+                if ($rem_a->oldest > $rem_b->oldest) return 1;
+                return 0;
+            });
+            $admins = DB::table("users")->where([["role", "=", "Administrator"],["sap_system", "=", System::$system], ["active", "=", 1]])->get();
+            foreach($admins as $admin) {
+                if (substr($admin->id, 0, 1) == "~") continue;
+                // $admin->email = "radu@etrandafir.ro";
+                Mail::send('email.adminreminder',['admin' => $admin, 'reminders' => $reminders],
+                    function($message) use ($admin, $reminders) {
+                        $message->to($admin->email, $admin->username)->subject("Notificare SRM de pozitii deschise la furnizori/referenti");
+                        $message->from('no_reply_srm@materom.ro','MATEROM SRM');
+                    });
+                Log::debug("Sent mail 'Notificare Administrator de comenzi/pozitii deschise' to '$admin->id ($admin->email)'");
+            }
+        }
+    }
+
+    public static function RefSupReminderMessage($user, $norders, $nitems)
+    {
+        $result = "";
+
+        $locale = app('translator')->getLocale();
+        Session::put('locale', strtolower($user->lang));
+        app('translator')->setLocale(Session::get("locale"));
+
+        $result .= __("In portalul SRM exista &1 comenzi/&2 pozitii deschise ce necesita o actiune din partea dv.");
+        $result = str_replace("&1", "$norders", $result);
+        $result = str_replace("&2", "$nitems", $result);
+
+        Session::put('locale', $locale);
+        app('translator')->setLocale(Session::get("locale"));
+        return $result;
+    }
+
+    public static function AdminReminderMessage($user, $reminders, $width = "80em")
+    {
+        $result = "";
+
+        $locale = app('translator')->getLocale();
+        Session::put('locale', strtolower($user->lang));
+        app('translator')->setLocale(Session::get("locale"));
+
+        $result .= "<table style='border-collapse: collapse; border: 1px solid black; width: $width;'>";
+        $result .= "<thead style='line-height: 1.3rem;'>";
+        $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle; border: 1px solid black;'>";
+        $result .= "<th style='border: 1px solid black; width: 40%; text-align: left; padding: 2px;'><b>". __('User') . "</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 10%; text-align: left; padding: 2px;'><b>". __('Rol') . "</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 15%; text-align: left; padding: 2px;'><b>". __('Comenzi deschise')."</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 15%; text-align: left; padding: 2px;'><b>". __('Pozitii deschise')."</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 20%; text-align: left; padding: 2px;'><b>". __('Cea mai veche notificare')."</b></th>";
+        $result .= "</tr>";
+        $result .= "</thead>";
+        $result .= "<tbody style='line-height: 1.3rem;'>";
+
+        $i = 0;
+        foreach($reminders as $reminder) {
+            $i++;
+            if (($i % 2) == 0) $bgcolor = "Azure"; else $bgcolor = "Cyan";
+            $result .= "<tr style='border: 1px solid black; background-color:$bgcolor; vertical-align: middle; text-align: left;'>";
+            $result .= "<td style='padding: 2px; border: 1px solid black;'>" . $reminder->user->id . " " . $reminder->user->username . "</td>";
+            $result .= "<td style='padding: 2px; border: 1px solid black;'>" . $reminder->user->role . "</td>";
+            $result .= "<td style='padding: 2px; border: 1px solid black;'>" . $reminder->norders . "</td>";
+            $result .= "<td style='padding: 2px; border: 1px solid black;'>" . $reminder->nitems . "</td>";
+            $result .= "<td style='padding: 2px; border: 1px solid black;'>" . $reminder->oldest . "</td>";
+            $result .= "</tr>";
+        }
+
+        $result .= "</tbody>";
+        $result .= "</table><br>";
         Session::put('locale', $locale);
         app('translator')->setLocale(Session::get("locale"));
         return $result;

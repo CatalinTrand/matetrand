@@ -256,6 +256,7 @@ class Webservice
         if ($type != "F") {
             if (!$item_changed) {
                 $result = SAP::acknowledgePOItem($ebeln, $ebelp, " ");
+                if (($result != null) && !is_string($result)) $result = json_encode($result);
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                 DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
@@ -271,15 +272,18 @@ class Webservice
                     if ($pstage != 'Z') {
                         if (trim($item->idnlf) == trim($item->orig_idnlf)) {
                             $result = SAP::savePOItem($ebeln, $ebelp);
+                            if (($result != null) && !is_string($result)) $result = json_encode($result);
                             if (($result != null) && strlen(trim($result)) != 0) return $result;
                             if ($item->vbeln != Orders::stockorder) {
                                 $result = SAP::changeSOItem($item->vbeln, $item->posnr,
                                     $item->qty, $item->qty_uom, $_porder->lifnr, "", "", "",
                                     $item->sales_price, $item->sales_curr, $item->lfdat);
+                                if (($result != null) && !is_string($result)) $result = json_encode($result);
                                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                             }
                         } else {
                             $result = SAP::rejectPOItem($ebeln, $ebelp);
+                            if (($result != null) && !is_string($result)) $result = json_encode($result);
                             if (($result != null) && strlen(trim($result)) != 0) return $result;
                             if ($item->vbeln == Orders::stockorder) {
                                 $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, SAP::newMatnr($item->matnr),
@@ -330,11 +334,14 @@ class Webservice
         $old_stage = $pitem->stage;
         if ($new_status == 'X') {
             $result = SAP::acknowledgePOItem($ebeln, $item, " ");
+            if (($result != null) && !is_string($result)) $result = json_encode($result);
             if (($result != null) && strlen(trim($result)) != 0) return $result;
             $result = SAP::rejectPOItem($ebeln, $item);
+            if (($result != null) && !is_string($result)) $result = json_encode($result);
             if (($result != null) && strlen(trim($result)) != 0) return $result;
             if ($pitem->vbeln != Orders::stockorder) {
                 $result = SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
+                if (($result != null) && !is_string($result)) $result = json_encode($result);
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                 $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$pitem->kunnr'");
                 if (($ctvusers == null) || empty($ctvusers)) {
@@ -663,6 +670,7 @@ class Webservice
             } else {
                 // change supplier/material or change in SO
                 $result = SAP::rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
+                if (($result != null) && !is_string($result)) $result = json_encode($result);
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                 $set_new_lifnr = "";
                 if ($proposal->lifnr != $proposal->itemdata->lifnr) $set_new_lifnr = " new_lifnr ='" . $proposal->lifnr . "', ";
@@ -793,6 +801,7 @@ class Webservice
         }
 
         $result = SAP::rejectPOItem($ebeln, $ebelp);
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::processSOItem($item->vbeln, $item->posnr,
             $proposal->qty, $proposal->qty_uom, $proposal->lifnr, SAP::newMatnr($item->matnr),
@@ -835,8 +844,10 @@ class Webservice
     {
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $result = SAP::rejectPOItem($ebeln, $ebelp);
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::rejectSOItem($item->vbeln, $item->posnr, "07");
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $soitem = __("Rejected sales order item") . " " . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         DB::beginTransaction();
@@ -883,6 +894,7 @@ class Webservice
         if ($splititems == null || empty($splititems)) return;
 
         $result = SAP::rejectPOItem($ebeln, $ebelp);
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $text = "";
         if ($item->vbeln == Orders::stockorder) {
@@ -935,8 +947,10 @@ class Webservice
     {
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $result = SAP::rejectPOItem($ebeln, $ebelp);
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::rejectSOItem($item->vbeln, $item->posnr, "07");
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $soitem = __("Rejected split for sales order item ") . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         DB::beginTransaction();
@@ -1225,6 +1239,7 @@ class Webservice
             } else {
                 // change supplier/material or change in SO
                 $result = SAP::rejectPOItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
+                if (($result != null) && !is_string($result)) $result = json_encode($result);
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                 $set_new_lifnr = "";
                 if ($proposal->lifnr != $proposal->itemdata->lifnr) $set_new_lifnr = " new_lifnr ='" . $proposal->lifnr . "', ";

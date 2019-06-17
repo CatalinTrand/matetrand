@@ -386,8 +386,8 @@ class POrderItem
                         $this->reject = 2;
                         if ($this->inquired != 0 ) $this->inq_reply = 1;
                     }
-                    if ($this->dodays <> "") $this->eta_date_changeable = 1;
                 }
+                if ($this->dodays <> "") $this->eta_date_changeable = 1;
             } elseif (Auth::user()->role == 'Administrator') {
                 if (empty($this->status)) {
                     if ($this->position_splitted == 0) {

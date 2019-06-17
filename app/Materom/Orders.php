@@ -87,6 +87,9 @@ class Orders
 
         $backorders = Session::get("filter_backorders");
 
+        $goodsreceipt = Session::get("filter_goodsreceipt");
+        if (!isset($goodsreceipt) || $goodsreceipt == null) $goodsreceipt = 0;
+
         $filter_deldate_low = Session::get("filter_deldate_low");
         if (!isset($filter_deldate_low) || $filter_deldate_low == null || $filter_deldate_low == "") $filter_deldate_low = "2000-01-01";
         $filter_deldate_high = Session::get("filter_deldate_high");
@@ -205,9 +208,18 @@ class Orders
             if (empty($filter_sql)) $filter_sql = $backorder_sql;
             else $filter_sql .= " and " . $backorder_sql;
         }
+
+        $goodsreceipt_sql = "";
+        if ($goodsreceipt <> 0) $goodsreceipt_sql = "$items_table.grdate is not NULL";
+        if (!empty($goodsreceipt_sql)) {
+            if (empty($filter_sql)) $filter_sql = $goodsreceipt_sql;
+            else $filter_sql .= " and " . $goodsreceipt_sql;
+        }
+
         $deldate_sql = "$items_table.lfdat between '$filter_deldate_low' and '$filter_deldate_high'";
         if (empty($filter_sql)) $filter_sql = $deldate_sql;
         else $filter_sql .= " and " . $deldate_sql;
+
         $etadate_sql = "$items_table.etadt between '$filter_etadate_low' and '$filter_etadate_high'";
         if (empty($filter_sql)) $filter_sql = $etadate_sql;
         else $filter_sql .= " and " . $etadate_sql;

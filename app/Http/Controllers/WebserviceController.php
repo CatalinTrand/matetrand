@@ -36,7 +36,7 @@ class WebserviceController extends Controller
     {
         $this->tryAuthAPIToken();
         if (Auth::user() == null) return "API authentication failed";
-        // Mailservice::sendCTVReminders();
+        Mailservice::sendRefSupReminderMail(["mode" => 2, "user" => "f10068"]);
     }
 
     public function rfcPing()

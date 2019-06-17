@@ -110,6 +110,13 @@
         if (isset($tmp)) $filter_overdue_high = intval($tmp);
         if ($filter_overdue_high <= 0) $filter_overdue_high = "";
 
+        $filter_goodsreceipt = 0;
+        $goodsreceipt_checked = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_goodsreceipt");
+        if (isset($tmp)) $filter_goodsreceipt = intval($tmp);
+        if ($filter_goodsreceipt == 1) $goodsreceipt_checked = "checked";
+
         $filter_deldate_low = "";
         $tmp = \Illuminate\Support\Facades\Session::get("filter_deldate_low");
         if(isset($tmp) && !empty($tmp) && $filter_history == 1) $filter_deldate_low = $tmp;
@@ -243,8 +250,8 @@
                             </a>
                         @endif
                     </div>
-                    <div class="card-body" style="padding-bottom: 0px;">
-                        <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 7.7rem;">
+                    <div class="card-body" style="padding-bottom: 0px; padding-left: 0.5rem;">
+                        <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 8.9rem;">
                             <form action="orders" method="post">
                                 {{csrf_field()}}
                                 <div class="container" style="display: block; max-width: 100%;">
@@ -252,7 +259,7 @@
                                         <colgroup>
                                             <col style="width:10rem;">
                                             <col style="width:16rem;">
-                                            <col style="width:10rem;">
+                                            <col style="width:12rem;">
                                             <col style="width:18rem;">
                                             <col style="width:10rem;">
                                             <col style="width:14rem;">
@@ -262,7 +269,7 @@
                                             <col style="width: 100px;">
                                         </colgroup>
                                         <tbody>
-                                            <tr style="height: 1.6rem;">
+                                            <tr style="height: 1.5rem;">
                                                 <td>
                                                     {{__('Show by')}}:
                                                 </td>
@@ -315,7 +322,7 @@
                                                     @endif
                                                 </td>
                                             </tr>
-                                            <tr style="height: 1.6rem;">
+                                            <tr style="height: 1.5rem;">
                                                 <td>
                                                     {{__('Filter by status')}}:
                                                 </td>
@@ -377,25 +384,14 @@
                                                 <td>
                                                 </td>
                                             </tr>
-                                            <tr style="height: 1.6rem;">
+                                            <tr style="height: 1.5rem;">
                                                 <td colspan="2" style="padding-top: 0.4rem;">
                                                     <input type="checkbox" id="filter_inquirements" style="vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="this.form.submit();" {{$inquirements_checked}}>
                                                     <label for="filter_inquirements">{{__('Only inquirements')}}</label>
                                                 </td>
-                                                <td>
-                                                    @if ($filter_history != 2)
-                                                        {{__('Delivery date')}}:
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    @if ($filter_history != 2)
-                                                        <input type="text" id="filter_deldate_low" class="form-control-sm"
-                                                               style="height:1.4rem; width: 6rem;" name="filter_deldate_low"
-                                                               value="{{$filter_deldate_low}}">&nbsp;-
-                                                        <input type="text" id="filter_deldate_high" class="form-control-sm"
-                                                               style="height:1.4rem; width: 6rem;" name="filter_deldate_high"
-                                                               value="{{$filter_deldate_high}}">
-                                                    @endif
+                                                <td colspan="2">
+                                                    <input type="checkbox" id="filter_goodsreceipt" name="filter_goodsreceipt" style="vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$goodsreceipt_checked}}>
+                                                    <label for="filter_goodsreceipt">{{__('Only deliveries with goods receipt')}}</label>
                                                 </td>
                                                 <td>
                                                     {{__("Material")}}:
@@ -425,7 +421,7 @@
                                                 <td>
                                                 </td>
                                             </tr>
-                                            <tr style="height: 1.6rem;">
+                                            <tr style="height: 1.5rem;">
                                                 <td>
                                                     {{__('Backorders')}}:
                                                 </td>
@@ -439,17 +435,17 @@
                                                 </td>
                                                 <td>
                                                     @if ($filter_history != 2)
-                                                        {{__('ETA')}}:
+                                                        {{__('Delivery date')}}:
                                                     @endif
                                                 </td>
                                                 <td>
                                                     @if ($filter_history != 2)
-                                                        <input type="text" id="filter_etadate_low" class="form-control-sm"
-                                                               style="height:1.4rem; width: 6rem;" name="filter_etadate_low"
-                                                               value="{{$filter_etadate_low}}">&nbsp;-
-                                                        <input type="text" id="filter_etadate_high" class="form-control-sm"
-                                                               style="height:1.4rem; width: 6rem;" name="filter_etadate_high"
-                                                               value="{{$filter_etadate_high}}">
+                                                        <input type="text" id="filter_deldate_low" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_deldate_low"
+                                                               value="{{$filter_deldate_low}}">&nbsp;-
+                                                        <input type="text" id="filter_deldate_high" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_deldate_high"
+                                                               value="{{$filter_deldate_high}}">
                                                     @endif
                                                 </td>
                                                 <td>
@@ -467,6 +463,32 @@
                                                 <td>
                                                 </td>
                                                 <td>
+                                                </td>
+                                            </tr>
+                                            <tr style="height: 1.5rem;">
+                                                <td></td>
+                                                <td></td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        {{__('ETA')}}:
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        <input type="text" id="filter_etadate_low" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_etadate_low"
+                                                               value="{{$filter_etadate_low}}">&nbsp;-
+                                                        <input type="text" id="filter_etadate_high" class="form-control-sm"
+                                                               style="height:1.4rem; width: 6rem;" name="filter_etadate_high"
+                                                               value="{{$filter_etadate_high}}">
+                                                    @endif
+                                                </td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td>
                                                     <button type="button" style="margin-left: 2px; height: 1.5rem; "
                                                             onclick="reset_filters();return false;">{{__('Reset')}}</button>
                                                 </td>
@@ -479,11 +501,8 @@
                             </form>
                         </div>
                     </div>
-
-                    <br>
-
-                    <div style="overflow: scroll;">
-                        <div class="card-body orders-table-div" style="height: 67vh; padding-top: 0rem; width: 100%;">
+                    <div style="margin-top: -0.5rem; margin-left: -0.5rem; overflow: scroll;">
+                        <div class="card-body orders-table-div" style="height: 65.5vh; padding-top: 0px; padding-right: 4px; width: 100%;">
                             <table style="border: 2px solid black; table-layout: fixed;"
                                    class="orders-table basicTable table table-striped" id="orders_table">
                                 <colgroup>

@@ -129,6 +129,10 @@ class HomeController extends Controller
             Session::put("filter_overdue_high", $tmp);
         }
 
+        Session::put("filter_goodsreceipt", "0");
+        $tmp = Input::get("filter_goodsreceipt");
+        if (strtoupper($tmp) == "ON" ) Session::put("filter_goodsreceipt", "1");
+
         Session::put("filter_deldate_low", "");
         unset($tmp);
         $tmp = Input::get("filter_deldate_low");

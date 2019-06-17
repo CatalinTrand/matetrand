@@ -119,5 +119,6 @@
   "Displayed message": "Displayed messsage",
   "Are you sure do you want to delete": "Are you sure do you want to delete",
   "Purch. price": "Purch. price",
-  "Only overdue deliveries": "Only overdue deliveries"
+  "Only overdue deliveries": "Only overdue deliveries",
+  "Only deliveries with goods receipt": "Only deliveries with goods receipt"
 }
