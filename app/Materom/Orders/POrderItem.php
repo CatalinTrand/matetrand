@@ -299,6 +299,11 @@ class POrderItem
         $first = true;
         foreach ($this->changes as $itemchg) {
             if ($itemchg->ctype == 'E') continue;
+            if ($itemchg->ctype == "J") {
+                $this->eta_date_changed = 1;
+                continue;
+            }
+
             if (($itemchg->stage == Auth::user()->role[0]) && ($itemchg->acknowledged == 0)) {
                 // $this->inquired = 3;
             }
@@ -306,7 +311,6 @@ class POrderItem
             if ($itemchg->ctype == "Q") {if ($itemchg->acknowledged == 2) continue; else $this->quantity_changed = 1;}
             if ($itemchg->ctype == "P") {if ($itemchg->acknowledged == 2) continue; else $this->price_changed = 1;}
             if ($itemchg->ctype == "D") {if ($itemchg->acknowledged == 2) continue; else $this->delivery_date_changed = 1;}
-            if ($itemchg->ctype == "J") {if ($itemchg->acknowledged == 2) continue; else $this->eta_date_changed = 1;}
             if ($itemchg->ctype == "S") {if ($itemchg->acknowledged == 2) continue; else $this->position_splitted = 1;}
 
             if ($first && ($itemchg->ctype == "S") && ($this->inquired == 1) && ($this->inq_reply == 1))

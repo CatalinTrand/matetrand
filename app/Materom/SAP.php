@@ -543,7 +543,7 @@ class SAP
 
     public static function changeSOItem($vbeln, $posnr,
                                         $quantity, $quantity_unit, $lifnr, $matnr, $mtext,
-                                        $idnlf, $sales_price, $sales_curr, $lfdat)
+                                        $idnlf, $sales_price, $sales_curr, $purch_price, $purch_curr, $lfdat)
     {
         $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
@@ -555,7 +555,7 @@ class SAP
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_SO_ITEM_CHANGE');
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_SO_ITEM_CHANGE2');
             $result = ($sapfm->invoke(['I_VBELN' => $vbeln,
                                        'I_POSNR' => $posnr,
                                        'I_LIFNR' => $lifnr,
@@ -564,6 +564,8 @@ class SAP
                                        'I_MATNR' => $matnr,
                                        'I_MTEXT' => $mtext,
                                        'I_IDNLF' => $idnlf,
+                                       'I_PURCH_PRICE' => $purch_price,
+                                       'I_PURCH_CURR' => $purch_curr,
                                        'I_SALES_PRICE' => $sales_price,
                                        'I_SALES_CURR' => $sales_curr,
                                        'I_DELDATE' => $lfdat,
@@ -694,6 +696,10 @@ class SAP
                     $discount->price = $discount->price / 10;
                 }
                 $discount->price = number_format($discount->price, 2, ",", "");
+                $discount->old_price = $discount->KBETRO; unset($discount->KBETRO);
+                $discount->old_price = number_format($discount->old_price, 2, ",", "");
+                $discount->delta = $discount->DELTA; unset($discount->DELTA);
+                $discount->delta = number_format($discount->delta, 2, ",", "");
             }
             return $netprice;
         } catch (\SAPNWRFC\Exception $e) {

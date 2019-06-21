@@ -646,12 +646,16 @@
     <table id="net-price-calculation-table" class="table-striped" width="100%">
         <colgroup>
             <col width="10%">
-            <col width="70%">
-            <col width="20%">
+            <col width="24%">
+            <col width="25%">
+            <col width="25%">
+            <col width="16%">
         </colgroup>
-        <tr>
+        <tr style="line-height: 1.3rem;">
             <th colspan="2">{{__('Conditie')}}</th>
-            <th>{{__('Pret/Discount')}}</th>
+            <th style='text-align: right;'>{{__('Pret/Discount vechi')}}</th>
+            <th style='text-align: right;'>{{__('Pret/Discount nou')}}</th>
+            <th style='text-align: right;'>{{__('Delta')}}</th>
         </tr>
     </table>
 </div>
@@ -1265,8 +1269,16 @@
     }
 
     var net_price_calc, net_price_discounts;
+    var net_price_old_abs_margin, net_price_new_abs_margin;
+    var net_price_old_rel_margin, net_price_new_rel_margin;
+    var net_price_delta_margin;
     function update_net_price(dlg) {
         var sales_price, sales_curr;
+        net_price_old_abs_margin = "0.00 EUR";
+        net_price_new_abs_margin = "0.00 EUR";
+        net_price_old_rel_margin = "0.00";
+        net_price_new_rel_margin  = "0.00";
+        net_price_delta_margin = "0.00";
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1299,8 +1311,8 @@
     $(function () {
         net_price_calc = $("#net-price-calculation").dialog({
             autoOpen: false,
-            height: 240,
-            width: 400,
+            height: 320,
+            width: 540,
             modal: true,
             buttons: [
                 {
@@ -1321,14 +1333,30 @@
     function net_price_calculation(_this) {
         $("#net-price-calculation-table").find("tr:gt(0)").remove();
         let n = net_price_discounts.length;
+        var newRow, cols;
         for (i = 0; i < n; i++) {
-            var newRow = $("<tr style='height: 1.2rem;'>");
-            var cols = "<td>" + net_price_discounts[i].condition + "</td>" +
-                       "<td>" + net_price_discounts[i].description + "</td>" +
-                       "<td>" + parseFloat(net_price_discounts[i].price).toFixed(2) + " " + net_price_discounts[i].curr + "</td>";
+            newRow = $("<tr style='height: 1.3rem;'>");
+            cols = "<td>" + net_price_discounts[i].condition + "</td>" +
+                   "<td>" + net_price_discounts[i].description + "</td>" +
+                   "<td style='text-align: right;'>" + net_price_discounts[i].old_price + " " + net_price_discounts[i].curr + "</td>" +
+                   "<td style='text-align: right;'>" + net_price_discounts[i].price + " " + net_price_discounts[i].curr + "</td>" +
+                   "<td style='text-align: right;'>" + net_price_discounts[i].delta + " %" + "</td>";
             newRow.append(cols);
             $("#net-price-calculation-table").append(newRow);
         }
+        newRow = $("<tr style='height: 1.3rem; background-color: #fffa90'>");
+        let marginlabel = "{{__('Profit margin')}}";
+        cols = "<td rowspan='2' colspan='2' style='text-align: center; padding-right: 2rem;'><b>" + marginlabel + "</b></td>" +
+            "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_old_abs_margin + "</b></td>" +
+            "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_new_abs_margin + "</b></td>" +
+            "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;' rowspan='2'><b>" + net_price_delta_margin + " %" + "</b></td>";
+        newRow.append(cols);
+        $("#net-price-calculation-table").append(newRow);
+        newRow = $("<tr style='height: 1.3rem; background-color: #fffa90''>");
+        cols = "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_old_rel_margin + " %" + "</b></td>" +
+               "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_new_rel_margin + " %" + "</b></td>";
+        newRow.append(cols);
+        $("#net-price-calculation-table").append(newRow);
         net_price_calc.dialog({
             position: {
                 my: "center center",

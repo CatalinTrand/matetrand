@@ -78,6 +78,9 @@ class Kernel extends ConsoleKernel
         $schedule->command("materom:ctvreminders 200")->weekdays()->hourly()->between("09:00", "18:01");
         $schedule->command("materom:ctvreminders 300")->weekdays()->hourly()->between("09:00", "18:01");
 
+        $schedule->command("materom:refsupreminders 200")->weekdays()->hourly()->between("09:00", "18:01");
+        $schedule->command("materom:refsupreminders 300")->weekdays()->hourly()->between("09:00", "18:01");
+
     }
 
     /**

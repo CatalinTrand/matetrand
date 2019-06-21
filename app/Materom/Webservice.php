@@ -277,7 +277,7 @@ class Webservice
                             if ($item->vbeln != Orders::stockorder) {
                                 $result = SAP::changeSOItem($item->vbeln, $item->posnr,
                                     $item->qty, $item->qty_uom, $_porder->lifnr, "", "", "",
-                                    $item->sales_price, $item->sales_curr, $item->lfdat);
+                                    $item->sales_price, $item->sales_curr, $item->purch_price, $item->purch_curr, $item->lfdat);
                                 if (($result != null) && !is_string($result)) $result = json_encode($result);
                                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                             }
@@ -407,16 +407,19 @@ class Webservice
         }
         $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         if ($pitem->backorder != 0) $backorder = 1;
-        $pitem->changed = 1;
         $new_stage = $pitem->stage;
-        if ($pitem->stage == 'Z') {
-            $pitem->status = ' ';
-            $new_stage = 'F';
-            $pitem->changed = 2;
+        if ($column != 'etadt') {
+            $pitem->changed = 1;
+            $new_stage = $pitem->stage;
+            if ($pitem->stage == 'Z') {
+                $pitem->status = ' ';
+                $new_stage = 'F';
+                $pitem->changed = 2;
+            }
         }
         DB::beginTransaction();
         DB::update("update ". System::$table_pitems ." set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::update("update ". System::$table_porders ." set changed = '1' where ebeln = '$ebeln'");
+        if ($pitem->changed != 0) DB::update("update ". System::$table_porders ." set changed = '1' where ebeln = '$ebeln'");
         if ($column == 'idnlf') $type = 'M';
         if ($column == 'qty') $type = 'Q';
         if ($column == 'lfdat') $type = 'D';
@@ -791,7 +794,7 @@ class Webservice
             }
             $result = SAP::changeSOItem($item->vbeln, $item->posnr,
                 $proposal->qty, $proposal->qty_uom, $proposal->lifnr, "", "", "",
-                $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
+                $proposal->sales_price, $proposal->sales_curr, $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat);
             if (!empty(trim($result))) {
                 DB::rollBack();
                 return $result;
@@ -1032,7 +1035,9 @@ class Webservice
                 $ctype = $pitemchg->ctype;
                 $now = now();
 
-                if ((($pitem->stage == "F") || ($pitem->stage == "R")) && (trim($pitem->pstage) == "") && (trim($pitem->status) == "") &&
+                if ((($pitem->stage == "F") || ($pitem->stage == "R"))
+                    && ((trim($pitem->pstage) == "") || ($pitem->stage == $pitem->pstage))
+                    && (trim($pitem->status) == "") &&
                     ($pitemchg->ctype == "M" || $pitemchg->ctype == "Q" || $pitemchg->ctype == "P" || $pitemchg->ctype == "D" || $pitemchg->ctype == "J")) {
                     DB::beginTransaction();
                     DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
@@ -1224,7 +1229,7 @@ class Webservice
                 if (trim($proposal->sales_price) != trim($proposal->itemdata->sales_price)) {
                     $result = SAP::changeSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
                         "", "", "", "", "", "",
-                        $proposal->sales_price, $proposal->sales_curr, "");
+                        $proposal->sales_price, $proposal->sales_curr, $proposal->purch_price, $proposal->purch_curr, "");
                     if (!empty(trim($result))) {
                         DB::rollBack();
                         return $result;

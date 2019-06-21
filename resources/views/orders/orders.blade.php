@@ -2134,10 +2134,10 @@
             }
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
             if (mode == 1) {
-                accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
+                accept_reject_dialog2(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
             }
             if (mode == 2) {
-                accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
+                accept_reject_dialog2(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
             }
             if (mode == 3) {
                 split_dialog('2', thisbtn, porder, item, "Selectie/Split item");
@@ -2162,10 +2162,10 @@
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
             if (_dataIR.stage == 'R') {
                 if (mode == 1) {
-                    accept_reject_dialog(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
+                    accept_reject_dialog2(1, thisbtn, _dataIR, "Acceptare pozitie modificata", "Anumite campuri ale pozitiei au fost modificate - puteti accepta modificarile sau propune altele");
                 }
                 if (mode == 2) {
-                    accept_reject_dialog(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
+                    accept_reject_dialog2(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
             } else if (_dataIR.stage == 'C') {
                 select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");

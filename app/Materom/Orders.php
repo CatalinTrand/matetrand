@@ -85,6 +85,7 @@ class Orders
         if (!isset($history)) $history = 1;
         else $history = intval($history);
 
+        $inquirements = Session::get("filter_inquirements");
         $backorders = Session::get("filter_backorders");
 
         $goodsreceipt = Session::get("filter_goodsreceipt");
@@ -277,6 +278,7 @@ class Orders
         $history = Session::get("filter_history");
         $filter_status = Session::get("filter_status");
         $inquirements = Session::get("filter_inquirements");
+        $backorders = Session::get("filter_backorders");
         $overdue = Session::get("filter_overdue");
         if (!isset($overdue) || $overdue == null) $overdue = 0;
         $overdue_low = Session::get("filter_overdue_low");
@@ -373,11 +375,13 @@ class Orders
                 }
                 $_pitem->fill($_porder);
                 if (($inquirements != 1) ||
-                    ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")
-                                                || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) &&
-                     (($_pitem->owner != 0) || (Auth::user()->role == "Administrator") ||
-                      (((Auth::user()->role == "Furnizor") || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) && (($_pitem->info == 4) || ($_pitem->info == 5)))
-                     )
+                    (($_pitem->backorder == 0) &&
+                        ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")
+                                                    || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) &&
+                         (($_pitem->owner != 0) || (Auth::user()->role == "Administrator") ||
+                          (((Auth::user()->role == "Furnizor") || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) && (($_pitem->info == 4) || ($_pitem->info == 5)))
+                         )
+                        )
                     )
                    )
                     if ($overdue == 0 || (($_pitem->lfdat < $now) && (($_pitem->dodays > $overdue_low) && ($_pitem->dodays < $overdue_high)))) {
