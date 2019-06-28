@@ -163,7 +163,7 @@
                         <input id="ar-immed-net-price2" style="width: 10em;" type="text" name="ar-immed-net-price2" class="form-control" value=""
                                onfocus="this.oldvalue = this.value;" disabled>&nbsp;
                         <input id="ar-immed-net-curr2" style="width: 5em;" type="text" name="ar-immed-net-curr2" class="form-control" value="" disabled>
-                        <image id="icon-immed-net-price2" style="width: 32px; height: 32px; margin-left: 1em;" src='/images/icons8-calculator-48.png'
+                        <image id="icon-immed-net-price2" style="width: 32px; height: 32px; margin-left: 0.25em;" src='/images/icons8-calculator-48.png'
                             onclick="net_price_calculation(this);return false;"/>
                     </div>
                 </td>
@@ -1064,6 +1064,7 @@
                 $("#"+dlg+"-choose-sales-price2").prop("disabled", true);
                 ar2_choose_sales_price2_checkbox(_this, true, dlg);
                 $("#"+dlg+"-choose-new-sales-price2").prop("disabled", true);
+                update_net_price(dlg);
                 return;
             }
             let sprice = $("#"+dlg+"-sales-price2").val().trim();
@@ -1071,7 +1072,7 @@
             $("#"+dlg+"-new-sales-price2").val(nsprice.toFixed(2));
         } else {
             if (!$.isNumeric(nsprice)) {
-                $("#"+dlg+"-new-sales-price2").val(_this.oldvalue);
+                $("#"+dlg+"-new-sales-price2").val(_this.oldvalue.toFixed(2));
                 return;
             }
             nsprice = parseFloat(nsprice);
@@ -1099,6 +1100,7 @@
         }
         if (!$.isNumeric(newamt) && newamt != "-") {
             __this.val(_this.oldvalue);
+            update_net_price(dlg);
             return;
         }
         if (newamt == "-") newperc = 0; else newamt = parseFloat(newamt);
@@ -1135,6 +1137,7 @@
         }
         if (!$.isNumeric(newperc) && newperc != "-") {
             __this.val(_this.oldvalue);
+            update_net_price(dlg);
             return;
         }
         if (newperc == "-") newperc = 0; else newperc = parseFloat(newperc);
@@ -1189,7 +1192,6 @@
             $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
             ar2_choose_new_sales_price2_checkbox(_this, goto, dlg);
         }
-        update_net_price(dlg);
     }
 
     function ar2_choose_new_sales_price2_checkbox(_this, goto, dlg) {
@@ -1207,7 +1209,6 @@
             $("#"+dlg+"-choose-sales-price2").prop("checked", true);
             ar2_choose_sales_price2_checkbox(_this, goto, dlg);
         }
-        update_net_price(dlg);
     }
 
     function ar2_choose_save_sales_price2_checkbox(_this, dlg) {
@@ -1271,14 +1272,9 @@
     var net_price_calc, net_price_discounts;
     var net_price_old_abs_margin, net_price_new_abs_margin;
     var net_price_old_rel_margin, net_price_new_rel_margin;
-    var net_price_delta_margin;
+    var net_price_delta_abs_margin, net_price_delta_rel_margin;
     function update_net_price(dlg) {
         var sales_price, sales_curr;
-        net_price_old_abs_margin = "0.00 EUR";
-        net_price_new_abs_margin = "0.00 EUR";
-        net_price_old_rel_margin = "0.00";
-        net_price_new_rel_margin  = "0.00";
-        net_price_delta_margin = "0.00";
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1291,6 +1287,12 @@
         } else {
             sales_price = $("#"+dlg+"-new-sales-price2").val().trim();
         }
+        net_price_old_abs_margin = "0.00 " + sales_curr;
+        net_price_new_abs_margin = "0.00 " + sales_curr;
+        net_price_old_rel_margin = "0.00";
+        net_price_new_rel_margin  = "0.00";
+        net_price_delta_abs_margin = "0.00";
+        net_price_delta_rel_margin = "0.00";
         $.get("webservice/get_sales_price",
             {
                 vbeln: _ar_itemdata2.vbeln,
@@ -1300,9 +1302,48 @@
             },
             function (data, status) {
                 if (status == "success" && data != undefined && data != null) {
-                    $("#"+dlg+"-net-price2").val(data.price);
+                    $("#"+dlg+"-net-price2").val(data.price.toFixed(2));
                     $("#"+dlg+"-net-curr2").val(data.curr);
                     net_price_discounts = data.discounts;
+                    sales_price = parseFloat(sales_price);
+                    let purch_price = parseFloat($("#"+dlg+"-purch-price2").val());
+                    let purch_curr = $("#"+dlg+"-purch-curr2").val();
+                    let pp = cvfx(purch_price, purch_curr, sales_curr);
+                    net_price_new_abs_margin = sales_price - pp;
+                    net_price_new_rel_margin = 0;
+                    if (purch_price != 0)
+                        net_price_new_rel_margin = net_price_new_abs_margin * 100 / purch_price;
+                    let nam = net_price_new_abs_margin;
+                    net_price_new_abs_margin = net_price_new_abs_margin.toFixed(2).toString() + " " + sales_curr;
+                    net_price_new_rel_margin = net_price_new_rel_margin.toFixed(2).toString();
+                    for (i = 0; i < net_price_discounts.length; i++) {
+                        if (net_price_discounts[i].condition == "EK02") {
+                            net_price_discounts[i].price = purch_price.toFixed(2);
+                            if (net_price_discounts[i].old_price != 0)
+                                net_price_discounts[i].delta = (purch_price - net_price_discounts[i].old_price) * 100 / net_price_discounts[i].old_price;
+                            net_price_discounts[i].delta = net_price_discounts[i].delta.toFixed(2);
+                        }
+                    }
+
+                    let old_sales_curr = $("#"+dlg+"-old-sales-curr2").val();
+                    let old_purch_price = parseFloat($("#"+dlg+"-old-purch-price2").val());
+                    let old_purch_curr = $("#"+dlg+"-old-purch-curr2").val();
+                    pp = cvfx(old_purch_price, old_purch_curr, old_sales_curr);
+                    let old_sales_price = parseFloat($("#"+dlg+"-old-sales-price2").val());
+                    net_price_old_abs_margin = old_sales_price - pp;
+                    net_price_old_rel_margin = 0;
+                    if (old_purch_price != 0)
+                        net_price_old_rel_margin = net_price_old_abs_margin * 100 / old_purch_price;
+                    let oam = net_price_old_abs_margin;
+                    net_price_old_abs_margin = net_price_old_abs_margin.toFixed(2).toString() + " " + old_sales_curr;
+                    net_price_old_rel_margin = net_price_old_rel_margin.toFixed(2).toString();
+
+                    net_price_delta_abs_margin = 0;
+                    if (oam != 0) net_price_delta_abs_margin = (nam - oam) * 100 / oam;
+                    net_price_delta_abs_margin = net_price_delta_abs_margin.toFixed(2);
+                    net_price_delta_rel_margin = net_price_new_rel_margin - net_price_old_rel_margin;
+                    net_price_delta_rel_margin = net_price_delta_rel_margin.toFixed(2);
+
                 }
             }, "json");
 //        jQuery.ajaxSetup({async: true});
@@ -1349,12 +1390,13 @@
         cols = "<td rowspan='2' colspan='2' style='text-align: center; padding-right: 2rem;'><b>" + marginlabel + "</b></td>" +
             "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_old_abs_margin + "</b></td>" +
             "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_new_abs_margin + "</b></td>" +
-            "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;' rowspan='2'><b>" + net_price_delta_margin + " %" + "</b></td>";
+            "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_delta_abs_margin + " %" + "</b></td>";
         newRow.append(cols);
         $("#net-price-calculation-table").append(newRow);
         newRow = $("<tr style='height: 1.3rem; background-color: #fffa90''>");
         cols = "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_old_rel_margin + " %" + "</b></td>" +
-               "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_new_rel_margin + " %" + "</b></td>";
+               "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_new_rel_margin + " %" + "</b></td>" +
+               "<td style='text-align: right; border-left: 1px solid lightgray; padding-right: 0.2rem;'><b>" + net_price_delta_rel_margin + " %" + "</b></td>";
         newRow.append(cols);
         $("#net-price-calculation-table").append(newRow);
         net_price_calc.dialog({

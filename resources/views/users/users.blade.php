@@ -330,7 +330,7 @@
 
     <script>
         function deleteUser2(id) {
-            if (confirm("{{__('Are you sure do you want to delete ')}}" + id + "?")) {
+            if (confirm("{{__('Are you sure you want to delete ')}}" + id + "?")) {
                 location.replace(location.pathname + '?del=' + id);
             } else {
             }

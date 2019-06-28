@@ -117,9 +117,12 @@
   "Send proposal": "Send proposal",
   "Require SR approval": "Require SR approval",
   "Displayed message": "Displayed messsage",
-  "Are you sure do you want to delete": "Are you sure do you want to delete",
+  "Are you sure you want to delete": "Are you sure you want to delete",
   "Purch. price": "Purch. price",
   "Profit margin": "Profit margin",
   "Only overdue deliveries": "Only overdue deliveries",
-  "Only deliveries with goods receipt": "Only deliveries with goods receipt"
+  "Only deliveries with goods receipt": "Only deliveries with goods receipt",
+  "Send proposal to MATEROM": "Send proposal to MATEROM",
+  "Keep proposal": "Keep proposal",
+  "Reject proposal": "Reject proposal"
 }

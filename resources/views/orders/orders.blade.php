@@ -1507,7 +1507,10 @@
                         info_icon = "<image style='height: 1.2rem;' src='/images/yellow_blink.gif' onclick='replyack(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\"); return false;'>";
                         break;
                     case 6:
-                        info_icon = "<image style='height: 1.2rem;' src='/images/icons8-shipped-48.png'>";
+                        info_icon = "<image style='height: 1.5rem; margin: -2px;' src='/images/icons8-shipped-48.png' title='{{__("Completely delivered")}}'>";
+                        break;
+                    case 7:
+                        info_icon = "<image style='height: 1.5rem; margin: -2px;' src='/images/icons8-partially-shipped-48.png' title='{{__("Partially delivered")}}'>";
                         break;
                 }
                 if (pitem.backorder == 1)
@@ -1555,7 +1558,13 @@
                 let button_accept = "";
                 if (pitem.accept == 1)
                     button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
-                        "onclick='acceptPItem(this);return false;'/>";
+                        "onclick='acceptPItem(this);return false;' title='{{__("")}}'/>";
+                if (pitem.accept == 2)
+                    button_accept = "<button type='button' class='order-button-accepted-changed' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='acceptPItem(this);return false;' title='{{__("Send proposal to MATEROM")}}'/>";
+                if (pitem.accept == 3)
+                    button_accept = "<button type='button' class='order-button-accepted-keep' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='acceptPItem(this);return false;' title='{{__("Keep proposal")}}'/>";
                 let button_reject = "";
                 if (pitem.reject == 1)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
@@ -1569,6 +1578,9 @@
                 if (pitem.reject == 4)
                     button_reject = "<button type='button' class='order-button-rejected4' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
                         "onclick='requestRejectPItem(this, 4);return false;'/>";
+                if (pitem.reject == 5)
+                    button_reject = "<button type='button' class='order-button-rejected-cancel' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='rejectPItem(this, 0, null);return false;' title='{{__("Reject proposal")}}'/>";
                 let button_inquire = "";
                 if (pitem.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +

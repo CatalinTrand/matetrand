@@ -120,6 +120,20 @@
             background-position: center center;
         }
 
+        .order-button-accepted-changed {
+            background-image:url('/images/icons8-forward-button-50.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
+        .order-button-accepted-keep {
+            background-image:url('/images/icons8-collect-48.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
         .order-button-rejected {
             background-image:url('/images/icons8-delete-50-4.png');
             background-size:     contain;
@@ -129,6 +143,13 @@
 
         .order-button-rejected4 {
             background-image:url('/images/icons8-red-arrow-left-64.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center center;
+        }
+
+        .order-button-rejected-cancel {
+            background-image:url('/images/icons8-no-entry-64.png');
             background-size:     contain;
             background-repeat:   no-repeat;
             background-position: center center;

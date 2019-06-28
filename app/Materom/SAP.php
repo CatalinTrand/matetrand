@@ -535,8 +535,9 @@ class SAP
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
-//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            Log::error("Error processing SO item: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
+            return $e->getMessage();
         }
 
     }
@@ -573,8 +574,9 @@ class SAP
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
-//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            Log::error("Error changing SO item: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
+            return $e->getMessage();
         }
     }
 
@@ -598,8 +600,9 @@ class SAP
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
-//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            Log::error("Error rejecting SO item: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
+            return $e->getMessage();
         }
     }
 
@@ -643,7 +646,7 @@ class SAP
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_WRITE_ZPRET');
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_WRITE_ZPRET2');
             $result = $sapfm->invoke(['I_LIFNR' => $lifnr,
                                       'I_IDNLF' => $idnlf,
                                       'I_MEINS' => $meins,
@@ -655,8 +658,9 @@ class SAP
             $sapconn->close();
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
-//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
-            return $e->getErrorInfo();
+            Log::error("Error writing ZPRET: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
+            return $e->getMessage();
         }
         return "Internal error";
     }
@@ -695,16 +699,16 @@ class SAP
                     $discount->curr = "%";
                     $discount->price = $discount->price / 10;
                 }
-                $discount->price = number_format($discount->price, 2, ",", "");
+                $discount->price = number_format($discount->price, 2, ".", "");
                 $discount->old_price = $discount->KBETRO; unset($discount->KBETRO);
-                $discount->old_price = number_format($discount->old_price, 2, ",", "");
+                $discount->old_price = number_format($discount->old_price, 2, ".", "");
                 $discount->delta = $discount->DELTA; unset($discount->DELTA);
-                $discount->delta = number_format($discount->delta, 2, ",", "");
+                $discount->delta = number_format($discount->delta, 2, ".", "");
             }
             return $netprice;
         } catch (\SAPNWRFC\Exception $e) {
-            Log::error($e);
-            Log::error("GetErrorInfo:".json_encode($e->getErrorInfo()));
+            Log::error("Error reading sales order net price: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
             return null;
         }
     }

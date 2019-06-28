@@ -115,12 +115,15 @@
   "Change password": "Change password",
   "Change user data": "Change user data",
   "Delete user": "Delete user",
-  "Send proposal": "Send proposal",
+  "Send proposal": "Vorschlag senden",
   "Require SR approval": "Require SR approval",
   "Displayed message": "Displayed messsage",
   "Purch. price": "EK-Preis",
   "Profit margin": "Profit margin",
-  "Are you sure do you want to delete": "Are you sure do you want to delete",
-  "Only overdue deliveries": "Only overdue deliveries",
-  "Only deliveries with goods receipt": "Only deliveries with goods receipt"
+  "Are you sure you want to delete": "Sind Sie sicher, dass Sie löschen möchten",
+  "Only overdue deliveries": "Nur überfällige Lieferungen",
+  "Only deliveries with goods receipt": "Nur Lieferungen mit WE",
+  "Send proposal to MATEROM": "Vorschlag an MATEROM senden",
+  "Keep proposal": "Vorschlag behalten",
+  "Reject proposal": "Vorschlag ablehnen"
 }

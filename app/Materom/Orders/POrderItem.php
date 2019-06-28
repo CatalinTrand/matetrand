@@ -360,6 +360,7 @@ class POrderItem
                             $this->delivery_date_changeable = 1;
                         }
                         $this->accept = 1;
+                        if ($this->changed == 1) $this->accept = 2;
                         $this->reject = 1;
                     } elseif (($this->status == 'R') && ($this->pstage != 'F')) {
                         // cancellation asked by REF/CTV after initial approval
@@ -383,7 +384,12 @@ class POrderItem
                     }
                     if ((empty($this->status) || ($this->status == 'T'))) {
                         $this->accept = 1;
+                        if ($this->changed == 1) {
+                            $this->accept = 2;
+                            if ($this->status == 'T') $this->accept = 3;
+                        }
                         $this->reject = 1;
+                        if ($this->status == 'T') $this->reject = 5;
                         if ($this->inquired != 0 ) $this->inq_reply = 1;
                     } elseif ($this->status == 'R') {
                         $this->accept = 0;
@@ -406,7 +412,12 @@ class POrderItem
                 }
                 if (empty($this->status) || ($this->status == 'T')) {
                     $this->accept = 1;
+                    if ($this->changed == 1) {
+                        $this->accept = 2;
+                        if (($this->status == 'T') && ($this->stage == 'R' || $this->stage == 'C')) $this->accept = 3;
+                    }
                     $this->reject = 1;
+                    if (($this->status == 'T') && ($this->stage == 'R' || $this->stage == 'C')) $this->reject = 5;
                     if ($this->inquired != 0 ) $this->inq_reply = 1;
                 } elseif ($this->status == 'R') {
                     $this->accept = 0;
@@ -468,7 +479,10 @@ class POrderItem
             $this->inquired = 0;
             $this->inq_reply = 0;
         } else {
-            if ($this->grdate != null) $this->info = 6;
+            if ($this->grdate != null) {
+                $this->info = 7;
+                if (explode(" ", $this->delqty)[0] >= $this->qty) $this->info = 6;
+            }
         }
 
     }
