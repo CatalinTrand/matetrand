@@ -42,6 +42,7 @@ class MasterData
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
             return $e->getErrorInfo();
         }
+
     }
 
     static public function getData200($command, $in)

@@ -404,6 +404,7 @@ class Orders
 
     public static function overdues()
     {
+        if (empty(self::$overdue_orders) && empty(self::$overdue_items)) return "";
         return "" . self::$overdue_orders . "/" . self::$overdue_items;
     }
 
@@ -428,6 +429,25 @@ class Orders
         }
         $_porder->fill();
         return $_porder;
+    }
+
+    public static function getSupplierList()
+    {
+        $result = self::loadFromCache(null, null, false);
+        $suppliers = array();
+        if ($result == null || count($result) == 0) return $suppliers;
+        foreach ($result as $porder) {
+            if (Auth::user()->role == 'Furnizor' && $porder->lifnr != Auth::user()->lifnr) continue;
+            if (!isset($suppliers[$porder->lifnr])) {
+                $supplier = new \stdClass();
+                $supplier->lifnr_name = $porder->lifnr_name;
+                $supplier->orders = array();
+                $suppliers[$porder->lifnr] = $supplier;
+            }
+            array_push($suppliers[$porder->lifnr]->orders, $porder->ebeln);
+        }
+        ksort($suppliers);
+        return $suppliers;
     }
 
     public static function getOrderList($groupByPO = null)

@@ -201,9 +201,15 @@ class POrderItem
         $this->owner = 0;
         $this->crefo = 0;
         if (Auth::user()->role == 'Furnizor') {
-            if ($this->stage == 'F') $this->owner = 1;
+            if ($this->stage == 'F') {
+                if (Auth::user()->lifnr == $porder->lifnr)
+                    $this->owner = 1;
+            }
         } elseif (Auth::user()->role == 'Referent') {
-            if ($this->stage == 'R') $this->owner = 1;
+            if ($this->stage == 'R') {
+                if (Auth::user()->ekgrp == $porder->ekgrp)
+                    $this->owner = 1;
+            }
             else {
                 $suppliers = DB::select("select distinct users.id from users " .
                     " join users_ref using (id)" .

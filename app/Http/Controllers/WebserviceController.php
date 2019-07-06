@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Materom\ExcelData;
 use App\Materom\Mailservice;
 use App\Materom\Orders;
 use App\Materom\SAP\MasterData;
@@ -12,10 +13,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
 use App\Materom\Webservice;
 use App\Materom\SAP;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
 use Maatwebsite\Excel\Facades\Excel;
+use Exception;
 
 class WebserviceController extends Controller
 {
@@ -626,4 +628,49 @@ class WebserviceController extends Controller
                 Input::get("curr")
         ));
     }
+
+    public function xlsFileUpload(Request $request)
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+
+        $file = $request->file("file");
+        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $reader->setReadDataOnly(true);
+        $spreadsheet = null;
+        try {
+            $spreadsheet = $reader->load($file->getRealPath());
+        } catch (Exception $e) {
+            $spreadsheet = null;
+        }
+        if ($spreadsheet == null) {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+            $reader->setReadDataOnly(true);
+            $spreadsheet = null;
+            try {
+                $spreadsheet = $reader->load($file->getRealPath());
+            } catch (Exception $e) {
+                $spreadsheet = null;
+            }
+        }
+        if ($spreadsheet == null) return __("Uploaded file is not an Excel file, please check it before retrying");
+        return ExcelData::uploadXLSMassChange($spreadsheet);
+    }
+
+    public function xlsFileDownload()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+
+        $mode = Input::get("mode");
+        $lifnr = Input::get("lifnr");
+        $orders = explode("@", Input::get("orders"));
+        if ($mode == null || $lifnr == null|| $orders == null) return null;
+
+        if ($mode == 1) return ExcelData::downloadXLSReport($lifnr, $orders);
+        if ($mode == 2) return ExcelData::downloadXLSMassChange($lifnr, $orders);
+        return null;
+
+    }
+
 }

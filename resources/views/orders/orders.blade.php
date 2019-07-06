@@ -183,6 +183,21 @@
                 </svg>';
         }
 
+        $suppliers =  App\Materom\Orders::getSupplierList();
+        $supplier_list = "[]";
+        if (($suppliers != null) && count($suppliers) > 0) {
+            $supplier_list = "[";
+            foreach($suppliers as $lifnr => $supplier) {
+                $supplier_list .= "{lifnr:\"$lifnr\",lifnr_name:\"$supplier->lifnr_name\",orders:[";
+                $order_list = "";
+                foreach ($supplier->orders as $order)
+                    $order_list .= "\"$order\",";
+                $supplier_list .= substr($order_list, 0, -1) . "]},";
+            }
+            $supplier_list = substr($supplier_list, 0, -1);
+            $supplier_list .= "]";
+        }
+
     @endphp
     <div class="container-fluid">
         <input type="hidden" id="filter_history" value="{{$filter_history}}">
@@ -266,7 +281,7 @@
                                             <col style="width:10rem;">
                                             <col style="width:25rem;">
                                             <col>
-                                            <col style="width: 100px;">
+                                            <col style="width: 120px;">
                                         </colgroup>
                                         <tbody>
                                             <tr style="height: 1.5rem;">
@@ -315,8 +330,10 @@
                                                 <td>
                                                 </td>
                                                 <td>
-                                                    <button title="Download the xls report for shown orders" type="button" style="margin-left: 2px; height: 1.5rem;"
-                                                            onclick="download_orders_xls();return false;">{{__('XLS Report')}}</button>
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "CTV")
+                                                    <button title="Export purchase orders data to Excel" type="button" style="margin-left: 2px; height: 1.5rem;"
+                                                            onclick="downloadXLSFile(1);return false;">{{__('XLS Export')}}</button>
+                                                    @endif
                                                     @if (\Illuminate\Support\Facades\Auth::user()->id == "radu" && 1 == 2)
                                                         <button type="button" onclick="debug_job();return false;">d</button>
                                                     @endif
@@ -382,6 +399,8 @@
                                                 <td>
                                                 </td>
                                                 <td>
+                                                    <button title="Mass change operations on order items" type="button" style="margin-left: 2px; height: 1.5rem;"
+                                                    onclick='massChangeMenu(event, this);return false;'/>{{__('Mass changes')}}</button>
                                                 </td>
                                             </tr>
                                             <tr style="height: 1.5rem;">
@@ -887,7 +906,14 @@
         </ul>
     @endif
 
+    <ul class="mass-change-menu" id="mass-change-menu">
+        <li><div id="mass-change-menu-download" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-circle-arrow-s"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Download position list data")}}</div></li>
+        <li>-</li>
+        <li><div id="mass-change-menu-upload" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-circle-arrow-n"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Upload position list changes")}}</div></li>
+    </ul>
+
     <script>
+        var supplierList = {!! $supplier_list !!};
         function debug_job() {
             $.ajaxSetup({
                 headers: {
@@ -2740,8 +2766,21 @@
             })
         }
 
+        function massChangeMenu(e, _this) {
+            $("#mass-change-menu-download").click(function(){mass_change_download()});
+            $("#mass-change-menu-upload").click(function(){mass_change_upload()});
+            e.stopPropagation();
+            $("#mass-change-menu").menu().toggle().position({
+                my: "right top",
+                at: "right-60px top+12px",
+                of: $(_this),
+                collision: "fit flip"}
+            );
+        }
+
         $(document).on("click", function(e){
             $("#order-tools-menu").hide();
+            $("#mass-change-menu").hide();
         });
 
     </script>
@@ -2753,5 +2792,7 @@
     @include("orders.accept-reject2")
     @include("orders.split-item")
     @include("orders.inquiries")
+    @include("orders.file-upload")
+    @include("orders.file-download")
 
 @endsection

@@ -126,5 +126,19 @@
   "Only deliveries with goods receipt": "Numai livrari cu intrare de bunuri",
   "Send proposal to MATEROM": "Trimitere propunere la MATEROM",
   "Keep proposal": "Pastrare (keep) propunere",
-  "Reject proposal": "Rejectare (cancel) propunere"
+  "Reject proposal": "Rejectare (cancel) propunere",
+  "Select supplier": "Selectati furnizorul",
+  "Select orders to download": "Selectati comenzile pentru download",
+  "Select all orders": "Selectare toate comenzile",
+  "Download": "Download",
+  "File successfully uploaded": "Fisierul a fost incarcat cu succes",
+  "An error was encountered processing the mass changes": "A avut loc o eroare in cursul procesarii modificarilor in masa",
+  "The mass changes given in the file were successfully processed": "Modificarile in masa din fisier au fost procesate cu succes",
+  "No changes requested in the file, no operation performed": "Nu s-a efectuat nicio operatie deoarece nu au fost gasite cereri de modificare in fisier",
+  "Cell A": "Celula A",
+  "Cell B": "Celula B",
+  "Cell H": "Celula H",
+  "Cell K": "Celula K",
+  "Cell M": "Celula M",
+  "does not exist": "nu exista"
 }

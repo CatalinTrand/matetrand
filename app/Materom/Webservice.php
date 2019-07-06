@@ -145,13 +145,14 @@ class Webservice
     public static function getPOItemSubTree($data, $itemno)
     {
         $pitemchgs = array();
-        if ($data == null) return json_encode($pitemchgs);
-        $pitem = reset($data)->items[$itemno];
-        foreach ($pitem->changes as $pitemchg) {
-            if ((Auth::user()->role == 'Furnizor') && ($pitemchg->internal == 1)) continue;
-            $outpitemchg = $pitemchg;
-            unset($outpitemchg->internal);
-            $pitemchgs[] = $outpitemchg;
+        if ($data != null && isset(reset($data)->items[$itemno])) {
+            $pitem = reset($data)->items[$itemno];
+            foreach ($pitem->changes as $pitemchg) {
+                if ((Auth::user()->role == 'Furnizor') && ($pitemchg->internal == 1)) continue;
+                $outpitemchg = $pitemchg;
+                unset($outpitemchg->internal);
+                $pitemchgs[] = $outpitemchg;
+            }
         }
         return json_encode($pitemchgs);
     }
@@ -396,7 +397,7 @@ class Webservice
         }
     }
 
-    public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp, $backorder)
+    public static function doChangeItem($column, $value, $valuehlp, $oldvalue, $ebeln, $ebelp, $backorder, $seconds = 0)
     {
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
@@ -427,6 +428,7 @@ class Webservice
         if ($column == 'purch_price') $type = 'P';
         $newval = trim($value . " " . $valuehlp);
         $cdate = now();
+        $cdate->addSeconds($seconds);
         DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         if ($pitem->backorder == 0 && $backorder == 1 && $type == "D") {
             $cdate->addSeconds(1);
@@ -1026,8 +1028,13 @@ class Webservice
             $pitemchgs = DB::select("select * from ". System::$table_pitemchg .
                     " where ebeln = '$ebeln' and ebelp = '$ebelp' and ctype <> 'E' order by cdate desc");
             $pitemchg = null;
+            $prevchg = null;
             if ($pitemchgs != null && count($pitemchgs) > 0) {
                 $pitemchg = $pitemchgs[0];
+                $prevchgs = DB::select("select * from ". System::$table_pitemchg .
+                    " where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate < '$pitemchg->cdate' and ctype <> 'E' order by cdate desc");
+                if ($prevchgs != null && count($prevchgs) > 0) $prevchg = $prevchgs[0];
+                if ($prevchg == null) $prevchg = clone $pitemchg;
             }
             if ($pitemchg != null && ($pitemchg->acknowledged < 2)) {
                 $cdate = $pitemchg->cdate;
@@ -1099,8 +1106,8 @@ class Webservice
                 if ((($pitem->stage == "C") && ($pitemchg->stage == "C")) &&
                      $pitem->pstage == "R" &&
                      (($pitem->status == "T") || ($pitem->status == "A")) &&
-                     ($pitemchg->ctype == "O")
-                ) {
+                     ($pitemchg->ctype == "O"))
+                {
                     $message = __("Rolled back from proposal on") . " " . $cdate;
                     DB::beginTransaction();
                     DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
@@ -1115,8 +1122,10 @@ class Webservice
                 if ((($pitem->stage == "Z") && (($pitemchg->stage == "Z") || ($pitemchg->stage == "R"))) &&
                     ($pitem->pstage == "F" || $pitem->pstage == " ") &&
                     ((($pitem->status == "X") && ($pitemchg->ctype == "X")) ||
-                     (($pitem->status == "A") && ($pitemchg->ctype == "A")))
-                ) {
+                     (($pitem->status == "A") && ($pitemchg->ctype == "A"))
+                    )
+                   )
+                {
                     $message = __("Rolled back");
                     if ($pitem->status == "T") {
                         $message .= " " . __("from supplier acceptance proposal on") . " " . $cdate;
@@ -1132,6 +1141,31 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 3) by ". Auth::user()->id);
+                    return "OK";
+                }
+
+                if ((($pitem->stage == "Z") && (($pitemchg->stage == "Z") && ($pitemchg->acknowledged == 0))) &&
+                    ($pitem->pstage == "R") &&
+                    ((($pitem->status == "X") && ($pitemchg->ctype == "X")) ||
+                     (($pitem->status == "A") && ($pitemchg->ctype == "A"))
+                    )
+                   )
+                {
+                    $message = __("Rolled back");
+                    if ($pitem->status == "X") {
+                        $message .= " " . __("from reference rejection on") . " " . $cdate;
+                        $prevstatus = 'R';
+                    } elseif ($pitem->status == "A") {
+                        $message .= " " . __("from reference acceptance on") . " " . $cdate;
+                        $prevstatus = 'T';
+                    }
+                    DB::beginTransaction();
+                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update ". System::$table_pitems ." set stage = 'R', status = '$prevstatus', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                        "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
+                    DB::commit();
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 4) by ". Auth::user()->id);
                     return "OK";
                 }
 

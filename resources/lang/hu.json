@@ -112,6 +112,19 @@
   "Only deliveries with goods receipt": "Only deliveries with goods receipt",
   "Send proposal to MATEROM": "Send proposal to MATEROM",
   "Keep proposal": "Keep proposal",
-  "Reject proposal": "Reject proposal"
-
+  "Reject proposal": "Reject proposal",
+  "Select supplier": "Select supplier",
+  "Select orders to download": "Select orders to download",
+  "Select all orders": "Select all orders",
+  "Download": "Download",
+  "File successfully uploaded": "File successfully uploaded",
+  "An error was encountered processing the mass changes": "An error was encountered processing the mass changes",
+  "The mass changes given in the file were successfully processed": "The mass changes given in the file were successfully processed",
+  "No changes requested in the file, no operation performed": "No changes requested in the file, no operation performed",
+  "Cell A": "Cell A",
+  "Cell B": "Cell B",
+  "Cell H": "Cell H",
+  "Cell K": "Cell K",
+  "Cell M": "Cell M",
+  "does not exist": "does not exist"
 }

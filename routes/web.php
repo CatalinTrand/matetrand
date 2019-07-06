@@ -86,6 +86,8 @@ Route::get('webservice/get_fx_rate','WebserviceController@getFXRate');
 Route::get('webservice/archive_item','WebserviceController@archiveItem');
 Route::get('webservice/unarchive_item','WebserviceController@unarchiveItem');
 Route::get('webservice/rollback_item','WebserviceController@rollbackItem');
+Route::post('webservice/xlsfileupload','WebserviceController@xlsFileUpload');
+Route::get('webservice/xlsfiledownload','WebserviceController@xlsFileDownload');
 
 // Global data
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');

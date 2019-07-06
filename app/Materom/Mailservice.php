@@ -212,12 +212,19 @@ class Mailservice
             $mail->ctv = $ctv;
             $mail->items = $items;
             array_push($mails, $mail);
-            // $ctv->email = "radu@etrandafir.ro";
             Mail::send('email.ctvreminder',['user' => $ctv,'items' => $items],
                 function($message) use ($ctv, $items) {
                     $message->to($ctv->email, $ctv->username)->subject("Notificare SRM de pozitii ce necesita atentia dv.");
                     $message->from('no_reply_srm@materom.ro','MATEROM SRM');
                 });
+            if (1 == 2) {
+                $ctv->email = "radu@etrandafir.ro";
+                Mail::send('email.ctvreminder', ['user' => $ctv, 'items' => $items],
+                    function ($message) use ($ctv, $items) {
+                        $message->to($ctv->email, $ctv->username)->subject("Notificare SRM de pozitii ce necesita atentia dv.");
+                        $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
+                    });
+            }
             Log::debug("Sent mail 'Notificare CTV de pozitii in lucru' to '$ctv->id ($ctv->email)'");
         }
 

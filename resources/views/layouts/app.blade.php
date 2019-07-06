@@ -330,6 +330,12 @@
             display: none;
         }
 
+        .mass-change-menu {
+            width: 18em;
+            position: absolute;
+            display: none;
+        }
+
         .ui-menu .ui-menu-item.ui-state-focus{
             border: none;
             background-image: none;
