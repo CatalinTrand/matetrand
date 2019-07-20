@@ -237,14 +237,20 @@ class Mailservice
                 return strcmp($mail_a->ctv->id, $mail_b->ctv->id);
             });
             foreach($adminctvs as $adminctv) {
+                $maillist = [];
+                foreach($mails as $mail) {
+                    if (trim($mail->ctv->rgroup) == trim($adminctv->rgroup))
+                        array_push($maillist, $mail);
+                }
+                if (empty($maillist)) continue;
                 if (1 == 1)
-                Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $mails],
+                Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $maillist],
                     function ($message) use ($adminctv) {
                         $message->to($adminctv->email, $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                     });
                 if (1 == 2)
-                Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $mails],
+                Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $maillist],
                     function ($message) use ($adminctv) {
                         $message->to("radu@etrandafir.ro", $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
@@ -413,10 +419,16 @@ class Mailservice
             });
             $admins = DB::table("users")->where([["role", "=", "Administrator"],["sap_system", "=", System::$system], ["active", "=", 1]])->get();
             foreach($admins as $admin) {
+                $maillist = [];
+                foreach($reminders as $reminder) {
+                    if (trim($reminder->user->rgroup) == trim($admin->rgroup))
+                        array_push($maillist, $reminder);
+                }
+                if (empty($maillist)) continue;
                 if (substr($admin->id, 0, 1) == "~") continue;
                 // $admin->email = "radu@etrandafir.ro";
-                Mail::send('email.adminreminder',['admin' => $admin, 'reminders' => $reminders],
-                    function($message) use ($admin, $reminders) {
+                Mail::send('email.adminreminder',['admin' => $admin, 'reminders' => $maillist],
+                    function($message) use ($admin) {
                         $message->to($admin->email, $admin->username)->subject("Notificare SRM de pozitii deschise la furnizori/referenti");
                         $message->from('no_reply_srm@materom.ro','MATEROM SRM');
                     });

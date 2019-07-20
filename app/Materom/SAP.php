@@ -277,7 +277,7 @@ class SAP
             $i = 0;
             foreach($items as $itemkey => $itemval) {
                 $vitems[$itemkey] = $itemval;
-                if (++$i >= 1000) break;
+                if (++$i >= 200) break;
             }
             array_splice($items, 0, $i);
             $vitems = SAP::rfcGetDeliveryData($mode, $vitems);

@@ -54,6 +54,7 @@
                 },
                 {{__("Cancel")}}: function () {
                     downloadFileDialog.dialog("close");
+                    $(".ui-tooltip").hide();
                 }
             },
             open: function() {
@@ -62,6 +63,7 @@
             },
             close: function () {
                 fileDownloadDialogForm[0].reset();
+                $(".ui-tooltip").hide();
             },
             position: {
                 my: 'left top',
@@ -138,11 +140,11 @@
         supplier = supplierList[i];
         for (i = 0; i < supplier.orders.length; i++) {
             let order = $("<div style='vertical-align: center;'>");
-            order.html("<label><input id='file-download-order-" + supplier.orders[i] + "' type='checkbox' " +
+            order.html("<label><input id='file-download-order-" + supplier.orders[i] + "' type='checkbox' " + (supplier.orders.length == 1 ? "checked " : "") +
                 "style='position: relative; top: 1px;' onchange='file_download_order_changed()'>&nbsp;" + supplier.orders[i]) + "</label>";
             orders.append(order);
         }
-        $("#file-download-all-orders").prop("checked", false);
+        $("#file-download-all-orders").prop("checked", supplier.orders.length == 1);
     }
 
     function mass_change_download() {

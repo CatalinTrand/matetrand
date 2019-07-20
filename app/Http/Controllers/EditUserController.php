@@ -24,7 +24,8 @@ class EditUserController
             Input::get("readonly"),
             Input::get("none"),
             Input::get("mirror_user1"),
-            Input::get("ctvadmin")
+            Input::get("ctvadmin"),
+            Input::get("rgroup")
         );
     }
 

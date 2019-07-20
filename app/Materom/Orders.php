@@ -87,6 +87,7 @@ class Orders
 
         $inquirements = Session::get("filter_inquirements");
         $backorders = Session::get("filter_backorders");
+        $filter_eta = Session::get("filter_eta");
 
         $goodsreceipt = Session::get("filter_goodsreceipt");
         if (!isset($goodsreceipt) || $goodsreceipt == null) $goodsreceipt = 0;
@@ -104,7 +105,8 @@ class Orders
         $filter_etadate_high .= " 23:59:59";
 
         $time_limit = Session::get("filter_archdate");
-        $filter_vbeln = Session::get("filter_vbeln");
+        $filter_vbeln = str_replace("'", "", Session::get("filter_vbeln"));
+
         $filter_ebeln = Session::get("filter_ebeln");
         $filter_matnr = Session::get("filter_matnr");
         $filter_mtext = trim(Session::get("filter_mtext"));
@@ -210,6 +212,18 @@ class Orders
             else $filter_sql .= " and " . $backorder_sql;
         }
 
+        $now = now();
+        $now->hour = 23;
+        $now->minute = 59;
+        $now->second = 59;
+        $eta_sql = "";
+        if ($filter_eta == "1") $eta_sql = "$items_table.etadt >= '$now'";
+        if ($filter_eta == "2") $eta_sql = "$items_table.etadt < '$now'";
+        if (!empty($eta_sql)) {
+            if (empty($filter_sql)) $filter_sql = $eta_sql;
+            else $filter_sql .= " and " . $eta_sql;
+        }
+
         $goodsreceipt_sql = "";
         if ($goodsreceipt <> 0) $goodsreceipt_sql = "$items_table.grdate is not NULL";
         if (!empty($goodsreceipt_sql)) {
@@ -250,12 +264,17 @@ class Orders
             $isql = "insert into " . System::$table_pitems_cache . " (session, ebeln, ebelp, vbeln, cache_date) values ";
 
             $prev_ebeln = '$#$#$#$#$#';
+            $count = 0;
             foreach ($items as $item) {
                 if ($item->ebeln != $prev_ebeln) {
                     $prev_ebeln = $item->ebeln;
                     $psql .= " ('$cacheid', '$prev_ebeln', '$cache_date'),";
                 }
                 $isql .= " ('$cacheid', '$item->ebeln', '$item->ebelp', '$item->vbeln', '$cache_date'),";
+                if (++$count >= 10000) {
+                    \Session::put("alert-danger", "You have selected too many order items, only the first $count will be shown. Please restrict your selection.");
+                    break;
+                }
             }
 
             DB::insert(substr($psql, 0, -1) . ';');
@@ -279,6 +298,7 @@ class Orders
         $filter_status = Session::get("filter_status");
         $inquirements = Session::get("filter_inquirements");
         $backorders = Session::get("filter_backorders");
+        $filter_eta = Session::get("filter_eta");
         $overdue = Session::get("filter_overdue");
         if (!isset($overdue) || $overdue == null) $overdue = 0;
         $overdue_low = Session::get("filter_overdue_low");

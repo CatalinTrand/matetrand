@@ -186,6 +186,7 @@ class Data
             $lfdat->month = substr($nitem->lfdat, 4, 2);
             $lfdat->day = substr($nitem->lfdat, 6, 2);
             $nitem->lfdat = $lfdat->toDateTimeString();
+            $nitem->etadt = $nitem->lfdat;
             $nitem->mfrnr = $sapitm["MFRNR"];
             $nitem->werks = $sapitm["WERKS"];
             if ($nitem->werks == "D000" || $nitem->werks == "G000") {
@@ -220,13 +221,13 @@ class Data
             if (is_null($citem)) {
                 $new_order_item = true;
                 $sql = "insert into " . System::$table_pitems .
-                    " (ebeln, ebelp, matnr, idnlf, mtext, qty, qty_uom, lfdat, mfrnr, werks, " .
+                    " (ebeln, ebelp, matnr, idnlf, mtext, qty, qty_uom, lfdat, etadt, mfrnr, werks, " .
                     "purch_price, purch_curr, purch_prun, purch_puom, " .
                     "sales_price, sales_curr, sales_prun, sales_puom, " .
                     "vbeln, posnr, kunnr, shipto, ctv, ctv_name, stage, changed, status, " .
                     "orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof) values (" .
                     "'$nitem->ebeln', '$nitem->ebelp', '$nitem->matnr', '$nitem->idnlf', '" . substr($nitem->mtext, 0, 40) . "',$nitem->qty, '$nitem->qty_uom', " .
-                    "'$nitem->lfdat', '$nitem->mfrnr', '$nitem->werks', " .
+                    "'$nitem->lfdat', '$nitem->etadt', '$nitem->mfrnr', '$nitem->werks', " .
                     "'$nitem->purch_price', '$nitem->purch_curr', " .
                     "$nitem->purch_prun, '$nitem->purch_puom', " .
                     "'$nitem->sales_price', '$nitem->sales_curr', $nitem->sales_prun, " .

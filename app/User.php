@@ -20,7 +20,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'id','role', 'username', 'email', 'password','lang','ekgrp','lifnr','sap_system', 'readonly',
-        'none', 'mirror_user1', 'ctvadmin'
+        'none', 'mirror_user1', 'ctvadmin', 'rgroup'
     ];
 
     /**

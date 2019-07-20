@@ -39,6 +39,7 @@
             },
             close: function () {
                 fileUploadDialogForm[0].reset();
+                $(".ui-tooltip").hide();
             },
             position: {
                 my: 'left top',

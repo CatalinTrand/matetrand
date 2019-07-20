@@ -34,6 +34,7 @@ class CreateUsersTable extends Migration
             $table->integer('none')->default('1');
             $table->string('mirror_user1', 20)->default('');
             $table->integer('ctvadmin')->default('0');
+            $table->string('rgroup', 2)->default('');
         });
     }
 

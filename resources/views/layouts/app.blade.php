@@ -230,9 +230,9 @@
         }
 
         .orders-table {
-            margin-top: 1vw;
+            margin-top: 0.5vh;
             width: 100%;
-            border: 1px solid black;
+            border: 2px solid black;
             line-height: 1rem;
         }
         .orders-table td, .orders-table th {

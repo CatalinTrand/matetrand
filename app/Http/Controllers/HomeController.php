@@ -109,6 +109,11 @@ class HomeController extends Controller
         if ($tmp != "1" && $tmp != 2) $tmp = "0";
         Session::put("filter_backorders", $tmp);
 
+        Session::put("filter_eta", "0");
+        $tmp = trim(Input::get("filter_eta"));
+        if ($tmp != "1" && $tmp != 2) $tmp = "0";
+        Session::put("filter_eta", $tmp);
+
         Session::put("filter_overdue", "0");
         $tmp = Input::get("filter_overdue");
         if (strtoupper($tmp) == "ON" ) Session::put("filter_overdue", "1");

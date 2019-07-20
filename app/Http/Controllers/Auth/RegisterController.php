@@ -86,6 +86,8 @@ class RegisterController extends Controller
         $mirror_user1 = trim($mirror_user1);
         $ctvadmin = 0;
         if (isset($data['ctvadmin']) && strtoupper($data['ctvadmin']) == "ON") $ctvadmin = 1;
+        $rgroup = "";
+        if (isset($data['rgroup'])) $rgroup = trim($data['rgroup']);
 
         return User::create([
             'id' => $data['id'],
@@ -100,6 +102,7 @@ class RegisterController extends Controller
             'none'   => $none,
             'mirror_user1'  => $mirror_user1,
             'ctvadmin'   => $ctvadmin,
+            'rgroup'   => $rgroup,
             'password' => Hash::make($data['password']),
             'created_at' => Carbon::now()->getTimestamp()
         ]);

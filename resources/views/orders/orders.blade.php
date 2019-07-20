@@ -93,6 +93,17 @@
         $filter_backorders_2 = "";
         if ($tmp == "2") $filter_backorders_2 = "selected";
 
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_eta");
+        if ($tmp != "1" && $tmp != "2") $tmp = "0";
+        $filter_eta = $tmp;
+        $filter_eta_0 = "";
+        if ($tmp == "0") $filter_eta_0 = "selected";
+        $filter_eta_1 = "";
+        if ($tmp == "1") $filter_eta_1 = "selected";
+        $filter_eta_2 = "";
+        if ($tmp == "2") $filter_eta_2 = "selected";
+
         $filter_overdue = 0;
         $overdue_checked = "";
         unset($tmp);
@@ -399,7 +410,7 @@
                                                 <td>
                                                 </td>
                                                 <td>
-                                                    <button title="Mass change operations on order items" type="button" style="margin-left: 2px; height: 1.5rem;"
+                                                    <button title="Mass change operations on order items" type="button" style="margin-left: 2px; height: 1.5rem;" id="mass-change-menu-button"
                                                     onclick='massChangeMenu(event, this);return false;'/>{{__('Mass changes')}}</button>
                                                 </td>
                                             </tr>
@@ -485,8 +496,21 @@
                                                 </td>
                                             </tr>
                                             <tr style="height: 1.5rem;">
-                                                <td></td>
-                                                <td></td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        {{__('ETA')}}:
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if ($filter_history != 2)
+                                                        <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                                name="filter_eta" onchange="this.form.submit(); return false;">
+                                                            <option value="0"{{$filter_eta_0}}>{{__('Nicio filtrare')}}</option>
+                                                            <option value="1"{{$filter_eta_1}}>{{__('Fara ETA depasit')}}</option>
+                                                            <option value="2"{{$filter_eta_2}}>{{__('Doar cu ETA depasit')}}</option>
+                                                        </select>
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     @if ($filter_history != 2)
                                                         {{__('ETA')}}:
@@ -520,9 +544,9 @@
                             </form>
                         </div>
                     </div>
-                    <div style="margin-top: -0.5rem; margin-left: -0.5rem; overflow: scroll;">
+                    <div style="margin-left: -0.7rem; overflow: scroll;">
                         <div class="card-body orders-table-div" style="height: 65.5vh; padding-top: 0px; padding-right: 4px; width: 100%;">
-                            <table style="border: 2px solid black; table-layout: fixed;"
+                            <table style="table-layout: fixed;"
                                    class="orders-table basicTable table table-striped" id="orders_table">
                                 <colgroup>
                                     <col style="width:1.6%;">
@@ -2767,6 +2791,7 @@
         }
 
         function massChangeMenu(e, _this) {
+            $(".ui-tooltip").hide();
             $("#mass-change-menu-download").click(function(){mass_change_download()});
             $("#mass-change-menu-upload").click(function(){mass_change_upload()});
             e.stopPropagation();

@@ -309,6 +309,7 @@ class POrderItem
                 $this->eta_date_changed = 1;
                 continue;
             }
+            $itemchg_prole = DB::table("users")->where("id", $itemchg->cuser)->value("role");
 
             if (($itemchg->stage == Auth::user()->role[0]) && ($itemchg->acknowledged == 0)) {
                 // $this->inquired = 3;
@@ -325,7 +326,10 @@ class POrderItem
             if ($first && ($itemchg->acknowledged == 0)
                 && ((Auth::user()->role == 'Furnizor') || ((Auth::user()->role == 'Referent') && ($this->crefo == 1)))
                 && ($this->pstage != ' ') && ($this->pstage != '')
-                && ($this->pstage != 'F')) { // } && ($this->stage != 'Z')) {
+                && ($this->pstage != 'F')
+                && (Auth::user()->role != $itemchg_prole)
+               )
+            {
                 if ($itemchg->ctype == "A") $this->info = 4;
                 if ($itemchg->ctype == "X") $this->info = 5;
             }

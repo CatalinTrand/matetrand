@@ -146,12 +146,30 @@
                                 <div class="form-group row">
                                     <label for="sap_system"
                                            class="col-md-2 col-form-label text-md-left">{{ __('System') }}</label>
-
-                                    <div class="col-md-5">
-                                        <select id="sap_system" type="text" class="form-control" name="sap_system" required>
+                                    <div class="col-md-1" style="min-width: 7rem;">
+                                        <select id="sap_system" type="text" class="form-control" name="sap_system" required
+                                            onchange="$('#mirror_user1').prev().text('{{ __('Mirror user') }}' + ' ' + (this.options[this.selectedIndex].value == '200'?'300':'200'));">
                                             <option value="200" {{$currentsystem200}}>200</option>
                                             <option value="300" {{$currentsystem300}}>300</option>
                                         </select>
+                                    </div>
+
+                                    <div id="mirror_user1_div" class="col-md-5" style="display: block; padding-left: 0;">
+                                        <label for="mirror_user1" style=""
+                                               class="col-form-label text-md-left">{{__('Mirror user')}} {{$currentsystem200 == "" ? "200" : "300"}}</label>
+                                        <input id="mirror_user1" type="text" name="mirror_user1" class="form-control"  maxlength="20"
+                                               style="display: inline-block; margin-left: 5px; width: 7.5rem;" value="{{$user->mirror_user1}}">
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group row" id="rgroup_div">
+                                    <label for="rgroup"
+                                           class="col-md-2 col-form-label text-md-left">Reporting group</label>
+
+                                    <div class="col-md-2">
+                                        <input id="rgroup" type="text" name="rgroup" class="form-control" maxlength="2" style="width: 3rem;"
+                                               value="{{$user->rgroup}}">
                                     </div>
                                 </div>
 
