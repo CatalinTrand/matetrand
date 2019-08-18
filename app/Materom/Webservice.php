@@ -547,13 +547,16 @@ class Webservice
 
     static public function sendInquiry($ebeln, $ebelp, $text, $to)
     {
+        $pitem = DB::table(System::$table_pitems)->where(['ebeln' => $ebeln, 'ebelp' => $ebelp])->first();
+        $porder = DB::Select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
         $order = SAP::alpha_output($ebeln) . "/" . SAP::alpha_output($ebelp);
         $duser = "";
         $stage = '';
+        $newval = "";
+        $result = "";
         $internal = 0;
         if ($to[0] == 'F') {
             $stage = 'F';
-            $porder = DB::Select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
             $lifnr = $porder->lifnr;
             $duser = DB::table("users")->where([["role", "=", "Furnizor"],
                 ["lifnr", "=", $lifnr],
@@ -562,7 +565,6 @@ class Webservice
         }
         if ($to[0] == 'R') {
             $stage = 'R';
-            $porder = DB::select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
             $ekgrp = $porder->ekgrp;
             $duser = DB::table("users")->where([["role", "=", "Referent"],
                 ["ekgrp", "=", $ekgrp],
@@ -571,7 +573,6 @@ class Webservice
             if (Auth::user()->role == "CTV") $internal = 1;
         }
         if ($to[0] == 'C') {
-            $pitem = DB::table(System::$table_pitems)->where(['ebeln' => $ebeln, 'ebelp' => $ebelp])->first();
             if ($pitem->vbeln != Orders::stockorder)
                 $order = SAP::alpha_output($pitem->vbeln) . "/" . SAP::alpha_output($pitem->posnr);
             $stage = 'C';
@@ -583,13 +584,38 @@ class Webservice
             if (Auth::user()->role == "Referent") $internal = 1;
         }
 
+        if (strtoupper($to[0]) == 'P') {
+            list($cause, $solution, $details) = explode("//@@//", $text);
+            $newval = __("Neconformitati receptie");
+            $status = " ";
+            if ($to[0] == "p") {
+                $status = "X";
+                $newval = __("Rezolvat") . ": ". $newval;
+            }
+            $result = SAP::setPnadData($ebeln, $ebelp, $cause, $solution, $details, $status);
+            $text = $details;
+            if (!empty(trim($cause))) $text .= __(" /cauza").": ".$cause;
+            if (!empty(trim($solution))) $text .= __(" /solutie").": ".$solution;
+        }
+
         $uId = Auth::id();
         $uName = Auth::user()->username;
         $cdate = now();
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, stage, reason) VALUES " .
-            "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$stage', '$text')");
-        Mailservice::sendMessageCopy($duser, $uName, $order, $text);
-        \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
+        if (strtoupper($to[0]) == "P") {
+            $stage = 'R';
+            if (!empty($result))
+                \Session::put("alert-danger", $result);
+            else {
+                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
+                    "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
+                \Session::put("alert-success", __("Raportarea starii neconformitatii a fost efectuata cu succes."));
+            }
+        } else {
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
+                "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
+            Mailservice::sendMessageCopy($duser, $uName, $order, $text);
+            \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
+        }
         return "";
     }
 
@@ -762,6 +788,20 @@ class Webservice
             ["cdate", "=", $cdate],
             ["pos", "=", $pos]
         ])->first();
+
+        $now = now();
+
+        $ddays = (new Carbon($cdate))->diffInWeekDays(now());
+        if ($ddays > 0) {
+            $old_lfdat = substr($proposal->lfdat, 0, 10);
+            $new_lfdat = (new Carbon($old_lfdat))->addWeekdays($ddays);
+            $proposal->lfdat = substr($new_lfdat, 0, 10);
+            $message = "Delivery date adjusted from $old_lfdat to $proposal->lfdat due to delayed approval";
+            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, acknowledged, cuser, cuser_name, reason) values " .
+                "('$ebeln','$ebelp', 'E', 'C', '$now', 1, '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
+            $now->addSecond();
+        }
+
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
         if (($proposal->lifnr == $porder->lifnr) && (trim($proposal->idnlf) == trim($item->orig_idnlf))) {
@@ -778,7 +818,6 @@ class Webservice
             $tmp_sales_price = $proposal->sales_price;
             $tmp_sales_curr = $proposal->sales_curr;
             if (strlen($tmp_sales_curr) > 3) $tmp_sales_curr = substr($tmp_sales_curr, 0, 3);
-            $now = now();
             DB::beginTransaction();
             DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '" . $item->stage . "', status = 'A', " .
                 "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
@@ -823,7 +862,6 @@ class Webservice
         DB::beginTransaction();
         DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X'" . $set_new_lifnr .
             " where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        $now = now();
         DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 0, 'A', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");

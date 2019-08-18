@@ -58,6 +58,7 @@ class POrderItem
     public $shipto;      // VBPA-KUNNR WE
     public $ctv;         // KNVH-HKUNNR or VBAK-ERNAM
     public $ctv_name;    // cache (just for performance)
+    public $ctv_man;     // CTV modified manually
     public $deldate;     // inbound delivery confirmation date
     public $delqty;      // inbound qty
     public $grdate;      // goods receipt date
@@ -67,6 +68,14 @@ class POrderItem
     public $new_lifnr;   // new vendor, if initial one was rejected
     public $werks;       // plant
     public $elikz;       // delivery completed
+
+    // PNAD
+    public $qty_received; // plus/minue
+    public $qty_invoiced; // plus/minue
+    public $qty_diff;    // plus/minue
+    public $qty_damaged; // damaged
+    public $qty_details;
+    public $qty_solution;
 
     // computed/determined fields
     public $sorder;      // sales order to be displayed
@@ -145,6 +154,7 @@ class POrderItem
         $this->shipto = $pitem->shipto;
         $this->ctv = $pitem->ctv;
         $this->ctv_name = $pitem->ctv_name;
+        $this->ctv_man = $pitem->ctv_man;
         $this->deldate = $pitem->deldate;
         $this->delqty = $pitem->delqty;
         $this->grdate = $pitem->grdate;
@@ -158,6 +168,12 @@ class POrderItem
         $this->new_lifnr = $pitem->new_lifnr;
         $this->werks = $pitem->werks;
         $this->elikz = $pitem->elikz;
+        $this->qty_received = "";
+        $this->qty_invoiced = "";
+        $this->qty_diff = $pitem->qty_diff;
+        $this->qty_damaged = $pitem->qty_damaged;
+        $this->qty_details = $pitem->qty_details;
+        $this->qty_solution = $pitem->qty_solution;
         $this->changes = array();
     }
 
@@ -188,6 +204,7 @@ class POrderItem
             $this->shipto_name = "";
             $this->ctv = "";
             $this->ctv_name = "";
+            $this->ctv_man = 0;
             $this->posnr_out = "";
             if ($this->sorder != Orders::stockorder) $this->sorder = Orders::salesorder;
         } else {
@@ -477,7 +494,7 @@ class POrderItem
 
         $this->tools = 0;
         if ($history == 1 || $history == 2) {
-            if (Auth::user()->role == "Administrator" && Auth::user()->readonly != 1)
+            if ((Auth::user()->role == "Administrator") && Auth::user()->readonly != 1)
                 $this->tools = 1;
         }
 
@@ -489,7 +506,8 @@ class POrderItem
             $this->inquired = 0;
             $this->inq_reply = 0;
         } else {
-            if ($this->grdate != null) {
+            if ($this->elikz == "X") $this->info = 6;
+            else if ($this->grdate != null) {
                 $this->info = 7;
                 if (explode(" ", $this->delqty)[0] >= $this->qty) $this->info = 6;
             }

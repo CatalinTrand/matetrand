@@ -88,6 +88,9 @@ Route::get('webservice/unarchive_item','WebserviceController@unarchiveItem');
 Route::get('webservice/rollback_item','WebserviceController@rollbackItem');
 Route::post('webservice/xlsfileupload','WebserviceController@xlsFileUpload');
 Route::get('webservice/xlsfiledownload','WebserviceController@xlsFileDownload');
+Route::get('webservice/sap_poitem_dlvcompleted', 'WebserviceController@markPOItemDeliveryCompleted');
+Route::get('webservice/sap_poitem_backorder', 'WebserviceController@markPOItemBackorder');
+Route::get('webservice/sap_read_pnad_dd', 'WebserviceController@sapReadPnadDD');
 
 // Global data
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');

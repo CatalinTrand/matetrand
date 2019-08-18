@@ -126,8 +126,10 @@ class POrderItemChg
                 $this->text = __("Termen incert de livrare, s-au cerut informatii suplimentare de la furnizor");
                 break;
             case "E":
-                if (empty($this->duser)) $this->text = __("Generic message");
-                else $this->text = __("Message to") . " ". $this->duser;
+                if (empty($this->duser)) {
+                    $this->text = __("Generic message");
+                    if (!empty(trim($this->newval))) $this->text = $this->newval;
+                } else $this->text = __("Message to") . " ". $this->duser;
                 break;
             case "S":
                 $this->text = __("Item split proposed");

@@ -8,6 +8,7 @@ use App\Materom\Orders;
 use App\Materom\SAP\MasterData;
 use App\Materom\Statistics;
 use App\Materom\System;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
@@ -38,7 +39,6 @@ class WebserviceController extends Controller
     {
         $this->tryAuthAPIToken();
         if (Auth::user() == null) return "API authentication failed";
-        Mailservice::sendRefSupReminderMail(["mode" => 2, "user" => "f10068"]);
     }
 
     public function rfcPing()
@@ -673,4 +673,21 @@ class WebserviceController extends Controller
 
     }
 
+    public function markPOItemDeliveryCompleted()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+
+        $ebeln = Input::get("ebeln");
+        $ebelp = Input::get("ebelp");
+        $dlvcompleted = Input::get("dlvcompleted");
+        return SAP::markPOItemDeliveryCompleted($ebeln, $ebelp, $dlvcompleted);
+    }
+
+    public function sapReadPnadDD()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+        return SAP::readPnadDD();
+    }
 }

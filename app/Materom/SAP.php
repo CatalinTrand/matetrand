@@ -178,7 +178,7 @@ class SAP
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_CHANGE_ITEM');
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_CHANGE_ITEM2');
             $result = $sapfm->invoke(['I_EBELN' => $ebeln,
                                       'I_EBELP' => $ebelp,
                                       'I_MATNR' => "",
@@ -188,6 +188,37 @@ class SAP
                                       'I_EINDT' => $new_eindt,
                                       'I_ACKFLAG' => 'N' ])["E_MESSAGE"];
             $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+    }
+
+    static public function markPOItemDeliveryCompleted($ebeln, $ebelp, $dlvcompleted = true) {
+
+        $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        if (($dlvcompleted && $item->elikz == "X") || (!$dlvcompleted && empty(trim($item->elikz)))) return "";
+        $item->elikz = $dlvcompleted ? "X" : "";
+
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return;
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return;
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_CHANGE_ITEM2');
+            $result = $sapfm->invoke(['I_EBELN' => $ebeln,
+                                      'I_EBELP' => $ebelp,
+                                      'I_DLVCOMPLETED' => $dlvcompleted ? "Y" : "N"
+                                    ])["E_MESSAGE"];
+            $sapconn->close();
+            if (empty(trim($result)))
+                DB::update("update ". System::$table_pitems. " set elikz = '$item->elikz' where ebeln = '$ebeln' and ebelp ='$ebelp'");
             return $result;
         } catch (\SAPNWRFC\Exception $e) {
 //          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
@@ -292,6 +323,10 @@ class SAP
                         ", grqty = '$item->grqty'" .
                         ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
                         ", elikz = '$item->elikz'" .
+                        ", qty_diff = '$item->qty_diff'" .
+                        ", qty_damaged = '$item->qty_damaged'" .
+                        ", qty_solution = '$item->qty_solution'" .
+                        ", qty_details = '$item->qty_details'" .
                         " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
                     if ($ebeln <> $item->ebeln) {
                         $ebeln = $item->ebeln;
@@ -350,6 +385,10 @@ class SAP
                 $item->hdrqty_delivered = trim($item->HDRQTY_DELIVERED); unset($item->HDRQTY_DELIVERED);
                 $item->hdrqty_open = trim($item->HDRQTY_OPEN); unset($item->HDRQTY_OPEN);
                 $item->hdrqty_invoiced = trim($item->HDRQTY_INVOICED); unset($item->HDRQTY_INVOICED);
+                $item->qty_diff = trim($item->QTY_DIFF); unset($item->QTY_DIFF);
+                $item->qty_damaged = trim($item->QTY_DAMAGED); unset($item->QTY_DAMAGED);
+                $item->qty_solution = trim($item->QTY_SOLUTION); unset($item->QTY_SOLUTION);
+                $item->qty_details = trim($item->QTY_DETAILS); unset($item->QTY_DETAILS);
             }
             usort($items, function($item_a, $item_b)
             {
@@ -713,5 +752,65 @@ class SAP
         }
     }
 
+    public static function readPnadDD()
+    {
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_PNAD_DDIC');
+            $result = $sapfm->invoke([]);
+            $data = new \stdClass();
+            $tmp = $result["PEJ_CAUSE"];
+            $data->cause = json_decode($tmp);
+//            $data->cause = json_decode($result["PEJ_CAUSE"]);
+            $tmp = $result["PEJ_SOLUTION"];
+            $data->solution = json_decode($tmp);
+//            $data->solution = json_decode($result["PEJ_SOLUTION"]);
+            $sapconn->close();
+            return json_encode($data);
+        } catch (\SAPNWRFC\Exception $e) {
+            Log::error("Error writing ZPRET: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
+            return $e->getMessage();
+        }
+        return "{'cause':[{value:'XX','text':'undefined'}],solution:[{'value':'XX','text':'undefined'}]}";
+    }
+
+    public static function setPnadData($ebeln, $ebelp, $cause, $solution, $details, $status)
+    {
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_SET_PNAD_DATA');
+            $result = $sapfm->invoke([
+                'I_EBELN' => $ebeln,
+                'I_EBELP' => $ebelp,
+                'I_CAUSE' => $cause,
+                'I_SOLUTION' => $solution,
+                'I_DETAILS' => $details,
+                'I_STATUS' => $status
+            ]);
+            return $result["E_MESSAGE"];
+        } catch (\SAPNWRFC\Exception $e) {
+            Log::error("Error setting PNAD data: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
+            return $e->getMessage();
+        }
+        return null;
+    }
 
 };

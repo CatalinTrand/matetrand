@@ -336,12 +336,26 @@
             display: none;
         }
 
+        .delivery-date-menu {
+            width: 18em;
+            position: absolute;
+            display: none;
+        }
+
         .ui-menu .ui-menu-item.ui-state-focus{
             border: none;
             background-image: none;
             background-color: #eee;
         }
 
+        .leftInquiryDialogButton {
+            position: absolute;
+            left: 16px;
+            background-color: #9DC0F8;
+        }
+        .leftInquiryDialogButton:hover {
+            background-color: #9DB0E8;
+        }
 
     </style>
 </head>

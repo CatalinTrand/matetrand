@@ -545,7 +545,7 @@
                         </div>
                     </div>
                     <div style="margin-left: -0.7rem; overflow: scroll;">
-                        <div class="card-body orders-table-div" style="height: 65.5vh; padding-top: 0px; padding-right: 4px; width: 100%;">
+                        <div class="card-body orders-table-div" style="height: 65.5vh; padding-top: 0px; padding-right: 4px; width: 132%;">
                             <table style="table-layout: fixed;"
                                    class="orders-table basicTable table table-striped" id="orders_table">
                                 <colgroup>
@@ -587,11 +587,12 @@
                                     <col style="width:2.5%;">
                                     <col style="width:2%;">
                                     <col style="width:2.5%;">
-                                    <col style="width:2.5%;">
-                                    <col style="width:2.5%;">
-                                    <col style="width:2.5%;">
-                                    <col style="width:2.6%;">
-                                    <col style="width:2.5%;"> <!-- 24,3 -->
+                                    <col style="width:3.5%;">
+                                    <col style="width:3.5%;">
+                                    <col style="width:3.5%;">
+                                    <col style="width:3.5%;">
+                                    <col style="width:3.5%;">
+                                    <col style="width:25%;">
 
                                 </colgroup>
                                 <tr>
@@ -670,7 +671,7 @@
                                         echo "<th colspan=2>$th7b</th>";
                                         echo "<th colspan=2>$th7c</th>";
                                         echo "<th colspan=2>$th7d</th>";
-                                        for ($i = 0; $i < 2; $i++) echo "<th>&nbsp;</th>";
+                                        for ($i = 0; $i < 4; $i++) echo "<th>&nbsp;</th>";
                                     } else {
                                         echo "<th colspan=2>$th1</th>";
                                         echo "<th colspan=5>$th2</th>";
@@ -679,7 +680,7 @@
                                         echo "<th colspan=2>$th5</th>";
                                         echo "<th colspan=5>$th6</th>";
                                         echo "<th>$th7</th>";
-                                        for ($i = 0; $i < 5; $i++) echo "<th>&nbsp;</th>";
+                                        for ($i = 0; $i < 7; $i++) echo "<th>&nbsp;</th>";
                                     }
                                     @endphp
                                 </tr>
@@ -810,12 +811,21 @@
                                         } else {
                                             $oid = "S" . $order->vbeln;
                                             if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
+                                                $ctv_class = "td02";
+                                                $change_ctv = "";
+                                                $change_ctv2 = "";
+                                                if ($order->ctv_changeable != 0) {
+                                                    $ctv_class = "td02h";
+                                                    $change_ctv = "onclick=\"change_ctv(this, '$order->vbeln');return false;\"";
+                                                    $change_ctv2 = "onclick=\"change_ctv(this.previousSibling, '$order->vbeln');return false;\"";
+                                                }
+                                                if ($order->ctv_man != 0) $ctv_class .= "_c";
                                                 $data = "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->kunnr) . "</td>" .
                                                         "<td class='td02' colspan=5>$order->kunnr_name</td>" .
                                                         "<td class='td02' colspan=2>" . \App\Materom\SAP::alpha_output($order->shipto) . "</td>" .
                                                         "<td class='td02' colspan=5>$order->shipto_name</td>" .
-                                                        "<td class='td02' colspan=2>$order->ctv</td>" .
-                                                        "<td class='td02' colspan=5>$order->ctv_name</td>".
+                                                        "<td class='$ctv_class' $change_ctv colspan=2>$order->ctv</td>" .
+                                                        "<td class='$ctv_class' $change_ctv2 colspan=5>$order->ctv_name</td>".
                                                         "<td></td>";
                                             } else {
                                                 $data = "<td class='td02' colspan=2>&nbsp;</td>" .
@@ -823,7 +833,7 @@
                                                         "<td class='td02' colspan=2>&nbsp;</td>" .
                                                         "<td class='td02' colspan=5>&nbsp;</td>" .
                                                         "<td class='td02' colspan=2>&nbsp;</td>" .
-                                                        "<td class='td02' colspan=5>&nbsp;</td>".
+                                                        "<td class='td02' colspan=7>&nbsp;</td>".
                                                         "<td></td>";
                                             }
 
@@ -906,7 +916,7 @@
                                                  "<td>$owner_icon</td>" .
                                                  "<td colspan='7'></td>" .
                                                  "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
-                                                 "$data<td colspan='5'></td></tr>";
+                                                 "$data<td colspan='7'></td></tr>";
                                         }
                                     }
                                 @endphp
@@ -934,6 +944,14 @@
         <li><div id="mass-change-menu-download" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-circle-arrow-s"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Download position list data")}}</div></li>
         <li>-</li>
         <li><div id="mass-change-menu-upload" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-circle-arrow-n"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Upload position list changes")}}</div></li>
+    </ul>
+
+    <ul class="delivery-date-menu" id="delivery-date-menu">
+        <li><div id="delivery-date-menu-mark-delivered" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-circle-check"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Mark item as fully delivered")}}</div></li>
+        <!--
+        <li>-</li>
+        <li><div id="delivery-date-menu-mark-backorder" style="padding: 6px; font-weight: bold;"><span class="ui-icon ui-icon-circle-check"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{__("Mark item as backorder")}}</div></li>
+        -->
     </ul>
 
     <script>
@@ -1360,7 +1378,7 @@
             cols += '<td colspan="2"><b>{{__("Livrat")}}</b></td>';
             cols += '<td colspan="2"><b>{{__("Inca de livrat")}}</b></td>';
             cols += '<td colspan="2"><b>{{__("Facturat")}}</b></td>';
-            cols += '<td colspan="1"></td>';
+            cols += '<td colspan="3"></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
@@ -1475,7 +1493,7 @@
                 cols += '<td class="td02" colspan="2">' + porder.qty_delivered + '</td>';
                 cols += '<td class="td02" colspan="2">' + porder.qty_open + '</td>';
                 cols += '<td class="td02" colspan="2">' + porder.qty_invoiced + '</td>';
-                cols += '<td class="td02" colspan="1"></td>';
+                cols += '<td class="td02" colspan="3"></td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
                 if (i % 2 == 0)
@@ -1520,10 +1538,13 @@
             @endif
             // cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
             // cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: left;"><b></b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: right;"><b></b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Recept.")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Facturat")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Plus/Min")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Avariate")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Detalii/solutie")}}</b></td>';
             if (colsafter > 0)
                 cols += '<td class="td02" colspan="' + colsafter + '"></td>';
             newRow.append(cols).hide();
@@ -1697,16 +1718,19 @@
                     cols += '<td class="' + quantity_class + '" colspan="1" style="text-align: right;">' + pitem.x_quantity + '</td>';
                 }
 
+                let delivery_date_contextmenu = "";
+                if (pitem.status == "A") delivery_date_contextmenu = " oncontextmenu=\"delivery_date_oncontenxtmenu(event, '" + pitem.ebeln + "', '" + pitem.ebelp + "', " + pitem.delivery_date_changeable.toString() + ");return false;\"";
+
                 if ((pitem.delivery_date_changeable == 1) || ((pitem.delivery_date_changeable == 2))) {
                     let delivery_date_class = "td02h";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
                     let change_delivery_date_func = "change_delivery_date";
                     if (pitem.delivery_date_changeable == 2) change_delivery_date_func = "change_delivery_date2";
-                    cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="' + change_delivery_date_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\', ' + pitem.backorder + ');" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
+                    cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="' + change_delivery_date_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\', ' + pitem.backorder + ');" style="padding-left: 0.5rem;"' + delivery_date_contextmenu + '>' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 } else {
                     let delivery_date_class = "td02";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
-                    cols += '<td class="' + delivery_date_class + '" colspan="2" style="padding-left: 0.5rem;">' + pitem.x_delivery_date.split(' ')[0] + '</td>';
+                    cols += '<td class="' + delivery_date_class + '" colspan="2" style="padding-left: 0.5rem;"' + delivery_date_contextmenu + '>' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 }
 
                 let dodays = pitem.dodays;
@@ -1745,10 +1769,13 @@
                 if (pitem.grdate != null)
                     grdate = pitem.grdate.split(' ')[0];
 
-                cols += '<td class="td02" colspan="2" style="text-align: left;">' + '' + '</td>';
-                cols += '<td class="td02" colspan="2" style="text-align: right;">' + '' + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: left;">' + grdate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_received + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_invoiced + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_diff + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_damaged + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + pitem.qty_details + '</td>';
 
 
                 @if ($groupByPO != 4)
@@ -1788,10 +1815,10 @@
             var first_style = "background-color:" + first_color;
             cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
             @if ($groupByPO == 4)
-                let colsafter = "8";
+                let colsafter = "10";
                 cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
             @else
-                let colsafter = "9";
+                let colsafter = "11";
             @endif
             cols += '<td class="coloured" style="' + last_style + '"></td>';
             cols += '<td style="' + po_style + '"></td>';
@@ -1819,10 +1846,10 @@
                 let first_style = "background-color:" + first_color;
                 cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
                 @if ($groupByPO == 4)
-                    let colsreason = "10";
+                    let colsreason = "12";
                     cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
                 @else
-                    let colsreason = "10";
+                    let colsreason = "12";
                 @endif
                 cols += '<td class="coloured" style="' + last_style + '"></td>';
                 cols += '<td style="' + pi_style + '"></td>';
@@ -2303,7 +2330,7 @@
             return false;
         }
 
-        var change_cell, change_type, type_string, change_ebeln, change_ebelp, changeDialog, changeForm;
+        var change_cell, change_type, type_string, change_ebeln, change_ebelp, change_vbeln, changeDialog, changeForm;
 
         $(function () {
             changeDialog = $("#change-dialog").dialog({
@@ -2315,13 +2342,17 @@
                     Change: function () {
                         let new_val = $("#new_chg_val").val().trim();
                         if (new_val.length > 0) {
-                            if (doChangeItem(change_type, new_val, $("#new_val_hlp").text(),
-                                change_cell.innerHTML, change_ebeln, change_ebelp, $("#item_backorder").is(":checked"))) {
-                                change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
-                                $("#new_chg_val").text("");
-                                $("#new_val_hlp").text("");
-                                changeDialog.dialog("close");
-                                location.reload(true);
+                            if (type_string != "CTV") {
+                                if (doChangeItem(change_type, new_val, $("#new_val_hlp").text(),
+                                    change_cell.innerHTML, change_ebeln, change_ebelp, $("#item_backorder").is(":checked"))) {
+                                    change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
+                                    $("#new_chg_val").text("");
+                                    $("#new_val_hlp").text("");
+                                    changeDialog.dialog("close");
+                                    location.reload(true);
+                                }
+                            } else {
+                                alert("CTV-ul nu este definit");
                             }
                         } else {
                             alert("{{__('Enter a correct value')}}");
@@ -2424,6 +2455,94 @@
             $("#item_backorder").prop("checked", backorder != 0);
             $("#item_backorder").prop("disabled", backorder != 0);
             changeDialog.dialog("open");
+        }
+
+        function change_ctv(cell, vbeln) {
+
+            change_cell = cell;
+            change_type = 1;
+            let old_value = cell.innerHTML;
+            change_vbeln = vbeln;
+            type_string = "CTV";
+
+
+            $("#old_chg_val").text("CTV-ul existent: " + old_value);
+            $("#new_chg_val").val("");
+            $("#new_val_txt").text("Introduceti noul CTV:");
+            $("#new_val_hlp").text("");
+            $("#change-dialog").dialog('option', 'title', 'Modificare CTV comanda ' + conv_exit_alpha_output(vbeln));
+            $("#backorder-row").hide();
+            changeDialog.dialog("open");
+        }
+
+        function delivery_date_oncontenxtmenu(e, ebeln, ebelp, deldatechangeable) {
+            $(".ui-tooltip").hide();
+            $("#delivery-date-menu-mark-delivered").unbind("click");
+            $("#delivery-date-menu-mark-delivered").click(function(){delivery_date_menu_mark_delivered(ebeln, ebelp)});
+            /*
+            $("#delivery-date-menu-mark-backorder").unbind("click");
+            if (deldatechangeable != 0) {
+                $("#delivery-date-menu-mark-backorder").removeClass("ui-state-disabled");
+                $("#delivery-date-menu-mark-backorder").click(function(){delivery_date_menu_mark_backorder(ebeln, ebelp)});
+            } else {
+                $("#delivery-date-menu-mark-backorder").addClass("ui-state-disabled");
+            }
+            */
+            e.preventDefault();
+            e.stopPropagation();
+            $("#delivery-date-menu").menu().toggle().position({
+                my: "left top",
+                at: "left+2px top+2px",
+                of: e,
+                collision: "none"}
+            );
+        }
+
+        function delivery_date_menu_mark_delivered(ebeln, ebelp, dlvcompleted = true) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _data, _status;
+            $.get("webservice/sap_poitem_dlvcompleted",
+                {
+                    ebeln: ebeln,
+                    ebelp: ebelp,
+                    dlvcompleted: dlvcompleted
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_status != "success") alert("An error occurred setting the delivery completed flag");
+            else if(_data != null && _data.trim().length != 0) alert(_data);
+            else location.reload();
+        }
+
+        function delivery_date_menu_mark_backorder(ebeln, ebelp) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            var _data, _status;
+            $.get("webservice/sap_poitem_backorder",
+                {
+                    ebeln: ebeln,
+                    ebelp: ebelp
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_status != "success") alert("An error occurred marking the position as a backorder");
+            else if(_data != null && _data.trim().length != 0) alert(_data);
+            else location.reload();
         }
 
         function change_eta_date(cell, ebeln, ebelp) {
@@ -2682,8 +2801,11 @@
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
+            $("#order-tools-menu-archive").unbind("click");
             $("#order-tools-menu-archive").click(function(){item_tools_archive(porder, item, currentrow)});
+            $("#order-tools-menu-unarchive").unbind("click");
             $("#order-tools-menu-unarchive").click(function(){item_tools_unarchive(porder, item, currentrow)});
+            $("#order-tools-menu-rollback").unbind("click");
             $("#order-tools-menu-rollback").click(function(){item_tools_rollback(porder, item, currentrow)});
             e.stopPropagation();
             $("#order-tools-menu").menu().toggle().position({
@@ -2695,7 +2817,6 @@
         }
 
         function item_tools_archive(porder, item, currentrow) {
-            $("#order-tools-menu-archive").unbind("click");
             swal({
                 title: "{{__('Confirmation')}}",
                 text: "{{__('Are you sure you want to archive this item now?')}}",
@@ -2727,7 +2848,6 @@
         }
 
         function item_tools_unarchive(porder, item, currentrow) {
-            $("#order-tools-menu-unarchive").unbind("click");
             swal({
                 title: "{{__('Confirmation')}}",
                 text: "{{__('Are you sure you want to unarchive this item now?')}}",
@@ -2759,7 +2879,6 @@
         }
 
         function item_tools_rollback(porder, item, currentrow) {
-            $("#order-tools-menu-rollback").unbind("click");
             swal({
                 title: "{{__('Confirmation')}}",
                 text: "{{__('Are you sure you want to rollback this item now?')}}",
@@ -2806,6 +2925,7 @@
         $(document).on("click", function(e){
             $("#order-tools-menu").hide();
             $("#mass-change-menu").hide();
+            $("#delivery-date-menu").hide();
         });
 
     </script>

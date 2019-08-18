@@ -271,8 +271,8 @@ class Orders
                     $psql .= " ('$cacheid', '$prev_ebeln', '$cache_date'),";
                 }
                 $isql .= " ('$cacheid', '$item->ebeln', '$item->ebelp', '$item->vbeln', '$cache_date'),";
-                if (++$count >= 10000) {
-                    \Session::put("alert-danger", "You have selected too many order items, only the first $count will be shown. Please restrict your selection.");
+                if (++$count >= 5000) {
+                    \Session::put("alert-danger", "You have selected too many order items, only the first $count are shown below. Please restrict your selection.");
                     break;
                 }
             }
@@ -487,6 +487,7 @@ class Orders
                     $sorder = isset($orders[$vbeln]) ? $orders[$vbeln] : null;
                     if (!isset($sorder)) {
                         $sorder = new \stdClass();
+                        $sorder->ebeln = $porder->ebeln;
                         $sorder->info = $porder->info;
                         $sorder->wtime = $porder->wtime;
                         $sorder->ctime = $porder->ctime;
@@ -498,6 +499,7 @@ class Orders
                         $sorder->shipto_name = $pitem->shipto_name;
                         $sorder->ctv = $pitem->ctv;
                         $sorder->ctv_name = $pitem->ctv_name;
+                        $sorder->ctv_man = $pitem->ctv_man;
 
                         $sorder->info = 0;     // 0=empty, 1=new order, 2=warning, 3=critical, 4=new message
                         $sorder->owner = 0;    // 0=no, 1=direct, 2=indirect
@@ -511,6 +513,13 @@ class Orders
                         $sorder->accept = 0;   // 0-no, 1=display
                         $sorder->reject = 0;   // 0=no, 1=display
                         $sorder->inquire = 0;  // 0=no
+
+                        $sorder->ctv_changeable = 0;
+                        if (Auth::user()->role == "Administrator" ||
+                            (Auth::user()->role == "CTV" && Auth::user()->ctvadmin != 0))
+                        {
+                            $sorder->ctv_changeable = 1;
+                        }
 
                         $orders[$sorder->vbeln] = $sorder;
 
