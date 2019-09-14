@@ -398,7 +398,9 @@
 
         let defmargin = itemdata.defmargin.trim();
         if (defmargin.length == 0) defmargin = "<>";
-        else defmargin = parseFloat(defmargin).toFixed(2);
+        else {
+            defmargin = parseFloat(defmargin).toFixed(2);
+        }
 
         if (type == 1) {
             $("#ar-immed-lifnr2").val(conv_exit_alpha_output(itemdata.lifnr));
@@ -421,8 +423,8 @@
             scurr.val(itemdata.sales_curr); check_currency(scurr[0]);
             let pp = cvfx(itemdata.orig_purch_price, itemdata.purch_curr, itemdata.sales_curr);
             let amt = itemdata.sales_price - pp;
-            $("#ar-immed-defmargin-amt2").val(amt.toFixed(2));
-            $("#ar-immed-old-sales-margin-amt2").val(amt.toFixed(2));
+            $("#ar-immed-defmargin-amt2").val(itemdata.sales_curr.trim() == "HUF"? amt.toFixed(0) : amt.toFixed(2));
+            $("#ar-immed-old-sales-margin-amt2").val(itemdata.sales_curr.trim() == "HUF"? amt.toFixed(0) : amt.toFixed(2));
             $("#ar-immed-new-sales-curr2").val(itemdata.sales_curr);
             $("#ar-immed-net-curr2").val(itemdata.sales_curr);
             $("#ar-immed-new-sales-margin-curr2").val(itemdata.sales_curr);
@@ -993,11 +995,13 @@
         }
         if (margin == 0) margin = parseFloat($("#"+dlg+"-old-sales-margin-perc2").val());
         pprice = parseFloat(pprice);
-        _this.oldvalue = pprice.toFixed(2);
-        let cpprice = cvfx(pprice, $("#"+dlg+"-purch-curr2").val(), $("#"+dlg+"-sales-curr2").val());
+        let pcurr = $("#"+dlg+"-purch-curr2").val().trim();
+        _this.oldvalue = pcurr == "HUF"? pprice.toFixed(0) : pprice.toFixed(2);
+        let scurr = $("#"+dlg+"-sales-curr2").val().trim();
+        let cpprice = cvfx(pprice, pcurr, scurr);
         let sprice = (cpprice * (1 + margin / 100));
-        $("#"+dlg+"-sales-price2").val(sprice.toFixed(2));
-        $("#"+dlg+"-defmargin-amt2").val((sprice - cpprice).toFixed(2));
+        $("#"+dlg+"-sales-price2").val(scurr == "HUF" ? sprice.toFixed(0) : sprice.toFixed(2));
+        $("#"+dlg+"-defmargin-amt2").val(scurr == "HUF" ? (sprice - cpprice).toFixed(0) : (sprice - cpprice).toFixed(2));
         $("#"+dlg+"-new-sales-margin-amt2").val("");
         $("#"+dlg+"-new-sales-margin-perc2").val("");
         $("#"+dlg+"-new-sales-price2").val("");
@@ -1020,28 +1024,30 @@
         if (margin == 0) margin = parseFloat($("#"+dlg+"-old-sales-margin-perc2").val());
         let pprice = $("#"+dlg+"-purch-price2").val().trim();
         let cpprice = 0;
+        let pcurr = $("#"+dlg+"-purch-curr2").val().trim();
+        let scurr = $("#"+dlg+"-sales-curr2").val().trim();
         if (pprice.length == 0 || !$.isNumeric(pprice)) pprice = 0;
         else {
             pprice = parseFloat(pprice);
-            cpprice = cvfx(pprice, $("#"+dlg+"-purch-curr2").val(), $("#"+dlg+"-sales-curr2").val());
+            cpprice = cvfx(pprice, pcurr, scurr);
         }
         let sprice = $("#"+dlg+"-sales-price2").val().trim();
         if (sprice.length == 0) {
             sprice = (cpprice * (1 + margin / 100));
-            $("#"+dlg+"-sales-price2").val(sprice.toFixed(2));
-            _this.oldvalue = sprice.toFixed(2);
-            $("#"+dlg+"-defmargin-amt2").val((sprice - cpprice).toFixed(2));
+            $("#"+dlg+"-sales-price2").val(scurr == "HUF" ? sprice.toFixed(0) : sprice.toFixed(2));
+            _this.oldvalue = scurr == "HUF" ? sprice.toFixed(0) : sprice.toFixed(2);
+            $("#"+dlg+"-defmargin-amt2").val(scurr == "HUF" ? (sprice - cpprice).toFixed(0) : (sprice - cpprice).toFixed(2));
             return;
         } else {
             if (!$.isNumeric(sprice)) {
                 $("#"+dlg+"-sales-price2").val(_this.oldvalue);
-                $("#"+dlg+"-defmargin-amt2").val("0.00");
+                $("#"+dlg+"-defmargin-amt2").val(scurr == "HUF" ? "0" : "0.00");
                 return;
             }
         }
         sprice = parseFloat(sprice);
-        $("#"+dlg+"-defmargin-amt2").val((sprice - cpprice).toFixed(2));
-        _this.oldvalue = sprice.toFixed(2);
+        $("#"+dlg+"-defmargin-amt2").val(scurr == "HUF" ? (sprice - cpprice).toFixed(0) : (sprice - cpprice).toFixed(2));
+        _this.oldvalue = scurr == "HUF" ? sprice.toFixed(0) : sprice.toFixed(2);
         $("#"+dlg+"-new-sales-margin-amt2").val("");
         $("#"+dlg+"-new-sales-margin-perc2").val("");
         $("#"+dlg+"-new-sales-price2").val("");
@@ -1053,6 +1059,7 @@
     }
 
     function ar2_new_sales_price2_check(event, _this, dlg) {
+        let scurr = $("#"+dlg+"-sales-curr2").val().trim();
         let nsprice = $("#"+dlg+"-new-sales-price2").val().trim();
         if (nsprice.length == 0) {
             let amt2 = $("#"+dlg+"-new-sales-margin-amt2").val().trim();
@@ -1069,15 +1076,15 @@
             }
             let sprice = $("#"+dlg+"-sales-price2").val().trim();
             nsprice = parseFloat(sprice) + parseFloat(amt2);
-            $("#"+dlg+"-new-sales-price2").val(nsprice.toFixed(2));
+            $("#"+dlg+"-new-sales-price2").val(scurr == "HUF" ? nsprice.toFixed(0) : nsprice.toFixed(2));
         } else {
             if (!$.isNumeric(nsprice)) {
-                $("#"+dlg+"-new-sales-price2").val(_this.oldvalue.toFixed(2));
+                $("#"+dlg+"-new-sales-price2").val(scurr == "HUF" ? _this.oldvalue.toFixed(0) : _this.oldvalue.toFixed(2));
                 return;
             }
             nsprice = parseFloat(nsprice);
         }
-        _this.oldvalue = nsprice.toFixed(2);
+        _this.oldvalue = scurr == "HUF" ? nsprice.toFixed(0) : nsprice.toFixed(2);
         $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
         ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
@@ -1104,8 +1111,9 @@
             return;
         }
         if (newamt == "-") newperc = 0; else newamt = parseFloat(newamt);
-        _this.oldvalue = newamt.toFixed(2);
+        let scurr = $("#"+dlg+"-sales-curr2").val().trim();
         let sprice = $("#"+dlg+"-sales-price2").val().trim();
+        _this.oldvalue = scurr == "HUF" ? newamt.toFixed(0) : newamt.toFixed(2);
         if (sprice.length == 0) sprice = "0";
         sprice = parseFloat(sprice);
         let newperc = 0;
@@ -1114,7 +1122,7 @@
         $("#"+dlg+"-new-sales-margin-perc2").val(newperc);
         $("#"+dlg+"-new-sales-margin-perc2").oldvalue = newperc;
         sprice += newamt;
-        $("#"+dlg+"-new-sales-price2").val(sprice.toFixed(2));
+        $("#"+dlg+"-new-sales-price2").val(scurr == "HUF" ? sprice.toFixed(0) : sprice.toFixed(2));
         $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
         ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
@@ -1141,14 +1149,15 @@
             return;
         }
         if (newperc == "-") newperc = 0; else newperc = parseFloat(newperc);
-        _this.oldvalue = newperc.toFixed(2);
+        let scurr = $("#"+dlg+"-sales-curr2").val().trim();
         let sprice = $("#"+dlg+"-sales-price2").val().trim();
+        _this.oldvalue = scurr == "HUF" ? newperc.toFixed(0) : newperc.toFixed(2);
         if (sprice.length == 0) sprice = "0";
         sprice = parseFloat(sprice);
         let newamt = sprice * (100 + newperc) / 100;
-        $("#"+dlg+"-new-sales-margin-amt2").val((newamt - sprice).toFixed(2));
-        $("#"+dlg+"-new-sales-margin-amt2").oldvalue = (newamt - sprice).toFixed(2);
-        $("#"+dlg+"-new-sales-price2").val(newamt.toFixed(2));
+        $("#"+dlg+"-new-sales-margin-amt2").val(scurr == "HUF" ? (newamt - sprice).toFixed(0) : (newamt - sprice).toFixed(2));
+        $("#"+dlg+"-new-sales-margin-amt2").oldvalue = scurr == "HUF" ? (newamt - sprice).toFixed(0) : (newamt - sprice).toFixed(2);
+        $("#"+dlg+"-new-sales-price2").val(scurr == "HUF" ? newamt.toFixed(0) : newamt.toFixed(2));
         $("#"+dlg+"-choose-new-sales-price2").prop("checked", true);
         ar2_choose_new_sales_price2_checkbox(_this, false, dlg);
         $("#"+dlg+"-choose-sales-price2").prop("disabled", false);
@@ -1172,7 +1181,8 @@
                 pprice = parseFloat(pprice);
                 cpprice = cvfx(pprice, $("#"+dlg+"-purch-curr2").val(), $("#"+dlg+"-sales-curr2").val());
             }
-            $("#"+dlg+"-defmargin-amt2").val((cpprice * ( 1 + margin) / 100).toFixed(2));
+            let pcurr = $("#"+dlg+"-purch-curr2").val().trim();
+            $("#"+dlg+"-defmargin-amt2").val(pcurr == "HUF"? (cpprice * ( 1 + margin) / 100).toFixed(0) : (cpprice * ( 1 + margin) / 100).toFixed(2));
         }
         update_net_price(dlg);
     }
@@ -1252,6 +1262,8 @@
         fxt = get_fx_rate(tocurr);
         if (fxf == 0 || fxt == 0) return amt;
         amt = parseFloat(amt);
+        if (fromcurr == "HUF") amt = amt / 100;
+        if (tocurr == "HUF") amt = amt * 100;
         return amt * fxf / fxt;
     }
 
@@ -1302,7 +1314,7 @@
             },
             function (data, status) {
                 if (status == "success" && data != undefined && data != null) {
-                    $("#"+dlg+"-net-price2").val(data.price.toFixed(2));
+                    $("#"+dlg+"-net-price2").val(data.curr == "HUF" ? data.price.toFixed(0) : data.price.toFixed(2));
                     $("#"+dlg+"-net-curr2").val(data.curr);
                     net_price_discounts = data.discounts;
                     sales_price = parseFloat(sales_price);
@@ -1314,14 +1326,14 @@
                     if (purch_price != 0)
                         net_price_new_rel_margin = net_price_new_abs_margin * 100 / purch_price;
                     let nam = net_price_new_abs_margin;
-                    net_price_new_abs_margin = net_price_new_abs_margin.toFixed(2).toString() + " " + sales_curr;
+                    net_price_new_abs_margin = (sales_curr == "HUF" ? net_price_new_abs_margin.toFixed(0) : net_price_new_abs_margin.toFixed(2)).toString() + " " + sales_curr;
                     net_price_new_rel_margin = net_price_new_rel_margin.toFixed(2).toString();
                     for (i = 0; i < net_price_discounts.length; i++) {
                         if (net_price_discounts[i].condition == "EK02") {
-                            net_price_discounts[i].price = purch_price.toFixed(2);
+                            net_price_discounts[i].price = purch_curr == "HUF" ? purch_price.toFixed(0) : purch_price.toFixed(2);
                             if (net_price_discounts[i].old_price != 0)
                                 net_price_discounts[i].delta = (purch_price - net_price_discounts[i].old_price) * 100 / net_price_discounts[i].old_price;
-                            net_price_discounts[i].delta = net_price_discounts[i].delta.toFixed(2);
+                            net_price_discounts[i].delta = purch_curr == "HUF" ? net_price_discounts[i].delta.toFixed(0) : net_price_discounts[i].delta.toFixed(2);
                         }
                     }
 
@@ -1335,7 +1347,7 @@
                     if (old_purch_price != 0)
                         net_price_old_rel_margin = net_price_old_abs_margin * 100 / old_purch_price;
                     let oam = net_price_old_abs_margin;
-                    net_price_old_abs_margin = net_price_old_abs_margin.toFixed(2).toString() + " " + old_sales_curr;
+                    net_price_old_abs_margin = (old_sales_curr == "HUF" ? net_price_old_abs_margin.toFixed(0) : net_price_old_abs_margin.toFixed(2)).toString() + " " + old_sales_curr;
                     net_price_old_rel_margin = net_price_old_rel_margin.toFixed(2).toString();
 
                     net_price_delta_abs_margin = 0;

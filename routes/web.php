@@ -43,6 +43,7 @@ Route::post('webservice/insertcustomer','WebserviceController@insertCustomer');
 Route::post('webservice/changepassword','WebserviceController@changePassword');
 Route::post('webservice/impersonate_as_user','WebserviceController@impersonateAsUser');
 Route::post('webservice/acceptitemchange','WebserviceController@acceptItemChange');
+Route::post('webservice/acceptitemlistchange','WebserviceController@acceptItemListChange');
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/dochangeitem','WebserviceController@doChangeItem');
 Route::post('webservice/sendAck','WebserviceController@sendAck');

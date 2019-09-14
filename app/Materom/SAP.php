@@ -127,6 +127,39 @@ class SAP
         return "Internal error";
     }
 
+    static public function acknowledgePOItemList($ebeln, $ebelplist, $ackflag) {
+
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $elist = array();
+            foreach($ebelplist as $ebelp) {
+                $eobj = new \stdClass();
+                $eobj->ebelp = $ebelp;
+                array_push($elist, $eobj);
+            }
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_PO_LIST_SET_ACK_REJ');
+            $ebelplist_json = json_encode($elist);
+            $result = $sapfm->invoke(['I_EBELN' => $ebeln,
+                                      'IST_EBELP' => $ebelplist_json,
+                                      'I_SET_FLAG' => 'B',
+                                      'I_INDICATOR' => $ackflag ])["E_MESSAGE"];
+            $sapconn->close();
+            return $result;
+        } catch (\SAPNWRFC\Exception $e) {
+//          Log::error("SAPRFC (GetPOData)):" . $e->getErrorInfo());
+            return $e->getErrorInfo();
+        }
+        return "Internal error";
+    }
+
     static public function rejectPOItem($ebeln, $ebelp) {
 
         $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
@@ -444,8 +477,11 @@ class SAP
                 $inforecord->idnlf = trim($record["IDNLF"]);
                 $inforecord->mtext = trim($record["TXZ01"]);
                 $inforecord->matnr = SAP::alpha_output($record["MATNR"]);
-                $inforecord->purch_price = $record["NETPR"];
                 $inforecord->purch_curr = trim($record["WAERS"]);
+                $tmp_purch_price = (float)(trim($record["NETPR"]));
+                $purch_decimals = SAP::decimals($inforecord->purch_curr);
+                if ($purch_decimals == 0) $tmp_purch_price *= 100;
+                $inforecord->purch_price = number_format($tmp_purch_price, $purch_decimals, '.', '');
                 $inforecord->infnr = trim($record["INFNR"]);
                 $inforecords[] = $inforecord;
             }
@@ -494,10 +530,16 @@ class SAP
                 $zpretrecord->idnlf = trim($record["IDNLF"]);
                 $zpretrecord->mtext = trim($record["TXZ01"]);
                 $zpretrecord->matnr = SAP::alpha_output($record["MATNR"]);
-                $zpretrecord->purch_price = $record["PURCH_PRICE"];
                 $zpretrecord->purch_curr = trim($record["PURCH_CURR"]);
-                $zpretrecord->sales_price = $record["SALES_PRICE"];
+                $tmp_purch_price = (float)(trim($record["PURCH_PRICE"]));
+                $purch_decimals = SAP::decimals($zpretrecord->purch_curr);
+                if ($purch_decimals == 0) $tmp_purch_price *= 100;
+                $zpretrecord->purch_price = number_format($tmp_purch_price, $purch_decimals, '.', '');
                 $zpretrecord->sales_curr = trim($record["SALES_CURR"]);
+                $tmp_sales_price = (float)(trim($record["SALES_PRICE"]));
+                $sales_decimals = SAP::decimals($zpretrecord->sales_curr);
+                if ($sales_decimals == 0) $tmp_sales_price *= 100;
+                $zpretrecord->sales_price = number_format($tmp_sales_price, $sales_decimals, '.', '');
                 $zpretrecords[] = $zpretrecord;
             }
             return $zpretrecords;
@@ -811,6 +853,16 @@ class SAP
             return $e->getMessage();
         }
         return null;
+    }
+
+    public static function decimals($curr)
+    {
+        switch (strtoupper(trim($curr))) {
+            case "HUF":
+                return 0;
+            default:
+                return 2;
+        }
     }
 
 };

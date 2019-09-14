@@ -71,6 +71,15 @@ class WebserviceController extends Controller
         );
     }
 
+    public function acceptItemListChange()
+    {
+        return Webservice::acceptItemListChange(
+            Input::get("ebeln"),
+            Input::get("itemlist"),
+            Input::get("type")
+        );
+    }
+
     public function cancelItem()
     {
         return Webservice::cancelItem(

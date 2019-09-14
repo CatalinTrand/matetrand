@@ -41,6 +41,8 @@ class POrder
     public $qty_open;      // header status
     public $qty_invoiced;  // header status
 
+    public $mirror_ebeln;  // mirror between systems
+
     // computed/determined fields
     public $lifnr_name;
     public $ekgrp_name;
@@ -83,6 +85,7 @@ class POrder
         $this->qty_delivered = $porder->qty_delivered;
         $this->qty_open = $porder->qty_open;
         $this->qty_invoiced = $porder->qty_invoiced;
+        $this->mirror_ebeln = $porder->mirror_ebeln;
         $this->items = array();
     }
 

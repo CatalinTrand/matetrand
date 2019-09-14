@@ -395,7 +395,7 @@ class Orders
                 }
                 $_pitem->fill($_porder);
                 if (($inquirements != 1) ||
-                    (($_pitem->backorder == 0) &&
+                    ((($_pitem->backorder == 0) || (Auth::user()->role == "CTV" && $_pitem->delivery_date_changed != 0)) &&
                         ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")
                                                     || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) &&
                          (($_pitem->owner != 0) || (Auth::user()->role == "Administrator") ||

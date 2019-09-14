@@ -197,10 +197,14 @@ class Mailservice
                 " where stage = 'C' and vbeln <> '$stockorder' and $sql");
             if (empty($items)) continue;
             foreach($items as $item) {
+                $item->delayhours = 0;
                 $pitem = DB::table(System::$table_pitems)->where([["vbeln", "=", $item->vbeln],["posnr", "=", $item->posnr]])->first();
-                $cdate = DB::select("select cdate from ".System::$table_pitemchg.
-                    " where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' and stage = 'C' order by cdate desc")[0]->cdate;
-                $item->delayhours = $now->diffInHours($cdate);
+                $cdates = DB::select("select cdate from ".System::$table_pitemchg.
+                    " where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' and stage = 'C' order by cdate desc");
+                if (!is_null($cdates) && !empty($cdates)) {
+                    $cdate = $cdates[0]->cdate;
+                    $item->delayhours = $now->diffInHours($cdate);
+                }
             }
             usort($items, function($item_a, $item_b)
             {

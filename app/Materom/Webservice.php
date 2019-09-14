@@ -324,6 +324,109 @@ class Webservice
         return "";
     }
 
+    public static function acceptItemListChange($ebeln, $itemlist, $type)
+    {
+        $_porder = Orders::readPOrder($ebeln);
+        if ($_porder == null) return "Purchase order $ebeln does not exist";
+        $ebelplist = array();
+        foreach ($itemlist as $ebelp) {
+            if (!isset($_porder->items[$ebelp])) return "Purchase order item $ebeln/$ebelp does not exist";
+            if ($_porder->items[$ebelp]->accept != 0 || $type == "F") $ebelplist[] = $ebelp;
+        }
+        if (empty($ebelplist)) return;
+        $allitems = DB::table(System::$table_pitems)->where('ebeln', $ebeln)->get();
+        $items = array(); foreach($allitems as $item) $items[$item->ebelp] = $item;
+        $todoitems1 = array();
+        foreach($ebelplist as $ebelp) {
+            $item = $items[$ebelp];
+            if ($_porder->items[$ebelp]->accept == 0) {
+                if ($type != "F")
+                    continue;
+            }
+            $item_changed = ($item->changed == "1") || ($item->changed == "2");
+            $pstage = $item->stage;
+            $cdate = now();
+            if ($type != "F") {
+                if (!$item_changed) {
+                    array_push($todoitems1, $ebelp);
+                } else {
+                    if ($item->stage == 'F') {
+                        DB::update("update ". System::$table_pitems ." set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                            "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                    } else {
+                        $reason = "";
+                        $new_status = "A";
+                        if ($pstage != 'Z') {
+                            if (trim($item->idnlf) == trim($item->orig_idnlf)) {
+                                $result = SAP::savePOItem($ebeln, $ebelp);
+                                if (($result != null) && !is_string($result)) $result = json_encode($result);
+                                if (($result != null) && strlen(trim($result)) != 0) return $result;
+                                if ($item->vbeln != Orders::stockorder) {
+                                    $result = SAP::changeSOItem($item->vbeln, $item->posnr,
+                                        $item->qty, $item->qty_uom, $_porder->lifnr, "", "", "",
+                                        $item->sales_price, $item->sales_curr, $item->purch_price, $item->purch_curr, $item->lfdat);
+                                    if (($result != null) && !is_string($result)) $result = json_encode($result);
+                                    if (($result != null) && strlen(trim($result)) != 0) return $result;
+                                }
+                            } else {
+                                $result = SAP::rejectPOItem($ebeln, $ebelp);
+                                if (($result != null) && !is_string($result)) $result = json_encode($result);
+                                if (($result != null) && strlen(trim($result)) != 0) return $result;
+                                if ($item->vbeln == Orders::stockorder) {
+                                    $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, SAP::newMatnr($item->matnr),
+                                        $item->qty, $item->qty_uom,
+                                        $item->purch_price, $item->purch_curr, $item->lfdat);
+                                    if (!empty(trim($result))) {
+                                        if (substr($result, 0, 2) == "OK")
+                                            $reason = __("New purchase requisition") . " " . SAP::alpha_output(substr($result, 2));
+                                        else return $result;
+                                    }
+                                } else {
+                                    $result = SAP::processSOItem($item->vbeln, $item->posnr,
+                                        $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr),
+                                        $item->mtext, $item->idnlf, $item->purch_price, $item->purch_curr,
+                                        $item->sales_price, $item->sales_curr, $item->lfdat);
+                                    if (!empty(trim($result))) {
+                                        if (substr($result, 0, 2) == "OK")
+                                            $reason = __("New sales order item"). " " . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
+                                        else return $result;
+                                    }
+                                    $new_status = 'X';
+                                }
+                            }
+                        } else $reason = __("Definitively accepted");
+                        DB::update("update ". System::$table_pitems ." set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                            "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$reason')");
+                    }
+                }
+            } elseif ($item->pstage == 'Z') {
+                DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, acknowledged, oldval) values " .
+                    "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 1, 'F')");
+
+            }
+        }
+
+        if (!empty($todoitems1)) {
+            $result = SAP::acknowledgePOItemList($ebeln, $todoitems1, " ");
+            if (($result != null) && !is_string($result)) $result = json_encode($result);
+            if (($result != null) && strlen(trim($result)) != 0) return $result;
+            foreach($todoitems1 as $ebelp) {
+                $item = $items[$ebelp];
+                $pstage = $item->stage;
+                DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                    "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+            }
+
+        }
+
+        return "";
+
+    }
+
     public static function cancelItem($ebeln, $item, $category, $reason, $new_status, $new_stage)
     {
         $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $item]])->first();
@@ -1092,13 +1195,13 @@ class Webservice
                         $idnlf = $pitemchg->oldval;
                         DB::update("update ". System::$table_pitems ." set idnlf = '$idnlf' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
-                    if ($pitemchg->ctype == "Q") {
-                        $message .= " " . __("from quantity change");
+                    if ($pitemchg->ctype == "P") {
+                        $message .= " " . __("from price change");
                         $purch_price = explode(" ", $pitemchg->oldval)[0];
                         DB::update("update ". System::$table_pitems ." set purch_price = '$purch_price' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
-                    if ($pitemchg->ctype == "P") {
-                        $message .= " " . __("from price change");
+                    if ($pitemchg->ctype == "Q") {
+                        $message .= " " . __("from quantity change");
                         $qty = explode(" ", $pitemchg->oldval)[0];
                         DB::update("update ". System::$table_pitems ." set qty = '$qty' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }

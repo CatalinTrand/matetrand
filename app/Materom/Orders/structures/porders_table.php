@@ -22,3 +22,4 @@ $table->string('qty_ordered', 12)->default("");
 $table->string('qty_delivered', 12)->default("");
 $table->string('qty_open', 12)->default("");
 $table->string('qty_invoiced', 12)->default("");
+$table->string('mirror_ebeln',10);

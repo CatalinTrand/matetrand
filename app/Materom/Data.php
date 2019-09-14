@@ -126,6 +126,7 @@ class Data
         $norder->ctime = $now->toDateTimeString();
         $norder->changed = '0';
         $norder->status = '';
+        $norder->mirror_ebeln = $saphdr["MIRROR_EBELN"];
 
         $new_order_item = false;
         $send_mail = true;
@@ -134,9 +135,10 @@ class Data
 
         if (is_null($order)) {
             $new_order_item = true;
-            $sql = "insert into " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) values " .
+            $sql = "insert into " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, mirror_ebeln) values " .
                 "('$norder->ebeln', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
-                "'$norder->ekgrp', '$norder->bedat', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
+                "'$norder->ekgrp', '$norder->bedat', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status', ".
+                "'$norder->mirror_ebeln')";
             DB::insert($sql);
         } else {
             $send_mail = false;
@@ -193,14 +195,20 @@ class Data
                 DB::rollBack();
                 return "nOK";
             }
-            $nitem->purch_price = $sapitm["PURCH_PRICE"];
             $nitem->purch_curr = $sapitm["PURCH_CURR"];
+            $tmp_purch_price = (float)(trim($sapitm["PURCH_PRICE"]));
+            $purch_decimals = SAP::decimals($nitem->purch_curr);
+            if ($purch_decimals == 0) $tmp_purch_price *= 100;
+            $nitem->purch_price = number_format($tmp_purch_price, $purch_decimals, '.', '');
             $nitem->purch_prun = $sapitm["PURCH_PRUN"];
             $nitem->purch_puom = $sapitm["PURCH_PUOM"];
             $nitem->vbeln = $sapitm["VBELN"];
             $nitem->posnr = $sapitm["POSNR"];
-            $nitem->sales_price = $sapitm["SALES_PRICE"];
             $nitem->sales_curr = $sapitm["SALES_CURR"];
+            $tmp_sales_price = (float)(trim($sapitm["SALES_PRICE"]));
+            $sales_decimals = SAP::decimals($nitem->sales_curr);
+            if ($sales_decimals == 0) $tmp_sales_price *= 100;
+            $nitem->sales_price = number_format($tmp_sales_price, $sales_decimals, '.', '');
             $nitem->sales_prun = $sapitm["SALES_PRUN"];
             $nitem->sales_puom = $sapitm["SALES_PUOM"];
             $nitem->vbeln = trim($nitem->vbeln);
@@ -315,11 +323,12 @@ class Data
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr,
                 $pitem->elikz, $pitem->etadt, $archdate]);
 
-        DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, mirror_ebeln, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
                 $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
                 $porder->fxrate, $porder->changed, $porder->status,
                 $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced,
+                $porder->mirror_ebeln,
                 $archdate]);
 
         DB::commit();
@@ -376,11 +385,11 @@ class Data
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr, $pitem->elikz, $pitem->etadt]);
 
         if (!DB::table(System::$table_porders)->where("ebeln", $ebeln)->exists())
-            DB::insert("INSERT INTO " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, mirror_ebeln) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
                     $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
                     $porder->fxrate, $porder->changed, $porder->status,
-                    $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced]);
+                    $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced, $porder->mirror_ebeln]);
 
         DB::commit();
 
