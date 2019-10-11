@@ -33,7 +33,7 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
 
             $pdate = now()->subDays(1);
-
+            ini_set('memory_limit', '256M');
             System::init();
 
             Log::info("Daily cleanup job has started in system ". System::$system_name);

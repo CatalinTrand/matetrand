@@ -169,6 +169,20 @@
         $filter_kunnr_name = \Illuminate\Support\Facades\Session::get("filter_kunnr_name");
         if (!isset($filter_kunnr_name) || is_null($filter_kunnr_name)) $filter_kunnr_name = "";
 
+        $filter_pnad = 0;
+        $pnad_checked = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_pnad");
+        if (isset($tmp)) $filter_pnad = intval($tmp);
+        if ($filter_pnad == 1) $pnad_checked = "checked";
+
+        $filter_mirror = 0;
+        $mirror_checked = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_mirror");
+        if (isset($tmp)) $filter_mirror = intval($tmp);
+        if ($filter_mirror == 1) $mirror_checked = "checked";
+
         $autoexplode_PO = \Illuminate\Support\Facades\Session::get("autoexplode_PO");
         $autoexplode_SO = null;
         if ($groupByPO == 4) {
@@ -317,6 +331,12 @@
                                                         <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
                                                         <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
                                                     </select>
+
+                                                    @if ((\Illuminate\Support\Facades\Auth::user()->role == "Referent" || \Illuminate\Support\Facades\Auth::user()->role == "Administrator") && ($filter_history_curr != ""))
+                                                        <input type="checkbox" id="filter_pnad" name="filter_pnad" style="margin-bottom: 4px; margin-left: 1rem; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$pnad_checked}}>
+                                                        <label for="filter_pnad" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only with PNAD')}}</label>
+                                                    @endif
+
                                                 </td>
                                                 <td>
                                                     {{__("Purchase order")}}:
@@ -374,8 +394,8 @@
                                                     </td>
                                                 @else
                                                     <td colspan="2">
-                                                        <input type="checkbox" id="filter_overdue" name="filter_overdue" style="vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$overdue_checked}}>
-                                                        <label for="filter_overdue">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;
+                                                        <input type="checkbox" id="filter_overdue" name="filter_overdue" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$overdue_checked}}>
+                                                        <label for="filter_overdue" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;
                                                         <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
                                                                style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_low"
                                                                maxlength="2" value="{{$filter_overdue_low}}">&nbsp;-
@@ -415,13 +435,22 @@
                                                 </td>
                                             </tr>
                                             <tr style="height: 1.5rem;">
-                                                <td colspan="2" style="padding-top: 0.4rem;">
-                                                    <input type="checkbox" id="filter_inquirements" style="vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="this.form.submit();" {{$inquirements_checked}}>
-                                                    <label for="filter_inquirements">{{__('Only inquirements')}}</label>
+                                                <td colspan="1" style="padding-top: 0.4rem;">
+                                                    <input type="checkbox" id="filter_inquirements" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="this.form.submit();" {{$inquirements_checked}}>
+                                                    <label for="filter_inquirements" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only inquirements')}}</label>
                                                 </td>
+
+                                                <td colspan="1" style="padding-top: 0.4rem;">
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
+                                                        <input type="checkbox" id="filter_mirror" name="filter_mirror" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$mirror_checked}}>
+                                                        <label for="filter_mirror" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only intercompany')}}</label>
+                                                    @endif
+                                                </td>
+
+
                                                 <td colspan="2">
-                                                    <input type="checkbox" id="filter_goodsreceipt" name="filter_goodsreceipt" style="vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$goodsreceipt_checked}}>
-                                                    <label for="filter_goodsreceipt">{{__('Only deliveries with goods receipt')}}</label>
+                                                    <input type="checkbox" id="filter_goodsreceipt" name="filter_goodsreceipt" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$goodsreceipt_checked}}>
+                                                    <label for="filter_goodsreceipt" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only deliveries with goods receipt')}}</label>
                                                 </td>
                                                 <td>
                                                     {{__("Material")}}:
@@ -1568,10 +1597,10 @@
             // cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
-            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Recept.")}}</b></td>';
-            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Facturat")}}</b></td>';
-            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Plus/Min")}}</b></td>';
-            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Avariate")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Recept.")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Facturat")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Plus/Min")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Avariate")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Detalii/solutie")}}</b></td>';
             if (colsafter > 0)
                 cols += '<td class="td02" colspan="' + colsafter + '"></td>';
@@ -1799,8 +1828,8 @@
 
                 cols += '<td class="td02" colspan="2" style="text-align: left;">' + grdate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
-                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_received + '</td>';
-                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_invoiced + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_received + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_invoiced + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_diff + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_damaged + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: left;">' + pitem.qty_details + '</td>';

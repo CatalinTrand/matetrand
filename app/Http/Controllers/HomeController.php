@@ -156,6 +156,14 @@ class HomeController extends Controller
         $tmp = Input::get("filter_etadate_high");
         if (isset($tmp) && $tmp != null) Session::put("filter_etadate_high", $tmp);
 
+        Session::put("filter_pnad", "0");
+        $tmp = Input::get("filter_pnad");
+        if (strtoupper($tmp) == "ON" ) Session::put("filter_pnad", "1");
+
+        Session::put("filter_mirror", "0");
+        $tmp = Input::get("filter_mirror");
+        if (strtoupper($tmp) == "ON" ) Session::put("filter_mirror", "1");
+
         Orders::fillCache();
         return redirect()->back();
     }

@@ -154,7 +154,7 @@ class Mailservice
         $stockorder = Orders::stockorder;
         $kunnrs = DB::select("select distinct kunnr from ". System::$table_pitems." where stage = 'C' and vbeln <> '$stockorder'");
         if (count($kunnrs) == 0) {
-            Log::debug("sendCTVReminders: no items pending for CTVs");
+            Log::channel("notifmails")->debug("sendCTVReminders: no items pending for CTVs");
             return;
         }
         $fallbackctv = trim(DB::table(System::$table_roles)->where("rfc_role", "CTV")->value("user1"));
@@ -165,7 +165,7 @@ class Mailservice
         if (!empty($fallbackctv)) $sql .= "id <> '$fallbackctv->id' and ";
         $ctvs = DB::select("select * from users where $sql role = 'CTV' and active = 1 and sap_system = '". System::$system. "'");
         if (count($ctvs) == 0) {
-            Log::debug("sendCTVReminders: No active CTVs found");
+            Log::channel("notifmails")->debug("sendCTVReminders: No active CTVs found");
             return;
         }
         $nukunnrs = array();
@@ -229,7 +229,7 @@ class Mailservice
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                     });
             }
-            Log::debug("Sent mail 'Notificare CTV de pozitii in lucru' to '$ctv->id ($ctv->email)'");
+            Log::channel("notifmails")->info("Sent mail 'Notificare CTV de pozitii in lucru' to '$ctv->id ($ctv->email)'");
         }
 
         $adminctvs = DB::table("users")->where([["ctvadmin", "=", 1],["role", "=", "CTV"],["active", "=", 1],["sap_system", "=", System::$system]])->get();
@@ -259,7 +259,7 @@ class Mailservice
                         $message->to("radu@etrandafir.ro", $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                     });
-                Log::debug("Sent mail 'Notificare Admin CTV de pozitii in lucru' to '$adminctv->id ($adminctv->email)'");
+                Log::channel("notifmails")->info("Sent mail 'Notificare Admin CTV de pozitii in lucru' to '$adminctv->id ($adminctv->email)'");
             }
         }
     }
@@ -367,7 +367,7 @@ class Mailservice
             $users = DB::select("select * from users where id = '$userid' and $sqlrole and sap_system = '".
                 System::$system. "' and active = 1");
         if (empty($users)) {
-            Log::info("No Reference/Supplier users selected/suitable for sending reminder mails");
+            Log::channel("notifmails")->info("No Reference/Supplier users selected/suitable for sending reminder mails");
             return;
         }
 
@@ -409,7 +409,7 @@ class Mailservice
             $reminder->nitems = $nitems;
             $reminder->oldest = $oldest;
             array_push($reminders, $reminder);
-            Log::debug("Sent mail 'Notificare furnizor/referent de comenzi/pozitii deschise' to '$user->id ($user->email)'");
+            Log::channel("notifmails")->info("Sent mail 'Notificare furnizor/referent de comenzi/pozitii deschise' to '$user->id ($user->email)'");
         }
         if (!empty($reminders)) {
             // Notificare Admini SRM de pozitii deschise la referenti/furnizori
@@ -436,7 +436,7 @@ class Mailservice
                         $message->to($admin->email, $admin->username)->subject("Notificare SRM de pozitii deschise la furnizori/referenti");
                         $message->from('no_reply_srm@materom.ro','MATEROM SRM');
                     });
-                Log::debug("Sent mail 'Notificare Administrator de comenzi/pozitii deschise' to '$admin->id ($admin->email)'");
+                Log::channel("notifmails")->info("Sent mail 'Notificare Administrator de comenzi/pozitii deschise' to '$admin->id ($admin->email)'");
             }
         }
     }

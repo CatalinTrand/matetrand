@@ -80,6 +80,11 @@ return [
         'poevent' => [
             'driver' => 'single',
             'path' => storage_path('logs/materom_poevent.log'),
+        ],
+
+        'notifmails' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/notification_mails.log'),
         ]
     ],
 

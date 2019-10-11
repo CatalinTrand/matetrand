@@ -70,12 +70,13 @@ class POrderItem
     public $elikz;       // delivery completed
 
     // PNAD
-    public $qty_received; // plus/minue
-    public $qty_invoiced; // plus/minue
-    public $qty_diff;    // plus/minue
-    public $qty_damaged; // damaged
+    public $qty_received;
+    public $qty_invoiced; // invoiced to the customer
+    public $qty_diff;     // plus/minus
+    public $qty_damaged;  // damaged
     public $qty_details;
     public $qty_solution;
+    public $pnad_status;  // X=open record exists in ZWM, ''=no open record
 
     // computed/determined fields
     public $sorder;      // sales order to be displayed
@@ -168,12 +169,13 @@ class POrderItem
         $this->new_lifnr = $pitem->new_lifnr;
         $this->werks = $pitem->werks;
         $this->elikz = $pitem->elikz;
-        $this->qty_received = "";
-        $this->qty_invoiced = "";
+        $this->qty_received = $pitem->qty_received;
+        $this->qty_invoiced = $pitem->qty_invoiced;
         $this->qty_diff = $pitem->qty_diff;
         $this->qty_damaged = $pitem->qty_damaged;
         $this->qty_details = $pitem->qty_details;
         $this->qty_solution = $pitem->qty_solution;
+        $this->pnad_status = $pitem->pnad_status;
         $this->changes = array();
     }
 
@@ -321,7 +323,7 @@ class POrderItem
 
         $first = true;
         foreach ($this->changes as $itemchg) {
-            if ($itemchg->ctype == 'E') continue;
+            if (($itemchg->ctype == 'E') || ($itemchg->ctype == 'B')) continue;
             if ($itemchg->ctype == "J") {
                 $this->eta_date_changed = 1;
                 continue;
@@ -456,8 +458,8 @@ class POrderItem
 
             }
         } elseif (($history == 2) && (Auth::user()->role == 'Administrator')) {
-//            if ($this->status == 'A')
-//                $this->matnr_changeable = 1;
+            if ($this->status == 'A')
+                $this->matnr_changeable = 1;
         }
 
         $this->x_delivery_date = substr($this->lfdat, 0, 10);

@@ -92,6 +92,12 @@ class Orders
         $goodsreceipt = Session::get("filter_goodsreceipt");
         if (!isset($goodsreceipt) || $goodsreceipt == null) $goodsreceipt = 0;
 
+        $pnad = Session::get("filter_pnad");
+        if (!isset($pnad) || $pnad == null) $pnad = 0;
+
+        $mirror = Session::get("filter_mirror");
+        if (!isset($mirror) || $mirror == null) $mirror = 0;
+
         $filter_deldate_low = Session::get("filter_deldate_low");
         if (!isset($filter_deldate_low) || $filter_deldate_low == null || $filter_deldate_low == "") $filter_deldate_low = "2000-01-01";
         $filter_deldate_high = Session::get("filter_deldate_high");
@@ -159,29 +165,6 @@ class Orders
             $filter_sql = self::addFilter($filter_sql,
                 "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         } elseif (Auth::user()->role == "Referent") {
-/*
-            $refs = DB::select("select distinct users_ref.id, users.lifnr from users_ref " .
-                "join users using (id) " .
-                "where refid ='" . Auth::user()->id . "'");
-            $filter_refs_sql = "";
-            foreach ($refs as $ref) {
-                $manufacturers = DB::select("select distinct mfrnr from ". System::$table_users_sel ." where id ='" . $ref->id . "'");
-                $sql = "";
-                foreach ($manufacturers as $manufacturer) {
-                    if (empty(trim($manufacturer->mfrnr))) continue;
-                    $sel1 = $items_table . ".mfrnr = '$manufacturer->mfrnr'";
-                    if (empty($sql)) $sql = $sel1;
-                    else $sql .= ' or ' . $sel1;
-                }
-                if (!empty($sql)) $sql = "( $sql )";
-                $sql = self::addFilter($sql, self::processFilter($orders_table . ".lifnr", $ref->lifnr, 10));
-                $filter_refs_sql .= " or ( $sql )";
-            }
-            if (!empty($filter_refs_sql))
-                $filter_refs_sql = "((" . substr($filter_refs_sql, 4) . ") or " .
-                    self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
-            else
-*/
             $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
             $filter_sql = self::addFilter($filter_sql, $filter_refs_sql);
         } elseif (Auth::user()->role == "CTV") {
@@ -200,6 +183,8 @@ class Orders
             $filter_sql = self::addFilter($filter_sql,
                 "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         }
+
+        if ($mirror <> 0) $filter_sql = self::addFilter($filter_sql, "$orders_table.mirror_ebeln <> ''");
 
         if ($groupByPO == 2) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln <> '" . Orders::stockorder . "'");
         elseif ($groupByPO == 3) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln = '" . Orders::stockorder . "'");
@@ -229,6 +214,13 @@ class Orders
         if (!empty($goodsreceipt_sql)) {
             if (empty($filter_sql)) $filter_sql = $goodsreceipt_sql;
             else $filter_sql .= " and " . $goodsreceipt_sql;
+        }
+
+        $pnad_sql = "";
+        if ($pnad <> 0) $pnad_sql = "$items_table.pnad_status = 'X'";
+        if (!empty($pnad_sql)) {
+            if (empty($filter_sql)) $filter_sql = $pnad_sql;
+            else $filter_sql .= " and " . $pnad_sql;
         }
 
         $deldate_sql = "$items_table.lfdat between '$filter_deldate_low' and '$filter_deldate_high'";
@@ -404,7 +396,7 @@ class Orders
                         )
                     )
                    )
-                    if ($overdue == 0 || (($_pitem->lfdat < $now) && (($_pitem->dodays > $overdue_low) && ($_pitem->dodays < $overdue_high)))) {
+                    if ($overdue == 0 || (($_pitem->lfdat < $now) && (($_pitem->dodays > $overdue_low) && ($_pitem->dodays < $overdue_high)) && ($_pitem->pnad_status != "X"))) {
                         $_porder->appendItem($_pitem);
                         self::$overdue_items++;
                         $overdueitems = true;

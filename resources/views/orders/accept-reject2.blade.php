@@ -164,7 +164,7 @@
                                onfocus="this.oldvalue = this.value;" disabled>&nbsp;
                         <input id="ar-immed-net-curr2" style="width: 5em;" type="text" name="ar-immed-net-curr2" class="form-control" value="" disabled>
                         <image id="icon-immed-net-price2" style="width: 32px; height: 32px; margin-left: 0.25em;" src='/images/icons8-calculator-48.png'
-                            onclick="net_price_calculation(this);return false;"/>
+                            onclick="net_price_calculation(this, 'ar-immed');return false;"/>
                     </div>
                 </td>
             </tr>
@@ -637,7 +637,7 @@
                     <input id="aep-net-price2" style="width: 10em;" type="text" name="aep-net-price2" class="form-control" value="" disabled>
                     <input id="aep-net-curr2" style="width: 5em;" type="text" name="aep-net-curr2" class="form-control" value="" disabled>
                     <image id="icon-aep-net-price2" style="width: 32px; height: 32px; margin-left: 1em;" src='/images/icons8-calculator-48.png'
-                           onclick="net_price_calculation(this);return false;"/>
+                           onclick="net_price_calculation(this, 'aep');return false;"/>
                 </div>
             </td>
         </tr>
@@ -1328,11 +1328,17 @@
                     let nam = net_price_new_abs_margin;
                     net_price_new_abs_margin = (sales_curr == "HUF" ? net_price_new_abs_margin.toFixed(0) : net_price_new_abs_margin.toFixed(2)).toString() + " " + sales_curr;
                     net_price_new_rel_margin = net_price_new_rel_margin.toFixed(2).toString();
+                    var i;
                     for (i = 0; i < net_price_discounts.length; i++) {
                         if (net_price_discounts[i].condition == "EK02") {
                             net_price_discounts[i].price = purch_curr == "HUF" ? purch_price.toFixed(0) : purch_price.toFixed(2);
-                            if (net_price_discounts[i].old_price != 0)
-                                net_price_discounts[i].delta = (purch_price - net_price_discounts[i].old_price) * 100 / net_price_discounts[i].old_price;
+                            if (net_price_discounts[i].old_price != 0) {
+                                let old_pp = net_price_discounts[i].old_price;
+                                if (purch_curr != net_price_discounts[i].curr) {
+                                    old_pp = cvfx(old_pp, net_price_discounts[i].curr, purch_curr);
+                                }
+                                net_price_discounts[i].delta = (purch_price - old_pp) * 100 / old_pp;
+                            }
                             net_price_discounts[i].delta = purch_curr == "HUF" ? net_price_discounts[i].delta.toFixed(0) : net_price_discounts[i].delta.toFixed(2);
                         }
                     }
@@ -1383,16 +1389,18 @@
         });
     });
 
-    function net_price_calculation(_this) {
+    function net_price_calculation(_this, dlg) {
         $("#net-price-calculation-table").find("tr:gt(0)").remove();
         let n = net_price_discounts.length;
         var newRow, cols;
         for (i = 0; i < n; i++) {
             newRow = $("<tr style='height: 1.3rem;'>");
+            let new_curr = net_price_discounts[i].curr;
+            if (net_price_discounts[i].condition == "EK02") new_curr = $("#"+dlg+"-purch-curr2").val().trim().toUpperCase();
             cols = "<td>" + net_price_discounts[i].condition + "</td>" +
                    "<td>" + net_price_discounts[i].description + "</td>" +
                    "<td style='text-align: right;'>" + net_price_discounts[i].old_price + " " + net_price_discounts[i].curr + "</td>" +
-                   "<td style='text-align: right;'>" + net_price_discounts[i].price + " " + net_price_discounts[i].curr + "</td>" +
+                   "<td style='text-align: right;'>" + net_price_discounts[i].price + " " + new_curr + "</td>" +
                    "<td style='text-align: right;'>" + net_price_discounts[i].delta + " %" + "</td>";
             newRow.append(cols);
             $("#net-price-calculation-table").append(newRow);

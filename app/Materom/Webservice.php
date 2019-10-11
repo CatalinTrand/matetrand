@@ -504,9 +504,16 @@ class Webservice
     {
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
-        else $history = intval($history);
+            else $history = intval($history);
         if ($history == 2) {
             // update matnr for invoice closing
+            $result = SAP::UpdateMaterialForInvoiceClosing($ebeln, $ebelp, trim($value));
+            if (empty($result)) {
+                $cdate = now();
+                DB::insert("insert into " . System::$table_pitemchg . "_arch".
+                    " (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oldval,newval) values " .
+                    "('$ebeln','$ebelp','M', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','Changed after archiving - for invoice closing','$oldvalue','$value')");
+            }
             return;
         }
         $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();

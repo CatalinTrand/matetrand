@@ -305,16 +305,18 @@ class SAP
 
     static public function refreshDeliveryStatus($mode, $items = null)
     {
+        return self::refreshDeliveryStatus2($mode, $items);
         // if (Auth::user()->role == "Administrator") Log::debug("Performance check: start refreshDeliveryStatus");
 
-        if ($items == null)
-            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz from ". System::$table_pitems ." order by ebeln, ebelp");
-        else {
+        if ($items == null) {
+            $sql = "";
+        } else {
             $sql = "where ";
             foreach ($items as $item) $sql .= "(ebeln = '$item->ebeln' and ebelp = '$item->ebelp') or ";
             $sql = substr($sql, 0, -4);
-            $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz from ". System::$table_pitems ." $sql order by ebeln, ebelp");
         }
+
+        $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz, qty_diff, qty_damaged, qty_received, qty_invoiced, pnad_status from ". System::$table_pitems ." $sql order by ebeln, ebelp");
         if ($items == null) return;
         $sqlh = "where ";
         $ebeln = "";
@@ -356,10 +358,13 @@ class SAP
                         ", grqty = '$item->grqty'" .
                         ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
                         ", elikz = '$item->elikz'" .
+                        ", qty_received = '$item->qty_received'" .
+                        ", qty_invoiced = '$item->qty_invoiced'" .
                         ", qty_diff = '$item->qty_diff'" .
                         ", qty_damaged = '$item->qty_damaged'" .
                         ", qty_solution = '$item->qty_solution'" .
                         ", qty_details = '$item->qty_details'" .
+                        ", pnad_status = '$item->pnad_status'" .
                         " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
                     if ($ebeln <> $item->ebeln) {
                         $ebeln = $item->ebeln;
@@ -375,6 +380,91 @@ class SAP
             }
             unset($vitems);
         }
+
+        // if (Auth::user()->role == "Administrator") Log::debug("Performance check: end refreshDeliveryStatus");
+
+        return "OK";
+
+    }
+
+    static $refreshDeliveryMode;
+    static public function refreshDeliveryStatus2($mode, $items = null)
+    {
+        // if (Auth::user()->role == "Administrator") Log::debug("Performance check: start refreshDeliveryStatus");
+        self::$refreshDeliveryMode = $mode;
+        if ($items == null) {
+            $sql = "";
+        } else {
+            $sql = "";
+            foreach ($items as $item) $sql .= "(ebeln = '$item->ebeln' and ebelp = '$item->ebelp') or ";
+            $sql = substr($sql, 0, -4);
+        }
+        if ($sql == "") $sql = "ebeln <> ''";
+
+        DB::table(System::$table_pitems)->selectRaw("ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz, qty_diff, qty_damaged, qty_received, qty_invoiced, pnad_status")
+                                        ->whereRaw($sql)
+                                        ->orderByRaw("ebeln, ebelp")
+            ->chunk(200, function($items)
+            {
+                $sqlh = "where ";
+                $ebeln = "";
+                foreach ($items as $item) {
+                    if ($ebeln <> $item->ebeln) {
+                        $ebeln = $item->ebeln;
+                        $sqlh .= "ebeln = '$item->ebeln' or ";
+                    }
+                }
+                $sqlh = substr($sqlh, 0, -4);
+                $orders = DB::select("select ebeln, qty_ordered, qty_delivered, qty_open, qty_invoiced from ". System::$table_porders ." $sqlh order by ebeln");
+                foreach ($orders as $order) {
+                    $orders[$order->ebeln] = $order;
+                }
+                foreach ($items as $item) {
+                    $order = $orders[$item->ebeln];
+                    $item->hdrqty_ordered = $order->qty_ordered;
+                    $item->hdrqty_delivered = $order->qty_delivered;
+                    $item->hdrqty_open = $order->qty_open;
+                    $item->hdrqty_invoiced = $order->qty_invoiced;
+                }
+                $vitems = array();
+                foreach($items as $itemkey => $itemval) {
+                    $vitems[$itemkey] = $itemval;
+                }
+                $vitems = SAP::rfcGetDeliveryData(self::$refreshDeliveryMode, $vitems);
+                if ($vitems != null) {
+                    DB::beginTransaction();
+                    $ebeln = "";
+                    foreach ($vitems as $item) {
+                        db::update("update " . System::$table_pitems . " set" .
+                            " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
+                            ", delqty = '$item->delqty'" .
+                            ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
+                            ", grqty = '$item->grqty'" .
+                            ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
+                            ", elikz = '$item->elikz'" .
+                            ", qty_received = '$item->qty_received'" .
+                            ", qty_invoiced = '$item->qty_invoiced'" .
+                            ", qty_diff = '$item->qty_diff'" .
+                            ", qty_damaged = '$item->qty_damaged'" .
+                            ", qty_solution = '$item->qty_solution'" .
+                            ", qty_details = '$item->qty_details'" .
+                            ", pnad_status = '$item->pnad_status'" .
+                            " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
+                        if ($ebeln <> $item->ebeln) {
+                            $ebeln = $item->ebeln;
+                            db::update("update " . System::$table_porders . " set" .
+                                " qty_ordered = '$item->hdrqty_ordered'" .
+                                ", qty_delivered = '$item->hdrqty_delivered'" .
+                                ", qty_open = '$item->hdrqty_open'" .
+                                ", qty_invoiced = '$item->hdrqty_invoiced'" .
+                                " where ebeln = '$item->ebeln';");
+                        }
+                    }
+                    DB::commit();
+                }
+                unset($vitems);
+
+            });
 
         // if (Auth::user()->role == "Administrator") Log::debug("Performance check: end refreshDeliveryStatus");
 
@@ -418,10 +508,13 @@ class SAP
                 $item->hdrqty_delivered = trim($item->HDRQTY_DELIVERED); unset($item->HDRQTY_DELIVERED);
                 $item->hdrqty_open = trim($item->HDRQTY_OPEN); unset($item->HDRQTY_OPEN);
                 $item->hdrqty_invoiced = trim($item->HDRQTY_INVOICED); unset($item->HDRQTY_INVOICED);
+                $item->qty_received = trim($item->QTY_RECEIVED); unset($item->QTY_RECEIVED);
+                $item->qty_invoiced = trim($item->QTY_INVOICED); unset($item->QTY_INVOICED);
                 $item->qty_diff = trim($item->QTY_DIFF); unset($item->QTY_DIFF);
                 $item->qty_damaged = trim($item->QTY_DAMAGED); unset($item->QTY_DAMAGED);
                 $item->qty_solution = trim($item->QTY_SOLUTION); unset($item->QTY_SOLUTION);
                 $item->qty_details = trim($item->QTY_DETAILS); unset($item->QTY_DETAILS);
+                $item->pnad_status = trim($item->PNAD_STATUS); unset($item->PNAD_STATUS);
             }
             usort($items, function($item_a, $item_b)
             {
@@ -782,6 +875,7 @@ class SAP
                 }
                 $discount->price = number_format($discount->price, 2, ".", "");
                 $discount->old_price = $discount->KBETRO; unset($discount->KBETRO);
+                if ($discount->curr == "%") $discount->old_price = $discount->old_price / 10;
                 $discount->old_price = number_format($discount->old_price, 2, ".", "");
                 $discount->delta = $discount->DELTA; unset($discount->DELTA);
                 $discount->delta = number_format($discount->delta, 2, ".", "");
@@ -849,6 +943,33 @@ class SAP
             return $result["E_MESSAGE"];
         } catch (\SAPNWRFC\Exception $e) {
             Log::error("Error setting PNAD data: " . $e->getMessage());
+            Log::error($e->getErrorInfo());
+            return $e->getMessage();
+        }
+        return null;
+    }
+
+    public static function UpdateMaterialForInvoiceClosing($ebeln, $ebelp, $idnlf)
+    {
+        $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
+        if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
+        $roleData = DB::select("select * from ". System::$table_roles ." where rfc_role = '" . Auth::user()->role . "'");
+        if($roleData) $roleData = $roleData[0]; else return __("Cannot determine role connection parameters");
+
+        $rfcData = new RFCData($globalRFCData->rfc_router, $globalRFCData->rfc_server,
+            $globalRFCData->rfc_sysnr, $globalRFCData->rfc_client,
+            $roleData->rfc_user, $roleData->rfc_passwd);
+        try {
+            $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_SET_IDNLF_FOR_INVOICE');
+            $result = $sapfm->invoke([
+                'I_EBELN' => $ebeln,
+                'I_EBELP' => $ebelp,
+                'I_IDNLF' => $idnlf
+            ]);
+            return $result["E_MESSAGE"];
+        } catch (\SAPNWRFC\Exception $e) {
+            Log::error("Error setting IDNLF for invoice closing: " . $e->getMessage());
             Log::error($e->getErrorInfo());
             return $e->getMessage();
         }

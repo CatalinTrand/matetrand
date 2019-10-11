@@ -178,6 +178,7 @@ class Data
             $nitem->matnr = trim($sapitm["MATNR"]);
             $nitem->idnlf = trim($sapitm["IDNLF"]);
             $nitem->mtext = trim($sapitm["MTEXT"]);
+            $nitem->mtext = str_replace("\\", "\\\\", $nitem->mtext);
             $nitem->mtext = str_replace("'", "\'", $nitem->mtext);
             $nitem->qty = $sapitm["MENGE"];
             $nitem->qty_uom = $sapitm["MEINS"];
@@ -248,11 +249,47 @@ class Data
                 DB::insert($sql);
 
             } else {
-                $sql = "update " . System::$table_pitems . " set " .
-                    "ctv = '$nitem->ctv', " .
-                    "ctv_name = '$nitem->ctv_name', " .
-                    "ctv_man = $nitem->ctv_man " .
-                    "where ebeln = '$nitem->ebeln' and ebelp = '$nitem->ebelp'";
+                Log::debug("Update ". Auth::user()->id. " '$nitem->ebeln'/'$nitem->ebelp'");
+                if (DB::table(System::$table_pitemchg)->where([["ebeln", "=", $nitem->ebeln],["ebelp", "=", $nitem->ebelp]])->exists()
+                    || $citem->changed != 0 || $citem->stage != 'F' || $citem->pstage != '' || $citem->status != '' || 1 == 1) {
+                    $sql = "update " . System::$table_pitems . " set " .
+                        "ctv = '$nitem->ctv', " .
+                        "ctv_name = '$nitem->ctv_name', " .
+                        "ctv_man = $nitem->ctv_man " .
+                        "where ebeln = '$nitem->ebeln' and ebelp = '$nitem->ebelp'";
+                    Log::channel("poevent")->info("Purchase order item $ebeln/$citem->ebelp was updated (level 1)");
+                } else  {
+                    $sql = "update " . System::$table_pitems . " set " .
+                        "matnr = '$nitem->matnr', ".
+                        "idnlf = '$nitem->idnlf', ".
+                        "qty = $nitem->qty, ".
+                        "qty_uom = '$nitem->qty_uom', ".
+                        "lfdat = '$nitem->lfdat', ".
+                        "mfrnr = '$nitem->mfrnr', ".
+                        "werks = '$nitem->werks', ".
+                        "purch_price = '$nitem->purch_price', ".
+                        "purch_curr = '$nitem->purch_curr', ".
+                        "purch_prun = $nitem->purch_prun, ".
+                        "purch_puom = '$nitem->purch_puom', ".
+                        "sales_price = '$nitem->sales_price', ".
+                        "sales_curr = '$nitem->sales_curr', ".
+                        "sales_prun = $nitem->sales_prun, ".
+                        "sales_puom = '$nitem->sales_puom', ".
+                        "vbeln = '$nitem->vbeln', ".
+                        "posnr = '$nitem->posnr', ".
+                        "kunnr = '$nitem->kunnr', ".
+                        "shipto = '$nitem->shipto',".
+                        "ctv = '$nitem->ctv', ".
+                        "ctv_name = '$nitem->ctv_name', ".
+                        "ctv_man = $nitem->ctv_man, ".
+                        "orig_matnr = '$nitem->matnr', ".
+                        "orig_idnlf = '$nitem->idnlf', ".
+                        "orig_purch_price = '$nitem->purch_price',".
+                        "orig_qty = $nitem->qty, ".
+                        "orig_lfdat = '$nitem->lfdat'".
+                        " where ebeln = '$nitem->ebeln' and ebelp = '$nitem->ebelp'";
+                    Log::channel("poevent")->info("Purchase order item $ebeln/$citem->ebelp was updated (level 2)");
+                }
                 DB::update($sql);
             }
         }
@@ -311,14 +348,14 @@ class Data
                     $archdate]);
         }
 
-        DB::insert("INSERT INTO " . System::$table_pitems . "_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_diff, qty_damaged, qty_details, qty_solution, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_pitems . "_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
                 $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
                 $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
                 $pitem->sales_prun, $pitem->sales_puom, $pitem->qty, $pitem->qty_uom, $pitem->kunnr,
                 $pitem->shipto, $pitem->ctv, $pitem->ctv_name, $pitem->ctv_man, $pitem->lfdat, $pitem->backorder, $pitem->deldate,
                 $pitem->delqty, $pitem->grdate, $pitem->grqty, $pitem->gidate,
-                $pitem->qty_diff, $pitem->qty_damaged, $pitem->qty_details, $pitem->qty_solution,
+                $pitem->qty_received, $pitem->qty_invoiced, $pitem->qty_diff, $pitem->qty_damaged, $pitem->qty_details, $pitem->qty_solution, $pitem->pnad_status,
                 $pitem->stage, $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr,
                 $pitem->elikz, $pitem->etadt, $archdate]);
@@ -373,14 +410,14 @@ class Data
                     $pichange->newval, $pichange->oebeln, $pichange->oebelp, $pichange->reason, $pichange->acknowledged]);
         }
 
-        DB::insert("INSERT INTO " . System::$table_pitems . " (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_diff, qty_damaged, qty_details, qty_solution, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_pitems . " (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
                 $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
                 $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
                 $pitem->sales_prun, $pitem->sales_puom, $pitem->qty, $pitem->qty_uom, $pitem->kunnr,
                 $pitem->shipto, $pitem->ctv, $pitem->ctv_name, $pitem->ctv_man, $pitem->lfdat, $pitem->backorder, $pitem->deldate,
                 $pitem->delqty, $pitem->grdate, $pitem->grqty, $pitem->gidate,
-                $pitem->qty_diff, $pitem->qty_damaged, $pitem->qty_details, $pitem->qty_solution,
+                $pitem->qty_received, $pitem->qty_invoiced, $pitem->qty_diff, $pitem->qty_damaged, $pitem->qty_details, $pitem->qty_solution, $pitem->pnad_status,
                 $pitem->stage, $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr, $pitem->elikz, $pitem->etadt]);
 
@@ -409,7 +446,8 @@ class Data
 
         $pitems = DB::table(System::$table_pitems)->where("grdate", "<>", "null")->get();
         foreach ($pitems as $pitem) {
-            if ("" . $pitem->qty == explode(" ", $pitem->grqty)[0]) {
+            if ("" . $pitem->qty == explode(" ", $pitem->grqty)[0] &&
+                "" . $pitem->qty == explode(" ", $pitem->qty_invoiced)[0]) {
                 Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (goods received)");
                 self::archiveItem($pitem->ebeln, $pitem->ebelp);
             }
@@ -417,8 +455,10 @@ class Data
 
         $pitems = DB::table(System::$table_pitems)->where("elikz", "=", "X")->get();
         foreach ($pitems as $pitem) {
-            Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (fully delivered)");
-            self::archiveItem($pitem->ebeln, $pitem->ebelp);
+            if ("" . $pitem->qty == explode(" ", $pitem->qty_invoiced)[0]) {
+                Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (fully delivered)");
+                self::archiveItem($pitem->ebeln, $pitem->ebelp);
+            }
         }
 
         $pitems = DB::select("select distinct ebeln, ebelp from " . System::$table_pitems . " where stage = 'Z' and status = 'X'");
