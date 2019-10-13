@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 class EditUsers {
 
     static function editUser($id, $role, $user, $token, $lang, $lifnr, $ekgrp, $active, $email, $sap_system,
-                             $readonly, $none, $mirror_user1, $ctvadmin, $rgroup)
+                             $readonly, $pnad, $none, $mirror_user1, $ctvadmin, $rgroup)
     {
 
         $prevusers = DB::select("select * from users where id ='$id'");
@@ -19,6 +19,7 @@ class EditUsers {
         $sap_system = trim($sap_system);
         if ("X".$sap_system == "X200") $sap_system = "";
         if (strtoupper($readonly) == "ON") $readonly = 1; else $readonly = 0;
+        if (strtoupper($pnad) == "ON") $pnad = 1; else $pnad = 0;
         if (strtoupper($none) == "ON") $none = 1; else $none = 0;
         if (strtoupper($ctvadmin) == "ON") $ctvadmin = 1; else $ctvadmin = 0;
         if (Auth::user()->role == 'CTV' && Auth::user()->ctvadmin == 1 && Auth::user()->id == $id) $ctvadmin = 1;
@@ -34,13 +35,15 @@ class EditUsers {
 
         if (ctype_digit($lifnr)) $lifnr = str_pad($lifnr, 10, "0", STR_PAD_LEFT);
 
-        if($active == 1)
+        if ($active == 1)
             DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', lifnr = '$lifnr', " .
-                              "ekgrp = '$ekgrp', active = '$active', deleted_at = null, activated_at = '$activated_at', sap_system = '$sap_system', readonly = '$readonly', ".
+                              "ekgrp = '$ekgrp', active = '$active', deleted_at = null, activated_at = '$activated_at', sap_system = '$sap_system', ".
+                              "readonly = '$readonly', pnad = '$pnad', ".
                               "none = '$none', mirror_user1 = '$mirror_user1', ctvadmin = '$ctvadmin', rgroup = '$rgroup' where id = '$id'");
         else
             DB::update("update users set username = '$user', api_token = '$token', email = '$email', lang = '$lang', ".
-            "active = '$active', deleted_at = NOW(), activated_at = '$activated_at', sap_system = '$sap_system', readonly = '$readonly', ".
+            "active = '$active', deleted_at = NOW(), activated_at = '$activated_at', sap_system = '$sap_system', ".
+            "readonly = '$readonly', pnad = '$pnad', ".
             "none = '$none', mirror_user1 = '$mirror_user1', ctvadmin = '$ctvadmin', rgroup = '$rgroup' where id = '$id'");
 
         \Session::put("alert-success", "User data was successfully saved");

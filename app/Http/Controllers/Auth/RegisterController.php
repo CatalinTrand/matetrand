@@ -78,6 +78,8 @@ class RegisterController extends Controller
         if ("X".$sap_system == "X200") $sap_system = "";
         $readonly = 0;
         if (isset($data['readonly']) && strtoupper($data['readonly']) == "ON") $readonly = 1;
+        $pnad = 0;
+        if (isset($data['pnad']) && strtoupper($data['pnad']) == "ON") $pnad = 1;
         $none = 1;
         if (!isset($data['none']) || strtoupper($data['none']) != "ON") $none = 0;
         $mirror_user1 = "";
@@ -99,6 +101,7 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'sap_system' => $sap_system,
             'readonly'   => $readonly,
+            'pnad'   => $pnad,
             'none'   => $none,
             'mirror_user1'  => $mirror_user1,
             'ctvadmin'   => $ctvadmin,

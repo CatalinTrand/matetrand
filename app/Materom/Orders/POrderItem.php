@@ -457,7 +457,7 @@ class POrderItem
             } elseif (Auth::user()->role == 'CTV') {
 
             }
-        } elseif (($history == 2) && (Auth::user()->role == 'Administrator')) {
+        } elseif ((($history == 2) && (Auth::user()->role == 'Administrator')) && (Auth::user()->readonly != 0)) {
             if ($this->status == 'A')
                 $this->matnr_changeable = 1;
         }
@@ -501,10 +501,23 @@ class POrderItem
         }
 
         if ($history == 2 || Auth::user()->readonly != 0) {
+            $this->matnr_changeable = 0;
+            if ((($history == 2) && (Auth::user()->role == 'Administrator')) && (Auth::user()->readonly != 0)) {
+                if ($this->status == 'A')
+                    $this->matnr_changeable = 1;
+            }
+            $this->quantity_changeable = 0;
+            $this->price_changeable = 0;
+            $this->delivery_date_changeable = 0;
+            $this->eta_date_changeable = 0;
+            $this->position_splittable = 0;
             $this->info = 0;
             $this->accept = 0;
             $this->reject = 0;
             $this->inquire = 0;
+            if ((Auth::user()->pnad == 1) && ($history == 1)) {
+                $this->inquire = 1;
+            }
             $this->inquired = 0;
             $this->inq_reply = 0;
         } else {

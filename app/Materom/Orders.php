@@ -165,7 +165,10 @@ class Orders
             $filter_sql = self::addFilter($filter_sql,
                 "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         } elseif (Auth::user()->role == "Referent") {
-            $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
+            if (!empty(Auth::user()->ekgrp))
+                $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
+            else
+                $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", "###") . ")";
             $filter_sql = self::addFilter($filter_sql, $filter_refs_sql);
         } elseif (Auth::user()->role == "CTV") {
             $clients = DB::select("select distinct kunnr from ". System::$table_user_agent_clients ." where id = '" .

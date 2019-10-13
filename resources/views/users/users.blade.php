@@ -245,8 +245,10 @@
                                             $active = "Inactive";
 
                                         $readonly = "Normal";
-                                        if($user->readonly == 1)
+                                        if ($user->readonly == 1) {
                                             $readonly = "Read-only";
+                                            if ($user->pnad == 1) $readonly = "PNAD";
+                                        }
 
                                         $chPass = __('Change password');
                                         $editUser = __('Change user data');
@@ -384,31 +386,35 @@
                 modal: true,
                 buttons: {
                     Change: function () {
-                        $.ajaxSetup({
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            }
-                        });
-                        jQuery.ajaxSetup({async: false});
-                        $.post("webservice/changepassword",
-                            {
-                                user_id: idForUser,
-                                new_password: $("#new_password").val()
-                            },
-                            function (data, status) {
-                                passwordData = data;
-                                passwordStatus = status;
+                        if ($("#new_password").val() == $("#conf_password").val()) {
+                            $.ajaxSetup({
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                }
                             });
-                        jQuery.ajaxSetup({async: true});
+                            jQuery.ajaxSetup({async: false});
+                            $.post("webservice/changepassword",
+                                {
+                                    user_id: idForUser,
+                                    new_password: $("#new_password").val()
+                                },
+                                function (data, status) {
+                                    passwordData = data;
+                                    passwordStatus = status;
+                                });
+                            jQuery.ajaxSetup({async: true});
 
-                        if (passwordStatus == "success" && passwordData == "OK") {
-                            newPasswordDialog.dialog("close");
-                            // $("#app").prepend("<div class='alert alert-success'><b class='blinking-text'>Password successfully changed</b></div>");
-                        }
-                        else {
-                            if (passwordData != "OK")
-                                $("#new_password_msg").text(passwordData);
-                            else $("#new_password_msg").text("An error occured updating the password");
+                            if (passwordStatus == "success" && passwordData == "OK") {
+                                newPasswordDialog.dialog("close");
+                                // $("#app").prepend("<div class='alert alert-success'><b class='blinking-text'>Password successfully changed</b></div>");
+                            }
+                            else {
+                                if (passwordData != "OK")
+                                    $("#new_password_msg").text(passwordData);
+                                else $("#new_password_msg").text("An error occured updating the password");
+                            }
+                        } else {
+                            alert("Password not confirmed correctly");
                         }
                     },
                     Cancel: function () {
@@ -417,7 +423,7 @@
                 },
                 close: function () {
                     newPasswordForm[0].reset();
-                    location.replace(location.pathname + "?id=" + passwordUser);
+                    location.replace(location.pathname);
                 },
                 position: {
                     my: 'top',

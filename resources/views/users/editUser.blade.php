@@ -93,7 +93,11 @@
         }
 
         $readonly = "";
-        if ($user->readonly == 1) $readonly = "checked";
+        $pnad = "";
+        if ($user->readonly == 1) {
+            $readonly = "checked";
+            if ($user->pnad == 1 && $user->role == "Referent") $pnad = "checked";
+        }
         $none = "";
         if ($user->none == 1) $none = "checked";
         $ctvadmin = "";
@@ -269,8 +273,19 @@
                                     <label for="readonly"
                                            class="col-md-2 col-form-label text-md-left">{{ __('Read-only') }}</label>
 
-                                    <div class="col-md-5">
-                                        <input id="readonly" type="checkbox" name="readonly" style="float: left; margin-top: 1em;" {{$readonly}}>
+                                    <div class="col-md-4">
+                                        <input id="readonly" type="checkbox" name="readonly" style="float: left; margin-top: 0.75em;" {{$readonly}}
+                                            @if ($user->role == "Referent")
+                                            onchange="if(this.checked){$('#pnad_div').show();}else{$('#pnad_div').hide();$('#pnad').prop('checked',false);}"
+                                            @endif
+                                            >
+                                    </div>
+                                    <div class="row" id="pnad_div">
+                                        <label for="pnad"
+                                               class="col-form-label text-md-right">{{ __('PNAD') }}</label>
+                                        <div class="col-md-1">
+                                            <input id="pnad" type="checkbox" name="pnad" style="float: left; margin-top: 0.75em;" {{$pnad}}>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -596,6 +611,12 @@
 
         $(document).ready(function () {
             selectCheck('{{$user->role}}');
+            @if ($user->role == "Referent")
+            if (document.getElementById("readonly").checked)
+                document.getElementById("pnad_div").style.display = "";
+            else
+                document.getElementById("pnad_div").style.display = "none";
+            @endif
         });
 
         function selectCheck(nameSelect) {
@@ -610,6 +631,7 @@
             var agent_div = document.getElementById("agent_div");
             var customer_div = document.getElementById("customers_div");
             var ctvadmin_div = document.getElementById("ctvadmin_div");
+            var pnad_div = document.getElementById("pnad_div");
 
             if (nameSelect) {
                 if (nameSelect == "Referent" || nameSelect == "Furnizor") {
@@ -623,6 +645,7 @@
                         ref_div.style.display = "";
                         lifnr_div.style.display = "";
                         vendor_div.style.display = "";
+                        pnad_div.style.display = "none";
                     }
                     token_div.style.display = "none";
                     agent_div.style.display = "none";
@@ -634,6 +657,7 @@
                     lifnr_div.style.display = "none";
                     ekgrp_div.style.display = "none";
                     vendor_div.style.display = "none";
+                    pnad_div.style.display = "none";
 
                     if (nameSelect == "Administrator") {
                         token_div.style.display = "";
@@ -658,6 +682,7 @@
                 ref_div.style.display = "none";
                 vendor_div.style.display = "none";
                 token_div.style.display = "none";
+                pnad_div.style.display = "none";
             }
         }
     </script>

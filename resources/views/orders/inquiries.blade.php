@@ -6,9 +6,13 @@
                     <label for="inquiry_recipient" id="label_inquiry_recipient"
                            class="col-md-2 col-form-label text-md-left">{{__("Recipient")}}</label>
                     <select class="form-control-sm input-sm" style="height: 1.5rem; margin-top: 3px; padding: 2px;" id="inquiry_recipient"
+                        @if (\Illuminate\Support\Facades\Auth::user()->pnad != 1)
                         onchange="inquiry_recipient_changed();">
                         <option value="F" selected>{{__("Vendor")}}</option>
                         <option value="C">{{__("CTV")}}</option>
+                        @else
+                        disabled>
+                        @endif
                         <option value="P">{{__("PNAD")}}</option>
                     </select>
                 </div>

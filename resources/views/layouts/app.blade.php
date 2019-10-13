@@ -415,7 +415,7 @@
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" style="margin-top: 4px;" class="nav-link dropdown-toggle" href="#" role="button"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                {{ __(Auth::user()->role) . " " . (Auth::user()->readonly == 1? "R/O ": "") . Auth::user()->username }} <span class="caret"></span>
+                                {{ __(Auth::user()->role) . " " . (Auth::user()->readonly == 1? (Auth::user()->pnad == 1 ? "PNAD " : "R/O "): "") . Auth::user()->username }} <span class="caret"></span>
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">

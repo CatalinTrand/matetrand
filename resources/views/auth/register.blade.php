@@ -9,7 +9,7 @@
         if ($sap_system == "200") $currentsystem200 = "selected";
         if ($sap_system == "300") $currentsystem300 = "selected";
         $readonly = "";
-        if (\Illuminate\Support\Facades\Auth::user()->readonly == 1) $readonly = "checked";
+        $pnad = "";
         $none = "";
         if (\Illuminate\Support\Facades\Auth::user()->none == 1) $none = "checked";
         $mirror_user1 = trim(\Illuminate\Support\Facades\Auth::user()->mirror_user1);
@@ -147,7 +147,15 @@
                                     <label for="readonly"
                                            class="col-md-2 col-form-label text-md-left">{{ __('Read-only') }}</label>
                                     <div class="col-md-5">
-                                        <input type="checkbox" style="float: left; margin-top: 1em;" id="readonly" name="readonly" {{$readonly}}>
+                                        <input type="checkbox" style="float: left; margin-top: 1em;" id="readonly" name="readonly" {{$readonly}}
+                                            onchange="if(this.checked && $('#role').val() == 'Referent'){$('#pnad_div').show();}else{$('#pnad_div').hide();$('#pnad').prop('checked',false);}">
+                                    </div>
+                                    <div class="row" id="pnad_div">
+                                        <label for="pnad"
+                                               class="col-form-label text-md-right">{{ __('PNAD') }}</label>
+                                        <div class="col-md-1">
+                                            <input id="pnad" type="checkbox" name="pnad" style="float: left; margin-top: 0.75em;" {{$pnad}}>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -219,21 +227,26 @@
             var lifnr_div = document.getElementById("lifnr_div");
             var ekgrp_div = document.getElementById("ekgrp_div");
             var ctvadmin_div = document.getElementById("ctvadmin_div");
+            var pnad_div = document.getElementById("pnad_div");
 
             if(nameSelect){
                 if(nameSelect.value == "Referent" || nameSelect.value == "Furnizor"){
                     if(nameSelect.value == "Referent") {
                         ekgrp_div.style.display = "";
                         lifnr_div.style.display = "none";
+                        if (document.getElementById("readonly").checked)
+                            document.getElementById("pnad_div").style.display = "";
                     } else {
                         ekgrp_div.style.display = "none";
                         lifnr_div.style.display = "";
+                        pnad_div.style.display = "none";
                     }
                     ctvadmin_div.style.display = "none";
                 }
                 else {
                     lifnr_div.style.display = "none";
                     ekgrp_div.style.display = "none";
+                    pnad_div.style.display = "none";
                     if (nameSelect.value == "CTV") ctvadmin_div.style.display = "";
                     else ctvadmin_div.style.display = "none";
                 }
@@ -242,6 +255,7 @@
                 lifnr_div.style.display = "none";
                 ekgrp_div.style.display = "none";
                 ctvadmin_div.style.display = "none";
+                pnad_div.style.display = "none";
             }
         }
     </script>
