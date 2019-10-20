@@ -133,6 +133,18 @@ class WebserviceController extends Controller
         Session::forget("filter_lifnr_name");
         Session::forget("filter_kunnr");
         Session::forget("filter_kunnr_name");
+        Session::forget("filter_backorders");
+        Session::forget("filter_eta");
+        Session::forget("filter_overdue");
+        Session::forget("filter_overdue_low");
+        Session::forget("filter_overdue_high");
+        Session::forget("filter_goodsreceipt");
+        Session::forget("filter_deldate_low");
+        Session::forget("filter_deldate_high");
+        Session::forget("filter_etadate_low");
+        Session::forget("filter_etadate_high");
+        Session::forget("filter_pnad");
+        Session::forget("filter_mirror");
         Session::forget("autoexplode_PO");
         Session::forget("autoexplode_SO");
         Orders::fillCache();
@@ -408,7 +420,29 @@ class WebserviceController extends Controller
         if (Auth::user() == null) return "API authentication failed";
         if (Auth::user()->role == "Administrator") {
             Auth::loginUsingId(Input::get("id"));
-
+            Session::forget("filter_vbeln");
+            Session::forget("filter_ebeln");
+            Session::forget("filter_matnr");
+            Session::forget("filter_mtext");
+            Session::forget("filter_ekgrp");
+            Session::forget("filter_lifnr");
+            Session::forget("filter_lifnr_name");
+            Session::forget("filter_kunnr");
+            Session::forget("filter_kunnr_name");
+            Session::forget("filter_backorders");
+            Session::forget("filter_eta");
+            Session::forget("filter_overdue");
+            Session::forget("filter_overdue_low");
+            Session::forget("filter_overdue_high");
+            Session::forget("filter_goodsreceipt");
+            Session::forget("filter_deldate_low");
+            Session::forget("filter_deldate_high");
+            Session::forget("filter_etadate_low");
+            Session::forget("filter_etadate_high");
+            Session::forget("filter_pnad");
+            Session::forget("filter_mirror");
+            Session::forget("autoexplode_PO");
+            Session::forget("autoexplode_SO");
             System::init(Auth::user()->sap_system);
             Session::put('locale', strtolower(Auth::user()->lang));
             Session::put('materomdbcache', Orders::newCacheToken());
@@ -450,6 +484,8 @@ class WebserviceController extends Controller
             }
             if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
                 Session::put("filter_ebeln", "NONE");
+            if (Auth::user()->role == "Referent" || Auth::user()->readonly == 1 || Auth::user()->pnad == 1)
+                Session::put("filter_pnad", "1");
             Orders::fillCache();
         }
 

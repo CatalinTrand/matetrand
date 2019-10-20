@@ -56,3 +56,5 @@ $table->string('new_lifnr', 10)->default('');
 $table->string('werks', 4)->default('');
 $table->string('elikz', 1)->default('');
 $table->dateTime('etadt')->default(DB::raw('CURRENT_TIMESTAMP'));
+$table->string('mirror_ebeln', 10)->default('');
+$table->string('mirror_ebelp', 5)->default('');

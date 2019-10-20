@@ -78,6 +78,10 @@ class POrderItem
     public $qty_solution;
     public $pnad_status;  // X=open record exists in ZWM, ''=no open record
 
+    // mirroring
+    public $mirror_ebeln;
+    public $mirror_ebelp;
+
     // computed/determined fields
     public $sorder;      // sales order to be displayed
     public $kunnr_name;
@@ -176,6 +180,8 @@ class POrderItem
         $this->qty_details = $pitem->qty_details;
         $this->qty_solution = $pitem->qty_solution;
         $this->pnad_status = $pitem->pnad_status;
+        $this->mirror_ebeln = $pitem->mirror_ebeln;
+        $this->mirror_ebelp = $pitem->mirror_ebelp;
         $this->changes = array();
     }
 

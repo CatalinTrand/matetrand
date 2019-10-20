@@ -165,9 +165,10 @@ class Orders
             $filter_sql = self::addFilter($filter_sql,
                 "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         } elseif (Auth::user()->role == "Referent") {
+            $filter_refs_sql = "";
             if (!empty(Auth::user()->ekgrp))
                 $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", Auth::user()->ekgrp) . ")";
-            else
+            elseif (Auth::user()->pnad != 1)
                 $filter_refs_sql = "(" . self::processFilter($orders_table . ".ekgrp", "###") . ")";
             $filter_sql = self::addFilter($filter_sql, $filter_refs_sql);
         } elseif (Auth::user()->role == "CTV") {
@@ -187,7 +188,7 @@ class Orders
                 "($items_table.werks <> 'D000' and $items_table.werks <> 'G000')");
         }
 
-        if ($mirror <> 0) $filter_sql = self::addFilter($filter_sql, "$orders_table.mirror_ebeln <> ''");
+        if ($mirror <> 0) $filter_sql = self::addFilter($filter_sql, "$items_table.mirror_ebeln <> ''");
 
         if ($groupByPO == 2) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln <> '" . Orders::stockorder . "'");
         elseif ($groupByPO == 3) $filter_sql = self::addFilter($filter_sql, "$items_table.vbeln = '" . Orders::stockorder . "'");

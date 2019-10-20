@@ -81,6 +81,7 @@ class MasterData
             $lifnr_name = __("Undefined supplier");
         }
         if ($cover_error == 2) {
+            $lifnr_name = str_replace("\\", "\\\\", $lifnr_name);
             $lifnr_name = str_replace('"', "'", $lifnr_name);
             DB::insert('insert into ' . System::$table_sap_lfa1 . ' (lifnr, name1) values ("' . $lifnr . '", "' . $lifnr_name . '");');
         }
@@ -97,6 +98,7 @@ class MasterData
             $kunnr_name = __("Undefined client");
         }
         if ($cover_error == 2) {
+            $kunnr_name = str_replace("\\", "\\\\", $kunnr_name);
             $kunnr_name = str_replace('"', "'", $kunnr_name);
             DB::insert('insert into ' . System::$table_sap_kna1 . ' (kunnr, name1) values ("' . $kunnr . '", "' . $kunnr_name . '");');
         }
@@ -130,6 +132,7 @@ class MasterData
             $ekgrp_name = __("Undefined purchase group");
         }
         if ($cover_error == 2) {
+            $ekgrp_name = str_replace("\\", "\\\\", $ekgrp_name);
             $ekgrp_name = str_replace('"', "'", $ekgrp_name);
             DB::insert('insert into ' . System::$table_sap_t024 . ' (ekgrp, eknam) values ("' . $ekgrp . '", "' . $ekgrp_name . '");');
         }
@@ -209,6 +212,7 @@ class MasterData
         DB::beginTransaction();
         DB::delete("delete from " . System::$table_sap_kna1);
         foreach ($customers as $customer) {
+            $customer->name1 = str_replace("\\", "\\\\", $customer->name1);
             $customer->name1 = str_replace('"', "'", $customer->name1);
             DB::insert('insert into ' . System::$table_sap_kna1 . ' (kunnr, name1) values ("' . $customer->kunnr .
                 '", "' . $customer->name1 . '")');
@@ -261,6 +265,7 @@ class MasterData
         DB::beginTransaction();
         DB::delete("delete from " . System::$table_sap_lfa1);
         foreach ($vendors as $vendor) {
+            $vendor->name1 = str_replace("\\", "\\\\", $vendor->name1);
             $vendor->name1 = str_replace('"', "'", $vendor->name1);
             DB::insert('insert into ' . System::$table_sap_lfa1 . ' (lifnr, name1) values ("' . $vendor->lifnr .
                 '", "' . $vendor->name1 . '")');
@@ -312,7 +317,9 @@ class MasterData
         DB::beginTransaction();
         DB::delete("delete from " . System::$table_sap_t024);
         foreach ($pgroups as $pgroup) {
+            $pgroup->eknam = str_replace("\\", "\\\\", $pgroup->eknam);
             $pgroup->eknam = str_replace('"', "'", $pgroup->eknam);
+            $pgroup->ektel = str_replace("\\", "\\\\", $pgroup->ektel);
             $pgroup->ektel = str_replace('"', "'", $pgroup->ektel);
             DB::insert('insert into ' . System::$table_sap_t024 . ' (ekgrp, eknam, ektel, smtp_addr) values ("' .
                 $pgroup->ekgrp . '", "' . $pgroup->eknam . '",  "' . $pgroup->ektel . '", "' . $pgroup->smtp_addr . '")');

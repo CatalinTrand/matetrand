@@ -198,7 +198,7 @@ class Webservice
         }
 
         $cdate = now();
-        DB::update("update ". System::$table_pitemchg ." set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and ctype = 'E'");
+        // DB::update("update ". System::$table_pitemchg ." set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and ctype = 'E'");
         DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, stage, ctype, reason, cuser, cuser_name, duser) values " .
             "('$ebeln','$ebelp', '$cdate', '$stage', 'E', '$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "', '$duser')");
         Mailservice::sendMessageCopy($duser, Auth::user()->username, $order, $message);
@@ -309,9 +309,11 @@ class Webservice
                             }
                         }
                     } else $reason = __("Definitively accepted");
+                    $ack = 0;
+                    if (Auth::user()->role == "Referent" && $pstage == "R") $ack = 1;
                     DB::update("update ". System::$table_pitems ." set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
-                        "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$reason')");
+                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason, acknowledged) values " .
+                        "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$reason', $ack)");
                 }
             }
         } elseif ($item->pstage == 'Z') {
