@@ -89,6 +89,7 @@ class POrderItem
     public $wtime;    // processing warning date
     public $ctime;    // processing critical date
     public $dodays;   // delivery overdue days
+    public $ebelp_title;
 
     // external representations
     public $x_quantity;
@@ -182,6 +183,9 @@ class POrderItem
         $this->pnad_status = $pitem->pnad_status;
         $this->mirror_ebeln = $pitem->mirror_ebeln;
         $this->mirror_ebelp = $pitem->mirror_ebelp;
+        $this->ebelp_title = "";
+        if (!empty(trim($this->mirror_ebeln)) && System::ic_on())
+            $this->ebelp_title = __("Mirrored with")." ".SAP::alpha_output($pitem->mirror_ebeln)."-".SAP::alpha_output($pitem->mirror_ebelp);
         $this->changes = array();
     }
 

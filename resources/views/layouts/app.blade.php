@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Materom SRM</title>
+    <title>{{trim(env("APP_NAME", "Materom SRM"))}}</title>
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
@@ -381,6 +381,11 @@
                         background-color: lightyellow; padding: 5px; border-style: double;">
                     {{__("System")}}:&nbsp;{{App\Materom\System::$system_name}}
                 </div>
+                @if (trim(env("MATEROM_DISPLAYNAME", "")) != "")
+                    <div style="margin-left: 2rem; font-weight: bold; font-size: 200%; color: red;">
+                        {{trim(env("MATEROM_DISPLAYNAME", ""))}}
+                    </div>
+                @endif
             @endguest
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false"

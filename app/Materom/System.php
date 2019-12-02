@@ -60,7 +60,7 @@ class System
     public static function init($sap_system = "")
     {
         $sap_system = trim($sap_system);
-        if ("X".$sap_system == "X200") $sap_system = "";
+        if ("X" . $sap_system == "X200") $sap_system = "";
         self::$system = $sap_system;
 
         self::$system_name = $sap_system;
@@ -108,4 +108,22 @@ class System
         self::$table_users_sel .= $sap__system;
         self::$table_stat_orders .= $sap__system;
     }
+
+    public static function ic_on()
+    {
+        $ic = strtoupper(trim(env("MATEROM_INTERCOMPANY", "N")));
+        if ($ic == "TEST") return substr(Auth::user()->id, 0, 3) == "ic_";
+        return $ic == "Y" || $ic == "1" || $ic == "ON" || $ic == "YES" || $ic == "SELF";
+    }
+
+    public static function d_ic($mirror_ebeln) // direct intercompany
+    {
+        return self::ic_on() && self::$system == "300" && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1));
+    }
+
+    public static function r_ic($mirror_ebeln) // reversed intercompany
+    {
+        return self::ic_on() && self::$system == "" && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1));
+    }
+
 }

@@ -33,7 +33,7 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
 
             $pdate = now()->subDays(1);
-            ini_set('memory_limit', '256M');
+            ini_set('memory_limit', '512M');
             System::init();
 
             Log::info("Daily cleanup job has started in system ". System::$system_name);
@@ -72,7 +72,7 @@ class Kernel extends ConsoleKernel
 
             }
 
-        })->dailyAt("03:00");
+        })->dailyAt(env("MATEROM_JOB_TIME", "03:00"));
 
 
         $schedule->command("materom:ctvreminders 200")->weekdays()->hourly()->between("09:00", "18:01");

@@ -176,6 +176,7 @@ class Data
             } else {
                 if (isset($sapitm["LOEKZ"]) && $sapitm["LOEKZ"] == "L") {
                     Log::channel("poevent")->info("Purchase order item $ebeln/$citem->ebelp: deleted in SAP");
+                    continue;
                 }
             }
             $nitem = new \stdClass();
@@ -258,9 +259,9 @@ class Data
                 DB::insert($sql);
 
             } else {
-                Log::debug("Update ". Auth::user()->id. " '$nitem->ebeln'/'$nitem->ebelp'");
+                // Log::debug("Update ". Auth::user()->id. " '$nitem->ebeln'/'$nitem->ebelp'");
                 if (DB::table(System::$table_pitemchg)->where([["ebeln", "=", $nitem->ebeln],["ebelp", "=", $nitem->ebelp]])->exists()
-                    || $citem->changed != 0 || $citem->stage != 'F' || $citem->pstage != '' || $citem->status != '' || 1 == 1) {
+                    || $citem->changed != 0 || $citem->stage != 'F' || $citem->pstage != '' || $citem->status != '') {
                     $sql = "update " . System::$table_pitems . " set " .
                         "ctv = '$nitem->ctv', " .
                         "ctv_name = '$nitem->ctv_name', " .
@@ -286,6 +287,8 @@ class Data
                         "sales_puom = '$nitem->sales_puom', ".
                         "vbeln = '$nitem->vbeln', ".
                         "posnr = '$nitem->posnr', ".
+                        "mirror_ebeln = '$nitem->mirror_ebeln', ".
+                        "mirror_ebelp = '$nitem->mirror_ebelp', ".
                         "kunnr = '$nitem->kunnr', ".
                         "shipto = '$nitem->shipto',".
                         "ctv = '$nitem->ctv', ".
@@ -452,14 +455,20 @@ class Data
     {
         SAP::refreshDeliveryStatus(2);
 
-        $pitems = DB::table(System::$table_pitems)->where("grdate", "<>", "null")->get();
-        foreach ($pitems as $pitem) {
-            if ("" . $pitem->qty == explode(" ", $pitem->grqty)[0] &&
-                "" . $pitem->qty == explode(" ", $pitem->qty_invoiced)[0]) {
-                Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (goods received)");
-                self::archiveItem($pitem->ebeln, $pitem->ebelp);
-            }
-        }
+        DB::table(System::$table_pitems)->where("grdate", "<>", "null")->orderByRaw("ebeln, ebelp")
+            ->chunk(5000, function($pitems) {
+                foreach ($pitems as $pitem) {
+                    if ("" . $pitem->qty == explode(" ", $pitem->grqty)[0]) {
+                        if ("" . $pitem->qty == explode(" ", $pitem->qty_invoiced)[0] && $pitem->vbeln != Orders::stockorder) {
+                            Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (goods invoiced)");
+                            self::archiveItem($pitem->ebeln, $pitem->ebelp);
+                        } elseif ($pitem->vbeln == Orders::stockorder) {
+                            Log::info("Archiving " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp) . " (goods received)");
+                            self::archiveItem($pitem->ebeln, $pitem->ebelp);
+                        }
+                    }
+                }
+            });
 
         $pitems = DB::table(System::$table_pitems)->where("elikz", "=", "X")->get();
         foreach ($pitems as $pitem) {

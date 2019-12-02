@@ -119,11 +119,16 @@ class WebserviceController extends Controller
 
     public function deletefilters()
     {
-//        Session::forget('filter_status');
-//        Session::forget('filter_history');
-//        Session::forget("filter_archdate");
-//        Session::forget("filter_inquirements");
-//        Session::forget("filter_overdue");
+        $mode = Input::get("mode");
+        if ($mode == 0) {
+            Session::forget('filter_status');
+            Session::forget('filter_history');
+            Session::forget("filter_archdate");
+            Session::forget("filter_inquirements");
+            Session::forget("filter_overdue");
+            Session::forget("filter_pnad");
+            Session::forget("filter_mirror");
+        }
         Session::forget("filter_vbeln");
         Session::forget("filter_ebeln");
         Session::forget("filter_matnr");
@@ -143,11 +148,9 @@ class WebserviceController extends Controller
         Session::forget("filter_deldate_high");
         Session::forget("filter_etadate_low");
         Session::forget("filter_etadate_high");
-        Session::forget("filter_pnad");
-        Session::forget("filter_mirror");
         Session::forget("autoexplode_PO");
         Session::forget("autoexplode_SO");
-        Orders::fillCache();
+        if ($mode == 0) Orders::fillCache();
     }
 
     public function refilter()
@@ -484,7 +487,7 @@ class WebserviceController extends Controller
             }
             if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
                 Session::put("filter_ebeln", "NONE");
-            if (Auth::user()->role == "Referent" || Auth::user()->readonly == 1 || Auth::user()->pnad == 1)
+            if (Auth::user()->role == "Referent" && Auth::user()->readonly == 1 && Auth::user()->pnad == 1)
                 Session::put("filter_pnad", "1");
             Orders::fillCache();
         }
@@ -557,7 +560,19 @@ class WebserviceController extends Controller
     {
         $this->tryAuthAPIToken();
         if (Auth::user() == null) return "API authentication failed";
-        return Webservice::sapProcessPO(Input::get("ebeln"));
+        $return = Webservice::sapProcessPO(Input::get("ebeln"));
+        if ($return == "OK" &&
+            strtoupper(trim(env("MATEROM_INTERCOMPANY", "N"))) == "SELF" &&
+            !empty(Auth::user()->mirror_user1)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            $return = Webservice::sapProcessPO(Input::get("ebeln"));
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+        return $return;
     }
 
     public function readInforecords()

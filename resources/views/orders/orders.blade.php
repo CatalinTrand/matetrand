@@ -1004,7 +1004,7 @@
             jQuery.ajaxSetup({async: true});
         }
 
-        function delete_filters() {
+        function delete_filters(mode = 0) {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1014,7 +1014,7 @@
             var df_data, df_status;
             $.post("webservice/deletefilters",
                 {
-                    empty: null
+                    mode: mode
                 },
                 function (data, status) {
                     df_data = data;
@@ -1024,7 +1024,7 @@
         }
 
         function re_filter(type, order) {
-            delete_filters();
+            delete_filters(1);
 
             $.ajaxSetup({
                 headers: {
@@ -1048,7 +1048,7 @@
         }
 
         function reset_filters() {
-            delete_filters();
+            delete_filters(0);
             location.reload();
         }
 
@@ -1749,7 +1749,7 @@
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
                     cols += '<td class="coloured td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_tools + '</td>';
                 @endif
-                cols += "<td colspan='1'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
+                cols += "<td colspan='1'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;' title='" + pitem.ebelp_title + "'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.werks + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + conv_exit_alpha_output(pitem.mfrnr) + '</td>';
 
@@ -2296,7 +2296,7 @@
             }
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
                 if (mode != 3)
-                select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+                select_proposal(mode, thisbtn, _dataIR, "{{__('Selectie propunere')}}", "{{__('Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului')}}");
                 else
                 select_proposal(mode, thisbtn, _dataIR, "Decizie split item", "Furnizorul a efectuat spargerea pozitiei in mai multe materiale, decideti daca acceptati");
             @elseif (\Illuminate\Support\Facades\Auth::user()->id == "radu" || \Illuminate\Support\Facades\Auth::user()->role == "Administrator")
@@ -2308,7 +2308,7 @@
                     accept_reject_dialog2(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
             } else if (_dataIR.stage == 'C') {
-                select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+                select_proposal(mode, thisbtn, _dataIR, "{{__('Selectie propunere')}}", "{{__('Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului')}}");
             }
             @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Administrator")
             if (_dataIR.stage == 'R') {
@@ -2319,7 +2319,7 @@
                     accept_reject_dialog2(2, thisbtn, _dataIR, "Rejectare pozitie", "Furnizorul a rejectat aceasta pozitie - puteti propune alte variante");
                 }
             } else if (_dataIR.stage == 'C') {
-                select_proposal(mode, thisbtn, _dataIR, "Selectie propunere", "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului");
+                select_proposal(mode, thisbtn, _dataIR, "{{__('Selectie propunere')}}", "{{__('Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului')}}");
             }
             @endif
         }

@@ -225,8 +225,21 @@ class Webservice
             if ($lastchanges == null || empty($lastchanges)) return "No suitable status record found";
             $cdate = $lastchanges[0]->cdate;
         }
-        if ($cdate != null)
-            DB::update("update ". System::$table_pitemchg ." set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        if ($cdate != null) {
+            DB::update("update " . System::$table_pitemchg . " set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        }
+
+        $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        if (System::d_ic($item->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::sendAck($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
@@ -287,7 +300,7 @@ class Webservice
                             if (($result != null) && !is_string($result)) $result = json_encode($result);
                             if (($result != null) && strlen(trim($result)) != 0) return $result;
                             if ($item->vbeln == Orders::stockorder) {
-                                $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, SAP::newMatnr($item->matnr),
+                                $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, $item->matnr,
                                     $item->qty, $item->qty_uom,
                                     $item->purch_price, $item->purch_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
@@ -321,6 +334,16 @@ class Webservice
             DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, acknowledged, oldval) values " .
                 "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 1, 'F')");
 
+        }
+
+        if (System::d_ic($item->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::acceptItemChange($item->mirror_ebeln, $item->mirror_ebelp, $type);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
         }
 
         return "";
@@ -376,7 +399,7 @@ class Webservice
                                 if (($result != null) && !is_string($result)) $result = json_encode($result);
                                 if (($result != null) && strlen(trim($result)) != 0) return $result;
                                 if ($item->vbeln == Orders::stockorder) {
-                                    $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, SAP::newMatnr($item->matnr),
+                                    $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, $item->matnr,
                                         $item->qty, $item->qty_uom,
                                         $item->purch_price, $item->purch_curr, $item->lfdat);
                                     if (!empty(trim($result))) {
@@ -409,6 +432,17 @@ class Webservice
                     "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 1, 'F')");
 
             }
+
+            if (System::d_ic($item->mirror_ebeln)) {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId(Auth::user()->mirror_user1);
+                System::init(Auth::user()->sap_system);
+                self::acceptItemChange($item->mirror_ebeln, $item->mirror_ebelp, $type);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
+
         }
 
         if (!empty($todoitems1)) {
@@ -421,6 +455,17 @@ class Webservice
                 DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                if (System::d_ic($item->mirror_ebeln)) {
+                    $currid = Auth::user()->id;
+                    $sap_system = Auth::user()->sap_system;
+                    Auth::loginUsingId(Auth::user()->mirror_user1);
+                    System::init(Auth::user()->sap_system);
+                    DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$item->mirror_ebeln' and ebelp = '$item->mirror_ebelp'");
+                    DB::insert("insert into ". System::$table_pitemchg ." ($item->mirror_ebeln, $item->mirror_ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                        "('$item->mirror_ebeln','$item->mirror_ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                    Auth::loginUsingId($currid);
+                    System::init($sap_system);
+                }
             }
 
         }
@@ -466,14 +511,14 @@ class Webservice
                         }
                     }
                 }
-            }
-            if ($old_stage != 'R') {
-                $refuser = DB::table("users")->where(["ekgrp" => $_porder->ekgrp, "role" => "Referent",
-                    "active" => 1, "sap_system" => Auth::user()->sap_system])->first();
-                if ($refuser != null) {
-                    try {
-                        Mailservice::sendSalesOrderNotification($refuser->id, $pitem->vbeln, $pitem->posnr);
-                    } catch (Exception $e) {}
+                if ($old_stage != 'R') {
+                    $refuser = DB::table("users")->where(["ekgrp" => $_porder->ekgrp, "role" => "Referent",
+                        "active" => 1, "sap_system" => Auth::user()->sap_system])->first();
+                    if ($refuser != null) {
+                        try {
+                            Mailservice::sendSalesOrderNotification($refuser->id, $pitem->vbeln, $pitem->posnr);
+                        } catch (Exception $e) {}
+                    }
                 }
             }
         }
@@ -485,6 +530,17 @@ class Webservice
         DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval, reason) values " .
             "('$ebeln','$item', '$new_status', '$new_stage', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$category1', '$reason1')");
         DB::commit();
+
+        if (System::d_ic($pitem->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::cancelItem($pitem->mirror_ebeln, $pitem->mirror_ebelp, $category, $reason, $new_status, $new_stage);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
@@ -553,6 +609,16 @@ class Webservice
             DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
         }
         DB::commit();
+
+        if (System::d_ic($pitem->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::doChangeItem($column, $value, $valuehlp, $oldvalue, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $backorder, $seconds);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
         return "";
     }
 
@@ -728,6 +794,25 @@ class Webservice
             Mailservice::sendMessageCopy($duser, $uName, $order, $text);
             \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
         }
+
+        if (System::d_ic($pitem->mirror_ebeln) && Auth::user()->role != "CTV") {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::sendInquiry($pitem->mirror_ebeln, $pitem->mirror_ebelp, $text, $to);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        } elseif (System::r_ic($pitem->mirror_ebeln) && Auth::user()->role == "CTV") {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::sendInquiry($pitem->mirror_ebeln, $pitem->mirror_ebelp, $text, $to);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
@@ -888,6 +973,19 @@ class Webservice
                 // if (!empty($set_new_lifnr)) Data::archiveItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
             }
         }
+
+        if (System::d_ic($proposal->itemdata->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                                                                           'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+            self::processProposal($proposal);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
@@ -992,6 +1090,17 @@ class Webservice
             $result = Data::archiveItem($ebeln, $ebelp);
             Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
         }
+
+        if (System::r_ic($item->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::acceptProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate, $pos);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
@@ -1035,10 +1144,21 @@ class Webservice
             $result = Data::archiveItem($ebeln, $ebelp);
             Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
         }
+
+        if (System::r_ic($item->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::rejectProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
-    static public function acceptSplit($ebeln, $ebelp, $cdate)
+    static public function acceptSplit($ebeln, $ebelp, $cdate, $no_ic = false)
     {
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $splititems = DB::table(System::$table_pitemchg_proposals)->where([
@@ -1054,7 +1174,7 @@ class Webservice
         $text = "";
         if ($item->vbeln == Orders::stockorder) {
             foreach($splititems as $splititem) {
-                $result = SAP::createPurchReq($splititem->lifnr, $splititem->idnlf, $splititem->mtext, SAP::newMatnr($item->matnr),
+                $result = SAP::createPurchReq($splititem->lifnr, $splititem->idnlf, $splititem->mtext, $item->matnr,
                     $splititem->qty, $splititem->qty_uom,
                     $splititem->purch_price, $splititem->purch_curr, $splititem->lfdat);
                 if (!empty(trim($result))) {
@@ -1095,6 +1215,18 @@ class Webservice
             "('$ebeln', '$ebelp', '$cdate', 0, 'A', 'Z', 'U', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$text')");
         DB::commit();
+
+
+        if (System::r_ic($item->mirror_ebeln) && !$no_ic) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::acceptSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
@@ -1123,6 +1255,17 @@ class Webservice
                 Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
             }
         }
+
+        if (System::r_ic($item->mirror_ebeln)) {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            self::rejectSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        }
+
         return "";
     }
 
@@ -1154,7 +1297,20 @@ class Webservice
             $counter++;
         }
         DB::commit();
-        return self::acceptSplit($ebeln, $ebelp, $cdate);
+        if (System::r_ic($proposal->itemdata->mirror_ebeln)) {
+            self::acceptSplit($ebeln, $ebelp, $cdate, true);
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+            self::processSplit($proposal);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        } else {
+            return self::acceptSplit($ebeln, $ebelp, $cdate);
+        }
     }
 
     static public function archiveItem($ebeln, $ebelp)
@@ -1229,6 +1385,15 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 0$ctype) by ". Auth::user()->id);
+                    if (System::d_ic($pitem->mirror_ebeln)) {
+                        $currid = Auth::user()->id;
+                        $sap_system = Auth::user()->sap_system;
+                        Auth::loginUsingId(Auth::user()->mirror_user1);
+                        System::init(Auth::user()->sap_system);
+                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                        Auth::loginUsingId($currid);
+                        System::init($sap_system);
+                    }
                     return "OK";
                 }
 
@@ -1250,6 +1415,15 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 1) by ". Auth::user()->id);
+                    if (System::d_ic($pitem->mirror_ebeln)) {
+                        $currid = Auth::user()->id;
+                        $sap_system = Auth::user()->sap_system;
+                        Auth::loginUsingId(Auth::user()->mirror_user1);
+                        System::init(Auth::user()->sap_system);
+                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                        Auth::loginUsingId($currid);
+                        System::init($sap_system);
+                    }
                     return "OK";
                 }
 
@@ -1266,6 +1440,15 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 2) by ". Auth::user()->id);
+                    if (System::d_ic($pitem->mirror_ebeln)) {
+                        $currid = Auth::user()->id;
+                        $sap_system = Auth::user()->sap_system;
+                        Auth::loginUsingId(Auth::user()->mirror_user1);
+                        System::init(Auth::user()->sap_system);
+                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                        Auth::loginUsingId($currid);
+                        System::init($sap_system);
+                    }
                     return "OK";
                 }
 
@@ -1291,6 +1474,15 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 3) by ". Auth::user()->id);
+                    if (System::d_ic($pitem->mirror_ebeln)) {
+                        $currid = Auth::user()->id;
+                        $sap_system = Auth::user()->sap_system;
+                        Auth::loginUsingId(Auth::user()->mirror_user1);
+                        System::init(Auth::user()->sap_system);
+                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                        Auth::loginUsingId($currid);
+                        System::init($sap_system);
+                    }
                     return "OK";
                 }
 
@@ -1316,6 +1508,15 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 4) by ". Auth::user()->id);
+                    if (System::d_ic($pitem->mirror_ebeln)) {
+                        $currid = Auth::user()->id;
+                        $sap_system = Auth::user()->sap_system;
+                        Auth::loginUsingId(Auth::user()->mirror_user1);
+                        System::init(Auth::user()->sap_system);
+                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                        Auth::loginUsingId($currid);
+                        System::init($sap_system);
+                    }
                     return "OK";
                 }
 
@@ -1512,6 +1713,28 @@ class Webservice
                 }
                 // if (!empty($set_new_lifnr)) Data::archiveItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
             }
+        }
+
+        if (System::d_ic($proposal->itemdata->mirror_ebeln) && Auth::user()->role != "CTV") {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+            self::processProposal2($proposal);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
+        } elseif (System::r_ic($proposal->itemdata->mirror_ebeln) && Auth::user()->role == "CTV") {
+            $currid = Auth::user()->id;
+            $sap_system = Auth::user()->sap_system;
+            Auth::loginUsingId(Auth::user()->mirror_user1);
+            System::init(Auth::user()->sap_system);
+            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+            self::processProposal2($proposal);
+            Auth::loginUsingId($currid);
+            System::init($sap_system);
         }
         return "";
     }
