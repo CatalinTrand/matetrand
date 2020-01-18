@@ -10,6 +10,7 @@ namespace App\Materom;
 
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class System
@@ -126,4 +127,17 @@ class System
         return self::ic_on() && self::$system == "" && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1));
     }
 
+    public static function getMirrorCTVuser($kunnr)
+    {
+        $local_table_users_agent = System::deftable_users_agent;
+        $local_table_user_agent_clients = System::deftable_user_agent_clients;
+        if (empty(Auth::user()->sap_system)) {
+            $local_table_users_agent .= "_300";
+            $local_table_user_agent_clients .= "_300";
+        }
+        $dusers = DB::select("select id, count(*) as count from ". $local_table_users_agent ." join ". $local_table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count, id");
+        if ($dusers == null || empty($dusers)) $duser = DB::table($local_table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
+        else $duser = $dusers[0]->id;
+        return $duser;
+    }
 }

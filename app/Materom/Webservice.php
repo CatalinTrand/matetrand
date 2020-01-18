@@ -806,7 +806,12 @@ class Webservice
         } elseif (System::r_ic($pitem->mirror_ebeln) && Auth::user()->role == "CTV") {
             $currid = Auth::user()->id;
             $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
+            $mirror_user1 = System::getMirrorCTVuser($pitem->kunnr);
+            if ($mirror_user1 == null) {
+                Log::error("Error mirroring CTV inquiry for $ebeln/$ebelp (" . $pitem->vbeln . "/" . $pitem->posnr . "): no suitable CTV mirror user found");
+                return "";
+            }
+            Auth::loginUsingId($mirror_user1);
             System::init(Auth::user()->sap_system);
             self::sendInquiry($pitem->mirror_ebeln, $pitem->mirror_ebelp, $text, $to);
             Auth::loginUsingId($currid);
@@ -1051,6 +1056,20 @@ class Webservice
                 return $result;
             }
             DB::commit();
+            if (System::r_ic($item->mirror_ebeln)) {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
+                if ($mirror_user1 == null) {
+                    Log::error("Error mirroring CTV accepting proposal for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
+                    return "";
+                }
+                Auth::loginUsingId($mirror_user1);
+                System::init(Auth::user()->sap_system);
+                self::acceptProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate, $pos);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
             return "";
         }
 
@@ -1094,7 +1113,12 @@ class Webservice
         if (System::r_ic($item->mirror_ebeln)) {
             $currid = Auth::user()->id;
             $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
+            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
+            if ($mirror_user1 == null) {
+                Log::error("Error mirroring CTV accepting proposal for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
+                return "";
+            }
+            Auth::loginUsingId($mirror_user1);
             System::init(Auth::user()->sap_system);
             self::acceptProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate, $pos);
             Auth::loginUsingId($currid);
@@ -1148,7 +1172,12 @@ class Webservice
         if (System::r_ic($item->mirror_ebeln)) {
             $currid = Auth::user()->id;
             $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
+            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
+            if ($mirror_user1 == null) {
+                Log::error("Error mirroring CTV rejecting proposal for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
+                return "";
+            }
+            Auth::loginUsingId($mirror_user1);
             System::init(Auth::user()->sap_system);
             self::rejectProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
             Auth::loginUsingId($currid);
@@ -1220,7 +1249,12 @@ class Webservice
         if (System::r_ic($item->mirror_ebeln) && !$no_ic) {
             $currid = Auth::user()->id;
             $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
+            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
+            if ($mirror_user1 == null) {
+                Log::error("Error mirroring CTV accepting split for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
+                return "";
+            }
+            Auth::loginUsingId($mirror_user1);
             System::init(Auth::user()->sap_system);
             self::acceptSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
             Auth::loginUsingId($currid);
@@ -1259,7 +1293,12 @@ class Webservice
         if (System::r_ic($item->mirror_ebeln)) {
             $currid = Auth::user()->id;
             $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
+            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
+            if ($mirror_user1 == null) {
+                Log::error("Error mirroring CTV rejecting split for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
+                return "";
+            }
+            Auth::loginUsingId($mirror_user1);
             System::init(Auth::user()->sap_system);
             self::rejectSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
             Auth::loginUsingId($currid);
@@ -1301,7 +1340,12 @@ class Webservice
             self::acceptSplit($ebeln, $ebelp, $cdate, true);
             $currid = Auth::user()->id;
             $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
+            $mirror_user1 = System::getMirrorCTVuser($proposal->itemdata->kunnr);
+            if ($mirror_user1 == null) {
+                Log::error("Error mirroring CTV processing split for $ebeln/$ebelp (" . $proposal->itemdata->vbeln . "/" . $proposal->itemdata->posnr . "): no suitable CTV mirror user found");
+                return "";
+            }
+            Auth::loginUsingId($mirror_user1);
             System::init(Auth::user()->sap_system);
             $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
                 'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
@@ -1528,6 +1572,11 @@ class Webservice
     static public function processProposal2($proposal)
     {
         $cdate = now();
+        return self::_processProposal2($proposal, $cdate);
+    }
+
+    static public function _processProposal2($proposal, $cdate)
+    {
         $stage = $proposal->itemdata->stage;
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
@@ -1722,17 +1771,22 @@ class Webservice
             System::init(Auth::user()->sap_system);
             $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
                 'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
-            self::processProposal2($proposal);
+            self::_processProposal2($proposal, $cdate);
             Auth::loginUsingId($currid);
             System::init($sap_system);
         } elseif (System::r_ic($proposal->itemdata->mirror_ebeln) && Auth::user()->role == "CTV") {
             $currid = Auth::user()->id;
             $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
+            $mirror_user1 = System::getMirrorCTVuser($proposal->itemdata->kunnr);
+            if ($mirror_user1 == null) {
+                Log::error("Error mirroring CTV processing split for $ebeln/$ebelp (" . $proposal->itemdata->vbeln . "/" . $proposal->itemdata->posnr . "): no suitable CTV mirror user found");
+                return "";
+            }
+            Auth::loginUsingId($mirror_user1);
             System::init(Auth::user()->sap_system);
             $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
                 'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
-            self::processProposal2($proposal);
+            self::_processProposal2($proposal, $cdate);
             Auth::loginUsingId($currid);
             System::init($sap_system);
         }

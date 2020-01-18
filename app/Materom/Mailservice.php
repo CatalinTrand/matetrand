@@ -17,6 +17,7 @@ class Mailservice
     {
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
+        if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
         Mail::send('email.messagecopy',['user' => $user,'from' => $from, 'order' => $order, 'content' => $content],
             function($message) use ($user, $from, $order) {
             $message->to($user->email, $user->username)->subject(__("Mesaj SRM pentru comanda ") . $order);
@@ -31,6 +32,7 @@ class Mailservice
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         $user->agent = $user->username;
+        if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
         Mail::send('email.notification',['user' => $user,'ebeln' => $ebeln], function($message) use ($ebeln, $user) {
             $message->to($user->email, $user->username)->subject("Notificare comanda $ebeln");
             $message->from('no_reply_srm@materom.ro','MATEROM SRM');
@@ -47,6 +49,7 @@ class Mailservice
             $kunnr = DB::table(System::$table_pitems)->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if (isset($kunnr) && $kunnr != null) $user->agent = MasterData::getAgentForClient($kunnr)->agent_name;
         }
+        if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
         Mail::send('email.salesordernotification',['user' => $user,'vbeln' => $vbeln,'posnr' => $posnr],
             function($message) use ($vbeln, $posnr, $user) {
             $posnr = SAP::alpha_output($posnr);
@@ -65,6 +68,7 @@ class Mailservice
             $kunnr = DB::table(System::$table_pitems)->where([["vbeln", "=", $vbeln], ["posnr", "=", $posnr]])->value("kunnr");
             if (isset($kunnr) && $kunnr != null) $user->agent = MasterData::getAgentForClient($kunnr)->agent_name;
         }
+        if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
         Mail::send('email.salesorderproposal',['user' => $user,'vbeln' => $vbeln,'posnr' => $posnr],
             function($message) use ($vbeln, $posnr, $user) {
                 $posnr = SAP::alpha_output($posnr);
@@ -83,6 +87,7 @@ class Mailservice
             $kunnr = DB::table(System::$table_pitems)->where([["vbeln", "=", $vbeln],["posnr", "=", $posnr]])->value("kunnr");
             if (isset($kunnr) && $kunnr != null) $user->agent = MasterData::getAgentForClient($kunnr)->agent_name;
         }
+        if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
         Mail::send('email.salesorderchange',['user' => $user,'vbeln' => $vbeln, 'posnr' => $posnr, 'newposnr' => $newposnr],
             function($message) use ($vbeln, $posnr, $user) {
                 $posnr = SAP::alpha_output($posnr);
@@ -216,6 +221,7 @@ class Mailservice
             $mail->ctv = $ctv;
             $mail->items = $items;
             array_push($mails, $mail);
+            if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
             Mail::send('email.ctvreminder',['user' => $ctv,'items' => $items],
                 function($message) use ($ctv, $items) {
                     $message->to($ctv->email, $ctv->username)->subject("Notificare SRM de pozitii ce necesita atentia dv.");
@@ -223,6 +229,7 @@ class Mailservice
                 });
             if (1 == 2) {
                 $ctv->email = "radu@etrandafir.ro";
+                if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
                 Mail::send('email.ctvreminder', ['user' => $ctv, 'items' => $items],
                     function ($message) use ($ctv, $items) {
                         $message->to($ctv->email, $ctv->username)->subject("Notificare SRM de pozitii ce necesita atentia dv.");
@@ -247,14 +254,14 @@ class Mailservice
                         array_push($maillist, $mail);
                 }
                 if (empty($maillist)) continue;
-                if (1 == 1)
+                if (1 == 1 && strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
                 Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $maillist],
                     function ($message) use ($adminctv) {
                         $message->to($adminctv->email, $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                     });
-                if (1 == 2)
-                Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $maillist],
+                if (1 == 2 && strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
+                    Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $maillist],
                     function ($message) use ($adminctv) {
                         $message->to("radu@etrandafir.ro", $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
@@ -398,6 +405,7 @@ class Mailservice
             }
             if ($nitems == 0) continue;
             // $user->email = "radu@etrandafir.ro";
+            if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
             Mail::send('email.refsupreminder',['user' => $user, 'norders' => $norders, 'nitems' => $nitems],
                 function($message) use ($user, $norders, $nitems) {
                     $message->to($user->email, $user->username)->subject("Notificare SRM de pozitii ce necesita atentia dv.");
@@ -431,6 +439,7 @@ class Mailservice
                 if (empty($maillist)) continue;
                 if (substr($admin->id, 0, 1) == "~") continue;
                 // $admin->email = "radu@etrandafir.ro";
+                if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
                 Mail::send('email.adminreminder',['admin' => $admin, 'reminders' => $maillist],
                     function($message) use ($admin) {
                         $message->to($admin->email, $admin->username)->subject("Notificare SRM de pozitii deschise la furnizori/referenti");
