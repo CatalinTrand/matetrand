@@ -132,6 +132,8 @@ class POrderItem
     public $position_splittable;      // 0=no, 1=yes
     public $position_splitted;        // 0=no, 1=yes
 
+    public $readonly;                 // because of intercompany or any other reason
+
     function __construct($pitem)
     {
         $this->ebeln = $pitem->ebeln;
@@ -184,8 +186,16 @@ class POrderItem
         $this->mirror_ebeln = $pitem->mirror_ebeln;
         $this->mirror_ebelp = $pitem->mirror_ebelp;
         $this->ebelp_title = "";
-        if (!empty(trim($this->mirror_ebeln)) && System::ic_on())
-            $this->ebelp_title = __("Mirrored with")." ".SAP::alpha_output($pitem->mirror_ebeln)."-".SAP::alpha_output($pitem->mirror_ebelp);
+        $this->readonly = 0;
+        if (!empty(trim($this->mirror_ebeln)) && System::ic_on()) {
+            $this->ebelp_title = __("Mirrored with") . " " . SAP::alpha_output($pitem->mirror_ebeln) . "-" . SAP::alpha_output($pitem->mirror_ebelp);
+            if (empty(Auth::user()->sap_system)) {
+                if (Auth::user()->role == "Furnizor" || Auth::user()->role == "Referent") $this->readonly = 1;
+            }
+            if (!empty(Auth::user()->sap_system)) {
+                if (Auth::user()->role == "CTV") $this->readonly = 1;
+            }
+        }
         $this->changes = array();
     }
 
@@ -510,7 +520,7 @@ class POrderItem
                 $this->tools = 1;
         }
 
-        if ($history == 2 || Auth::user()->readonly != 0) {
+        if ($history == 2 || Auth::user()->readonly != 0 || $this->readonly != 0) {
             $this->matnr_changeable = 0;
             if ((($history == 2) && (Auth::user()->role == 'Administrator')) && (Auth::user()->readonly != 0)) {
                 if ($this->status == 'A')

@@ -58,8 +58,11 @@ class System
     public static $table_sap_client_agents = self::deftable_sap_client_agents;
     public static $table_stat_orders = self::deftable_stat_orders;
 
+    public static $mirroring;
+
     public static function init($sap_system = "")
     {
+        self::$mirroring = false;
         $sap_system = trim($sap_system);
         if ("X" . $sap_system == "X200") $sap_system = "";
         self::$system = $sap_system;
@@ -110,24 +113,97 @@ class System
         self::$table_stat_orders .= $sap__system;
     }
 
+    public static function init_mirror($sap_system = "")
+    {
+        self::init($sap_system);
+        self::$mirroring = true;
+    }
+
     public static function ic_on()
     {
+        if (self::$mirroring) return false;
         $ic = strtoupper(trim(env("MATEROM_INTERCOMPANY", "N")));
         if ($ic == "TEST") return substr(Auth::user()->id, 0, 3) == "ic_";
         return $ic == "Y" || $ic == "1" || $ic == "ON" || $ic == "YES" || $ic == "SELF";
     }
 
-    public static function d_ic($mirror_ebeln) // direct intercompany
+    public static function getMirrorUser($stage, $mirror_ebeln, $mirror_ebelp) // get intercompany user
     {
-        return self::ic_on() && self::$system == "300" && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1));
+        $mirror_user1 = null;
+        if (!(self::ic_on() && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1)))) return null;
+        $role = Auth::user()->role;
+        if ($role == "Administrator") {
+            if (empty(trim($stage)) || $stage == "F") $role = "Furnizor";
+            elseif ($stage == "R") $role = "Referent";
+            elseif ($stage == "C") $role = "CTV";
+            else return null;
+        }
+        if (($role == "Furnizor" || $role == "Referent" ) && empty(self::$system)) return null;
+        if (($role == "CTV") && !empty(self::$system)) return null;
+        $curr_sap_system = self::$system;
+        System::init(empty(self::$system) ? "300" : "");
+        $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $mirror_ebeln], ['ebelp', '=', $mirror_ebelp]])->first();
+        if (empty($item)) return null;
+        $order = DB::table(System::$table_porders)->where('ebeln', $mirror_ebeln)->first();
+        if (empty($order)) return null;
+        if ($stage <> $item->stage) {
+            Log::error("Mirroring error: unsynchronized order items (system ".self::$system_name.", order/item $mirror_ebeln/".SAP::alpha_output($mirror_ebelp).")");
+            System::init($curr_sap_system);
+            return null;
+        }
+        if ($role == "Furnizor") {
+            $mirror_user1 = self::getMirrorVendorUser($order->lifnr);
+        } elseif ($role == "Referent") {
+            $mirror_user1 = self::getMirrorRefUser($order->ekgrp, $order->lifnr);
+        } elseif ($role == "CTV") {
+            if (empty($item->vbeln) || empty($item->kunnr) || ($item->vbeln == Orders::stockorder)) return null;
+            $mirror_user1 = self::getMirrorCTVuser($item->kunnr);
+        }
+        System::init($curr_sap_system);
+        if (is_null($mirror_user1)) $mirror_user1 = "";
+        return $mirror_user1;
     }
 
-    public static function r_ic($mirror_ebeln) // reversed intercompany
+    public static function d_ic($stage, $mirror_ebeln, $mirror_ebelp) // direct intercompany (300->200)
     {
-        return self::ic_on() && self::$system == "" && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1));
+        if (!(self::ic_on() && self::$system == "300" && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1)))) return null;
+        return self::getMirrorUser($stage, $mirror_ebeln, $mirror_ebelp);
     }
 
-    public static function getMirrorCTVuser($kunnr)
+    public static function r_ic($stage, $mirror_ebeln, $mirror_ebelp) // reversed intercompany (200->300)
+    {
+        if (!(self::ic_on() && self::$system == "" && !empty(trim($mirror_ebeln)) && !empty(trim(Auth::user()->mirror_user1)))) return null;
+        return self::getMirrorUser($stage, $mirror_ebeln, $mirror_ebelp);
+    }
+
+    public static function getMirrorVendorUser($lifnr)
+    {
+        return DB::table("users")
+            ->where([["role", "=", "Furnizor"],
+                     ["lifnr", "=", $lifnr],
+                     ["active", "=", 1],
+                     ["sap_system", "=", System::$system]])->value("id");
+    }
+
+    public static function getMirrorRefUser($ekgrp, $lifnr)
+    {
+        $users = DB::table("users")
+            ->where([["role", "=", "Referent"],
+                ["ekgrp", "=", $ekgrp],
+                ["active", "=", 1],
+                ["sap_system", "=", System::$system]])->get(["id"]);
+        if (empty($users)) return null;
+        if (count($users) == 1) return $users[0]->id;
+        foreach ($users as $user) {
+            $vendors = DB::select("select distinct id from users join users_ref using (id) ".
+                              "where users_ref.refid = '$user->id' and ".
+                              "users.role = 'Furnizor' and users.lifnr = '$lifnr' and users.active = 1 and users.sap_system = '".System::$system."'");
+            if (!empty($vendors)) return $user->id;
+        }
+        return $users[0]->id;
+    }
+
+    public static function getMirrorCTVUser($kunnr)
     {
         $local_table_users_agent = System::deftable_users_agent;
         $local_table_user_agent_clients = System::deftable_user_agent_clients;

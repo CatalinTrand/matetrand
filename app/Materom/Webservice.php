@@ -230,14 +230,20 @@ class Webservice
         }
 
         $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
-        if (System::d_ic($item->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::sendAck($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
+        if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (sendAck): no mirror user could be determined for ".
+                                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::sendAck($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
         }
 
         return "";
@@ -336,14 +342,20 @@ class Webservice
 
         }
 
-        if (System::d_ic($item->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::acceptItemChange($item->mirror_ebeln, $item->mirror_ebelp, $type);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
+        if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (acceptItemChange): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::acceptItemChange($item->mirror_ebeln, $item->mirror_ebelp, $type);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
         }
 
         return "";
@@ -433,14 +445,20 @@ class Webservice
 
             }
 
-            if (System::d_ic($item->mirror_ebeln)) {
-                $currid = Auth::user()->id;
-                $sap_system = Auth::user()->sap_system;
-                Auth::loginUsingId(Auth::user()->mirror_user1);
-                System::init(Auth::user()->sap_system);
-                self::acceptItemChange($item->mirror_ebeln, $item->mirror_ebelp, $type);
-                Auth::loginUsingId($currid);
-                System::init($sap_system);
+            if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+                if (empty($mirror_user1)) {
+                    Log::error("Mirroring error (acceptItemChange/List): no mirror user could be determined for ".
+                        Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                        " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                } else {
+                    $currid = Auth::user()->id;
+                    $sap_system = Auth::user()->sap_system;
+                    Auth::loginUsingId($mirror_user1);
+                    System::init_mirror(Auth::user()->sap_system);
+                    self::acceptItemChange($item->mirror_ebeln, $item->mirror_ebelp, $type);
+                    Auth::loginUsingId($currid);
+                    System::init($sap_system);
+                }
             }
 
         }
@@ -455,16 +473,22 @@ class Webservice
                 DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
-                if (System::d_ic($item->mirror_ebeln)) {
-                    $currid = Auth::user()->id;
-                    $sap_system = Auth::user()->sap_system;
-                    Auth::loginUsingId(Auth::user()->mirror_user1);
-                    System::init(Auth::user()->sap_system);
-                    DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$item->mirror_ebeln' and ebelp = '$item->mirror_ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." ($item->mirror_ebeln, $item->mirror_ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
-                        "('$item->mirror_ebeln','$item->mirror_ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
-                    Auth::loginUsingId($currid);
-                    System::init($sap_system);
+                if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+                    if (empty($mirror_user1)) {
+                        Log::error("Mirroring error (acceptItemListChange): no mirror user could be determined for ".
+                            Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                            " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                    } else {
+                        $currid = Auth::user()->id;
+                        $sap_system = Auth::user()->sap_system;
+                        Auth::loginUsingId($mirror_user1);
+                        System::init_mirror(Auth::user()->sap_system);
+                        DB::update("update " . System::$table_pitems . " set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$item->mirror_ebeln' and ebelp = '$item->mirror_ebelp'");
+                        DB::insert("insert into " . System::$table_pitemchg . " ($item->mirror_ebeln, $item->mirror_ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                            "('$item->mirror_ebeln','$item->mirror_ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
+                        Auth::loginUsingId($currid);
+                        System::init($sap_system);
+                    }
                 }
             }
 
@@ -531,14 +555,34 @@ class Webservice
             "('$ebeln','$item', '$new_status', '$new_stage', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$category1', '$reason1')");
         DB::commit();
 
-        if (System::d_ic($pitem->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::cancelItem($pitem->mirror_ebeln, $pitem->mirror_ebelp, $category, $reason, $new_status, $new_stage);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
+        if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (cancelItem): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::cancelItem($pitem->mirror_ebeln, $pitem->mirror_ebelp, $category, $reason, $new_status, $new_stage);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
+        } elseif (!is_null($mirror_user1 = System::r_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (cancelItem): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::cancelItem($pitem->mirror_ebeln, $pitem->mirror_ebelp, $category, $reason, $new_status, $new_stage);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
         }
 
         return "";
@@ -610,14 +654,20 @@ class Webservice
         }
         DB::commit();
 
-        if (System::d_ic($pitem->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::doChangeItem($column, $value, $valuehlp, $oldvalue, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $backorder, $seconds);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
+        if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (doChangeItem): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::doChangeItem($column, $value, $valuehlp, $oldvalue, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $backorder, $seconds);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
         }
         return "";
     }
@@ -795,27 +845,34 @@ class Webservice
             \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
         }
 
-        if (System::d_ic($pitem->mirror_ebeln) && Auth::user()->role != "CTV") {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::sendInquiry($pitem->mirror_ebeln, $pitem->mirror_ebelp, $text, $to);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
-        } elseif (System::r_ic($pitem->mirror_ebeln) && Auth::user()->role == "CTV") {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            $mirror_user1 = System::getMirrorCTVuser($pitem->kunnr);
-            if ($mirror_user1 == null) {
-                Log::error("Error mirroring CTV inquiry for $ebeln/$ebelp (" . $pitem->vbeln . "/" . $pitem->posnr . "): no suitable CTV mirror user found");
-                return "";
+        if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (sendInquiry): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::sendInquiry($pitem->mirror_ebeln, $pitem->mirror_ebelp, $text, $to);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
             }
-            Auth::loginUsingId($mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::sendInquiry($pitem->mirror_ebeln, $pitem->mirror_ebelp, $text, $to);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
+        } elseif (!is_null($mirror_user1 = System::r_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (sendInquiry): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::sendInquiry($pitem->mirror_ebeln, $pitem->mirror_ebelp, $text, $to);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
         }
 
         return "";
@@ -979,16 +1036,22 @@ class Webservice
             }
         }
 
-        if (System::d_ic($proposal->itemdata->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
-            System::init(Auth::user()->sap_system);
-            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
-                                                                           'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
-            self::processProposal($proposal);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
+        if (!is_null($mirror_user1 = System::d_ic($proposal->itemdata->stage, $proposal->itemdata->mirror_ebeln, $proposal->itemdata->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (processProposal): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$proposal->itemdata->ebeln."/".SAP::alpha_output($proposal->itemdata->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                    'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+                self::processProposal($proposal);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
         }
 
         return "";
@@ -1019,7 +1082,8 @@ class Webservice
 
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
-        if (($proposal->lifnr == $porder->lifnr) && (trim($proposal->idnlf) == trim($item->orig_idnlf))) {
+        if ((($proposal->lifnr == $porder->lifnr) && (trim($proposal->idnlf) == trim($item->orig_idnlf)))
+            || System::$mirroring) {
             // keeping the same supplier for stock orders, just update PO
             $tmp_idnlf = $proposal->idnlf;
             $tmp_mtext = str_replace("'", "\'", $proposal->mtext);
@@ -1056,19 +1120,20 @@ class Webservice
                 return $result;
             }
             DB::commit();
-            if (System::r_ic($item->mirror_ebeln)) {
-                $currid = Auth::user()->id;
-                $sap_system = Auth::user()->sap_system;
-                $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
-                if ($mirror_user1 == null) {
-                    Log::error("Error mirroring CTV accepting proposal for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
-                    return "";
+            if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+                if (empty($mirror_user1)) {
+                    Log::error("Mirroring error (sendAck): no mirror user could be determined for ".
+                        Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                        " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                } else {
+                    $currid = Auth::user()->id;
+                    $sap_system = Auth::user()->sap_system;
+                    Auth::loginUsingId($mirror_user1);
+                    System::init_mirror(Auth::user()->sap_system);
+                    self::acceptProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate, $pos);
+                    Auth::loginUsingId($currid);
+                    System::init($sap_system);
                 }
-                Auth::loginUsingId($mirror_user1);
-                System::init(Auth::user()->sap_system);
-                self::acceptProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate, $pos);
-                Auth::loginUsingId($currid);
-                System::init($sap_system);
             }
             return "";
         }
@@ -1110,19 +1175,20 @@ class Webservice
             Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
         }
 
-        if (System::r_ic($item->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
-            if ($mirror_user1 == null) {
-                Log::error("Error mirroring CTV accepting proposal for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
-                return "";
+        if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (acceptProposal): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::acceptProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate, $pos);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
             }
-            Auth::loginUsingId($mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::acceptProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate, $pos);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
         }
 
         return "";
@@ -1169,19 +1235,20 @@ class Webservice
             Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
         }
 
-        if (System::r_ic($item->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
-            if ($mirror_user1 == null) {
-                Log::error("Error mirroring CTV rejecting proposal for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
-                return "";
+        if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (rejectProposal): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::rejectProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
             }
-            Auth::loginUsingId($mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::rejectProposal($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
         }
 
         return "";
@@ -1246,19 +1313,20 @@ class Webservice
         DB::commit();
 
 
-        if (System::r_ic($item->mirror_ebeln) && !$no_ic) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
-            if ($mirror_user1 == null) {
-                Log::error("Error mirroring CTV accepting split for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
-                return "";
+        if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp)) && !$no_ic) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (acceptSplit): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::acceptSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
             }
-            Auth::loginUsingId($mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::acceptSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
         }
 
         return "";
@@ -1290,19 +1358,20 @@ class Webservice
             }
         }
 
-        if (System::r_ic($item->mirror_ebeln)) {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            $mirror_user1 = System::getMirrorCTVuser($item->kunnr);
-            if ($mirror_user1 == null) {
-                Log::error("Error mirroring CTV rejecting split for $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): no suitable CTV mirror user found");
-                return "";
+        if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (rejectSplit): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                self::rejectSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
             }
-            Auth::loginUsingId($mirror_user1);
-            System::init(Auth::user()->sap_system);
-            self::rejectSplit($item->mirror_ebeln, $item->mirror_ebelp, $cdate);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
         }
 
         return "";
@@ -1316,9 +1385,9 @@ class Webservice
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
         DB::beginTransaction();
-        DB::update("update ". System::$table_pitems ." set stage = 'R', pstage = '$stage', changed = '1' " .
+        DB::update("update " . System::$table_pitems . " set stage = 'R', pstage = '$stage', changed = '1' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
             "('$ebeln', '$ebelp', '$cdate', 1, '$proposal->type', 'R', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "')");
         $counter = 0;
@@ -1327,7 +1396,7 @@ class Webservice
             if (strlen($propitem->purch_curr) > 3) $propitem->purch_curr = substr($propitem->purch_curr, 0, 3);
             if (strlen($propitem->sales_curr) > 3) $propitem->sales_curr = substr($propitem->sales_curr, 0, 3);
             $propitem->mtext = str_replace("'", "\'", $propitem->mtext);
-            DB::insert("insert into ". System::$table_pitemchg_proposals ." (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+            DB::insert("insert into " . System::$table_pitemchg_proposals . " (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
                 "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
                 "'$ebeln', '$ebelp', '$cdate', $counter, " .
                 "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
@@ -1336,22 +1405,27 @@ class Webservice
             $counter++;
         }
         DB::commit();
-        if (System::r_ic($proposal->itemdata->mirror_ebeln)) {
-            self::acceptSplit($ebeln, $ebelp, $cdate, true);
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            $mirror_user1 = System::getMirrorCTVuser($proposal->itemdata->kunnr);
-            if ($mirror_user1 == null) {
-                Log::error("Error mirroring CTV processing split for $ebeln/$ebelp (" . $proposal->itemdata->vbeln . "/" . $proposal->itemdata->posnr . "): no suitable CTV mirror user found");
-                return "";
+        if (!is_null($mirror_user1 = System::r_ic($proposal->itemdata->stage, $proposal->itemdata->mirror_ebeln, $proposal->itemdata->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (sendAck): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $proposal->itemdata->ebeln . "/" . SAP::alpha_output($proposal->itemdata->ebelp));
+            } else {
+                self::acceptSplit($ebeln, $ebelp, $cdate, true);
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                    'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+                $mirror_order = DB::table(System::$table_porders)->where(['ebeln' => $proposal->itemdata->mirror_ebeln])->first();
+                foreach ($proposal->items as $propitem) {
+                    $propitem->lifnr = $mirror_order->lifnr;
+                }
+                self::processSplit($proposal);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
             }
-            Auth::loginUsingId($mirror_user1);
-            System::init(Auth::user()->sap_system);
-            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
-                'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
-            self::processSplit($proposal);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
         } else {
             return self::acceptSplit($ebeln, $ebelp, $cdate);
         }
@@ -1429,14 +1503,20 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 0$ctype) by ". Auth::user()->id);
-                    if (System::d_ic($pitem->mirror_ebeln)) {
-                        $currid = Auth::user()->id;
-                        $sap_system = Auth::user()->sap_system;
-                        Auth::loginUsingId(Auth::user()->mirror_user1);
-                        System::init(Auth::user()->sap_system);
-                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
-                        Auth::loginUsingId($currid);
-                        System::init($sap_system);
+                    if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+                        if (empty($mirror_user1)) {
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
+                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                        } else {
+                            $currid = Auth::user()->id;
+                            $sap_system = Auth::user()->sap_system;
+                            Auth::loginUsingId($mirror_user1);
+                            System::init_mirror(Auth::user()->sap_system);
+                            self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                            Auth::loginUsingId($currid);
+                            System::init($sap_system);
+                        }
                     }
                     return "OK";
                 }
@@ -1459,14 +1539,20 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 1) by ". Auth::user()->id);
-                    if (System::d_ic($pitem->mirror_ebeln)) {
-                        $currid = Auth::user()->id;
-                        $sap_system = Auth::user()->sap_system;
-                        Auth::loginUsingId(Auth::user()->mirror_user1);
-                        System::init(Auth::user()->sap_system);
-                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
-                        Auth::loginUsingId($currid);
-                        System::init($sap_system);
+                    if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+                        if (empty($mirror_user1)) {
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
+                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                        } else {
+                            $currid = Auth::user()->id;
+                            $sap_system = Auth::user()->sap_system;
+                            Auth::loginUsingId($mirror_user1);
+                            System::init_mirror(Auth::user()->sap_system);
+                            self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                            Auth::loginUsingId($currid);
+                            System::init($sap_system);
+                        }
                     }
                     return "OK";
                 }
@@ -1484,14 +1570,20 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 2) by ". Auth::user()->id);
-                    if (System::d_ic($pitem->mirror_ebeln)) {
-                        $currid = Auth::user()->id;
-                        $sap_system = Auth::user()->sap_system;
-                        Auth::loginUsingId(Auth::user()->mirror_user1);
-                        System::init(Auth::user()->sap_system);
-                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
-                        Auth::loginUsingId($currid);
-                        System::init($sap_system);
+                    if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+                        if (empty($mirror_user1)) {
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
+                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                        } else {
+                            $currid = Auth::user()->id;
+                            $sap_system = Auth::user()->sap_system;
+                            Auth::loginUsingId($mirror_user1);
+                            System::init_mirror(Auth::user()->sap_system);
+                            self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                            Auth::loginUsingId($currid);
+                            System::init($sap_system);
+                        }
                     }
                     return "OK";
                 }
@@ -1518,14 +1610,20 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 3) by ". Auth::user()->id);
-                    if (System::d_ic($pitem->mirror_ebeln)) {
-                        $currid = Auth::user()->id;
-                        $sap_system = Auth::user()->sap_system;
-                        Auth::loginUsingId(Auth::user()->mirror_user1);
-                        System::init(Auth::user()->sap_system);
-                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
-                        Auth::loginUsingId($currid);
-                        System::init($sap_system);
+                    if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+                        if (empty($mirror_user1)) {
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
+                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                        } else {
+                            $currid = Auth::user()->id;
+                            $sap_system = Auth::user()->sap_system;
+                            Auth::loginUsingId($mirror_user1);
+                            System::init_mirror(Auth::user()->sap_system);
+                            self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                            Auth::loginUsingId($currid);
+                            System::init($sap_system);
+                        }
                     }
                     return "OK";
                 }
@@ -1552,14 +1650,20 @@ class Webservice
                         "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
                     Log::info("Order item $ebeln/$ebelp was manually rolled back (type 4) by ". Auth::user()->id);
-                    if (System::d_ic($pitem->mirror_ebeln)) {
-                        $currid = Auth::user()->id;
-                        $sap_system = Auth::user()->sap_system;
-                        Auth::loginUsingId(Auth::user()->mirror_user1);
-                        System::init(Auth::user()->sap_system);
-                        self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
-                        Auth::loginUsingId($currid);
-                        System::init($sap_system);
+                    if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
+                        if (empty($mirror_user1)) {
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
+                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                        } else {
+                            $currid = Auth::user()->id;
+                            $sap_system = Auth::user()->sap_system;
+                            Auth::loginUsingId($mirror_user1);
+                            System::init_mirror(Auth::user()->sap_system);
+                            self::rollbackItem($pitem->mirror_ebeln, $pitem->mirror_ebelp);
+                            Auth::loginUsingId($currid);
+                            System::init($sap_system);
+                        }
                     }
                     return "OK";
                 }
@@ -1631,8 +1735,9 @@ class Webservice
             }
         } else {
             $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
-            if (($proposal->lifnr == $proposal->itemdata->lifnr) &&
-                (trim($proposal->idnlf) == trim($proposal->itemdata->orig_idnlf))) {
+            if ((($proposal->lifnr == $proposal->itemdata->lifnr) &&
+                 (trim($proposal->idnlf) == trim($proposal->itemdata->orig_idnlf)))
+                || System::$mirroring) {
                 // keeping the same supplier and material code, just update PO & SO
                 $tmp_idnlf = $proposal->idnlf;
                 $tmp_mtext = str_replace("'", "\'", $proposal->mtext);
@@ -1764,31 +1869,54 @@ class Webservice
             }
         }
 
-        if (System::d_ic($proposal->itemdata->mirror_ebeln) && Auth::user()->role != "CTV") {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            Auth::loginUsingId(Auth::user()->mirror_user1);
-            System::init(Auth::user()->sap_system);
-            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
-                'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
-            self::_processProposal2($proposal, $cdate);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
-        } elseif (System::r_ic($proposal->itemdata->mirror_ebeln) && Auth::user()->role == "CTV") {
-            $currid = Auth::user()->id;
-            $sap_system = Auth::user()->sap_system;
-            $mirror_user1 = System::getMirrorCTVuser($proposal->itemdata->kunnr);
-            if ($mirror_user1 == null) {
-                Log::error("Error mirroring CTV processing split for $ebeln/$ebelp (" . $proposal->itemdata->vbeln . "/" . $proposal->itemdata->posnr . "): no suitable CTV mirror user found");
-                return "";
+        if (!is_null($mirror_user1 = System::d_ic($proposal->itemdata->stage, $proposal->itemdata->mirror_ebeln, $proposal->itemdata->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (processProposal2): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$proposal->itemdata->ebeln."/".SAP::alpha_output($proposal->itemdata->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                $mirror_order = DB::table(System::$table_porders)->where(['ebeln' => $proposal->itemdata->mirror_ebeln])->first();
+                $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                    'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+                if (isset($proposal->items) && !empty($proposal->items)) {
+                    foreach ($proposal->items as $propitem) {
+                        $propitem->lifnr = $mirror_order->lifnr;
+                    }
+                } else {
+                    $proposal->lifnr = $mirror_order->lifnr;
+                }
+                self::_processProposal2($proposal, $cdate);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
             }
-            Auth::loginUsingId($mirror_user1);
-            System::init(Auth::user()->sap_system);
-            $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
-                'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
-            self::_processProposal2($proposal, $cdate);
-            Auth::loginUsingId($currid);
-            System::init($sap_system);
+        } elseif (!is_null($mirror_user1 = System::r_ic($proposal->itemdata->stage, $proposal->itemdata->mirror_ebeln, $proposal->itemdata->mirror_ebelp))) {
+            if (empty($mirror_user1)) {
+                Log::error("Mirroring error (processProposal2): no mirror user could be determined for ".
+                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
+                    " order/item ".$proposal->itemdata->ebeln."/".SAP::alpha_output($proposal->itemdata->ebelp));
+            } else {
+                $currid = Auth::user()->id;
+                $sap_system = Auth::user()->sap_system;
+                Auth::loginUsingId($mirror_user1);
+                System::init_mirror(Auth::user()->sap_system);
+                $mirror_order = DB::table(System::$table_porders)->where(['ebeln' => $proposal->itemdata->mirror_ebeln])->first();
+                $proposal->itemdata = DB::table(System::$table_pitems)->where(['ebeln' => $proposal->itemdata->mirror_ebeln,
+                    'ebelp' => $proposal->itemdata->mirror_ebelp])->first();
+                if (isset($proposal->items) && !empty($proposal->items)) {
+                    foreach ($proposal->items as $propitem) {
+                        $propitem->lifnr = $mirror_order->lifnr;
+                    }
+                } else {
+                    $proposal->lifnr = $mirror_order->lifnr;
+                }
+                self::_processProposal2($proposal, $cdate);
+                Auth::loginUsingId($currid);
+                System::init($sap_system);
+            }
         }
         return "";
     }
