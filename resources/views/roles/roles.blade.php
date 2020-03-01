@@ -161,7 +161,7 @@
                                                    class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
-                                                <input id="a_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
+                                                <input id="a_rfc_passwd" type="password" name="rfc_passwd" class="spaced-input" required
                                                        value="{{$adminData->rfc_passwd}}">
                                             </div>
                                         </div>
@@ -197,7 +197,7 @@
                                                    class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
-                                                <input id="f_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
+                                                <input id="f_rfc_passwd" type="password" name="rfc_passwd" class="spaced-input" required
                                                        value="{{$furnizorData->rfc_passwd}}">
                                             </div>
                                         </div>
@@ -232,7 +232,7 @@
                                                    class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
-                                                <input id="r_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
+                                                <input id="r_rfc_passwd" type="password" name="rfc_passwd" class="spaced-input" required
                                                        value="{{$referentData->rfc_passwd}}">
                                             </div>
                                         </div>
@@ -267,7 +267,7 @@
                                                    class="col-md-4 text-md-left spaced-label">{{__('RFC Password')}}</label>
 
                                             <div class="col-md-6">
-                                                <input id="c_rfc_passwd" type="text" name="rfc_passwd" class="spaced-input" required
+                                                <input id="c_rfc_passwd" type="password" name="rfc_passwd" class="spaced-input" required
                                                        value="{{$ctvData->rfc_passwd}}">
                                             </div>
                                         </div>
