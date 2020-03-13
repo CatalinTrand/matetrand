@@ -1,4 +1,6 @@
 {
+  "from": "from",
+  "to": "to",
   "Administrator": "Administrator",
   "Data": "Date",
   "Data creare": "Creation date",
@@ -116,7 +118,6 @@
   "Miscellaneous": "Miscellaneous",
   "Other": "Other",
   "Filter by status": "Filter by status",
-  "to": "to",
   "Change password": "Change password",
   "Change user data": "Change user data",
   "Delete user": "Delete user",
@@ -127,7 +128,10 @@
   "Purch. price": "Purch. price",
   "Profit margin": "Profit margin",
   "Only overdue deliveries": "Only overdue deliveries",
-  "Only deliveries with goods receipt": "Only deliveries with goods receipt",
+  "Deliveries": "Deliveries",
+  "Nicio filtrare": "No filtering",
+  "Doar cu intrare de bunuri": "Only w/ goods receipt",
+  "Fara intrare de bunuri": "Only w/o goods receipt",
   "Send proposal to MATEROM": "Send proposal to MATEROM",
   "Keep proposal": "Keep proposal",
   "Reject proposal": "Reject proposal",
@@ -154,5 +158,6 @@
   "Avariate": "Damaged",
   "Detalii/solutie": "Details/solution",
   "Selectie propunere": "Proposal selection",
-  "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului" : "The supplier requested changes in the delivery conditions - select one of the proposals below"
+  "Furnizorul a cerut modificari ale conditiilor de aprovizionare - selectati una din propunerile referentului" : "The supplier requested changes in the delivery conditions - select one of the proposals below",
+  "ETA has changed": "ETA has changed"
 }

@@ -13,18 +13,18 @@ use Illuminate\Support\Facades\Session;
 
 class Mailservice
 {
-    static public function sendMessageCopy($userid, $from, $order, $content)
+    static public function sendMessageCopy($userid, $from, $order, $content, $sorder = "")
     {
         $user = DB::table("users")->where("id", $userid)->first();
         if ($user == null) return;
         if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
-        Mail::send('email.messagecopy',['user' => $user,'from' => $from, 'order' => $order, 'content' => $content],
-            function($message) use ($user, $from, $order) {
+        Mail::send('email.messagecopy',['user' => $user,'from' => $from,
+            'order' => $order, 'content' => $content, 'sorder' => $sorder, ],
+            function($message) use ($user, $from, $order, $sorder) {
             $message->to($user->email, $user->username)->subject(__("Mesaj SRM pentru comanda ") . $order);
             $message->from('no_reply_srm@materom.ro','MATEROM SRM');
         });
         Log::debug("Sent mail 'Copie mesaj SRM' de la '$from' la '$user->email'");
-
     }
 
     static public function sendNotification($userid, $ebeln)

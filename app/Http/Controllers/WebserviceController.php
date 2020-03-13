@@ -117,6 +117,15 @@ class WebserviceController extends Controller
         );
     }
 
+    public function acknowledgeByBell()
+    {
+        return Webservice::acknowledgeByBell(
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("mode")
+        );
+    }
+
     public function deletefilters()
     {
         $mode = Input::get("mode");
@@ -126,7 +135,9 @@ class WebserviceController extends Controller
             Session::forget("filter_archdate");
             Session::forget("filter_inquirements");
             Session::forget("filter_overdue");
-            Session::forget("filter_pnad");
+            Session::forget("filter_pnad_status");
+            Session::forget("filter_pnad_type");
+            Session::forget("filter_pnad_mblnr");
             Session::forget("filter_mirror");
         }
         Session::forget("filter_vbeln");
@@ -138,6 +149,7 @@ class WebserviceController extends Controller
         Session::forget("filter_lifnr_name");
         Session::forget("filter_kunnr");
         Session::forget("filter_kunnr_name");
+        Session::forget("filter_mfrnr_text");
         Session::forget("filter_backorders");
         Session::forget("filter_eta");
         Session::forget("filter_overdue");
@@ -432,6 +444,7 @@ class WebserviceController extends Controller
             Session::forget("filter_lifnr_name");
             Session::forget("filter_kunnr");
             Session::forget("filter_kunnr_name");
+            Session::forget("filter_mfrnr_text");
             Session::forget("filter_backorders");
             Session::forget("filter_eta");
             Session::forget("filter_overdue");
@@ -442,7 +455,9 @@ class WebserviceController extends Controller
             Session::forget("filter_deldate_high");
             Session::forget("filter_etadate_low");
             Session::forget("filter_etadate_high");
-            Session::forget("filter_pnad");
+            Session::forget("filter_pnad_status");
+            Session::forget("filter_pnad_type");
+            Session::forget("filter_pnad_mblnr");
             Session::forget("filter_mirror");
             Session::forget("autoexplode_PO");
             Session::forget("autoexplode_SO");
@@ -488,7 +503,7 @@ class WebserviceController extends Controller
             if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
                 Session::put("filter_ebeln", "NONE");
             if (Auth::user()->role == "Referent" && Auth::user()->readonly == 1 && Auth::user()->pnad == 1)
-                Session::put("filter_pnad", "1");
+                Session::put("filter_pnad_status", "2");
             Orders::fillCache();
         }
 

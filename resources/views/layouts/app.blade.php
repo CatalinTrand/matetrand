@@ -169,6 +169,13 @@
             background-position: center center;
         }
 
+        .background-image-filters {
+            background-image:url('/images/icons8-filter-40.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center left;
+        }
+
         .header-fixed {
             width: 100%
         }
@@ -355,6 +362,13 @@
         }
         .leftInquiryDialogButton:hover {
             background-color: #9DB0E8;
+        }
+
+        .rightInquiryDialogButton {
+            background-color: #E0F0C0;
+        }
+        .rightInquiryDialogButton:hover {
+            background-color: #C0C08F;
         }
 
     </style>

@@ -99,6 +99,7 @@ class HomeController extends Controller
         Session::put("filter_lifnr_name", Input::get("filter_lifnr_name"));
         Session::put("filter_kunnr", Input::get("filter_kunnr"));
         Session::put("filter_kunnr_name", Input::get("filter_kunnr_name"));
+        Session::put("filter_mfrnr_text", Input::get("filter_mfrnr_text"));
 
         Session::put("filter_inquirements", "0");
         $tmp = Input::get("filter_inquirements");
@@ -136,7 +137,8 @@ class HomeController extends Controller
 
         Session::put("filter_goodsreceipt", "0");
         $tmp = Input::get("filter_goodsreceipt");
-        if (strtoupper($tmp) == "ON" ) Session::put("filter_goodsreceipt", "1");
+        if (($tmp != "1") && ($tmp != "2")) $tmp = "0";
+        Session::put("filter_goodsreceipt", $tmp);
 
         Session::put("filter_deldate_low", "");
         unset($tmp);
@@ -156,9 +158,15 @@ class HomeController extends Controller
         $tmp = Input::get("filter_etadate_high");
         if (isset($tmp) && $tmp != null) Session::put("filter_etadate_high", $tmp);
 
-        Session::put("filter_pnad", "0");
-        $tmp = Input::get("filter_pnad");
-        if (strtoupper($tmp) == "ON" ) Session::put("filter_pnad", "1");
+        $tmp = Input::get("filter_pnad_status");
+        if (($tmp != "1") && ($tmp != "2") && ($tmp != "3")) $tmp = "0";
+        Session::put("filter_pnad_status", $tmp);
+
+        $tmp = Input::get("filter_pnad_type");
+        if (($tmp != "1") && ($tmp != "2")) $tmp = "0";
+        Session::put("filter_pnad_type", $tmp);
+
+        Session::put("filter_pnad_mblnr", Input::get("filter_pnad_mblnr"));
 
         Session::put("filter_mirror", "0");
         $tmp = Input::get("filter_mirror");
@@ -184,6 +192,7 @@ class HomeController extends Controller
         Session::put("filter_lifnr_name", Input::get("filter_lifnr_name"));
         Session::put("filter_kunnr", Input::get("filter_kunnr"));
         Session::put("filter_kunnr_name", Input::get("filter_kunnr_name"));
+        Session::put("filter_mfrnr_text", Input::get("filter_mfrnr_text"));
         Session::put("filter_history", Input::get("filter_history"));
         Session::put("filter_archdate", Input::get("time_search"));
         Orders::fillCache();

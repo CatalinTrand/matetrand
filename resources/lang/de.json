@@ -1,4 +1,6 @@
 {
+  "from": "von",
+  "to": "auf",
   "Login": "Anmelden",
   "User ID": "Benutzer",
   "Password": "Passwort",
@@ -111,7 +113,6 @@
   "Miscellaneous": "Miscellaneous",
   "Other": "Other",
   "Filter by status": "Filter by status",
-  "to": "auf",
   "Change password": "Change password",
   "Change user data": "Change user data",
   "Delete user": "Delete user",
@@ -122,7 +123,10 @@
   "Profit margin": "Profit margin",
   "Are you sure you want to delete": "Sind Sie sicher, dass Sie löschen möchten",
   "Only overdue deliveries": "Nur überfällige Lieferungen",
-  "Only deliveries with goods receipt": "Nur Lieferungen mit WE",
+  "Deliveries": "Lieferungen",
+  "Nicio filtrare": "Ohne einschränkungen",
+  "Doar cu intrare de bunuri": "Nur mit WE",
+  "Fara intrare de bunuri": "Nur ohne WE",
   "Send proposal to MATEROM": "Vorschlag an MATEROM senden",
   "Keep proposal": "Vorschlag behalten",
   "Reject proposal": "Vorschlag ablehnen",
@@ -140,5 +144,6 @@
   "Cell K": "Zell K",
   "Cell M": "Zell M",
   "does not exist": "does not exist",
-  "Only with PNAD": "Only with PNAD"
+  "Only with PNAD": "Only with PNAD",
+  "ETA has changed": "ETA wurde geändert"
 }

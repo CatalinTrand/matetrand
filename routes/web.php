@@ -47,6 +47,7 @@ Route::post('webservice/acceptitemlistchange','WebserviceController@acceptItemLi
 Route::post('webservice/cancelItem','WebserviceController@cancelItem');
 Route::post('webservice/dochangeitem','WebserviceController@doChangeItem');
 Route::post('webservice/sendAck','WebserviceController@sendAck');
+Route::post('webservice/acknowledgebell','WebserviceController@acknowledgeByBell');
 Route::post('webservice/replymessage','WebserviceController@replyMessage');
 Route::get('webservice/getsubtree','WebserviceController@getSubTree');
 Route::post('webservice/sortmessages','WebserviceController@sortMessages');

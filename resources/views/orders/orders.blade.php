@@ -121,12 +121,16 @@
         if (isset($tmp)) $filter_overdue_high = intval($tmp);
         if ($filter_overdue_high <= 0) $filter_overdue_high = "";
 
-        $filter_goodsreceipt = 0;
-        $goodsreceipt_checked = "";
         unset($tmp);
         $tmp = \Illuminate\Support\Facades\Session::get("filter_goodsreceipt");
-        if (isset($tmp)) $filter_goodsreceipt = intval($tmp);
-        if ($filter_goodsreceipt == 1) $goodsreceipt_checked = "checked";
+        if (($tmp != "1") && ($tmp != "2")) $tmp = "0";
+        $filter_goodsreceipt = $tmp;
+        $filter_goodsreceipt_0 = "";
+        if ($tmp == "0") $filter_goodsreceipt_0 = "selected";
+        $filter_goodsreceipt_1 = "";
+        if ($tmp == "1") $filter_goodsreceipt_1 = "selected";
+        $filter_goodsreceipt_2 = "";
+        if ($tmp == "2") $filter_goodsreceipt_2 = "selected";
 
         $filter_deldate_low = "";
         $tmp = \Illuminate\Support\Facades\Session::get("filter_deldate_low");
@@ -152,7 +156,7 @@
         if (!isset($filter_matnr)) $filter_matnr = "";
 
         $filter_mtext = \Illuminate\Support\Facades\Session::get("filter_mtext");
-        if (!isset($filter_mtext)) $filter_mtext = "";
+        if (!isset($filter_mtext) || is_null($filter_mtext)) $filter_mtext = "";
 
         $filter_ekgrp = \Illuminate\Support\Facades\Session::get("filter_ekgrp");
         if (!isset($filter_ekgrp) || is_null($filter_ekgrp)) $filter_ekgrp = "";
@@ -169,12 +173,37 @@
         $filter_kunnr_name = \Illuminate\Support\Facades\Session::get("filter_kunnr_name");
         if (!isset($filter_kunnr_name) || is_null($filter_kunnr_name)) $filter_kunnr_name = "";
 
-        $filter_pnad = 0;
-        $pnad_checked = "";
+        $filter_mfrnr_text = \Illuminate\Support\Facades\Session::get("filter_mfrnr_text");
+        if (!isset($filter_mfrnr_text) || is_null($filter_mfrnr_text)) $filter_mfrnr_text = "";
+
+        $filter_pnad_active = 0;
+
+        $filter_pnad_status = 0;
         unset($tmp);
-        $tmp = \Illuminate\Support\Facades\Session::get("filter_pnad");
-        if (isset($tmp)) $filter_pnad = intval($tmp);
-        if ($filter_pnad == 1) $pnad_checked = "checked";
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_pnad_status");
+        if (isset($tmp) && !is_null($tmp)) $filter_pnad_status = intval($tmp);
+        if (($filter_pnad_status != "0") &&
+            ($filter_pnad_status != "1") &&
+            ($filter_pnad_status != "2") &&
+            ($filter_pnad_status != "3"))
+            $filter_pnad_status = 0;
+        if ($filter_pnad_status != 0) $filter_pnad_active = 1;
+
+        $filter_pnad_type = 0;
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_pnad_type");
+        if (isset($tmp) && !is_null($tmp)) $filter_pnad_type = intval($tmp);
+        if (($filter_pnad_type != "0") &&
+            ($filter_pnad_type != "1") &&
+            ($filter_pnad_type != "2"))
+            $filter_pnad_type = 0;
+        if ($filter_pnad_type != 0) $filter_pnad_active = 1;
+
+        $filter_pnad_mblnr = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_pnad_mblnr");
+        if (isset($tmp) && !is_null($tmp)) $filter_pnad_mblnr = $tmp;
+        if (!empty($filter_pnad_mblnr)) $filter_pnad_active = 1;
 
         $filter_mirror = 0;
         $mirror_checked = "";
@@ -333,10 +362,21 @@
                                                     </select>
 
                                                     @if ((\Illuminate\Support\Facades\Auth::user()->role == "Referent" || \Illuminate\Support\Facades\Auth::user()->role == "Administrator") && ($filter_history_curr != ""))
-                                                        <input type="checkbox" id="filter_pnad" name="filter_pnad" style="margin-bottom: 4px; margin-left: 1rem; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$pnad_checked}}>
-                                                        <label for="filter_pnad" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only with PNAD')}}</label>
+                                                        <button title="Open PNAD filter dialog" type="button" id="show-pnad-filters"
+                                                                @if ($filter_pnad_active == 1)
+                                                                class="background-image-filters"
+                                                                @endif
+                                                                style="margin-left: 2px; height: 1.3rem; vertical-align: top;" id="pnad-filter-button"
+                                                                onclick='showPNADFilters(event, this);return false;'/>
+                                                                @if ($filter_pnad_active == 1)
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                @endif
+                                                                {{__('Filtre PNAD')}}
+                                                        </button>
+                                                        <input type="hidden" id="filter_pnad_status" name="filter_pnad_status" value="{{$filter_pnad_status}}">
+                                                        <input type="hidden" id="filter_pnad_type" name="filter_pnad_type" value="{{$filter_pnad_type}}">
+                                                        <input type="hidden" id="filter_pnad_mblnr" name="filter_pnad_mblnr" value="{{$filter_pnad_mblnr}}">
                                                     @endif
-
                                                 </td>
                                                 <td>
                                                     {{__("Purchase order")}}:
@@ -448,9 +488,16 @@
                                                 </td>
 
 
-                                                <td colspan="2">
-                                                    <input type="checkbox" id="filter_goodsreceipt" name="filter_goodsreceipt" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$goodsreceipt_checked}}>
-                                                    <label for="filter_goodsreceipt" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only deliveries with goods receipt')}}</label>
+                                                <td colspan="1">
+                                                    <label for="filter_goodsreceipt" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Deliveries')}}</label>
+                                                </td>
+                                                <td colspan="1">
+                                                    <select id="filter_goodsreceipt" class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                            name="filter_goodsreceipt" onchange="this.form.submit(); return false;">
+                                                        <option value="0"{{$filter_goodsreceipt_0}}>{{__('Nicio filtrare')}}</option>
+                                                        <option value="1"{{$filter_goodsreceipt_1}}>{{__('Doar cu intrare de bunuri')}}</option>
+                                                        <option value="2"{{$filter_goodsreceipt_2}}>{{__('Fara intrare de bunuri')}}</option>
+                                                    </select>
                                                 </td>
                                                 <td>
                                                     {{__("Material")}}:
@@ -555,8 +602,14 @@
                                                                value="{{$filter_etadate_high}}">
                                                     @endif
                                                 </td>
-                                                <td></td>
-                                                <td></td>
+                                                <td>
+                                                    {{__("Fabricant")}}:
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control-sm input-sm"
+                                                           style="width: 10rem; height: 1.4rem;" maxlength="20" name="filter_mfrnr_text"
+                                                           value="{{$filter_mfrnr_text}}">&nbsp;&nbsp;
+                                                </td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
@@ -620,8 +673,9 @@
                                     <col style="width:3.5%;">
                                     <col style="width:3.5%;">
                                     <col style="width:3.5%;">
-                                    <col style="width:3.5%;">
-                                    <col style="width:25%;">
+                                    <col style="width:4.5%;">
+                                    <col style="width:4.5%;">
+                                    <col style="width:10.5%;">
 
                                 </colgroup>
                                 <tr>
@@ -1601,6 +1655,7 @@
             cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Facturat")}}</b></td>';
             cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Plus/Min")}}</b></td>';
             cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Avariate")}}</b></td>';
+            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Doc. MIGO")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Detalii/solutie")}}</b></td>';
             if (colsafter > 0)
                 cols += '<td class="td02" colspan="' + colsafter + '"></td>';
@@ -1643,6 +1698,34 @@
                 }
                 if (pitem.backorder == 1)
                     info_icon = "<image style='height: 1.2rem;' src='/images/icons8-next-page-48.png' title='Backorder'>";
+                if (pitem.pmfa.length > 0) {
+                    @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                        switch (pitem.pmfa.substr(0, 1)) {
+                            case "A":
+                            case "B":
+                                info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_1.gif' " +
+                                            "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                            "title='{{__("Purchase item cancelled by Materom")}}'" +
+                                    ">";
+                                break;
+                        }
+                    @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+                        switch (pitem.pmfa.substr(0, 1)) {
+                            case "C":
+                                info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_1.gif' " +
+                                    "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                    "title='{{__("Purchase item cancelled by supplier")}}'" +
+                                    ">";
+                                break;
+                            case "D":
+                                info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_1.gif' " +
+                                    "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                    "title='{{__("ETA has changed")}}'" +
+                                    ">";
+                                break;
+                    }
+                    @endif
+                }
 
                 let owner_icon = "";
                 switch (pitem.owner) {
@@ -1830,8 +1913,9 @@
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_received + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_invoiced + '</td>';
-                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_diff + '</td>';
-                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_damaged + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_diff + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_damaged + '</td>';
+                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_pnad_mblnr + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: left;">' + pitem.qty_details + '</td>';
 
 
@@ -2115,11 +2199,11 @@
                 for (let i = 0; i < _dataRP.length; i++) {
                     if (isChecked('I' + _dataRP[i].ebeln +'_' + _dataRP[i].ebelp)) {
                         doRejectItem(porder, _dataRP[i].ebelp, category, reason,
-                                @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                                    'R', 'R'
-                        @else
-                            'X', 'Z'
-                        @endif
+                            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                                'R', 'R'
+                            @else
+                                'X', 'Z'
+                            @endif
                     );
                     }
                 }
@@ -2853,6 +2937,30 @@
             @endif
         }
 
+        function ack_bell(ebeln, ebelp, mode) {
+
+            var _data, _status = "";
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            jQuery.ajaxSetup({async: false});
+            $.post("webservice/acknowledgebell",
+                {
+                    ebeln: ebeln,
+                    ebelp: ebelp,
+                    mode: mode
+                },
+                function (data, status) {
+                    _data = data;
+                    _status = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            $("#tr_I" + ebeln + "_" + ebelp).fadeOut();
+        }
+
         function replyack2(ebeln) {
             var _data, _status = "";
         }
@@ -2994,7 +3102,7 @@
 
     @include("orders.read_inforecords")
     @include("orders.read_zpretrecords")
-    @include("orders.updaterow")
+    @include("orders.pnad_filters")
     @include("orders.accept-reject")
     @include("orders.accept-reject2")
     @include("orders.split-item")

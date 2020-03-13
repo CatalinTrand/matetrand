@@ -26,11 +26,11 @@ class Webservice
     static public function insertManufacturer($userid, $mfrnr)
     {
         if (ctype_digit($mfrnr)) $mfrnr = str_pad($mfrnr, 10, "0", STR_PAD_LEFT);
-        $find = DB::select("select * from ". System::$table_users_sel ." where id = '$userid' and mfrnr = '$mfrnr'");
+        $find = DB::select("select * from " . System::$table_users_sel . " where id = '$userid' and mfrnr = '$mfrnr'");
         if (count($find) == 0) {
             $mfrnr_name = SAP\MasterData::getLifnrName($mfrnr);
             if (is_array($mfrnr_name) || strlen(trim($mfrnr_name)) == 0) return __('Manufacturer does not exist');
-            DB::insert("insert into ". System::$table_users_sel ." (id, mfrnr, mfrnr_name) values ('$userid','$mfrnr', '$mfrnr_name')");
+            DB::insert("insert into " . System::$table_users_sel . " (id, mfrnr, mfrnr_name) values ('$userid','$mfrnr', '$mfrnr_name')");
             return "";
         } else return __("Manufacturer already exists");
     }
@@ -55,9 +55,9 @@ class Webservice
         $agent_name = MasterData::getAgentName($agent);
         if (empty($agent_name)) return "The agent is not defined in SAP";
 
-        $find = DB::select("select * from ". System::$table_users_agent ." where id = '$userid' and agent = '$agent'");
+        $find = DB::select("select * from " . System::$table_users_agent . " where id = '$userid' and agent = '$agent'");
         if (count($find) == 0) {
-            DB::insert("insert into ". System::$table_users_agent ." (id, agent) values ('$userid','$agent')");
+            DB::insert("insert into " . System::$table_users_agent . " (id, agent) values ('$userid','$agent')");
             return "";
         } else return __("This agent is already defined for user");
     }
@@ -68,9 +68,9 @@ class Webservice
         $kunnr_name = MasterData::getKunnrName($kunnr);
         if (empty($kunnr_name)) return "The client is not defined in SAP";
 
-        $find = DB::select("select * from ". System::$table_users_cli ." where id = '$userid' and kunnr = '$kunnr'");
+        $find = DB::select("select * from " . System::$table_users_cli . " where id = '$userid' and kunnr = '$kunnr'");
         if (count($find) == 0) {
-            DB::insert("insert into ". System::$table_users_cli ." (id, kunnr) values ('$userid','$kunnr')");
+            DB::insert("insert into " . System::$table_users_cli . " (id, kunnr) values ('$userid','$kunnr')");
             return "";
         } else return __("This customer is already defined for user");
     }
@@ -170,7 +170,7 @@ class Webservice
         $stage = '';
         if ($to[0] == 'F') {
             $stage = 'F';
-            $porder = DB::select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
+            $porder = DB::select("select * from " . System::$table_porders . " where ebeln = '$ebeln'")[0];
             $lifnr = $porder->lifnr;
             $duser = DB::table("users")->where([["role", "=", "Furnizor"],
                 ["lifnr", "=", $lifnr],
@@ -179,7 +179,7 @@ class Webservice
         }
         if ($to[0] == 'R') {
             $stage = 'R';
-            $porder = DB::select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
+            $porder = DB::select("select * from " . System::$table_porders . " where ebeln = '$ebeln'")[0];
             $ekgrp = $porder->ekgrp;
             $duser = DB::table("users")->where([["role", "=", "Referent"],
                 ["ekgrp", "=", $ekgrp],
@@ -190,7 +190,7 @@ class Webservice
         if ($to[0] == 'C') {
             $stage = 'C';
             $kunnr = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count, id");
+            $dusers = DB::select("select id, count(*) as count from " . System::$table_users_agent . " join " . System::$table_user_agent_clients . " using (id) where kunnr = '$kunnr' group by id order by count, id");
             if ($dusers == null || empty($dusers))
                 $duser = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
             else $duser = $dusers[0]->id;
@@ -199,7 +199,7 @@ class Webservice
 
         $cdate = now();
         // DB::update("update ". System::$table_pitemchg ." set acknowledged = '1' where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate' and ctype = 'E'");
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, stage, ctype, reason, cuser, cuser_name, duser) values " .
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, stage, ctype, reason, cuser, cuser_name, duser) values " .
             "('$ebeln','$ebelp', '$cdate', '$stage', 'E', '$message', '" . Auth::user()->id . "', '" . Auth::user()->username . "', '$duser')");
         Mailservice::sendMessageCopy($duser, Auth::user()->username, $order, $message);
         return "";
@@ -221,7 +221,7 @@ class Webservice
     static function sendAck($ebeln, $ebelp, $cdate)
     {
         if ($cdate == null) {
-            $lastchanges = DB::select("select cdate from ". System::$table_pitemchg . " where ebeln = '$ebeln' and ebelp = '$ebelp' and (ctype = 'A' or ctype = 'X') order by cdate desc");
+            $lastchanges = DB::select("select cdate from " . System::$table_pitemchg . " where ebeln = '$ebeln' and ebelp = '$ebelp' and (ctype = 'A' or ctype = 'X') order by cdate desc");
             if ($lastchanges == null || empty($lastchanges)) return "No suitable status record found";
             $cdate = $lastchanges[0]->cdate;
         }
@@ -232,9 +232,9 @@ class Webservice
         $item = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (sendAck): no mirror user could be determined for ".
-                                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                Log::error("Mirroring error (sendAck): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -253,7 +253,7 @@ class Webservice
     {
         $proposal = DB::table(System::$table_pitemchg)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp], ["ctype", "=", $type]])->orderBy("cdate", "desc")->first();
         if ($proposal == null) return json_encode(array());
-        $proposals = DB::select("select * from ". System::$table_pitemchg_proposals ." where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$proposal->cdate' and type = '$type'");
+        $proposals = DB::select("select * from " . System::$table_pitemchg_proposals . " where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$proposal->cdate' and type = '$type'");
         foreach ($proposals as $proposal) {
             $proposal->lifnr_name = MasterData::getLifnrName($proposal->lifnr);
         }
@@ -278,17 +278,23 @@ class Webservice
                 $result = SAP::acknowledgePOItem($ebeln, $ebelp, " ");
                 if (($result != null) && !is_string($result)) $result = json_encode($result);
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
-                DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                DB::update("update " . System::$table_pitems . " set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
             } else {
                 if ($item->stage == 'F') {
-                    DB::update("update ". System::$table_pitems ." set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                    $result = SAP::acknowledgePOItem($ebeln, $item, "X");
+                    if (($result != null) && !is_string($result)) $result = json_encode($result);
+                    if (($result != null) && strlen(trim($result)) != 0) return $result;
+                    DB::update("update " . System::$table_pitems . " set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                         "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
                 } else {
                     $reason = "";
                     $new_status = "A";
+                    $result = SAP::acknowledgePOItem($ebeln, $ebelp, " ");
+                    if (($result != null) && !is_string($result)) $result = json_encode($result);
+                    if (($result != null) && strlen(trim($result)) != 0) return $result;
                     if ($pstage != 'Z') {
                         if (trim($item->idnlf) == trim($item->orig_idnlf)) {
                             $result = SAP::savePOItem($ebeln, $ebelp);
@@ -321,7 +327,7 @@ class Webservice
                                     $item->sales_price, $item->sales_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
                                     if (substr($result, 0, 2) == "OK")
-                                        $reason = __("New sales order item"). " " . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
+                                        $reason = __("New sales order item") . " " . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
                                     else return $result;
                                 }
                                 $new_status = 'X';
@@ -330,23 +336,23 @@ class Webservice
                     } else $reason = __("Definitively accepted");
                     $ack = 0;
                     if (Auth::user()->role == "Referent" && $pstage == "R") $ack = 1;
-                    DB::update("update ". System::$table_pitems ." set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason, acknowledged) values " .
+                    DB::update("update " . System::$table_pitems . " set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason, acknowledged) values " .
                         "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$reason', $ack)");
                 }
             }
         } elseif ($item->pstage == 'Z') {
-            DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, acknowledged, oldval) values " .
+            DB::update("update " . System::$table_pitems . " set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, acknowledged, oldval) values " .
                 "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 1, 'F')");
 
         }
 
         if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (acceptItemChange): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                Log::error("Mirroring error (acceptItemChange): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -372,9 +378,10 @@ class Webservice
         }
         if (empty($ebelplist)) return;
         $allitems = DB::table(System::$table_pitems)->where('ebeln', $ebeln)->get();
-        $items = array(); foreach($allitems as $item) $items[$item->ebelp] = $item;
+        $items = array();
+        foreach ($allitems as $item) $items[$item->ebelp] = $item;
         $todoitems1 = array();
-        foreach($ebelplist as $ebelp) {
+        foreach ($ebelplist as $ebelp) {
             $item = $items[$ebelp];
             if ($_porder->items[$ebelp]->accept == 0) {
                 if ($type != "F")
@@ -388,12 +395,18 @@ class Webservice
                     array_push($todoitems1, $ebelp);
                 } else {
                     if ($item->stage == 'F') {
-                        DB::update("update ". System::$table_pitems ." set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                        $result = SAP::acknowledgePOItem($ebeln, $ebelp, "X");
+                        if (($result != null) && !is_string($result)) $result = json_encode($result);
+                        if (($result != null) && strlen(trim($result)) != 0) return $result;
+                        DB::update("update " . System::$table_pitems . " set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                             "('$ebeln','$ebelp', 'T', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
                     } else {
                         $reason = "";
                         $new_status = "A";
+                        $result = SAP::acknowledgePOItem($ebeln, $ebelp, " ");
+                        if (($result != null) && !is_string($result)) $result = json_encode($result);
+                        if (($result != null) && strlen(trim($result)) != 0) return $result;
                         if ($pstage != 'Z') {
                             if (trim($item->idnlf) == trim($item->orig_idnlf)) {
                                 $result = SAP::savePOItem($ebeln, $ebelp);
@@ -426,30 +439,30 @@ class Webservice
                                         $item->sales_price, $item->sales_curr, $item->lfdat);
                                     if (!empty(trim($result))) {
                                         if (substr($result, 0, 2) == "OK")
-                                            $reason = __("New sales order item"). " " . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
+                                            $reason = __("New sales order item") . " " . substr(trim($result), 2) . " from item " . ltrim($item->posnr, "0");
                                         else return $result;
                                     }
                                     $new_status = 'X';
                                 }
                             }
                         } else $reason = __("Definitively accepted");
-                        DB::update("update ". System::$table_pitems ." set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                        DB::update("update " . System::$table_pitems . " set stage = 'Z', status = '$new_status', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
                             "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$reason')");
                     }
                 }
             } elseif ($item->pstage == 'Z') {
-                DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, acknowledged, oldval) values " .
+                DB::update("update " . System::$table_pitems . " set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, acknowledged, oldval) values " .
                     "('$ebeln','$ebelp', 'A', 'Z', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', 1, 'F')");
 
             }
 
             if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
                 if (empty($mirror_user1)) {
-                    Log::error("Mirroring error (acceptItemChange/List): no mirror user could be determined for ".
-                        Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                        " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                    Log::error("Mirroring error (acceptItemChange/List): no mirror user could be determined for " .
+                        Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                        " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
                 } else {
                     $currid = Auth::user()->id;
                     $sap_system = Auth::user()->sap_system;
@@ -467,17 +480,17 @@ class Webservice
             $result = SAP::acknowledgePOItemList($ebeln, $todoitems1, " ");
             if (($result != null) && !is_string($result)) $result = json_encode($result);
             if (($result != null) && strlen(trim($result)) != 0) return $result;
-            foreach($todoitems1 as $ebelp) {
+            foreach ($todoitems1 as $ebelp) {
                 $item = $items[$ebelp];
                 $pstage = $item->stage;
-                DB::update("update ". System::$table_pitems ." set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
+                DB::update("update " . System::$table_pitems . " set stage = 'Z', status = 'A', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
                 if (!is_null($mirror_user1 = System::d_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
                     if (empty($mirror_user1)) {
-                        Log::error("Mirroring error (acceptItemListChange): no mirror user could be determined for ".
-                            Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                            " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                        Log::error("Mirroring error (acceptItemListChange): no mirror user could be determined for " .
+                            Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                            " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
                     } else {
                         $currid = Auth::user()->id;
                         $sap_system = Auth::user()->sap_system;
@@ -505,7 +518,7 @@ class Webservice
         if ($_porder == null) return;
         if (!isset($_porder->items[$item])) return;
         if (!(($_porder->items[$item]->reject != 0) ||
-              ($_porder->items[$item]->inquired == 4 && $_porder->items[$item]->inq_reply == 1))) return;
+            ($_porder->items[$item]->inquired == 4 && $_porder->items[$item]->inq_reply == 1))) return;
         $old_stage = $pitem->stage;
         if ($new_status == 'X') {
             $result = SAP::acknowledgePOItem($ebeln, $item, " ");
@@ -515,10 +528,11 @@ class Webservice
             if (($result != null) && !is_string($result)) $result = json_encode($result);
             if (($result != null) && strlen(trim($result)) != 0) return $result;
             if ($pitem->vbeln != Orders::stockorder) {
+                DB::update("update " . System::$table_pitems . " set pmfa = 'C' where ebeln = '$ebeln' and ebelp = '$item'");
                 $result = SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
                 if (($result != null) && !is_string($result)) $result = json_encode($result);
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
-                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$pitem->kunnr'");
+                $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$pitem->kunnr'");
                 if (($ctvusers == null) || empty($ctvusers)) {
                     $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
                     if (($ctvuser1 != null) && !empty($ctvuser1)) {
@@ -541,25 +555,26 @@ class Webservice
                     if ($refuser != null) {
                         try {
                             Mailservice::sendSalesOrderNotification($refuser->id, $pitem->vbeln, $pitem->posnr);
-                        } catch (Exception $e) {}
+                        } catch (Exception $e) {
+                        }
                     }
                 }
             }
         }
         DB::beginTransaction();
         $cdate = now();
-        DB::update("update ". System::$table_pitems ." set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
+        DB::update("update " . System::$table_pitems . " set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");
         $category1 = addcslashes($category, "'");
         $reason1 = addcslashes($reason, "'");
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval, reason) values " .
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, oldval, reason) values " .
             "('$ebeln','$item', '$new_status', '$new_stage', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$category1', '$reason1')");
         DB::commit();
 
         if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (cancelItem): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                Log::error("Mirroring error (cancelItem): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -571,9 +586,9 @@ class Webservice
             }
         } elseif (!is_null($mirror_user1 = System::r_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (cancelItem): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                Log::error("Mirroring error (cancelItem): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -596,7 +611,7 @@ class Webservice
         } else {
             $groupByPO = Session::get('groupOrdersBy');
             if (!isset($groupByPO)) $groupByPO = 1;
-            if($groupByPO != 4)
+            if ($groupByPO != 4)
                 return DB::select("select * from $items_table where ebeln = '$order'");
             return DB::select("select * from $items_table where ebeln = '$order' and vbeln = '$vbeln'");
         }
@@ -606,19 +621,28 @@ class Webservice
     {
         $history = Session::get("filter_history");
         if (!isset($history)) $history = 1;
-            else $history = intval($history);
+        else $history = intval($history);
         if ($history == 2) {
             // update matnr for invoice closing
             $result = SAP::UpdateMaterialForInvoiceClosing($ebeln, $ebelp, trim($value));
             if (empty($result)) {
                 $cdate = now();
-                DB::insert("insert into " . System::$table_pitemchg . "_arch".
+                DB::insert("insert into " . System::$table_pitemchg . "_arch" .
                     " (ebeln,ebelp,ctype,cdate,cuser,cuser_name,reason,oldval,newval) values " .
                     "('$ebeln','$ebelp','M', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','Changed after archiving - for invoice closing','$oldvalue','$value')");
             }
             return;
         }
         $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+
+        $dctv = null;
+        if (!is_null($pitem->kunnr) || !empty(trim($pitem->kunnr))) {
+            $dctvs = DB::select("select id, count(*) as count from " . System::$table_users_agent . " join " . System::$table_user_agent_clients . " using (id) where kunnr = '$pitem->kunnr' group by id order by count, id");
+            if ($dctvs == null || empty($dctvs))
+                $dctv = DB::table(System::$table_user_agent_clients)->where("kunnr", $pitem->kunnr)->value("id");
+            else $dctv = $dctvs[0]->id;
+        }
+
         if ($pitem->backorder != 0) $backorder = 1;
         $new_stage = $pitem->stage;
         if ($column != 'etadt') {
@@ -631,34 +655,47 @@ class Webservice
             }
         }
         DB::beginTransaction();
-        DB::update("update ". System::$table_pitems ." set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        if ($pitem->changed != 0) DB::update("update ". System::$table_porders ." set changed = '1' where ebeln = '$ebeln'");
+        DB::update("update " . System::$table_pitems . " set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        if ($pitem->changed != 0) DB::update("update " . System::$table_porders . " set changed = '1' where ebeln = '$ebeln'");
         if ($column == 'idnlf') $type = 'M';
         if ($column == 'qty') $type = 'Q';
         if ($column == 'lfdat') $type = 'D';
-        if ($column == 'etadt') $type = 'J';
+        if ($column == 'etadt') {
+            $type = 'J';
+            DB::update("update " . System::$table_pitems . " set pmfa = 'D' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            if (!is_null($dctv) && !empty($dctv)) {
+                $etadt = $pitem->etadt;
+                if (empty($etadt)) $etadt = $pitem->lfdat;
+                $etadt = substr($etadt, 0, 10);
+                $message = __("ETA has changed")." ".__("from")." ".$etadt." ".__("to")." ".$value;
+                Log::info($message." (".Auth::user()->id." -> $dctv)");
+                $order = SAP::alpha_output($pitem->ebeln) . "/" . SAP::alpha_output($pitem->ebelp);
+                $sorder = SAP::alpha_output($pitem->vbeln) . "/" . SAP::alpha_output($pitem->posnr);
+                Mailservice::sendMessageCopy($dctv, Auth::user()->username, $order, $message, $sorder);
+            }
+        }
         if ($column == 'purch_price') $type = 'P';
         $newval = trim($value . " " . $valuehlp);
         $cdate = now();
         $cdate->addSeconds($seconds);
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         if ($pitem->backorder == 0 && $backorder == 1 && $type == "D") {
             $cdate->addSeconds(1);
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
         }
         if ($type == "D") {
-            DB::update("update ". System::$table_pitems ." set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::update("update " . System::$table_pitems . " set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             $cdate->addSeconds(1);
             $oldetadt = substr($pitem->etadt, 0, 10);
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
         }
         DB::commit();
 
         if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (doChangeItem): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                Log::error("Mirroring error (doChangeItem): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -697,7 +734,7 @@ class Webservice
 
     static public function getCTVUsers()
     {
-        $users = DB::select("select * from users where role = 'CTV' and sap_system = '" . Auth::user()->sap_system ."'");
+        $users = DB::select("select * from users where role = 'CTV' and sap_system = '" . Auth::user()->sap_system . "'");
         $result = '[ ';
         foreach ($users AS $user) {
             if ($user->active == 1) $user_active = 'X'; else $user_active = '';
@@ -776,7 +813,7 @@ class Webservice
     static public function sendInquiry($ebeln, $ebelp, $text, $to)
     {
         $pitem = DB::table(System::$table_pitems)->where(['ebeln' => $ebeln, 'ebelp' => $ebelp])->first();
-        $porder = DB::Select("select * from ". System::$table_porders ." where ebeln = '$ebeln'")[0];
+        $porder = DB::Select("select * from " . System::$table_porders . " where ebeln = '$ebeln'")[0];
         $order = SAP::alpha_output($ebeln) . "/" . SAP::alpha_output($ebelp);
         $duser = "";
         $stage = '';
@@ -805,7 +842,7 @@ class Webservice
                 $order = SAP::alpha_output($pitem->vbeln) . "/" . SAP::alpha_output($pitem->posnr);
             $stage = 'C';
             $kunnr = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->value("kunnr");
-            $dusers = DB::select("select id, count(*) as count from ". System::$table_users_agent ." join ". System::$table_user_agent_clients ." using (id) where kunnr = '$kunnr' group by id order by count, id");
+            $dusers = DB::select("select id, count(*) as count from " . System::$table_users_agent . " join " . System::$table_user_agent_clients . " using (id) where kunnr = '$kunnr' group by id order by count, id");
             if ($dusers == null || empty($dusers))
                 $duser = DB::table(System::$table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
             else $duser = $dusers[0]->id;
@@ -818,12 +855,12 @@ class Webservice
             $status = " ";
             if ($to[0] == "p") {
                 $status = "X";
-                $newval = __("Rezolvat") . ": ". $newval;
+                $newval = __("Rezolvat") . ": " . $newval;
             }
             $result = SAP::setPnadData($ebeln, $ebelp, $cause, $solution, $details, $status);
             $text = $details;
-            if (!empty(trim($cause))) $text .= __(" /cauza").": ".$cause;
-            if (!empty(trim($solution))) $text .= __(" /solutie").": ".$solution;
+            if (!empty(trim($cause))) $text .= __(" /cauza") . ": " . $cause;
+            if (!empty(trim($solution))) $text .= __(" /solutie") . ": " . $solution;
         }
 
         $uId = Auth::id();
@@ -834,12 +871,12 @@ class Webservice
             if (!empty($result))
                 \Session::put("alert-danger", $result);
             else {
-                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
                     "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
                 \Session::put("alert-success", __("Raportarea starii neconformitatii a fost efectuata cu succes."));
             }
         } else {
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
                 "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
             Mailservice::sendMessageCopy($duser, $uName, $order, $text);
             \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
@@ -847,9 +884,9 @@ class Webservice
 
         if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (sendInquiry): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                Log::error("Mirroring error (sendInquiry): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -861,9 +898,9 @@ class Webservice
             }
         } elseif (!is_null($mirror_user1 = System::r_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (sendInquiry): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                Log::error("Mirroring error (sendInquiry): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -885,12 +922,12 @@ class Webservice
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
         $newstage = 'C';
-        if (Auth::user()->role == "Furnizor") $newstage ='R';
+        if (Auth::user()->role == "Furnizor") $newstage = 'R';
         if (isset($proposal->items)) {
             DB::beginTransaction();
-            DB::update("update ". System::$table_pitems ." set stage = '$newstage', pstage = '$stage', status = 'T' " .
+            DB::update("update " . System::$table_pitems . " set stage = '$newstage', pstage = '$stage', status = 'T' " .
                 "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                 "('$ebeln', '$ebelp', '$cdate', 1, '$proposal->type', '$newstage', '" .
                 Auth::user()->id . "', '" . Auth::user()->username . "')");
             $counter = 0;
@@ -899,7 +936,7 @@ class Webservice
                 if (strlen($propitem->purch_curr) > 3) $propitem->purch_curr = substr($propitem->purch_curr, 0, 3);
                 if (strlen($propitem->sales_curr) > 3) $propitem->sales_curr = substr($propitem->sales_curr, 0, 3);
                 $propitem->mtext = str_replace("'", "\'", $propitem->mtext);
-                DB::insert("insert into ". System::$table_pitemchg_proposals ." (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+                DB::insert("insert into " . System::$table_pitemchg_proposals . " (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
                     "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
                     "'$ebeln', '$ebelp', '$cdate', $counter, " .
                     "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
@@ -910,7 +947,7 @@ class Webservice
             DB::commit();
             $pitem = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
             if ($newstage == 'C') {
-                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$pitem->kunnr'");
+                $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$pitem->kunnr'");
                 if (($ctvusers == null) || empty($ctvusers)) {
                     $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
                     if (($ctvuser1 != null) && !empty($ctvuser1)) {
@@ -943,12 +980,12 @@ class Webservice
                 $tmp_purch_curr = $proposal->purch_curr;
                 if (strlen($tmp_purch_curr) > 3) $tmp_purch_curr = substr($tmp_purch_curr, 0, 3);
                 DB::beginTransaction();
-                DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$stage', status = 'A', " .
+                DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$stage', status = 'A', " .
                     "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
                     "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
                     "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr' " .
                     "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                     "('$ebeln', '$ebelp', '$cdate', 1, 'A', 'Z', '" .
                     Auth::user()->id . "', '" . Auth::user()->username . "')");
                 $result = SAP::savePOItem($ebeln, $ebelp);
@@ -983,11 +1020,11 @@ class Webservice
                     $newstatus = 'X';
                     if ($proposal->lifnr == $proposal->itemdata->lifnr) $newstatus = 'A';
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
+                    DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
                         "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 1, '$newstatus', 'Z', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$banfn')");
                     DB::commit();
@@ -1010,17 +1047,17 @@ class Webservice
                         else return $result;
                     }
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
+                    DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
                         "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 0, 'X', 'Z', 'C', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
                     DB::commit();
                     if (Auth::user()->role != "CTV") {
                         $kunnr = $proposal->itemdata->kunnr;
-                        $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$kunnr'");
+                        $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$kunnr'");
                         foreach ($ctvusers as $ctvuser) {
                             Mailservice::sendSalesOrderChange($ctvuser->id, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
                         }
@@ -1032,15 +1069,14 @@ class Webservice
                             Mailservice::sendSalesOrderChange($refuser->id, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
                     }
                 }
-                // if (!empty($set_new_lifnr)) Data::archiveItem($proposal->itemdata->ebeln, $proposal->itemdata->ebelp);
             }
         }
 
         if (!is_null($mirror_user1 = System::d_ic($proposal->itemdata->stage, $proposal->itemdata->mirror_ebeln, $proposal->itemdata->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (processProposal): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$proposal->itemdata->ebeln."/".SAP::alpha_output($proposal->itemdata->ebelp));
+                Log::error("Mirroring error (processProposal): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $proposal->itemdata->ebeln . "/" . SAP::alpha_output($proposal->itemdata->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -1075,10 +1111,14 @@ class Webservice
             $new_lfdat = (new Carbon($old_lfdat))->addWeekdays($ddays);
             $proposal->lfdat = substr($new_lfdat, 0, 10);
             $message = "Delivery date adjusted from $old_lfdat to $proposal->lfdat due to delayed approval";
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, acknowledged, cuser, cuser_name, reason) values " .
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, acknowledged, cuser, cuser_name, reason) values " .
                 "('$ebeln','$ebelp', 'E', 'C', '$now', 1, '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
             $now->addSecond();
         }
+
+        $result = SAP::acknowledgePOItem($ebeln, $ebelp, " ");
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
+        if (($result != null) && strlen(trim($result)) != 0) return $result;
 
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
@@ -1098,13 +1138,13 @@ class Webservice
             $tmp_sales_curr = $proposal->sales_curr;
             if (strlen($tmp_sales_curr) > 3) $tmp_sales_curr = substr($tmp_sales_curr, 0, 3);
             DB::beginTransaction();
-            DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '" . $item->stage . "', status = 'A', " .
+            DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '" . $item->stage . "', status = 'A', " .
                 "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
                 "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
                 "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr', " .
                 "sales_price = '$tmp_sales_price', sales_curr = '$tmp_sales_curr' " .
                 "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                 "('$ebeln', '$ebelp', '$now', 0, 'A', 'Z', '" .
                 Auth::user()->id . "', '" . Auth::user()->username . "')");
             $result = SAP::savePOItem($ebeln, $ebelp);
@@ -1122,9 +1162,9 @@ class Webservice
             DB::commit();
             if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
                 if (empty($mirror_user1)) {
-                    Log::error("Mirroring error (sendAck): no mirror user could be determined for ".
-                        Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                        " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                    Log::error("Mirroring error (sendAck): no mirror user could be determined for " .
+                        Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                        " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
                 } else {
                     $currid = Auth::user()->id;
                     $sap_system = Auth::user()->sap_system;
@@ -1154,9 +1194,9 @@ class Webservice
         $set_new_lifnr = "";
         if ($proposal->lifnr != $porder->lifnr) $set_new_lifnr = ", new_lifnr ='$proposal->lifnr'";
         DB::beginTransaction();
-        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X'" . $set_new_lifnr .
+        DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$item->stage', status = 'X'" . $set_new_lifnr .
             " where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 0, 'A', 'Z', 'C', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
@@ -1167,19 +1207,20 @@ class Webservice
                     Mailservice::sendSalesOrderChange($ctvuser->id, $item->vbeln, $item->posnr, $result);
                 }
             }
-        } catch (Exception $exception){
+        } catch (Exception $exception) {
             Log::error($exception);
         }
         if (Auth::user()->role == "CTV") {
-            $result = Data::archiveItem($ebeln, $ebelp);
-            Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
+            DB::beginTransaction();
+            DB::update("update " . System::$table_pitems . " set pmfa = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::commit();
         }
 
         if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (acceptProposal): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                Log::error("Mirroring error (acceptProposal): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -1197,6 +1238,9 @@ class Webservice
     static public function rejectProposal($ebeln, $ebelp, $cdate)
     {
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+        $result = SAP::acknowledgePOItem($ebeln, $ebelp, " ");
+        if (($result != null) && !is_string($result)) $result = json_encode($result);
+        if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::rejectPOItem($ebeln, $ebelp);
         if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
@@ -1205,10 +1249,10 @@ class Webservice
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $soitem = __("Rejected sales order item") . " " . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         DB::beginTransaction();
-        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X' " .
+        DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
         $now = now();
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'D', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
@@ -1231,15 +1275,16 @@ class Webservice
             Log::error($exception);
         }
         if (Auth::user()->role == "CTV") {
-            $result = Data::archiveItem($ebeln, $ebelp);
-            Log::info("Archiving $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
+            DB::beginTransaction();
+            DB::update("update " . System::$table_pitems . " set pmfa = 'B' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::commit();
         }
 
         if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (rejectProposal): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                Log::error("Mirroring error (rejectProposal): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -1269,7 +1314,7 @@ class Webservice
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $text = "";
         if ($item->vbeln == Orders::stockorder) {
-            foreach($splititems as $splititem) {
+            foreach ($splititems as $splititem) {
                 $result = SAP::createPurchReq($splititem->lifnr, $splititem->idnlf, $splititem->mtext, $item->matnr,
                     $splititem->qty, $splititem->qty_uom,
                     $splititem->purch_price, $splititem->purch_curr, $splititem->lfdat);
@@ -1281,7 +1326,7 @@ class Webservice
             }
             $text = __("New purchase requisition ") . $text;
         } else {
-            foreach($splititems as $splititem) {
+            foreach ($splititems as $splititem) {
                 $result = SAP::processSOItem($item->vbeln, $item->posnr,
                     $splititem->qty, $splititem->qty_uom, $splititem->lifnr, SAP::newMatnr($item->matnr),
                     $splititem->mtext, $splititem->idnlf, $splititem->purch_price, $splititem->purch_curr,
@@ -1295,7 +1340,7 @@ class Webservice
             $text2 = substr($text, 1);
             $text = __("New sales order items: ") . $text2;
             if (Auth::user()->role != "CTV") {
-                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
+                $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$item->kunnr'");
                 foreach ($ctvusers as $ctvuser) {
                     Mailservice::sendSalesOrderChange($ctvuser->id, $item->vbeln, $item->posnr, $text2);
                 }
@@ -1303,11 +1348,11 @@ class Webservice
         }
 
         DB::beginTransaction();
-        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X' " .
+        DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::delete("delete from ". System::$table_pitemchg_proposals ." where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        DB::delete("delete from " . System::$table_pitemchg_proposals . " where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         $cdate = now();
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$cdate', 0, 'A', 'Z', 'U', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$text')");
         DB::commit();
@@ -1315,9 +1360,9 @@ class Webservice
 
         if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp)) && !$no_ic) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (acceptSplit): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                Log::error("Mirroring error (acceptSplit): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -1343,16 +1388,16 @@ class Webservice
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $soitem = __("Rejected split for sales order item ") . SAP::alpha_output($item->vbeln) . '/' . ltrim($item->posnr, "0");
         DB::beginTransaction();
-        DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$item->stage', status = 'X' " .
+        DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$item->stage', status = 'X' " .
             "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::delete("delete from ". System::$table_pitemchg_proposals ." where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+        DB::delete("delete from " . System::$table_pitemchg_proposals . " where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
         $now = now();
-        DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
             "('$ebeln', '$ebelp', '$now', 0, 'X', 'Z', 'W', '" .
             Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
         DB::commit();
         if (Auth::user()->role != 'CTV') {
-            $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$item->kunnr'");
+            $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$item->kunnr'");
             foreach ($ctvusers as $ctvuser) {
                 Mailservice::sendSalesOrderNotification($ctvuser->id, $item->vbeln, $item->posnr);
             }
@@ -1360,9 +1405,9 @@ class Webservice
 
         if (!is_null($mirror_user1 = System::r_ic($item->stage, $item->mirror_ebeln, $item->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (rejectSplit): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$item->ebeln."/".SAP::alpha_output($item->ebelp));
+                Log::error("Mirroring error (rejectSplit): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $item->ebeln . "/" . SAP::alpha_output($item->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -1434,14 +1479,14 @@ class Webservice
     static public function archiveItem($ebeln, $ebelp)
     {
         $result = Data::archiveItem($ebeln, $ebelp);
-        Log::info("Order item $ebeln/$ebelp was manually archived by ". Auth::user()->id);
+        Log::info("Order item $ebeln/$ebelp was manually archived by " . Auth::user()->id);
         return $result;
     }
 
     static public function unarchiveItem($ebeln, $ebelp)
     {
         $result = Data::unarchiveItem($ebeln, $ebelp);
-        Log::info("Order item $ebeln/$ebelp was manually unarchived by ". Auth::user()->id);
+        Log::info("Order item $ebeln/$ebelp was manually unarchived by " . Auth::user()->id);
         return $result;
     }
 
@@ -1449,13 +1494,13 @@ class Webservice
     {
         $pitem = DB::table(System::$table_pitems)->where(["ebeln" => $ebeln, "ebelp" => $ebelp])->first();
         if ($pitem != null) {
-            $pitemchgs = DB::select("select * from ". System::$table_pitemchg .
-                    " where ebeln = '$ebeln' and ebelp = '$ebelp' and ctype <> 'E' order by cdate desc");
+            $pitemchgs = DB::select("select * from " . System::$table_pitemchg .
+                " where ebeln = '$ebeln' and ebelp = '$ebelp' and ctype <> 'E' order by cdate desc");
             $pitemchg = null;
             $prevchg = null;
             if ($pitemchgs != null && count($pitemchgs) > 0) {
                 $pitemchg = $pitemchgs[0];
-                $prevchgs = DB::select("select * from ". System::$table_pitemchg .
+                $prevchgs = DB::select("select * from " . System::$table_pitemchg .
                     " where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate < '$pitemchg->cdate' and ctype <> 'E' order by cdate desc");
                 if ($prevchgs != null && count($prevchgs) > 0) $prevchg = $prevchgs[0];
                 if ($prevchg == null) $prevchg = clone $pitemchg;
@@ -1471,43 +1516,43 @@ class Webservice
                     && (trim($pitem->status) == "") &&
                     ($pitemchg->ctype == "M" || $pitemchg->ctype == "Q" || $pitemchg->ctype == "P" || $pitemchg->ctype == "D" || $pitemchg->ctype == "J")) {
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update " . System::$table_pitemchg . " set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
                     $message = __("Rolled back");
                     if ($pitemchg->ctype == "M") {
                         $message .= " " . __("from material code change");
                         $idnlf = $pitemchg->oldval;
-                        DB::update("update ". System::$table_pitems ." set idnlf = '$idnlf' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::update("update " . System::$table_pitems . " set idnlf = '$idnlf' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
                     if ($pitemchg->ctype == "P") {
                         $message .= " " . __("from price change");
                         $purch_price = explode(" ", $pitemchg->oldval)[0];
-                        DB::update("update ". System::$table_pitems ." set purch_price = '$purch_price' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::update("update " . System::$table_pitems . " set purch_price = '$purch_price' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
                     if ($pitemchg->ctype == "Q") {
                         $message .= " " . __("from quantity change");
                         $qty = explode(" ", $pitemchg->oldval)[0];
-                        DB::update("update ". System::$table_pitems ." set qty = '$qty' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::update("update " . System::$table_pitems . " set qty = '$qty' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
                     if ($pitemchg->ctype == "D") {
                         $message .= " " . __("from delivery date change");
                         $lfdat = $pitemchg->oldval;
-                        DB::update("update ". System::$table_pitems ." set lfdat = '$lfdat' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::update("update " . System::$table_pitems . " set lfdat = '$lfdat' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
                     if ($pitemchg->ctype == "J") {
                         $message .= " " . __("from ETA date change");
                         $etadt = $pitemchg->oldval;
-                        DB::update("update ". System::$table_pitems ." set etadt = '$etadt' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                        DB::update("update " . System::$table_pitems . " set etadt = '$etadt' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                     }
                     $message .= " (previous = " . $pitemchg->oldval . ", current = " . $pitemchg->newval . ")";
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
-                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 0$ctype) by ". Auth::user()->id);
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 0$ctype) by " . Auth::user()->id);
                     if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
                         if (empty($mirror_user1)) {
-                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
-                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for " .
+                                Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                                " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
                         } else {
                             $currid = Auth::user()->id;
                             $sap_system = Auth::user()->sap_system;
@@ -1524,8 +1569,8 @@ class Webservice
                 if ((($pitem->stage == "R") && ($pitemchg->stage == "R")) &&
                     ($pitem->pstage == "F" || $pitem->pstage == " ") &&
                     ((($pitem->status == "T") && ($pitemchg->ctype == "T")) ||
-                     (($pitem->status == "A") && ($pitemchg->ctype == "A")))
-                   ) {
+                        (($pitem->status == "A") && ($pitemchg->ctype == "A")))
+                ) {
                     $message = __("Rolled back");
                     if ($pitem->status == "T") {
                         $message .= " " . __("from supplier acceptance proposal on") . " " . $cdate;
@@ -1533,17 +1578,17 @@ class Webservice
                         $message .= " " . __("from supplier acceptance on") . " " . $cdate;
                     }
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-                    DB::update("update ". System::$table_pitems ." set stage = 'F', status = '', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                    DB::update("update " . System::$table_pitemchg . " set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update " . System::$table_pitems . " set stage = 'F', status = '', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
-                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 1) by ". Auth::user()->id);
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 1) by " . Auth::user()->id);
                     if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
                         if (empty($mirror_user1)) {
-                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
-                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for " .
+                                Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                                " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
                         } else {
                             $currid = Auth::user()->id;
                             $sap_system = Auth::user()->sap_system;
@@ -1558,23 +1603,22 @@ class Webservice
                 }
 
                 if ((($pitem->stage == "C") && ($pitemchg->stage == "C")) &&
-                     $pitem->pstage == "R" &&
-                     (($pitem->status == "T") || ($pitem->status == "A")) &&
-                     ($pitemchg->ctype == "O"))
-                {
+                    $pitem->pstage == "R" &&
+                    (($pitem->status == "T") || ($pitem->status == "A")) &&
+                    ($pitemchg->ctype == "O")) {
                     $message = __("Rolled back from proposal on") . " " . $cdate;
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-                    DB::update("update ". System::$table_pitems ." set stage = 'R', status = '$status', pstage = 'C' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                    DB::update("update " . System::$table_pitemchg . " set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update " . System::$table_pitems . " set stage = 'R', status = '$status', pstage = 'C' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
                         "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
-                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 2) by ". Auth::user()->id);
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 2) by " . Auth::user()->id);
                     if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
                         if (empty($mirror_user1)) {
-                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
-                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for " .
+                                Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                                " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
                         } else {
                             $currid = Auth::user()->id;
                             $sap_system = Auth::user()->sap_system;
@@ -1591,10 +1635,9 @@ class Webservice
                 if ((($pitem->stage == "Z") && (($pitemchg->stage == "Z") || ($pitemchg->stage == "R"))) &&
                     ($pitem->pstage == "F" || $pitem->pstage == " ") &&
                     ((($pitem->status == "X") && ($pitemchg->ctype == "X")) ||
-                     (($pitem->status == "A") && ($pitemchg->ctype == "A"))
+                        (($pitem->status == "A") && ($pitemchg->ctype == "A"))
                     )
-                   )
-                {
+                ) {
                     $message = __("Rolled back");
                     if ($pitem->status == "T") {
                         $message .= " " . __("from supplier acceptance proposal on") . " " . $cdate;
@@ -1604,17 +1647,17 @@ class Webservice
                         $message .= " " . __("from supplier acceptance on") . " " . $cdate;
                     }
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-                    DB::update("update ". System::$table_pitems ." set stage = 'F', status = '', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                    DB::update("update " . System::$table_pitemchg . " set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update " . System::$table_pitems . " set stage = 'F', status = '', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
                         "('$ebeln','$ebelp', 'E', 'F', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
-                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 3) by ". Auth::user()->id);
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 3) by " . Auth::user()->id);
                     if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
                         if (empty($mirror_user1)) {
-                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
-                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for " .
+                                Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                                " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
                         } else {
                             $currid = Auth::user()->id;
                             $sap_system = Auth::user()->sap_system;
@@ -1631,10 +1674,9 @@ class Webservice
                 if ((($pitem->stage == "Z") && (($pitemchg->stage == "Z") && ($pitemchg->acknowledged == 0))) &&
                     ($pitem->pstage == "R") &&
                     ((($pitem->status == "X") && ($pitemchg->ctype == "X")) ||
-                     (($pitem->status == "A") && ($pitemchg->ctype == "A"))
+                        (($pitem->status == "A") && ($pitemchg->ctype == "A"))
                     )
-                   )
-                {
+                ) {
                     $message = __("Rolled back");
                     if ($pitem->status == "X") {
                         $message .= " " . __("from reference rejection on") . " " . $cdate;
@@ -1644,17 +1686,17 @@ class Webservice
                         $prevstatus = 'T';
                     }
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitemchg ." set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
-                    DB::update("update ". System::$table_pitems ." set stage = 'R', status = '$prevstatus', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
+                    DB::update("update " . System::$table_pitemchg . " set acknowledged = 2 where ebeln = '$ebeln' and ebelp = '$ebelp' and cdate = '$cdate'");
+                    DB::update("update " . System::$table_pitems . " set stage = 'R', status = '$prevstatus', pstage = 'R' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name, reason) values " .
                         "('$ebeln','$ebelp', 'E', 'R', '$now', '" . Auth::user()->id . "','" . Auth::user()->username . "', '$message')");
                     DB::commit();
-                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 4) by ". Auth::user()->id);
+                    Log::info("Order item $ebeln/$ebelp was manually rolled back (type 4) by " . Auth::user()->id);
                     if (!is_null($mirror_user1 = System::d_ic($pitem->stage, $pitem->mirror_ebeln, $pitem->mirror_ebelp))) {
                         if (empty($mirror_user1)) {
-                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for ".
-                                Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                                " order/item ".$pitem->ebeln."/".SAP::alpha_output($pitem->ebelp));
+                            Log::error("Mirroring error (rollbackItem): no mirror user could be determined for " .
+                                Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                                " order/item " . $pitem->ebeln . "/" . SAP::alpha_output($pitem->ebelp));
                         } else {
                             $currid = Auth::user()->id;
                             $sap_system = Auth::user()->sap_system;
@@ -1685,12 +1727,12 @@ class Webservice
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
         $newstage = 'C';
-        if (Auth::user()->role == "Furnizor") $newstage ='R';
+        if (Auth::user()->role == "Furnizor") $newstage = 'R';
         if (isset($proposal->items)) {
             DB::beginTransaction();
-            DB::update("update ". System::$table_pitems ." set stage = '$newstage', pstage = '$stage', status = 'T' " .
+            DB::update("update " . System::$table_pitems . " set stage = '$newstage', pstage = '$stage', status = 'T' " .
                 "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-            DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                 "('$ebeln', '$ebelp', '$cdate', 1, '$proposal->type', '$newstage', '" .
                 Auth::user()->id . "', '" . Auth::user()->username . "')");
             $counter = 0;
@@ -1699,7 +1741,7 @@ class Webservice
                 if (strlen($propitem->purch_curr) > 3) $propitem->purch_curr = substr($propitem->purch_curr, 0, 3);
                 if (strlen($propitem->sales_curr) > 3) $propitem->sales_curr = substr($propitem->sales_curr, 0, 3);
                 $propitem->mtext = str_replace("'", "\'", $propitem->mtext);
-                DB::insert("insert into ". System::$table_pitemchg_proposals ." (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
+                DB::insert("insert into " . System::$table_pitemchg_proposals . " (type, ebeln, ebelp, cdate, pos, lifnr, idnlf, matnr, " .
                     "mtext, lfdat, qty, qty_uom, purch_price, purch_curr, sales_price, sales_curr, infnr) values ('$proposal->type'," .
                     "'$ebeln', '$ebelp', '$cdate', $counter, " .
                     "'$propitem->lifnr', '$propitem->idnlf', '$propitem->matnr', '$propitem->mtext', '$propitem->lfdat', " .
@@ -1715,7 +1757,7 @@ class Webservice
             DB::commit();
             $pitem = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
             if ($newstage == 'C') {
-                $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$pitem->kunnr'");
+                $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$pitem->kunnr'");
                 if (($ctvusers == null) || empty($ctvusers)) {
                     $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
                     if (($ctvuser1 != null) && !empty($ctvuser1)) {
@@ -1736,7 +1778,7 @@ class Webservice
         } else {
             $proposal->lifnr = SAP::alpha_input($proposal->lifnr);
             if ((($proposal->lifnr == $proposal->itemdata->lifnr) &&
-                 (trim($proposal->idnlf) == trim($proposal->itemdata->orig_idnlf)))
+                    (trim($proposal->idnlf) == trim($proposal->itemdata->orig_idnlf)))
                 || System::$mirroring) {
                 // keeping the same supplier and material code, just update PO & SO
                 $tmp_idnlf = $proposal->idnlf;
@@ -1751,13 +1793,13 @@ class Webservice
                 $tmp_sales_curr = $proposal->sales_curr;
                 if (strlen($tmp_purch_curr) > 3) $tmp_purch_curr = substr($tmp_purch_curr, 0, 3);
                 DB::beginTransaction();
-                DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$stage', status = 'A', " .
+                DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$stage', status = 'A', " .
                     "idnlf = '$tmp_idnlf', mtext = '$tmp_mtext', matnr = '$tmp_matnr', lfdat = '$tmp_lfdat', " .
                     "qty = $tmp_qty, qty_uom = '$tmp_qty_unit', " .
                     "purch_price = '$tmp_purch_price', purch_curr = '$tmp_purch_curr', " .
                     "sales_price = '$tmp_sales_price', sales_curr = '$tmp_sales_curr' " .
                     "where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name) values " .
                     "('$ebeln', '$ebelp', '$cdate', 1, 'A', 'Z', '" .
                     Auth::user()->id . "', '" . Auth::user()->username . "')");
                 $result = SAP::savePOItem($ebeln, $ebelp);
@@ -1806,11 +1848,11 @@ class Webservice
                     $newstatus = 'X';
                     if ($proposal->lifnr == $proposal->itemdata->lifnr) $newstatus = 'A';
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
+                    DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$tmp_stage', status = '$newstatus', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, cuser, cuser_name, reason) values " .
                         "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 1, '$newstatus', 'Z', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$banfn')");
                     DB::commit();
@@ -1838,11 +1880,11 @@ class Webservice
                         else return $result;
                     }
                     DB::beginTransaction();
-                    DB::update("update ". System::$table_pitems ." set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
+                    DB::update("update " . System::$table_pitems . " set stage = 'Z', pstage = '$tmp_stage', status = 'X', " . $set_new_lifnr .
                         "idnlf = '$tmp_idnlf', purch_price = '$tmp_purch_price', " .
                         "qty = '$tmp_qty', lfdat = '$tmp_lfdat', matnr = '$tmp_matnr' " .
                         "where ebeln = '" . $proposal->itemdata->ebeln . "' and ebelp = '" . $proposal->itemdata->ebelp . "'");
-                    DB::insert("insert into ". System::$table_pitemchg ." (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, stage, oldval, cuser, cuser_name, reason) values " .
                         "('" . $proposal->itemdata->ebeln . "', '" . $proposal->itemdata->ebelp . "', '$cdate', 0, 'X', 'Z', 'C', '" .
                         Auth::user()->id . "', '" . Auth::user()->username . "', '$soitem')");
                     DB::commit();
@@ -1853,7 +1895,7 @@ class Webservice
                     }
                     if (Auth::user()->role != "CTV") {
                         $kunnr = $proposal->itemdata->kunnr;
-                        $ctvusers = DB::select("select distinct id from ". System::$table_user_agent_clients ." where kunnr = '$kunnr'");
+                        $ctvusers = DB::select("select distinct id from " . System::$table_user_agent_clients . " where kunnr = '$kunnr'");
                         foreach ($ctvusers as $ctvuser) {
                             Mailservice::sendSalesOrderChange($ctvuser->id, $proposal->itemdata->vbeln, $proposal->itemdata->posnr, $result);
                         }
@@ -1871,9 +1913,9 @@ class Webservice
 
         if (!is_null($mirror_user1 = System::d_ic($proposal->itemdata->stage, $proposal->itemdata->mirror_ebeln, $proposal->itemdata->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (processProposal2): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$proposal->itemdata->ebeln."/".SAP::alpha_output($proposal->itemdata->ebelp));
+                Log::error("Mirroring error (processProposal2): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $proposal->itemdata->ebeln . "/" . SAP::alpha_output($proposal->itemdata->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -1895,9 +1937,9 @@ class Webservice
             }
         } elseif (!is_null($mirror_user1 = System::r_ic($proposal->itemdata->stage, $proposal->itemdata->mirror_ebeln, $proposal->itemdata->mirror_ebelp))) {
             if (empty($mirror_user1)) {
-                Log::error("Mirroring error (processProposal2): no mirror user could be determined for ".
-                    Auth::user()->sap_system."/".Auth::user()->id."/".Auth::user()->role.
-                    " order/item ".$proposal->itemdata->ebeln."/".SAP::alpha_output($proposal->itemdata->ebelp));
+                Log::error("Mirroring error (processProposal2): no mirror user could be determined for " .
+                    Auth::user()->sap_system . "/" . Auth::user()->id . "/" . Auth::user()->role .
+                    " order/item " . $proposal->itemdata->ebeln . "/" . SAP::alpha_output($proposal->itemdata->ebelp));
             } else {
                 $currid = Auth::user()->id;
                 $sap_system = Auth::user()->sap_system;
@@ -1921,4 +1963,20 @@ class Webservice
         return "";
     }
 
+    static function acknowledgeByBell($ebeln, $ebelp, $mode)
+    {
+        $item = DB::table(System::$table_pitems)->where([["ebeln", '=', $ebeln], ["ebelp", '=', $ebelp]])->first();
+        DB::beginTransaction();
+        DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::commit();
+        switch ($mode) {
+            case "A": // proposal accepted by CTV, acknowledged by supplier
+            case "B": // proposal rejected by CTV, acknowledged by supplier
+                $result = Data::archiveItem($ebeln, $ebelp);
+                Log::info("Archiving LATE $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
+                break;
+            case "C": // item rejected by supplier, acknowledged by CTV
+            case "D": // ETA modified, acknowledged by CTV
+        }
+    }
 }

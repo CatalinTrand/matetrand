@@ -73,6 +73,9 @@
         $filter_kunnr_name = \Illuminate\Support\Facades\Session::get("filter_kunnr_name");
         if (!isset($filter_kunnr_name) || is_null($filter_kunnr_name)) $filter_kunnr_name = "";
 
+        $filter_mfrnr_text = \Illuminate\Support\Facades\Session::get("filter_mfrnr_text");
+        if (!isset($filter_mfrnr_text) || isnull($filter_mfrnr_text)) $filter_mfrnr_text = "";
+
         $message_count = App\Materom\Orders::unreadMessageCount();
         $message_svg = "";
         if ($message_count > 0) {

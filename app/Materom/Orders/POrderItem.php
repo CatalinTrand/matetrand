@@ -76,11 +76,16 @@ class POrderItem
     public $qty_damaged;  // damaged
     public $qty_details;
     public $qty_solution;
+    public $qty_pnad_mblnr;
+    public $qty_pnad_mjahr;
     public $pnad_status;  // X=open record exists in ZWM, ''=no open record
 
     // mirroring
     public $mirror_ebeln;
     public $mirror_ebelp;
+
+    // post-mortem flag & action
+    public $pmfa;
 
     // computed/determined fields
     public $sorder;      // sales order to be displayed
@@ -106,6 +111,7 @@ class POrderItem
     public $rejected; // $this->status = X
     public $inquired; // 0=no, 1=tentatively accepted, 2=tentatively rejected, 3=simple message
     public $inq_reply; // 0=no reply, 1=with reply
+    public $inquirement; // 0=no, 1=is inquirement
 
     // buttons
     public $accept;   // 0-no, 1=display
@@ -182,11 +188,15 @@ class POrderItem
         $this->qty_damaged = $pitem->qty_damaged;
         $this->qty_details = $pitem->qty_details;
         $this->qty_solution = $pitem->qty_solution;
+        $this->qty_pnad_mblnr = $pitem->qty_pnad_mblnr;
+        $this->qty_pnad_mjahr = $pitem->qty_pnad_mjahr;
         $this->pnad_status = $pitem->pnad_status;
         $this->mirror_ebeln = $pitem->mirror_ebeln;
         $this->mirror_ebelp = $pitem->mirror_ebelp;
+        $this->pmfa = $pitem->pmfa;
         $this->ebelp_title = "";
         $this->readonly = 0;
+        $this->inquirement = 0;
         if (!empty(trim($this->mirror_ebeln)) && System::ic_on()) {
             $this->ebelp_title = __("Mirrored with") . " " . SAP::alpha_output($pitem->mirror_ebeln) . "-" . SAP::alpha_output($pitem->mirror_ebelp);
             if (empty(Auth::user()->sap_system)) {
@@ -546,6 +556,17 @@ class POrderItem
                 $this->info = 7;
                 if (explode(" ", $this->delqty)[0] >= $this->qty) $this->info = 6;
             }
+            if ((($this->backorder == 0) || (Auth::user()->role != "Furnizor" && $this->delivery_date_changed != 0)) &&
+                ((($this->inq_reply == 1) || (Auth::user()->role == "Furnizor")
+                        || ((Auth::user()->role == "Referent") && ($this->crefo == 1))) &&
+                    (($this->owner != 0) || (Auth::user()->role == "Administrator") ||
+                        (((Auth::user()->role == "Furnizor") || ((Auth::user()->role == "Referent") && ($this->crefo == 1))) &&
+                         (($this->info == 4) || ($this->info == 5) || ((substr($this->pmfa, 0, 1) == "A") || (substr($this->pmfa, 0, 1) == "B")))
+                        )
+                    )
+                )
+            ) $this->inquirement = 1;
+            if ((Auth::user()->role == "CTV") && ((substr($this->pmfa, 0, 1) == "C") || (substr($this->pmfa, 0, 1) == "D"))) $this->inquirement = 1;
         }
 
     }

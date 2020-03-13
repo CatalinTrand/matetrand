@@ -90,10 +90,14 @@ class Orders
         $filter_eta = Session::get("filter_eta");
 
         $goodsreceipt = Session::get("filter_goodsreceipt");
-        if (!isset($goodsreceipt) || $goodsreceipt == null) $goodsreceipt = 0;
+        if (!isset($goodsreceipt) || (($goodsreceipt != "1") && ($goodsreceipt != "2"))) $goodsreceipt = "0";
 
-        $pnad = Session::get("filter_pnad");
-        if (!isset($pnad) || $pnad == null) $pnad = 0;
+        $pnad_status = Session::get("filter_pnad_status");
+        if (!isset($pnad_status) || $pnad_status == null) $pnad_status = 0;
+        $pnad_type = Session::get("filter_pnad_type");
+        if (!isset($pnad_type) || $pnad_type == null) $pnad_type = 0;
+        $pnad_mblnr = Session::get("filter_pnad_mblnr");
+        if (!isset($pnad_mblnr) || $pnad_mblnr == null) $pnad_mblnr = "";
 
         $mirror = Session::get("filter_mirror");
         if (!isset($mirror) || $mirror == null) $mirror = 0;
@@ -127,6 +131,9 @@ class Orders
         $filter_kunnr_name = trim(Session::get("filter_kunnr_name"));
         if (!empty($filter_kunnr_name) && strpos($filter_kunnr_name, "*") === false)
             $filter_kunnr_name = "*" . $filter_kunnr_name . "*";
+        $filter_mfrnr_text = trim(Session::get("filter_mfrnr_text"));
+        if (!empty($filter_mfrnr_text) && strpos($filter_mfrnr_text, "*") === false)
+            $filter_mfrnr_text = "*" . $filter_mfrnr_text . "*";
 
         $cacheid = Session::get('materomdbcache');
         if (!isset($cacheid) || empty($cacheid)) return;
@@ -143,12 +150,13 @@ class Orders
         $filter_lifnr_name_sql = self::processFilter(System::$table_sap_lfa1.".name1", $filter_lifnr_name);
         $filter_kunnr_sql = self::processFilter($items_table . ".kunnr", $filter_kunnr, 10);
         $filter_kunnr_name_sql = self::processFilter(System::$table_sap_kna1.".name1", $filter_kunnr_name);
+        $filter_mfrnr_text_sql = self::processFilter("lfa1_mfrnr.name1", $filter_mfrnr_text);
 
         $filter_sql = $time_limit === null ? "" : "$items_table.archdate >= '$time_limit 00:00:00'";
         if ($history != 2) $filter_sql = "";
         $filter_sql = self::addFilters($filter_sql, $filter_ebeln_sql, $filter_ekgrp_sql,
             $filter_lifnr_sql, $filter_lifnr_name_sql, $filter_kunnr_sql, $filter_kunnr_name_sql);
-        $filter_sql = self::addFilters($filter_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql);
+        $filter_sql = self::addFilters($filter_sql, $filter_vbeln_sql, $filter_matnr_sql, $filter_mtext_sql, $filter_mfrnr_text_sql);
 
         if (Auth::user()->role == "Furnizor") {
             $manufacturers = DB::select("select distinct mfrnr from ". System::$table_users_sel ." where id ='" . Auth::user()->id . "'");
@@ -214,14 +222,32 @@ class Orders
         }
 
         $goodsreceipt_sql = "";
-        if ($goodsreceipt <> 0) $goodsreceipt_sql = "$items_table.grdate is not NULL";
+        if ($goodsreceipt == "1") $goodsreceipt_sql = "$items_table.grdate is not NULL";
+        elseif ($goodsreceipt == "2") $goodsreceipt_sql = "($items_table.grdate is NULL or $items_table.qty <> substring_index($items_table.grqty, ' ', 1))";
         if (!empty($goodsreceipt_sql)) {
             if (empty($filter_sql)) $filter_sql = $goodsreceipt_sql;
             else $filter_sql .= " and " . $goodsreceipt_sql;
         }
 
         $pnad_sql = "";
-        if ($pnad <> 0) $pnad_sql = "$items_table.pnad_status = 'X'";
+        if ($pnad_status == "1") $pnad_sql = "$items_table.pnad_status = 'X'";
+        elseif ($pnad_status == "2") $pnad_sql = "($items_table.pnad_status <> 'X' and $items_table.qty_pnad_mblnr <> '')";
+        elseif (($pnad_status == "3") && empty($pnad_mblnr)) $pnad_sql = "$items_table.qty_pnad_mblnr <> ''";
+        if (!empty($pnad_sql)) {
+            if (empty($filter_sql)) $filter_sql = $pnad_sql;
+            else $filter_sql .= " and " . $pnad_sql;
+        }
+
+        $pnad_sql = "";
+        if ($pnad_type == "1") $pnad_sql = "trim($items_table.qty_diff) <> ''";
+        elseif ($pnad_type == "2") $pnad_sql = "trim($items_table.qty_damaged) <> ''";
+        if (!empty($pnad_sql)) {
+            if (empty($filter_sql)) $filter_sql = $pnad_sql;
+            else $filter_sql .= " and " . $pnad_sql;
+        }
+
+        $pnad_sql = "";
+        if (!empty($pnad_mblnr)) $pnad_sql = "$items_table.qty_pnad_mblnr = '$pnad_mblnr'";
         if (!empty($pnad_sql)) {
             if (empty($filter_sql)) $filter_sql = $pnad_sql;
             else $filter_sql .= " and " . $pnad_sql;
@@ -241,6 +267,7 @@ class Orders
             " join " . $orders_table . " using (ebeln)";
         if (!empty($filter_lifnr_name_sql)) $sql .= " join " .System::$table_sap_lfa1. " using (lifnr)";
         if (!empty($filter_kunnr_name_sql)) $sql .= " join " .System::$table_sap_kna1. " using (kunnr)";
+        if (!empty($filter_mfrnr_text_sql)) $sql .= " join " .System::$table_sap_lfa1. " lfa1_mfrnr on lfa1_mfrnr.lifnr = $items_table.mfrnr";
         if (!empty($filter_sql)) $sql .= " where " . $filter_sql;
         $sql .= " order by " . $items_table . ".ebeln, " . $items_table . ".ebelp";
 //      Log::debug($sql);
@@ -390,21 +417,13 @@ class Orders
                     $_pitem->appendChange($_pitemchg);
                 }
                 $_pitem->fill($_porder);
-                if (($inquirements != 1) ||
-                    ((($_pitem->backorder == 0) || (Auth::user()->role != "Furnizor" && $_pitem->delivery_date_changed != 0)) &&
-                        ((($_pitem->inq_reply == 1) || (Auth::user()->role == "Furnizor")
-                                                    || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) &&
-                         (($_pitem->owner != 0) || (Auth::user()->role == "Administrator") ||
-                          (((Auth::user()->role == "Furnizor") || ((Auth::user()->role == "Referent") && ($_pitem->crefo == 1))) && (($_pitem->info == 4) || ($_pitem->info == 5)))
-                         )
-                        )
-                    )
-                   )
+                if (($inquirements != 1) || ($_pitem->inquirement == 1)) {
                     if ($overdue == 0 || (($_pitem->lfdat < $now) && (($_pitem->dodays > $overdue_low) && ($_pitem->dodays < $overdue_high)) && ($_pitem->pnad_status != "X"))) {
                         $_porder->appendItem($_pitem);
                         self::$overdue_items++;
                         $overdueitems = true;
                     }
+                }
             }
             $_porder->fill();
             if ($_porder->items != null) {

@@ -1,4 +1,6 @@
 {
+  "from": "from",
+  "to": "irányában",
   "Login": "Login",
   "User ID": "Használó",
   "Password": "Jelszó",
@@ -98,7 +100,6 @@
   "Vendor material": "Szállítóanyag",
   "Use": "Használat",
   "Filter by status": "Szűrés állapot szerint",
-  "to": "irányában",
   "Change password": "Jelszó módosítása",
   "Change user data": "Felhasználó dátumának módosítása",
   "Delete user": "Felhasználó törlése",
@@ -109,7 +110,10 @@
   "Purch. price": "Purch. price",
   "Profit margin": "Profit margin",
   "Only overdue deliveries": "Only overdue deliveries",
-  "Only deliveries with goods receipt": "Only deliveries with goods receipt",
+  "Deliveries": "Deliveries",
+  "Nicio filtrare": "No filtering",
+  "Doar cu intrare de bunuri": "Only w/ goods receipt",
+  "Fara intrare de bunuri": "Only w/o goods receipt",
   "Send proposal to MATEROM": "Send proposal to MATEROM",
   "Keep proposal": "Keep proposal",
   "Reject proposal": "Reject proposal",
@@ -127,5 +131,6 @@
   "Cell K": "Cell K",
   "Cell M": "Cell M",
   "does not exist": "does not exist",
-  "Only with PNAD": "Only with PNAD"
+  "Only with PNAD": "Only with PNAD",
+  "ETA has changed": "ETA has changed"
 }

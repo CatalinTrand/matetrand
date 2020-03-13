@@ -364,6 +364,8 @@ class SAP
                         ", qty_damaged = '$item->qty_damaged'" .
                         ", qty_solution = '$item->qty_solution'" .
                         ", qty_details = '$item->qty_details'" .
+                        ", qty_pnad_mblnr = '$item->qty_pnad_mblnr'" .
+                        ", qty_pnad_mjahr = '$item->qty_pnad_mjahr'" .
                         ", pnad_status = '$item->pnad_status'" .
                         " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
                     if ($ebeln <> $item->ebeln) {
@@ -448,6 +450,8 @@ class SAP
                             ", qty_damaged = '$item->qty_damaged'" .
                             ", qty_solution = '$item->qty_solution'" .
                             ", qty_details = '$item->qty_details'" .
+                            ", qty_pnad_mblnr = '$item->qty_pnad_mblnr'" .
+                            ", qty_pnad_mjahr = '$item->qty_pnad_mjahr'" .
                             ", pnad_status = '$item->pnad_status'" .
                             " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
                         if ($ebeln <> $item->ebeln) {
@@ -514,6 +518,8 @@ class SAP
                 $item->qty_damaged = trim($item->QTY_DAMAGED); unset($item->QTY_DAMAGED);
                 $item->qty_solution = trim($item->QTY_SOLUTION); unset($item->QTY_SOLUTION);
                 $item->qty_details = trim($item->QTY_DETAILS); unset($item->QTY_DETAILS);
+                $item->qty_pnad_mblnr = trim($item->QTY_PNAD_MBLNR); unset($item->QTY_PNAD_MBLNR);
+                $item->qty_pnad_mjahr = trim($item->QTY_PNAD_MJAHR); unset($item->QTY_PNAD_MJAHR);
                 $item->pnad_status = trim($item->PNAD_STATUS); unset($item->PNAD_STATUS);
             }
             usort($items, function($item_a, $item_b)
