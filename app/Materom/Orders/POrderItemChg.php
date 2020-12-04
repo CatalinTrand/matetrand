@@ -77,6 +77,7 @@ class POrderItemChg
         $texts[] = __("Reason 2");
         $texts[] = __("Miscellaneous");
         $texts[] = __("Other");
+        $texts[] = __("Propose new variant");
 
         switch ($this->ctype) {
             case "A":
@@ -134,6 +135,12 @@ class POrderItemChg
             case "S":
                 $this->text = __("Item split proposed");
                 break;
+            case "Y":
+                if ($this->oldval == "1") {
+                    $this->text = __("Backorder fara termen de livrare: verificarea de disponibilitate a fost eliminata");
+                } else {
+                    $this->text = __("Backorder fara termen de livrare, se va efectua o noua verificare de disponibilitate la data")." ".$this->newval;
+                }
         }
 
     }

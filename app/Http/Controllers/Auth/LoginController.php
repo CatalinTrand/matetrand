@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Materom\ExcelData;
 use App\Materom\Orders;
 use App\Materom\SAP;
 use App\Materom\System;
@@ -88,6 +89,7 @@ class LoginController extends Controller
         if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
             Session::put("filter_ebeln", "NONE");
         Orders::fillCache();
+        ExcelData::setDefaultXLSFields("xls01");
     }
 
     protected function validateLogin(Request $request)

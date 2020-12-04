@@ -25,7 +25,7 @@
     <style>
         html, body {
             overflow-x: hidden;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
             line-height: 1;
         }
 
@@ -371,6 +371,21 @@
             background-color: #C0C08F;
         }
 
+        .list-item-selected {
+            background-color: #9DB0E8;
+            cursor: cell;
+        }
+        .list-item:hover {
+            background-color: #BDE0FF;
+            cursor: cell;
+        }
+
+        .blurry-text {
+            color: transparent;
+            text-shadow: 0 0 5px rgba(0,0,0,0.7);
+        }
+
+
     </style>
 </head>
 <body style="font-size: 12px">
@@ -490,6 +505,17 @@
         */
         $(document).tooltip();
     });
+
+    $.fn.swapWith = function(that) {
+        var $this = this;
+        var $that = $(that);
+        var $temp = $("<div>");
+        $this.before($temp);
+        $that.before($this);
+        $temp.after($that).remove();
+        return $this;
+    }
+
 </script>
 </body>
 </html>

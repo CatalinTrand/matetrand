@@ -149,6 +149,7 @@ class Data
         $items_arch = DB::select("select * from " . System::$table_pitems . "_arch where ebeln = '$ebeln' order by ebelp");
         $items = DB::select("select * from " . System::$table_pitems . " where ebeln = '$ebeln' order by ebelp");
         $sapitms = $data["ET_ITEMS"];
+        $item_count = 0;
         foreach ($sapitms as $sapitm) {
             $citem = null;
             foreach ($items as $item) {
@@ -304,8 +305,14 @@ class Data
                 }
                 DB::update($sql);
             }
+            $item_count++;
         }
 
+        if ($item_count == 0) {
+            DB::rollBack();
+            Log::channel("poevent")->info("Purchase order $ebeln not created/updated: no effective items received");
+            return "OK";
+        }
         DB::commit();
         Log::channel("poevent")->info("Purchase order $ebeln successfully created/updated");
 //        if ("X" . System::$system != "X300") {
@@ -360,7 +367,7 @@ class Data
                     $archdate]);
         }
 
-        DB::insert("INSERT INTO " . System::$table_pitems . "_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_pitems . "_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, eta_delayed_check, eta_delayed_date, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
                 $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
                 $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
@@ -371,7 +378,8 @@ class Data
                 $pitem->qty_pnad_mblnr, $pitem->qty_pnad_mjahr, $pitem->pnad_status,
                 $pitem->stage, $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr,
-                $pitem->elikz, $pitem->etadt, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa, $archdate]);
+                $pitem->elikz, $pitem->etadt, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa,
+                $pitem->inb_dlv, $pitem->inb_dlv_posnr, $pitem->inb_inv, $pitem->inb_inv_date, $pitem->eta_delayed_check, $pitem->eta_delayed_date, $archdate]);
 
         DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
@@ -422,7 +430,7 @@ class Data
                     $pichange->newval, $pichange->oebeln, $pichange->oebelp, $pichange->reason, $pichange->acknowledged]);
         }
 
-        DB::insert("INSERT INTO " . System::$table_pitems . " (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_pitems . " (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, eta_delayed_check, eta_delayed_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
                 $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
                 $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
@@ -433,7 +441,8 @@ class Data
                 $pitem->qty_pnad_mblnr, $pitem->qty_pnad_mjahr, $pitem->pnad_status,
                 $pitem->stage, $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr, $pitem->elikz, $pitem->etadt,
-                $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa]);
+                $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa, $pitem->inb_dlv, $pitem->inb_dlv_posnr, $pitem->inb_inv, $pitem->inb_inv_date,
+                $pitem->eta_delayed_check, $pitem->eta_delayed_date]);
 
         if (!DB::table(System::$table_porders)->where("ebeln", $ebeln)->exists())
             DB::insert("INSERT INTO " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",

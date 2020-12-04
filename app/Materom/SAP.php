@@ -316,7 +316,7 @@ class SAP
             $sql = substr($sql, 0, -4);
         }
 
-        $items = DB::select("select ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz, qty_diff, qty_damaged, qty_received, qty_invoiced, pnad_status from ". System::$table_pitems ." $sql order by ebeln, ebelp");
+        $items = DB::select("select ebeln, ebelp, deldate, delqty, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, grdate, grqty, gidate, elikz, qty_diff, qty_damaged, qty_received, qty_invoiced, pnad_status from ". System::$table_pitems ." $sql order by ebeln, ebelp");
         if ($items == null) return;
         $sqlh = "where ";
         $ebeln = "";
@@ -354,6 +354,10 @@ class SAP
                     db::update("update " . System::$table_pitems . " set" .
                         " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
                         ", delqty = '$item->delqty'" .
+                        ", inb_dlv = '$item->inb_dlv'" .
+                        ", inb_dlv_posnr = '$item->inb_dlv_posnr'" .
+                        ", inb_inv = '$item->inb_inv'" .
+                        ", inb_inv_date = " . ($item->inb_inv_date == null ? "null" : "'$item->inb_inv_date'") .
                         ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
                         ", grqty = '$item->grqty'" .
                         ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
@@ -403,7 +407,7 @@ class SAP
         }
         if ($sql == "") $sql = "ebeln <> ''";
 
-        DB::table(System::$table_pitems)->selectRaw("ebeln, ebelp, deldate, delqty, grdate, grqty, gidate, elikz, qty_diff, qty_damaged, qty_received, qty_invoiced, pnad_status")
+        DB::table(System::$table_pitems)->selectRaw("ebeln, ebelp, deldate, delqty, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, grdate, grqty, gidate, elikz, qty_diff, qty_damaged, qty_received, qty_invoiced, pnad_status")
                                         ->whereRaw($sql)
                                         ->orderByRaw("ebeln, ebelp")
             ->chunk(200, function($items)
@@ -440,6 +444,10 @@ class SAP
                         db::update("update " . System::$table_pitems . " set" .
                             " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
                             ", delqty = '$item->delqty'" .
+                            ", inb_dlv = '$item->inb_dlv'" .
+                            ", inb_dlv_posnr = '$item->inb_dlv_posnr'" .
+                            ", inb_inv = '$item->inb_inv'" .
+                            ", inb_inv_date = " . ($item->inb_inv_date == null ? "null" : "'$item->inb_inv_date'") .
                             ", grdate = " . ($item->grdate == null ? "null" : "'$item->grdate'") .
                             ", grqty = '$item->grqty'" .
                             ", gidate = " . ($item->gidate == null ? "null" : "'$item->gidate'") .
@@ -494,6 +502,7 @@ class SAP
             $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_DELIVERY_STATUS');
             foreach ($items as $item) {
                 $item->deldate = SAP::date_input($item->deldate);
+                $item->inb_inv_date = SAP::date_input($item->inb_inv_date);
                 $item->grdate = SAP::date_input($item->grdate);
                 $item->gidate = SAP::date_input($item->gidate);
             }
@@ -503,6 +512,8 @@ class SAP
                 $item->ebeln = $item->EBELN; unset($item->EBELN);
                 $item->ebelp = $item->EBELP; unset($item->EBELP);
                 $item->deldate = SAP::date_output($item->DELDATE); unset($item->DELDATE);
+                $item->inb_dlv = $item->INB_DLV; unset($item->INB_DLV);
+                $item->inb_dlv_posnr = $item->INB_DLV_POSNR; unset($item->INB_DLV_POSNR);
                 $item->delqty = $item->DELQTY; unset($item->DELQTY);
                 $item->grdate = SAP::date_output($item->GRDATE); unset($item->GRDATE);
                 $item->grqty = $item->GRQTY; unset($item->GRQTY);
@@ -521,6 +532,8 @@ class SAP
                 $item->qty_pnad_mblnr = trim($item->QTY_PNAD_MBLNR); unset($item->QTY_PNAD_MBLNR);
                 $item->qty_pnad_mjahr = trim($item->QTY_PNAD_MJAHR); unset($item->QTY_PNAD_MJAHR);
                 $item->pnad_status = trim($item->PNAD_STATUS); unset($item->PNAD_STATUS);
+                $item->inb_inv = $item->INB_INV; unset($item->INB_INV);
+                $item->inb_inv_date = SAP::date_output($item->INB_INV_DATE); unset($item->INB_INV_DATE);
             }
             usort($items, function($item_a, $item_b)
             {

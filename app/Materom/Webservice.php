@@ -215,6 +215,20 @@ class Webservice
         $pitem->defmargin = MasterData::getSalesMargin($porder->lifnr, $pitem->mfrnr);
         $pitem->curr = $porder->curr;
         $pitem->fxrate = $porder->fxrate;
+
+        $pitem->owner = 0;
+        if (Auth::user()->role == 'Furnizor') {
+            if ($pitem->stage == 'F') {
+                if (Auth::user()->lifnr == $porder->lifnr)
+                    $pitem->owner = 1;
+            }
+        } elseif (Auth::user()->role == 'Referent') {
+            if ($pitem->stage == 'R') {
+                if (Auth::user()->ekgrp == $porder->ekgrp)
+                    $pitem->owner = 1;
+            }
+        }
+
         return json_encode($pitem);
     }
 
@@ -672,6 +686,14 @@ class Webservice
                 $order = SAP::alpha_output($pitem->ebeln) . "/" . SAP::alpha_output($pitem->ebelp);
                 $sorder = SAP::alpha_output($pitem->vbeln) . "/" . SAP::alpha_output($pitem->posnr);
                 Mailservice::sendMessageCopy($dctv, Auth::user()->username, $order, $message, $sorder);
+                $ctvuser1 = DB::table(System::$table_roles)->where([["rfc_role", "=", "CTV"]])->value("user1");
+                if (($ctvuser1 != null) && !empty($ctvuser1)) {
+                    try {
+                        Mailservice::sendMessageCopy($ctvuser1->id, $ctvuser1->username, $order, $message, $sorder);
+                    } catch (Exception $e) {
+                    }
+                }
+
             }
         }
         if ($column == 'purch_price') $type = 'P';
@@ -707,6 +729,62 @@ class Webservice
             }
         }
         return "";
+    }
+
+
+    public static function doChangeDeliveryDate($value, $oldvalue, $ebeln, $ebelp, $backorder, $delayed_check, $delayed_date)
+    {
+        $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
+        $changed = 0;
+        $pmfa = $pitem->pmfa;
+        if ($pitem->backorder != 0) $backorder = 1; else if ($backorder == 1) $changed = 1;
+        if (empty($value)) $value = $pitem->lfdat; else $changed = 1;
+        if ($pitem->eta_delayed_check != $delayed_check) $changed = 1;
+        if (empty($delayed_date)) $delayed_date = $pitem->eta_delayed_date;
+        elseif ($delayed_date != $pitem->eta_delayed_date) $changed = 1;
+        if ($delayed_check == 1 && $pitem->eta_delayed_date != $delayed_date) {
+            $backorder = 1;
+            $changed = 1;
+            $pmfa = "F";
+        }
+        if ($changed == 0) return "";
+
+        $pitem->changed = 1;
+        $new_stage = $pitem->stage;
+        if ($pitem->stage == 'Z') {
+            $pitem->status = ' ';
+            $new_stage = 'F';
+            $pitem->changed = 2;
+        }
+
+        DB::beginTransaction();
+        DB::update("update " . System::$table_pitems . " set lfdat = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder,  eta_delayed_check = $delayed_check, eta_delayed_date = '$delayed_date', pmfa = '$pmfa'  where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        DB::update("update " . System::$table_porders . " set changed = '1' where ebeln = '$ebeln'");
+
+        $cdate = now();
+        if ($value != $pitem->lfdat) {
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','D','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$value')");
+            $cdate->addSeconds(1);
+        }
+        if ($pitem->backorder == 0 && $backorder == 1) {
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+            $cdate->addSeconds(1);
+        }
+        if ($value != $pitem->etadt) {
+            DB::update("update " . System::$table_pitems . " set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            $oldetadt = substr($pitem->etadt, 0, 10);
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$value')");
+            $cdate->addSeconds(1);
+        }
+        if ($pitem->eta_delayed_check != $delayed_check) {
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->eta_delayed_check','$delayed_date')");
+            $cdate->addSeconds(1);
+        } elseif ($pitem->eta_delayed_check == 1 && $pitem->eta_delayed_date != $delayed_date && !empty($delayed_date)) {
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','=','$delayed_date')");
+            $cdate->addSeconds(1);
+        }
+        DB::commit();
+
     }
 
     public static function createPurchReq($lifnr, $idnlf, $mtext, $matnr, $qty, $unit, $price, $curr, $deldate, $infnr)
@@ -873,11 +951,13 @@ class Webservice
             else {
                 DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
                     "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
+                DB::update("update " . System::$table_pitems . " set pmfa = 'E' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 \Session::put("alert-success", __("Raportarea starii neconformitatii a fost efectuata cu succes."));
             }
         } else {
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
                 "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
+            DB::update("update " . System::$table_pitems . " set pmfa = 'E' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             Mailservice::sendMessageCopy($duser, $uName, $order, $text);
             \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
         }
@@ -1977,6 +2057,8 @@ class Webservice
                 break;
             case "C": // item rejected by supplier, acknowledged by CTV
             case "D": // ETA modified, acknowledged by CTV
+            case "E": // PNAD notification, acknowledged by CTV
+            case "F": // Backorder without delivery date
         }
     }
 }

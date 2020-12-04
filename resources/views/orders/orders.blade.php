@@ -94,6 +94,23 @@
         if ($tmp == "2") $filter_backorders_2 = "selected";
 
         unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_eta_delayed");
+        if ($tmp != "1" && $tmp != "2" && $tmp != "3") $tmp = "0";
+        $filter_eta_delayed = $tmp;
+        $filter_eta_delayed_0 = "";
+        if ($tmp == "0") $filter_eta_delayed_0 = "selected";
+        $filter_eta_delayed_1 = "";
+        if ($tmp == "1") $filter_eta_delayed_1 = "selected";
+        $filter_eta_delayed_2 = "";
+        if ($tmp == "2") $filter_eta_delayed_2 = "selected";
+        $filter_eta_delayed_3 = "";
+        if ($tmp == "3") $filter_eta_delayed_3 = "selected";
+        $filter_eta_delayed_date = "";
+        unset($tmp);
+        $tmp = \Illuminate\Support\Facades\Session::get("filter_eta_delayed_date");
+        if(isset($tmp) && !empty($tmp) && $filter_history == 1) $filter_eta_delayed_date = $tmp;
+
+        unset($tmp);
         $tmp = \Illuminate\Support\Facades\Session::get("filter_eta");
         if ($tmp != "1" && $tmp != "2") $tmp = "0";
         $filter_eta = $tmp;
@@ -421,6 +438,10 @@
                                                         <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
                                                         <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
                                                     </select>
+                                                    &nbsp;&nbsp;
+                                                    <input type="checkbox" id="filter_inquirements" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="this.form.submit();" {{$inquirements_checked}}>
+                                                    <label for="filter_inquirements" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only inquirements')}}</label>
+
                                                 </td>
                                                 @if ($filter_history == 2)
                                                     <td>
@@ -476,17 +497,21 @@
                                             </tr>
                                             <tr style="height: 1.5rem;">
                                                 <td colspan="1" style="padding-top: 0.4rem;">
-                                                    <input type="checkbox" id="filter_inquirements" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="this.form.submit();" {{$inquirements_checked}}>
-                                                    <label for="filter_inquirements" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only inquirements')}}</label>
+                                                    {{__('Backorders')}}:
                                                 </td>
 
                                                 <td colspan="1" style="padding-top: 0.4rem;">
                                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                                                        <input type="checkbox" id="filter_mirror" name="filter_mirror" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$mirror_checked}}>
-                                                        <label for="filter_mirror" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only intercompany')}}</label>
+                                                        <input type="checkbox" id="filter_mirror" name="filter_mirror" style="display: none; margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$mirror_checked}}>
+                                                        <label for="filter_mirror" style="display: none; margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only intercompany')}}</label>
                                                     @endif
+                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                            name="filter_backorders" onchange="this.form.submit(); return false;">
+                                                        <option value="0"{{$filter_backorders_0}}>{{__('Nicio filtrare')}}</option>
+                                                        <option value="1"{{$filter_backorders_1}}>{{__('Doar backorders')}}</option>
+                                                        <option value="2"{{$filter_backorders_2}}>{{__('Fara backorders')}}</option>
+                                                    </select>
                                                 </td>
-
 
                                                 <td colspan="1">
                                                     <label for="filter_goodsreceipt" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Deliveries')}}</label>
@@ -529,15 +554,25 @@
                                             </tr>
                                             <tr style="height: 1.5rem;">
                                                 <td>
-                                                    {{__('Backorders')}}:
+                                                    @if (($filter_history != 2) && ($filter_backorders != 2))
+                                                        {{__('Delay dlv/ETA check')}}:
+                                                    @endif
                                                 </td>
                                                 <td>
-                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                            name="filter_backorders" onchange="this.form.submit(); return false;">
-                                                        <option value="0"{{$filter_backorders_0}}>{{__('Nicio filtrare')}}</option>
-                                                        <option value="1"{{$filter_backorders_1}}>{{__('Doar backorders')}}</option>
-                                                        <option value="2"{{$filter_backorders_2}}>{{__('Fara backorders')}}</option>
-                                                    </select>
+                                                    @if (($filter_history != 2) && ($filter_backorders != 2))
+                                                        <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                                name="filter_eta_delayed" onchange="this.form.submit(); return false;">
+                                                            <option value="0"{{$filter_eta_delayed_0}}>{{__('Nicio filtrare')}}</option>
+                                                            <option value="1"{{$filter_eta_delayed_1}}>{{__('Fara mascate')}}</option>
+                                                            <option value="2"{{$filter_eta_delayed_2}}>{{__('Mascate pana la')}}</option>
+                                                            <option value="3"{{$filter_eta_delayed_3}}>{{__('Mascate dupa')}}</option>
+                                                        </select>
+                                                        @if ($filter_eta_delayed == 2 || $filter_eta_delayed == 3)
+                                                            <input type="text" id="filter_eta_delayed_date" class="form-control-sm"
+                                                                   style="height:1.4rem; width: 6rem;" name="filter_eta_delayed_date"
+                                                                   value="{{$filter_eta_delayed_date}}">
+                                                        @endif
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     @if ($filter_history != 2)
@@ -569,6 +604,8 @@
                                                 <td>
                                                 </td>
                                                 <td>
+                                                    <button type="button" style="margin-left: 2px; height: 1.5rem; "
+                                                            onclick="search_document();return false;">{{__('Search document')}}</button>
                                                 </td>
                                             </tr>
                                             <tr style="height: 1.5rem;">
@@ -627,7 +664,7 @@
                         </div>
                     </div>
                     <div style="margin-left: -0.7rem; overflow: scroll;">
-                        <div class="card-body orders-table-div" style="height: 65.5vh; padding-top: 0px; padding-right: 4px; width: 132%;">
+                        <div class="card-body orders-table-div" style="height: 65.5vh; padding-top: 0px; padding-right: 4px; width: 150%;">
                             <table style="table-layout: fixed;"
                                    class="orders-table basicTable table table-striped" id="orders_table">
                                 <colgroup>
@@ -651,11 +688,11 @@
                                     <col style="width:2.8%;">
                                     <col style="width:2.8%;">
                                     <col style="width:2.8%;">
-                                    <col style="width:2.8%;"> <!-- 31.5 -->
+                                    <col style="width:3.0%;"> <!-- 31.5 -->
 
-                                    <col style="width:2.8%;">
-                                    <col style="width:3.5%;">
-                                    <col style="width:3.5%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.7%;">
+                                    <col style="width:3.7%;">
                                     <col style="width:1.8%;">
                                     <col style="width:2.9%;">
                                     <col style="width:2.4%;">
@@ -664,10 +701,19 @@
                                     <col style="width:2.8%;">
                                     <col style="width:2.8%;"> <!-- 28.2 -->
 
-                                    <col style="width:2.8%;">
-                                    <col style="width:2%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.0%;">
+                                    <col style="width:3.0%;">
+
+                                    <col style="width:3.0%;">
                                     <col style="width:2.5%;">
-                                    <col style="width:2%;">
+                                    <col style="width:2.5%;">
+                                    <col style="width:2.5%;">
                                     <col style="width:2.5%;">
                                     <col style="width:3.5%;">
                                     <col style="width:3.5%;">
@@ -754,7 +800,7 @@
                                         echo "<th colspan=2>$th7b</th>";
                                         echo "<th colspan=2>$th7c</th>";
                                         echo "<th colspan=2>$th7d</th>";
-                                        for ($i = 0; $i < 4; $i++) echo "<th>&nbsp;</th>";
+                                        for ($i = 0; $i < 12; $i++) echo "<th>&nbsp;</th>";
                                     } else {
                                         echo "<th colspan=2>$th1</th>";
                                         echo "<th colspan=5>$th2</th>";
@@ -763,7 +809,7 @@
                                         echo "<th colspan=2>$th5</th>";
                                         echo "<th colspan=5>$th6</th>";
                                         echo "<th>$th7</th>";
-                                        for ($i = 0; $i < 7; $i++) echo "<th>&nbsp;</th>";
+                                        for ($i = 0; $i < 15; $i++) echo "<th>&nbsp;</th>";
                                     }
                                     @endphp
                                 </tr>
@@ -890,7 +936,7 @@
                                                  "<td class='td01' style='padding: 0;'>$button_reject</td>" .
                                                  "<td class='td01' style='padding: 0;'>$button_inquire</td>" .
                                                  "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
-                                                 "$data<td colspan='2'></td></tr>";
+                                                 "$data<td colspan='12'></td></tr>";
                                         } else {
                                             $oid = "S" . $order->vbeln;
                                             if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor") {
@@ -909,15 +955,15 @@
                                                         "<td class='td02' colspan=5>$order->shipto_name</td>" .
                                                         "<td class='$ctv_class' $change_ctv colspan=2>$order->ctv</td>" .
                                                         "<td class='$ctv_class' $change_ctv2 colspan=5>$order->ctv_name</td>".
-                                                        "<td></td>";
+                                                        "<td class='td02' colspan=10></td>";
                                             } else {
                                                 $data = "<td class='td02' colspan=2>&nbsp;</td>" .
                                                         "<td class='td02' colspan=5>&nbsp;</td>" .
                                                         "<td class='td02' colspan=2>&nbsp;</td>" .
                                                         "<td class='td02' colspan=5>&nbsp;</td>" .
                                                         "<td class='td02' colspan=2>&nbsp;</td>" .
-                                                        "<td class='td02' colspan=7>&nbsp;</td>".
-                                                        "<td></td>";
+                                                        "<td class='td02' colspan=9>&nbsp;</td>".
+                                                        "<td class='td02' colspan=10></td>";
                                             }
 
                                             switch ($order->info) {
@@ -1216,6 +1262,7 @@
 
         $(function () {
             $("#time_search").datepicker({dateFormat: "yy-mm-dd"});
+            $("#filter_eta_delayed_date").datepicker({dateFormat: "yy-mm-dd"});
             $("#filter_deldate_low").datepicker({dateFormat: "yy-mm-dd"});
             $("#filter_deldate_high").datepicker({dateFormat: "yy-mm-dd"});
             $("#filter_etadate_low").datepicker({dateFormat: "yy-mm-dd"});
@@ -1489,7 +1536,7 @@
             cols += '<td colspan="2"><b>{{__("Livrat")}}</b></td>';
             cols += '<td colspan="2"><b>{{__("Inca de livrat")}}</b></td>';
             cols += '<td colspan="2"><b>{{__("Facturat")}}</b></td>';
-            cols += '<td colspan="3"></td>';
+            cols += '<td colspan="11"></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:#FAEFCA; vertical-align: middle;");
@@ -1604,7 +1651,7 @@
                 cols += '<td class="td02" colspan="2">' + porder.qty_delivered + '</td>';
                 cols += '<td class="td02" colspan="2">' + porder.qty_open + '</td>';
                 cols += '<td class="td02" colspan="2">' + porder.qty_invoiced + '</td>';
-                cols += '<td class="td02" colspan="3"></td>';
+                cols += '<td class="td02" colspan="11"></td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
                 if (i % 2 == 0)
@@ -1647,8 +1694,10 @@
             @else
                 cols += '<td class="td02" colspan="2"><b>&nbsp;</b></td>';
             @endif
-            // cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
-            // cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Delivered quantity")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivery")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Delivered on")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Inbound invoice")}}</b></td>';
+            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Inbound invoice date")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Goods receipt date")}}</b></td>';
             cols += '<td class="td02" colspan="2" style="text-align: right;"><b>{{__("Goods receipt quantity")}}</b></td>';
             cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Recept.")}}</b></td>';
@@ -1721,6 +1770,18 @@
                                 info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_1.gif' " +
                                     "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
                                     "title='{{__("ETA has changed")}}'" +
+                                    ">";
+                                break;
+                            case "E":
+                                info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_1.gif' " +
+                                    "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                    "title='{{__("PNAD notification")}}'" +
+                                    ">";
+                                break;
+                            case "F":
+                                info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_3.gif' " +
+                                    "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                    "title='{{__("Backorder fara termen de livrare, se va efectua o noua verificare de disponibilitate la data")}}" + " " + pitem.eta_delayed_date.substr(0, 10) + "'" +
                                     ">";
                                 break;
                     }
@@ -1861,15 +1922,22 @@
                 let delivery_date_contextmenu = "";
                 if (pitem.status == "A") delivery_date_contextmenu = " oncontextmenu=\"delivery_date_oncontenxtmenu(event, '" + pitem.ebeln + "', '" + pitem.ebelp + "', " + pitem.delivery_date_changeable.toString() + ");return false;\"";
 
+                let delivery_date_blurry = "";
+                @if (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+                  if (pitem.eta_delayed_check) delivery_date_blurry = " blurry-text";
+                @endif
+
                 if ((pitem.delivery_date_changeable == 1) || ((pitem.delivery_date_changeable == 2))) {
                     let delivery_date_class = "td02h";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
                     let change_delivery_date_func = "change_delivery_date";
                     if (pitem.delivery_date_changeable == 2) change_delivery_date_func = "change_delivery_date2";
+                    delivery_date_class += delivery_date_blurry;
                     cols += '<td class="' + delivery_date_class + '" colspan="2" onclick="' + change_delivery_date_func + '(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\', ' + pitem.backorder + ');" style="padding-left: 0.5rem;"' + delivery_date_contextmenu + '>' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 } else {
                     let delivery_date_class = "td02";
                     if (pitem.delivery_date_changed == 1) delivery_date_class += "_c";
+                    delivery_date_class += delivery_date_blurry;
                     cols += '<td class="' + delivery_date_class + '" colspan="2" style="padding-left: 0.5rem;"' + delivery_date_contextmenu + '>' + pitem.x_delivery_date.split(' ')[0] + '</td>';
                 }
 
@@ -1877,13 +1945,20 @@
                 if (dodays > 99) dodays = ">99";
                 cols += '<td class="td02" colspan="1" style="text-align: left;">' + dodays + '</td>';
 
+                let eta_date_blurry = "";
+                @if (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
+                    if (pitem.eta_delayed_check) eta_date_blurry = " blurry-text";
+                @endif
+
                 if (pitem.eta_date_changeable != 0) {
                     let eta_date_class = "td02h";
                     if (pitem.eta_date_changed == 1) eta_date_class += "_c";
+                    eta_date_class += eta_date_blurry;
                     cols += '<td class="' + eta_date_class + '" colspan="2" style="text-align: left; padding-left: 0.1rem;" onclick="change_eta_date(this, \'' + pitem.ebeln + '\', \'' + pitem.ebelp + '\');">' + pitem.etadt_out + '</td>';
                 } else {
                     let eta_date_class = "td02";
                     if (pitem.eta_date_changed == 1) eta_date_class += "_c";
+                    eta_date_class += eta_date_blurry;
                     cols += '<td class="' + eta_date_class + '" colspan="2" style="text-align: left; padding-left: 0.1rem;">' + pitem.etadt_out + '</td>';
                 }
 
@@ -1909,6 +1984,18 @@
                 if (pitem.grdate != null)
                     grdate = pitem.grdate.split(' ')[0];
 
+                let inb_inv_date = "";
+                if (pitem.inb_inv_date != null)
+                    inb_inv_date = pitem.inb_inv_date.split(' ')[0];
+
+                let inb_dlv_text = '';
+                if (pitem.inb_dlv.trim().length != 0)
+                    inb_dlv_text = conv_exit_alpha_output(pitem.inb_dlv) + '/' + conv_exit_alpha_output(pitem.inb_dlv_posnr);
+
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + inb_dlv_text + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + deldate + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + pitem.inb_inv + '</td>';
+                cols += '<td class="td02" colspan="2" style="text-align: left;">' + inb_inv_date + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: left;">' + grdate + '</td>';
                 cols += '<td class="td02" colspan="2" style="text-align: right;">' + pitem.grqty + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_received + '</td>';
@@ -1968,6 +2055,7 @@
             cols += '<td class="td02" colspan="8"><b>{{__("Ce s-a schimbat")}}</b></td>';
             cols += '<td class="td02" colspan="2"><b>{{__("Motiv")}}</b></td>';
             cols += '<td colspan=' + colsafter + '><b></b></td>';
+            cols += '<td class="td02" colspan="8"><b></b></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:#ADD8E6; vertical-align: middle;");
@@ -2002,6 +2090,7 @@
                     colsreason = (parseInt(colsreason) + 1).toString();
                 @endif
                 cols += '<td class="td02" colspan="' + colsreason + '">' + pitemchg.reason + '</td>';
+                cols += '<td class="td02" colspan="8"></td>';
                 newRow.append(cols).hide();
                 $(prevrow).after(newRow);
                 if (i % 2 == 0)
@@ -2221,13 +2310,30 @@
             let rowtype = rowid.substr(3, 1); // I
             let porder = rowid.substr(4, 10);
             let item = rowid.substr(15, 5);
-            doRejectItem(porder, item, category, reason,
-            @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                'R', 'R'
-            @else
-                'X', 'Z'
-            @endif
-            );
+            if (category == "5") {
+                jQuery.ajaxSetup({async: false});
+                var _dataIR, _statusIR;
+                $.get("webservice/readpitem",
+                    {
+                        order: porder,
+                        item: item
+                    },
+                    function (data, status) {
+                        _dataIR = data;
+                        _statusIR = status;
+                    }, "json");
+                jQuery.ajaxSetup({async: true});
+                if (_statusIR != "success") return;
+                accept_reject_dialog2(2, thisbtn, _dataIR, "Propunere pozitie noua", "Ati rejectat aceasta pozitie, propunei aici alte variante");
+            } else {
+                doRejectItem(porder, item, category, reason,
+                    @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
+                      'R', 'R'
+                    @else
+                      'X', 'Z'
+                    @endif
+                );
+            }
             location.reload(true);
         }
 
@@ -2476,6 +2582,50 @@
             return false;
         }
 
+        function doChangeDeliveryDate(c_value, old_value, c_ebeln, c_ebelp, c_backorder, c_delay_check, c_delay_date) {
+            let v_backorder = 0;
+            let v_delay_check = 0;
+            let v_delay_date = "";
+
+            var d = new Date(c_value);
+            if (c_value.trim() != "") {
+                if (isNaN(d.valueOf())) return false;
+            }
+            v_backorder = c_backorder ? 1 : 0;
+            v_delay_check = c_delay_check ? 1 : 0;
+            if (c_delay_date.trim() != "") {
+                d = new Date(c_delay_date);
+                if (isNaN(d.valueOf())) return false;
+            }
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var _dataC, _statusC;
+            jQuery.ajaxSetup({async: false});
+            $.post("webservice/dochangedlvdate",
+                {
+                    value: c_value,
+                    oldvalue: old_value,
+                    ebeln: c_ebeln,
+                    ebelp: c_ebelp,
+                    backorder: v_backorder,
+                    delay_check: v_delay_check,
+                    delay_date: c_delay_date,
+                },
+                function (data, status) {
+                    _dataC = data;
+                    _statusC = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_statusC == "success") {
+                return true;
+            }
+            return false;
+        }
+
         var change_cell, change_type, type_string, change_ebeln, change_ebelp, change_vbeln, changeDialog, changeForm;
 
         $(function () {
@@ -2487,18 +2637,34 @@
                 buttons: {
                     Change: function () {
                         let new_val = $("#new_chg_val").val().trim();
-                        if (new_val.length > 0) {
+                        let delayed_date = $("#eta_delayed_date").val().trim();
+                        if ((type_string == "LFDAT") || (new_val.length > 0)) {
+                            if (type_string == "LFDAT") {
+                                if ($("#eta_delayed_check").is(":checked") && delayed_date.length == 0) {
+                                    alert("{{__('Enter a value for alert date')}}");
+                                    return;
+                                }
+                                if (doChangeDeliveryDate(new_val, change_cell.innerHTML, change_ebeln, change_ebelp,
+                                    $("#item_backorder").is(":checked"), $("#eta_delayed_check").is(":checked"),
+                                    delayed_date)) {
+                                    $("#new_chg_val").text("");
+                                    $("#new_val_hlp").text("");
+                                    $("#eta_delayed_check").prop("checked", false);
+                                    $("#eta_delayed_date").text("");
+                                    changeDialog.dialog("close");
+                                    location.reload(true);
+                                }
+                            } else
                             if (type_string != "CTV") {
                                 if (doChangeItem(change_type, new_val, $("#new_val_hlp").text(),
                                     change_cell.innerHTML, change_ebeln, change_ebelp, $("#item_backorder").is(":checked"))) {
-                                    change_cell.innerHTML = ($("#new_chg_val").val() + " " + $("#new_val_hlp").text()).trim();
                                     $("#new_chg_val").text("");
                                     $("#new_val_hlp").text("");
                                     changeDialog.dialog("close");
                                     location.reload(true);
+                                } else {
+                                    alert("CTV-ul nu este definit");
                                 }
-                            } else {
-                                alert("CTV-ul nu este definit");
                             }
                         } else {
                             alert("{{__('Enter a correct value')}}");
@@ -2506,6 +2672,11 @@
                     },
                     Cancel: function () {
                         changeDialog.dialog("close");
+                    }
+                },
+                open: function() {
+                    if (type_string != "LFDAT") {
+                        $("#change-dialog").dialog("option", "height", 220);
                     }
                 },
                 close: function () {
@@ -2547,6 +2718,7 @@
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare cod material pozitia ' + ebelp);
             $("#backorder-row").hide();
+            $("#eta-delayed-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2566,6 +2738,7 @@
             $("#new_val_hlp").text(values[1]);
             $("#change-dialog").dialog('option', 'title', 'Modificare cantitate pozitia ' + ebelp);
             $("#backorder-row").hide();
+            $("#eta-delayed-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2593,13 +2766,25 @@
             type_string = "LFDAT";
             $("#old_chg_val").text("Data de livrare existenta: " + old_value);
             $("#new_chg_val").val("");
-            $("#new_chg_val").datepicker({dateFormat: "yy-mm-dd"});
             $("#new_val_txt").text("Introduceti noua data de livrare:");
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare data livrare pentru pozitia ' + ebelp);
             $("#backorder-row").show();
+            $("#eta-delayed-row").show();
             $("#item_backorder").prop("checked", backorder != 0);
             $("#item_backorder").prop("disabled", backorder != 0);
+            if (backorder != 0) {
+                $("#eta_delayed_date").prop("enabled", 1);
+                $("#eta_delayed_check").prop("enabled", 1);
+                $("#eta_delayed_check").prop("checked", 1);
+            } else {
+                $("#eta_delayed_date").prop("enabled", 0);
+                $("#eta_delayed_check").prop("enabled", 0);
+                $("#eta_delayed_check").prop("checked", 0);
+            }
+            $("#change-dialog").dialog("option", "height", 250);
+            $("#new_chg_val").datepicker({dateFormat: "yy-mm-dd"});
+            $("#eta_delayed_date").datepicker({dateFormat: "yy-mm-dd"});
             changeDialog.dialog("open");
         }
 
@@ -2618,6 +2803,7 @@
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare CTV comanda ' + conv_exit_alpha_output(vbeln));
             $("#backorder-row").hide();
+            $("#eta-delayed-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2702,11 +2888,11 @@
             type_string = "ETADT";
             $("#old_chg_val").text("Data estimata curenta: " + old_value);
             $("#new_chg_val").val("");
-            $("#new_chg_val").datepicker({dateFormat: "yy-mm-dd"});
             $("#new_val_txt").text("Introduceti noua data estimata:");
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare data estimata pentru pozitia ' + ebelp);
             $("#backorder-row").hide();
+            $("#eta-delayed-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2739,6 +2925,7 @@
             $("#new_val_hlp").text(values[1]);
             $("#change-dialog").dialog('option', 'title', 'Modificare pret achizitie pentru pozitia ' + ebelp);
             $("#backorder-row").hide();
+            $("#eta-delayed-row").hide();
             changeDialog.dialog("open");
         }
 
@@ -2751,16 +2938,28 @@
                 <b id="old_chg_val"></b><br><br>
                 <i id="new_val_txt"></i>
                 <br><br>
-                <table style="border: none; padding: 0px;" width="80%">
+                <table style="border: none; padding: 0px;" width="100%">
                     <tr>
-                        <td><input id="new_chg_val" type="text" name="new_chg_val" size="20"
-                                   class="form-control col-md-8" value=""></td>
-                        <td style="text-align: left;" width="4rem"><b style="text-align: left;  margin-left: -5rem;" id="new_val_hlp"></b></td>
+                        <td style="width: 15rem;">
+                            <input id="new_chg_val" type="text" name="new_chg_val" style="width: 100%; height: 24px;"
+                                   class="form-control" value=""></td>
+                        <td style="text-align: left; width: 2rem;"><b style="text-align: left; margin-left: 4px;" id="new_val_hlp"></b></td>
+                        <td></td>
                     </tr>
                     <tr id="backorder-row">
-                        <td>
-                            <input type="checkbox" style="float: left; margin-top: 0.5em;" id="item_backorder" name="item_backorder">
+                        <td colspan="2" style="padding-top: 0.5em;">
+                            <input type="checkbox" style="float: left; height: 24px;" id="item_backorder" name="item_backorder">
                             <label for="item_backorder" style="margin-left: 0.7em; margin-top: 0.5em;">{{ __('Backorder') }}</label>
+                        </td>
+                    </tr>
+                    <tr id="eta-delayed-row">
+                        <td>
+                            <input type="checkbox" style="float: left; height: 24px;" id="eta_delayed_check" name="eta_delayed_check">
+                            <label for="eta_delayed_check" style="margin-left: 0.7em; margin-top: 0.5em;">{{ __('Delay ETA checks until') }}</label>
+                        </td>
+                        <td style="width: 8rem;">
+                            <input id="eta_delayed_date" type="text" name="eta_delayed_date" style="width: 100%; height: 24px;"
+                                   class="form-control" value="">
                         </td>
                     </tr>
                 </table>
@@ -2780,6 +2979,9 @@
                         <option value="2">{{__("Reason 2")}}</option>
                         <option value="3">{{__("Miscellaneous")}}</option>
                         <option value="4">{{__("Other")}}</option>
+                        @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+                            <option value="5">{{__("Propose new variant")}}</option>
+                        @endif
                     </select>
                 </div>
                 <br>
@@ -2958,7 +3160,11 @@
                     _status = status;
                 });
             jQuery.ajaxSetup({async: true});
-            $("#tr_I" + ebeln + "_" + ebelp).fadeOut();
+            if (mode == "B" || mode == "C") {
+                $("#tr_I" + ebeln + "_" + ebelp).fadeOut();
+            } else {
+                $("#tr_I" + ebeln + "_" + ebelp + " td:eq(1)").html("");
+            }
         }
 
         function replyack2(ebeln) {
@@ -3109,5 +3315,6 @@
     @include("orders.inquiries")
     @include("orders.file-upload")
     @include("orders.file-download")
+    @include("orders.search_document")
 
 @endsection

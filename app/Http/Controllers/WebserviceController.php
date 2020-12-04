@@ -142,6 +142,8 @@ class WebserviceController extends Controller
         }
         Session::forget("filter_vbeln");
         Session::forget("filter_ebeln");
+        if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
+            Session::put("filter_ebeln", "NONE");
         Session::forget("filter_matnr");
         Session::forget("filter_mtext");
         Session::forget("filter_ekgrp");
@@ -151,6 +153,8 @@ class WebserviceController extends Controller
         Session::forget("filter_kunnr_name");
         Session::forget("filter_mfrnr_text");
         Session::forget("filter_backorders");
+        Session::forget("filter_eta_delayed");
+        Session::forget("filter_eta_delayed_date");
         Session::forget("filter_eta");
         Session::forget("filter_overdue");
         Session::forget("filter_overdue_low");
@@ -214,6 +218,19 @@ class WebserviceController extends Controller
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("backorder")
+        );
+    }
+
+    public function doChangeDeliveryDate()
+    {
+        return Webservice::doChangeDeliveryDate(
+            Input::get("value"),
+            Input::get("oldvalue"),
+            Input::get("ebeln"),
+            Input::get("ebelp"),
+            Input::get("backorder"),
+            Input::get("delay_check"),
+            Input::get("delay_date")
         );
     }
 
@@ -446,6 +463,8 @@ class WebserviceController extends Controller
             Session::forget("filter_kunnr_name");
             Session::forget("filter_mfrnr_text");
             Session::forget("filter_backorders");
+            Session::forget("filter_eta_delayed");
+            Session::forget("filter_eta_delayed_date");
             Session::forget("filter_eta");
             Session::forget("filter_overdue");
             Session::forget("filter_overdue_low");
@@ -742,10 +761,22 @@ class WebserviceController extends Controller
         $orders = explode("@", Input::get("orders"));
         if ($mode == null || $lifnr == null|| $orders == null) return null;
 
-        if ($mode == 1) return ExcelData::downloadXLSReport($lifnr, $orders);
+        if ($mode == 1) return ExcelData::downloadXLSReport2($lifnr, $orders);
         if ($mode == 2) return ExcelData::downloadXLSMassChange($lifnr, $orders);
         return null;
 
+    }
+
+    public function fileDownloadFieldSelection()
+    {
+        $this->tryAuthAPIToken();
+        if (Auth::user() == null) return "API authentication failed";
+
+        $file = Input::get("file");
+        $fieldlist = explode("@", Input::get("fieldlist"));
+        if ($file == null) return null;
+        if (!empty($fieldlist) && count($fieldlist) > 1) return ExcelData::saveFieldSelection($file, $fieldlist);
+        return ExcelData::getFieldSelection($file);
     }
 
     public function markPOItemDeliveryCompleted()

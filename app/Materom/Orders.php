@@ -87,6 +87,14 @@ class Orders
 
         $inquirements = Session::get("filter_inquirements");
         $backorders = Session::get("filter_backorders");
+
+        $filter_eta_delayed = Session::get("filter_eta_delayed");
+        $filter_eta_delayed_date = Session::get("filter_eta_delayed_date");
+        if (!isset($filter_eta_delayed_date) || $filter_eta_delayed_date == null || $filter_eta_delayed_date == "") {
+            if ($filter_eta_delayed == "2") $filter_eta_delayed_date = "2199-12-31";
+            else $filter_eta_delayed_date = "2000-01-01";
+        } elseif ($filter_eta_delayed == "2") $filter_eta_delayed_date .= " 23:59:59";
+
         $filter_eta = Session::get("filter_eta");
 
         $goodsreceipt = Session::get("filter_goodsreceipt");
@@ -221,6 +229,21 @@ class Orders
             else $filter_sql .= " and " . $eta_sql;
         }
 
+        if ($backorders != "2") {
+            $eta_delayed_sql = "";
+            if ($filter_eta_delayed == "1") {
+                $eta_delayed_sql = "$items_table.eta_delayed_check = 0";
+            } elseif ($filter_eta_delayed == "2") {
+                $eta_delayed_sql = "($items_table.eta_delayed_check = 1 and $items_table.eta_delayed_date <= '$filter_eta_delayed_date')";
+            } elseif ($filter_eta_delayed == "3") {
+                $eta_delayed_sql = "($items_table.eta_delayed_check = 1 and $items_table.eta_delayed_date >= '$filter_eta_delayed_date')";
+            }
+            if (!empty($eta_delayed_sql)) {
+                if (empty($filter_sql)) $filter_sql = $eta_delayed_sql;
+                else $filter_sql .= " and " . $eta_delayed_sql;
+            }
+        }
+
         $goodsreceipt_sql = "";
         if ($goodsreceipt == "1") $goodsreceipt_sql = "$items_table.grdate is not NULL";
         elseif ($goodsreceipt == "2") $goodsreceipt_sql = "($items_table.grdate is NULL or $items_table.qty <> substring_index($items_table.grqty, ' ', 1))";
@@ -321,6 +344,8 @@ class Orders
         $filter_status = Session::get("filter_status");
         $inquirements = Session::get("filter_inquirements");
         $backorders = Session::get("filter_backorders");
+        $filter_eta_delayed = Session::get("filter_eta_delayed");
+        $filter_eta_delayed_date = Session::get("filter_eta_delayed_date");
         $filter_eta = Session::get("filter_eta");
         $overdue = Session::get("filter_overdue");
         if (!isset($overdue) || $overdue == null) $overdue = 0;

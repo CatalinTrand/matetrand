@@ -110,6 +110,16 @@ class HomeController extends Controller
         if ($tmp != "1" && $tmp != 2) $tmp = "0";
         Session::put("filter_backorders", $tmp);
 
+        Session::put("filter_eta_delayed", "0");
+        $tmp = trim(Input::get("filter_eta_delayed"));
+        if ($tmp != "1" && $tmp != "2" && $tmp != "3") $tmp = "0";
+        Session::put("filter_eta_delayed", $tmp);
+
+        Session::put("filter_eta_delayed_date", "");
+        unset($tmp);
+        $tmp = Input::get("filter_eta_delayed_date");
+        if (isset($tmp) && $tmp != null) Session::put("filter_eta_delayed_date", $tmp);
+
         Session::put("filter_eta", "0");
         $tmp = trim(Input::get("filter_eta"));
         if ($tmp != "1" && $tmp != 2) $tmp = "0";

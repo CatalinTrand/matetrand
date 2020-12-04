@@ -68,6 +68,10 @@ class POrderItem
     public $new_lifnr;   // new vendor, if initial one was rejected
     public $werks;       // plant
     public $elikz;       // delivery completed
+    public $inb_dlv;     // inbound delivery number
+    public $inb_dlv_posnr; // inbound delivery item number
+    public $inb_inv;     // inbound invoice number
+    public $inb_inv_date; // inbound invoice date
 
     // PNAD
     public $qty_received;
@@ -86,6 +90,10 @@ class POrderItem
 
     // post-mortem flag & action
     public $pmfa;
+
+    // delayed checks
+    public $eta_delayed_check;
+    public $eta_delayed_date;
 
     // computed/determined fields
     public $sorder;      // sales order to be displayed
@@ -194,9 +202,19 @@ class POrderItem
         $this->mirror_ebeln = $pitem->mirror_ebeln;
         $this->mirror_ebelp = $pitem->mirror_ebelp;
         $this->pmfa = $pitem->pmfa;
+        $this->inb_dlv = $pitem->inb_dlv;
+        $this->inb_dlv_posnr = $pitem->inb_dlv_posnr;
+        $this->inb_inv = $pitem->inb_inv;
+        $this->inb_inv_date = $pitem->inb_inv_date;
         $this->ebelp_title = "";
         $this->readonly = 0;
         $this->inquirement = 0;
+        $this->eta_delayed_check = $pitem->eta_delayed_check;
+        $this->eta_delayed_date = $pitem->eta_delayed_date;
+        if ($this->eta_delayed_check)
+            $this->eta_delayed_date_out = (new Carbon($this->eta_delayed_date))->format("Y-m-d");
+        else
+            $this->eta_delayed_date_out = "";
         if (!empty(trim($this->mirror_ebeln)) && System::ic_on()) {
             $this->ebelp_title = __("Mirrored with") . " " . SAP::alpha_output($pitem->mirror_ebeln) . "-" . SAP::alpha_output($pitem->mirror_ebelp);
             if (empty(Auth::user()->sap_system)) {
@@ -566,9 +584,12 @@ class POrderItem
                     )
                 )
             ) $this->inquirement = 1;
-            if ((Auth::user()->role == "CTV") && ((substr($this->pmfa, 0, 1) == "C") || (substr($this->pmfa, 0, 1) == "D"))) $this->inquirement = 1;
+            if ((Auth::user()->role == "CTV") && ((substr($this->pmfa, 0, 1) == "C")
+                                               || (substr($this->pmfa, 0, 1) == "D")
+                                               || (substr($this->pmfa, 0, 1) == "E"))) {
+                $this->inquirement = 1;
+            }
         }
-
     }
 
 
