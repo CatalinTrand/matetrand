@@ -130,6 +130,7 @@ class Mailservice
         $i = 0;
         foreach($itemhist as $itemh) {
             if ((Auth::user()->role == "Furnizor") && ($itemh->internal == 1)) continue;
+            if ((Auth::user()->role == "CTV") && ($itemh->internal == 2)) continue;
             $pitemchg = new POrderItemChg($itemh, true);
             $pitemchg->fill($item);
 

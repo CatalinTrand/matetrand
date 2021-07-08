@@ -631,7 +631,7 @@
         let idnlf = null;
         lifnr = $("#aes-lifnr").val();
         idnlf = $("#aes-idnlf").val();
-        read_inforecords(3, lifnr, idnlf);
+        read_inforecords(3, lifnr, idnlf, _sp_si_itemdata.bukrs);
     }
 
     function get_zpret_si() {

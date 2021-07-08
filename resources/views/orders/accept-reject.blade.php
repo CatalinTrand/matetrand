@@ -706,7 +706,7 @@
             lifnr = $("#aep-lifnr").val();
             idnlf = $("#aep-idnlf").val();
         }
-        read_inforecords(caller, lifnr, idnlf);
+        read_inforecords(caller, lifnr, idnlf, _ar_itemdata.bukrs);
     }
 
     function get_zpret(caller)

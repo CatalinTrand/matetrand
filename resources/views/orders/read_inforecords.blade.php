@@ -103,7 +103,7 @@
 
 <script>
 
-    var inforecordDialog, inforecordForm, inforecordCaller;
+    var inforecordDialog, inforecordForm, inforecordCaller, inforecordBukrs;
     var result_infnr, result_lifnr, result_lifnr_name, result_idnlf, result_mtext, result_matnr,
         result_purch_price, result_purch_currency;
     $(function () {
@@ -151,7 +151,7 @@
         });
     });
 
-    function read_inforecords(caller, lifnr, idnlf) {
+    function read_inforecords(caller, lifnr, idnlf, bukrs) {
         $("#inforecord_msg").text("");
         $("#inforecord_table").find("tr:gt(0)").remove();
         $("#inforecord-dialog").dialog('option', 'title', 'Inforecords');
@@ -163,6 +163,7 @@
         if (lifnr != null) $("#inforecord-lifnr").val(lifnr);
         if (idnlf != null) $("#inforecord-idnlf").val(idnlf);
         inforecordCaller = caller;
+        inforecordBukrs = bukrs;
         if (caller == 3) {
             $("#inforecord-lifnr").prop("disabled", true);
         } else {
@@ -173,13 +174,14 @@
 
     function get_inforecords(_this) {
 
-        var lifnr, lifnr_name, idnlf, mtext, matnr;
+        var lifnr, lifnr_name, idnlf, mtext, matnr, bukrs;
 
         lifnr = $("#inforecord-lifnr").val();
         lifnr_name = $("#inforecord-lifnr-name").val();
         idnlf = $("#inforecord-idnlf").val();
         mtext = $("#inforecord-mat-description").val();
         matnr = $("#inforecord-material").val();
+        bukrs = inforecordBukrs;
 
         if (lifnr.length + lifnr_name.length + idnlf.length + mtext.length + matnr.length == 0) {
             alert("{{__('Please check at least one selection condition')}}");
@@ -201,7 +203,8 @@
                 lifnr_name: lifnr_name,
                 idnlf: idnlf,
                 mtext: mtext,
-                matnr: matnr
+                matnr: matnr,
+                bukrs: bukrs
             },
             function (data, status) {
                 _data = data;

@@ -149,6 +149,7 @@ class Webservice
             $pitem = reset($data)->items[$itemno];
             foreach ($pitem->changes as $pitemchg) {
                 if ((Auth::user()->role == 'Furnizor') && ($pitemchg->internal == 1)) continue;
+                if ((Auth::user()->role == 'CTV') && ($pitemchg->internal == 2)) continue;
                 $outpitemchg = $pitemchg;
                 unset($outpitemchg->internal);
                 $pitemchgs[] = $outpitemchg;
@@ -209,6 +210,7 @@ class Webservice
     {
         $porder = DB::table(System::$table_porders)->where("ebeln", $order)->first();
         $pitem = DB::table(System::$table_pitems)->where([["ebeln", '=', $order], ["ebelp", '=', $item]])->first();
+        $pitem->bukrs = $porder->bukrs;
         $pitem->lifnr = $porder->lifnr;
         $pitem->lifnr_name = MasterData::getLifnrName($porder->lifnr);
         $pitem->defmargin = "";
@@ -296,7 +298,7 @@ class Webservice
                 DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, ctype, stage, cdate, cuser, cuser_name) values " .
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
             } else {
-                if ($item->stage == 'F') {
+                if ($item->stage == 'F' || strlen(trim($item->stage)) == 0) {
                     $result = SAP::acknowledgePOItem($ebeln, $item, "X");
                     if (($result != null) && !is_string($result)) $result = json_encode($result);
                     if (($result != null) && strlen(trim($result)) != 0) return $result;
@@ -328,7 +330,7 @@ class Webservice
                             if ($item->vbeln == Orders::stockorder) {
                                 $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, $item->matnr,
                                     $item->qty, $item->qty_uom,
-                                    $item->purch_price, $item->purch_curr, $item->lfdat);
+                                    $item->purch_price, $item->purch_curr, $item->lfdat, $_porder->bukrs);
                                 if (!empty(trim($result))) {
                                     if (substr($result, 0, 2) == "OK")
                                         $reason = __("New purchase requisition") . " " . SAP::alpha_output(substr($result, 2));
@@ -336,7 +338,7 @@ class Webservice
                                 }
                             } else {
                                 $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                                    $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr),
+                                    $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr, $_porder->bukrs),
                                     $item->mtext, $item->idnlf, $item->purch_price, $item->purch_curr,
                                     $item->sales_price, $item->sales_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
@@ -440,7 +442,7 @@ class Webservice
                                 if ($item->vbeln == Orders::stockorder) {
                                     $result = SAP::createPurchReq($_porder->lifnr, $item->idnlf, $item->mtext, $item->matnr,
                                         $item->qty, $item->qty_uom,
-                                        $item->purch_price, $item->purch_curr, $item->lfdat);
+                                        $item->purch_price, $item->purch_curr, $item->lfdat, $_porder->bukrs);
                                     if (!empty(trim($result))) {
                                         if (substr($result, 0, 2) == "OK")
                                             $reason = __("New purchase requisition") . " " . SAP::alpha_output(substr($result, 2));
@@ -448,7 +450,7 @@ class Webservice
                                     }
                                 } else {
                                     $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                                        $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr),
+                                        $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr, $_porder->bukrs),
                                         $item->mtext, $item->idnlf, $item->purch_price, $item->purch_curr,
                                         $item->sales_price, $item->sales_curr, $item->lfdat);
                                     if (!empty(trim($result))) {
@@ -761,35 +763,37 @@ class Webservice
         DB::update("update " . System::$table_pitems . " set lfdat = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder,  eta_delayed_check = $delayed_check, eta_delayed_date = '$delayed_date', pmfa = '$pmfa'  where ebeln = '$ebeln' and ebelp = '$ebelp'");
         DB::update("update " . System::$table_porders . " set changed = '1' where ebeln = '$ebeln'");
 
+        $internal = 0;
+        if ($pitem->eta_delayed_check != $delayed_check) {
+            $internal = 2;
+        } elseif ($pitem->eta_delayed_check == 1 && $pitem->eta_delayed_date != $delayed_date && !empty($delayed_date)) {
+            $internal = 2;
+        }
+
         $cdate = now();
         if ($value != $pitem->lfdat) {
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','D','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$value')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','D',$internal,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$value')");
             $cdate->addSeconds(1);
         }
         if ($pitem->backorder == 0 && $backorder == 1) {
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B',$internal,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
             $cdate->addSeconds(1);
         }
         if ($value != $pitem->etadt) {
             DB::update("update " . System::$table_pitems . " set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             $oldetadt = substr($pitem->etadt, 0, 10);
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$value')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J',$internal,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$value')");
             $cdate->addSeconds(1);
         }
         if ($pitem->eta_delayed_check != $delayed_check) {
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->eta_delayed_check','$delayed_date')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y',0,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->eta_delayed_check','$delayed_date')");
             $cdate->addSeconds(1);
         } elseif ($pitem->eta_delayed_check == 1 && $pitem->eta_delayed_date != $delayed_date && !empty($delayed_date)) {
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','=','$delayed_date')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y',0,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','=','$delayed_date')");
             $cdate->addSeconds(1);
         }
         DB::commit();
 
-    }
-
-    public static function createPurchReq($lifnr, $idnlf, $mtext, $matnr, $qty, $unit, $price, $curr, $deldate, $infnr)
-    {
-        return SAP::createPurchReq($lifnr, $idnlf, $mtext, $matnr, $qty, $unit, $price, $curr, $deldate, $infnr);
     }
 
     static public function getVendorUsers($lifnr)
@@ -1001,6 +1005,7 @@ class Webservice
         $stage = $proposal->itemdata->stage;
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
+        $bukrs = DB::table(System::$table_porders)->where("ebeln", $ebeln)->value("bukrs");
         $newstage = 'C';
         if (Auth::user()->role == "Furnizor") $newstage = 'R';
         if (isset($proposal->items)) {
@@ -1085,7 +1090,7 @@ class Webservice
                 if ($proposal->itemdata->vbeln == Orders::stockorder) {
                     $result = SAP::createPurchReq($proposal->lifnr, $proposal->idnlf, $proposal->mtext, $proposal->matnr,
                         $proposal->quantity, $proposal->quantity_unit,
-                        $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat);
+                        $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat, $bukrs);
                     if (!empty(trim($result))) {
                         if (substr($result, 0, 2) == "OK")
                             $banfn = __("New purchase requisition ") . SAP::alpha_output(substr($result, 2));
@@ -1118,7 +1123,7 @@ class Webservice
                     if (strlen($proposal->purch_curr) > 3) $proposal->purch_curr = substr($proposal->purch_curr, 0, 3);
                     if (strlen($proposal->sales_curr) > 3) $proposal->sales_curr = substr($proposal->sales_curr, 0, 3);
                     $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
-                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr),
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr, $bukrs),
                         $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
                         $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
                     if (!empty(trim($result))) {
@@ -1185,7 +1190,7 @@ class Webservice
 
         $now = now();
 
-        $ddays = (new Carbon($cdate))->diffInWeekDays(now());
+        $ddays = System::dateOnly($cdate)->diffInWeekDays(System::dateOnly($now));
         if ($ddays > 0) {
             $old_lfdat = substr($proposal->lfdat, 0, 10);
             $new_lfdat = (new Carbon($old_lfdat))->addWeekdays($ddays);
@@ -1202,6 +1207,7 @@ class Webservice
 
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
+        $bukrs = $porder->bukrs;
         if ((($proposal->lifnr == $porder->lifnr) && (trim($proposal->idnlf) == trim($item->orig_idnlf)))
             || System::$mirroring) {
             // keeping the same supplier for stock orders, just update PO
@@ -1262,7 +1268,7 @@ class Webservice
         if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::processSOItem($item->vbeln, $item->posnr,
-            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, SAP::newMatnr($item->matnr),
+            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, SAP::newMatnr($item->matnr, $bukrs),
             $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
             $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
         $soitem = "";
@@ -1382,6 +1388,7 @@ class Webservice
     static public function acceptSplit($ebeln, $ebelp, $cdate, $no_ic = false)
     {
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
+        $bukrs = DB::table(System::$table_porders)->where("ebeln", $ebeln)->value("bukrs");
         $splititems = DB::table(System::$table_pitemchg_proposals)->where([
             ["type", "=", "S"],
             ["ebeln", "=", $ebeln],
@@ -1397,7 +1404,7 @@ class Webservice
             foreach ($splititems as $splititem) {
                 $result = SAP::createPurchReq($splititem->lifnr, $splititem->idnlf, $splititem->mtext, $item->matnr,
                     $splititem->qty, $splititem->qty_uom,
-                    $splititem->purch_price, $splititem->purch_curr, $splititem->lfdat);
+                    $splititem->purch_price, $splititem->purch_curr, $splititem->lfdat, $bukrs);
                 if (!empty(trim($result))) {
                     if (substr($result, 0, 2) == "OK")
                         $text .= SAP::alpha_output(substr($result, 2));
@@ -1408,7 +1415,7 @@ class Webservice
         } else {
             foreach ($splititems as $splititem) {
                 $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                    $splititem->qty, $splititem->qty_uom, $splititem->lifnr, SAP::newMatnr($item->matnr),
+                    $splititem->qty, $splititem->qty_uom, $splititem->lifnr, SAP::newMatnr($item->matnr, $bukrs),
                     $splititem->mtext, $splititem->idnlf, $splititem->purch_price, $splititem->purch_curr,
                     $splititem->sales_price, $splititem->sales_curr, $splititem->lfdat);
                 if (!empty(trim($result))) {
@@ -1806,6 +1813,7 @@ class Webservice
         $stage = $proposal->itemdata->stage;
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
+        $bukrs = DB::table(System::$table_porders)->where("ebeln", $ebeln)->value("bukrs");
         $newstage = 'C';
         if (Auth::user()->role == "Furnizor") $newstage = 'R';
         if (isset($proposal->items)) {
@@ -1913,7 +1921,7 @@ class Webservice
                 if ($proposal->itemdata->vbeln == Orders::stockorder) {
                     $result = SAP::createPurchReq($proposal->lifnr, $proposal->idnlf, $proposal->mtext, $proposal->matnr,
                         $proposal->quantity, $proposal->quantity_unit,
-                        $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat);
+                        $proposal->purch_price, $proposal->purch_curr, $proposal->lfdat, $bukrs);
                     if (!empty(trim($result))) {
                         if (substr($result, 0, 2) == "OK")
                             $banfn = __("New purchase requisition ") . SAP::alpha_output(substr($result, 2));
@@ -1951,7 +1959,7 @@ class Webservice
                     if (strlen($proposal->purch_curr) > 3) $proposal->purch_curr = substr($proposal->purch_curr, 0, 3);
                     if (strlen($proposal->sales_curr) > 3) $proposal->sales_curr = substr($proposal->sales_curr, 0, 3);
                     $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
-                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr),
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr, $bukrs),
                         $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
                         $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
                     if (!empty(trim($result))) {

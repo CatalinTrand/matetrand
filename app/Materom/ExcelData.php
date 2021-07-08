@@ -233,6 +233,9 @@ class ExcelData
                                 case "idnlf":
                                     array_push($row, $item->idnlf);
                                     break;
+                                case "matnr":
+                                    array_push($row, $item->matnr);
+                                    break;
                                 case "mtext":
                                     array_push($row, $item->mtext);
                                     break;
@@ -298,6 +301,9 @@ class ExcelData
                                         $fieldtypes[$field->field] != "R" ?
                                             SAP::alpha_output($order->ekgrp) :
                                             MasterData::getEkgrpName($order->ekgrp));
+                                    break;
+                                case "bedat":
+                                    array_push($row, substr($order->bedat, 0, 10));
                                     break;
                             }
                             break;

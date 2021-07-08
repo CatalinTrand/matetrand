@@ -22,6 +22,7 @@ class POrder
     public $allitems; // all items belonging to this
 
     // purchase order related information
+    public $bukrs;    // EKKO-BUKRS
     public $lifnr;    // EKKO-LIFNR
     public $ekgrp;    // EKKO-EKGRP
     public $bedat;    // EKKO-BEDAT
@@ -67,6 +68,7 @@ class POrder
     function __construct($porder)
     {
         $this->ebeln = $porder->ebeln;
+        $this->bukrs = $porder->bukrs;
         $this->lifnr = $porder->lifnr;
         $this->ekgrp = $porder->ekgrp;
         $this->bedat = $porder->bedat;

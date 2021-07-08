@@ -9,6 +9,7 @@
 namespace App\Materom;
 
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -215,5 +216,14 @@ class System
         if ($dusers == null || empty($dusers)) $duser = DB::table($local_table_user_agent_clients)->where("kunnr", $kunnr)->value("id");
         else $duser = $dusers[0]->id;
         return $duser;
+    }
+
+    public static function dateOnly($date)
+    {
+        $ldate = new Carbon($date);
+        $ldate->hour = 0;
+        $ldate->minute = 0;
+        $ldate->second = 0;
+        return $ldate;
     }
 }

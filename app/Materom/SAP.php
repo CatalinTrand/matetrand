@@ -259,18 +259,20 @@ class SAP
         }
     }
 
-    static public function newMatnr($matnr)
+    static public function newMatnr($matnr, $bukrs)
     {
         $matnr = strtoupper(trim($matnr));
         if (($matnr == "PA200") || ($matnr == "PA-200") || ($matnr == "PA202") || ($matnr == "PA-202"))
             return "PA-202";
         if (($matnr == "PA299") || ($matnr == "PA-299") || ($matnr == "PA298") || ($matnr == "PA-298"))
             return "PA-298";
+        if ($bukrs == "ATOM") return "PA-299";
         return "PA-99";
     }
 
     static public function createPurchReq($lifnr, $idnlf, $mtext, $matnr,
-                                          $qty, $unit, $price, $curr, $deldate, $infnr = "")
+                                          $qty, $unit, $price, $curr, $deldate, $bukrs,
+                                          $infnr = "")
     {
 
         $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
@@ -293,6 +295,7 @@ class SAP
                                       'I_MENGE' => $qty,
                                       'I_MEINS' => $unit,
                                       'I_DELDATE' => $deldate,
+                                      'I_BUKRS' => $bukrs,
                                       'I_INFNR' => $infnr ])["E_MESSAGE"];
             $sapconn->close();
             return $result;
@@ -546,7 +549,7 @@ class SAP
         }
     }
 
-    static public function readInforecords($lifnr, $lifnr_name, $idnlf, $mtext, $matnr)
+    static public function readInforecords($lifnr, $lifnr_name, $idnlf, $mtext, $matnr, $bukrs)
     {
 
         $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
@@ -567,6 +570,8 @@ class SAP
             if ($idnlf == null) $idnlf = "";
             if ($mtext == null) $mtext = "";
             if ($matnr == null) $matnr = "";
+            if ($bukrs == null) $bukrs = "";
+            if (empty($bukrs)) $bukrs = "MATR";
             $sapfm = $sapconn->getFunction('ZSRM_RFC_READ_INFORECORDS');
             // $records = json_decode(($sapfm->invoke(['I_LIFNR' => $lifnr,
             //                                        'I_LIFNR_NAME' => $lifnr_name,
@@ -575,10 +580,11 @@ class SAP
             //                                        'I_MATNR' => $matnr
             //                                       ]))["INFORECORDS"]);
             $records = ($sapfm->invoke(['I_LIFNR' => $lifnr,
-                                                    'I_LIFNR_NAME' => $lifnr_name,
-                                                    'I_IDNLF' => $idnlf,
-                                                    'I_MTEXT' => $mtext,
-                                                    'I_MATNR' => $matnr
+                                        'I_LIFNR_NAME' => $lifnr_name,
+                                        'I_IDNLF' => $idnlf,
+                                        'I_MTEXT' => $mtext,
+                                        'I_MATNR' => $matnr,
+                                        'I_BUKRS' => $bukrs
                                        ]))["INFORECORDS"];
             $sapconn->close();
             $inforecords = array();

@@ -29,6 +29,7 @@ class POrderItem
     public $vbeln;       // EKKN-VBELN
     public $posnr;       // EKKN-VBELP
     public $posnr_out;
+    public $matnr;       // EKPO-MATNR
     public $idnlf;       // EKPO-IDNLF
     public $mtext;       // EKPO-TXZ01
     public $mfrnr;       // EKPO-MFRNR (VBAP-ZZMFRNR)
@@ -155,6 +156,7 @@ class POrderItem
         $this->vbeln = $pitem->vbeln;
         $this->posnr = $pitem->posnr;
         $this->posnr_out = "";
+        $this->matnr = $pitem->matnr;
         $this->idnlf = $pitem->idnlf;
         $this->mtext = $pitem->mtext;
         $this->mfrnr = $pitem->mfrnr;
@@ -575,20 +577,35 @@ class POrderItem
                 if (explode(" ", $this->delqty)[0] >= $this->qty) $this->info = 6;
             }
             if ((($this->backorder == 0) || (Auth::user()->role != "Furnizor" && $this->delivery_date_changed != 0)) &&
-                ((($this->inq_reply == 1) || (Auth::user()->role == "Furnizor")
-                        || ((Auth::user()->role == "Referent") && ($this->crefo == 1))) &&
-                    (($this->owner != 0) || (Auth::user()->role == "Administrator") ||
-                        (((Auth::user()->role == "Furnizor") || ((Auth::user()->role == "Referent") && ($this->crefo == 1))) &&
-                         (($this->info == 4) || ($this->info == 5) || ((substr($this->pmfa, 0, 1) == "A") || (substr($this->pmfa, 0, 1) == "B")))
-                        )
-                    )
+                ((($this->inq_reply == 1) ||
+                  (Auth::user()->role == "Furnizor") ||
+                  ((Auth::user()->role == "Referent") && ($this->crefo == 1))
+                 ) &&
+                 (($this->owner != 0) ||
+                  (Auth::user()->role == "Administrator") ||
+                  (((Auth::user()->role == "Furnizor") || ((Auth::user()->role == "Referent") && ($this->crefo == 1))) &&
+                   (($this->info == 4) || ($this->info == 5) || ((substr($this->pmfa, 0, 1) == "A") || (substr($this->pmfa, 0, 1) == "B") || (substr($this->pmfa, 0, 1) == "F")))
+                  )
+                 )
                 )
             ) $this->inquirement = 1;
             if ((Auth::user()->role == "CTV") && ((substr($this->pmfa, 0, 1) == "C")
                                                || (substr($this->pmfa, 0, 1) == "D")
-                                               || (substr($this->pmfa, 0, 1) == "E"))) {
+                                               || (substr($this->pmfa, 0, 1) == "E")
+                                               || (substr($this->pmfa, 0, 1) == "F"))
+               )
+            {
                 $this->inquirement = 1;
             }
+
+//            if ((Auth::user()->role == "Referent") && ($this->owner == 1) &&
+//                ($this->eta_delayed_check == 1) &&
+//                (substr($this->eta_delayed_date, 0, 10) >= substr(now(), 0, 10))
+//               )
+//            {
+//                $this->inquirement = 1;
+//            }
+
         }
     }
 

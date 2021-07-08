@@ -92,22 +92,6 @@ class WebserviceController extends Controller
         );
     }
 
-    public function createPurchReq()
-    {
-        return Webservice::createPurchReq(
-            Input::get("lifnr"),
-            Input::get("idnlf"),
-            Input::get("mtext"),
-            Input::get("matnr"),
-            Input::get("qty"),
-            Input::get("unit"),
-            Input::get("price"),
-            Input::get("curr"),
-            Input::get("deldate"),
-            Input::get("infnr")
-        );
-    }
-
     public function sendAck()
     {
         return Webservice::sendAck(
@@ -618,7 +602,8 @@ class WebserviceController extends Controller
             Input::get("lifnr_name"),
             Input::get("idnlf"),
             Input::get("mtext"),
-            Input::get("matnr")
+            Input::get("matnr"),
+            Input::get("bukrs")
         );
     }
 

@@ -83,9 +83,11 @@ class Data
         $norder->ebeln = $ebeln;
         $norder->lifnr = $saphdr["LIFNR"];
         $norder->ekgrp = $saphdr["EKGRP"];
+        $norder->bukrs = $saphdr["BUKRS"];
         $user = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1, "sap_system" => Auth::user()->sap_system])->first();
         if ($user == null) {
             Log::channel("poevent")->info("Purchase order $ebeln not processed: no suitable supplier user found");
+            Log::channel("poevent")->info("USER: ".Auth::user()->id);
             return "";
         }
         if ($user->activated_at == null) {
@@ -134,8 +136,8 @@ class Data
 
         if (is_null($order)) {
             $new_order_item = true;
-            $sql = "insert into " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) values " .
-                "('$norder->ebeln', '$norder->wtime', '$norder->ctime', '$norder->lifnr', " .
+            $sql = "insert into " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, bukrs, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status) values " .
+                "('$norder->ebeln', '$norder->wtime', '$norder->ctime', '$norder->lifnr', '$norder->bukrs', " .
                 "'$norder->ekgrp', '$norder->bedat', '$norder->erdat', '$norder->ernam', '$norder->curr', '$norder->fxrate', '$norder->changed', '$norder->status')";
             DB::insert($sql);
         } else {
@@ -381,11 +383,12 @@ class Data
                 $pitem->elikz, $pitem->etadt, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa,
                 $pitem->inb_dlv, $pitem->inb_dlv_posnr, $pitem->inb_inv, $pitem->inb_inv_date, $pitem->eta_delayed_check, $pitem->eta_delayed_date, $archdate]);
 
-        DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, bukrs, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
                 $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
                 $porder->fxrate, $porder->changed, $porder->status,
                 $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced,
+                $porder->bukrs,
                 $archdate]);
 
         DB::commit();
@@ -445,11 +448,12 @@ class Data
                 $pitem->eta_delayed_check, $pitem->eta_delayed_date]);
 
         if (!DB::table(System::$table_porders)->where("ebeln", $ebeln)->exists())
-            DB::insert("INSERT INTO " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            DB::insert("INSERT INTO " . System::$table_porders . " (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, bukrs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$porder->ebeln, $porder->wtime, $porder->ctime, $porder->lifnr,
                     $porder->ekgrp, $porder->bedat, $porder->erdat, $porder->ernam, $porder->curr,
                     $porder->fxrate, $porder->changed, $porder->status,
-                    $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced]);
+                    $porder->qty_ordered, $porder->qty_delivered, $porder->qty_open, $porder->qty_invoiced,
+                    $porder->bukrs]);
 
         DB::commit();
 
