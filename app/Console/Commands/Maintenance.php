@@ -11,6 +11,7 @@ namespace App\Console\Commands;
 use App\Materom\Data;
 use App\Materom\RFCData;
 use App\Materom\SAP;
+use App\Materom\SAP\MasterData;
 use App\Materom\System;
 use Exception;
 use Illuminate\Console\Command;
@@ -80,6 +81,10 @@ class Maintenance extends Command
         }
         if (strtoupper($command) == "REFRESH_DELIVERY_STATUS") {
             self::refresh_delivery_status($this);
+            return;
+        }
+        if (strtoupper($command) == "REFRESH_CUSTOMER_CACHE") {
+            MasterData::refreshCustomerCache();
             return;
         }
     }

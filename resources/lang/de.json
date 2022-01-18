@@ -1,4 +1,6 @@
 {
+  "Yes": "Ja",
+  "No": "Nein",
   "from": "von",
   "to": "auf",
   "Login": "Anmelden",
@@ -88,7 +90,7 @@
   "Status": "Status",
   "Administrator": "Verwalter",
   "CTV": "CTV",
-  "Global RFC Settings": "Globale RFC Einstellungen",
+  "Global RFC Settings": "SAP-RFC Einstellungen",
   "RFC Router": "RFC Router",
   "RFC Server": "RFC Server",
   "RFC SysNr": "RFC SysNr",
@@ -169,5 +171,11 @@
   "Select fields and their order": "Select fields and their order",
   "Fields...": "Felder...",
   "Up": "Nach oben",
-  "Down": "Nach unten"
+  "Down": "Nach unten",
+  "Mark as solved": "Mark as solved",
+  "Mark as unsolved": "Mark as UNsolved",
+  "EWM RFC Settings": "EWM-RFC Einstellungen",
+  "Purchase item cancelled by supplier": "Einkaufspos. wurde vom Lieferanten abgelehnt",
+  "Purchase item cancelled by Materom": "Einkaufspos. wurde von Materom abgelehnt",
+  "Please check item notification": "Bitte lesen Sie die Benachrichtigungsnachricht"
 }

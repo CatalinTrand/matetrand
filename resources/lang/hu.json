@@ -1,4 +1,6 @@
 {
+  "Yes": "Yes",
+  "No": "No",
   "from": "from",
   "to": "irányában",
   "Login": "Login",
@@ -155,5 +157,11 @@
   "Select fields and their order": "Select fields and their order",
   "Fields...": "Fields...",
   "Up": "Up",
-  "Down": "Down"
+  "Down": "Down",
+  "Mark as solved": "Mark as solved",
+  "Mark as unsolved": "Mark as UNsolved",
+  "EWM RFC Settings": "EWM RFC Settings",
+  "Purchase item cancelled by supplier": "Purchase item cancelled by supplier",
+  "Purchase item cancelled by Materom": "Purchase item cancelled by Materom",
+  "Please check item notification": "Please check the notification message in SRM"
 }

@@ -136,7 +136,7 @@ class Webservice
             unset($outpitem->sales_curr);
             unset($outpitem->sales_prun);
             unset($outpitem->sales_puom);
-            $outpitem->mfrnr = ucfirst(strtolower(substr(MasterData::getLifnrName($outpitem->mfrnr), 0, 9)));
+            $outpitem->mfrnr = ucfirst(strtolower(substr(MasterData::getLifnrName($outpitem->mfrnr), 0, 29)));
             $pitems[] = $outpitem;
         }
         return json_encode($pitems);
@@ -211,6 +211,7 @@ class Webservice
         $porder = DB::table(System::$table_porders)->where("ebeln", $order)->first();
         $pitem = DB::table(System::$table_pitems)->where([["ebeln", '=', $order], ["ebelp", '=', $item]])->first();
         $pitem->bukrs = $porder->bukrs;
+        $pitem->ekgrp = $porder->ekgrp;
         $pitem->lifnr = $porder->lifnr;
         $pitem->lifnr_name = MasterData::getLifnrName($porder->lifnr);
         $pitem->defmargin = "";
@@ -338,7 +339,7 @@ class Webservice
                                 }
                             } else {
                                 $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                                    $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr, $_porder->bukrs),
+                                    $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr, $_porder->bukrs, $_porder->ekgrp),
                                     $item->mtext, $item->idnlf, $item->purch_price, $item->purch_curr,
                                     $item->sales_price, $item->sales_curr, $item->lfdat);
                                 if (!empty(trim($result))) {
@@ -450,7 +451,7 @@ class Webservice
                                     }
                                 } else {
                                     $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                                        $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr, $_porder->bukrs),
+                                        $item->qty, $item->qty_uom, $_porder->lifnr, SAP::newMatnr($item->matnr, $_porder->bukrs, $_porder->ekgrp),
                                         $item->mtext, $item->idnlf, $item->purch_price, $item->purch_curr,
                                         $item->sales_price, $item->sales_curr, $item->lfdat);
                                     if (!empty(trim($result))) {
@@ -671,6 +672,7 @@ class Webservice
             }
         }
         DB::beginTransaction();
+        $internal = 0;
         DB::update("update " . System::$table_pitems . " set $column = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder where ebeln = '$ebeln' and ebelp = '$ebelp'");
         if ($pitem->changed != 0) DB::update("update " . System::$table_porders . " set changed = '1' where ebeln = '$ebeln'");
         if ($column == 'idnlf') $type = 'M';
@@ -678,6 +680,7 @@ class Webservice
         if ($column == 'lfdat') $type = 'D';
         if ($column == 'etadt') {
             $type = 'J';
+            $internal = 1;
             DB::update("update " . System::$table_pitems . " set pmfa = 'D' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             if (!is_null($dctv) && !empty($dctv)) {
                 $etadt = $pitem->etadt;
@@ -702,10 +705,10 @@ class Webservice
         $newval = trim($value . " " . $valuehlp);
         $cdate = now();
         $cdate->addSeconds($seconds);
-        DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
+        DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,internal,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate', $internal, '" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         if ($pitem->backorder == 0 && $backorder == 1 && $type == "D") {
             $cdate->addSeconds(1);
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,internal,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate', $internal, '" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
         }
         if ($type == "D") {
             DB::update("update " . System::$table_pitems . " set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
@@ -736,13 +739,39 @@ class Webservice
 
     public static function doChangeDeliveryDate($value, $oldvalue, $ebeln, $ebelp, $backorder, $delayed_check, $delayed_date)
     {
+        $mode = 0;
         $pitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $ebeln], ['ebelp', '=', $ebelp]])->first();
         $changed = 0;
         $pmfa = $pitem->pmfa;
-        if ($pitem->backorder != 0) $backorder = 1; else if ($backorder == 1) $changed = 1;
-        if (empty($value)) $value = $pitem->lfdat; else $changed = 1;
+
+        if ($backorder == "ETADT") {
+            $backorder = $pitem->backorder;
+            $mode = 1;
+        }
+
+        if ($pitem->backorder != 0) {
+            if (($pmfa == 'F') && ($pitem->stage == 'Z')) {
+                if ($backorder == 0) {
+                    $changed = 1;
+                    $delayed_check == 0;
+                    $pmfa = '';
+                }
+            }
+            else $backorder = 1;
+        } else if ($backorder == 1) $changed = 1;
+        if (empty($value)) {
+            if ($mode == 0) $value = $pitem->lfdat;
+            elseif ($mode == 1) $value = $pitem->etadt;
+        } else $changed = 1;
         if ($pitem->eta_delayed_check != $delayed_check) $changed = 1;
-        if (empty($delayed_date)) $delayed_date = $pitem->eta_delayed_date;
+        if (empty($delayed_date)) {
+            $delayed_date = $pitem->eta_delayed_date;
+            if ($delayed_check == 1) {
+                $backorder = 1;
+                $changed = 1;
+                $pmfa = "F";
+            }
+        }
         elseif ($delayed_date != $pitem->eta_delayed_date) $changed = 1;
         if ($delayed_check == 1 && $pitem->eta_delayed_date != $delayed_date) {
             $backorder = 1;
@@ -753,15 +782,19 @@ class Webservice
 
         $pitem->changed = 1;
         $new_stage = $pitem->stage;
-        if ($pitem->stage == 'Z') {
-            $pitem->status = ' ';
+        if (($pitem->stage == 'Z') && ($mode == 0)) {
+            $pitem->status = '';
             $new_stage = 'F';
             $pitem->changed = 2;
         }
 
         DB::beginTransaction();
-        DB::update("update " . System::$table_pitems . " set lfdat = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder,  eta_delayed_check = $delayed_check, eta_delayed_date = '$delayed_date', pmfa = '$pmfa'  where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::update("update " . System::$table_porders . " set changed = '1' where ebeln = '$ebeln'");
+        if ($mode == 0) {
+            DB::update("update " . System::$table_pitems . " set lfdat = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder,  eta_delayed_check = $delayed_check, eta_delayed_date = '$delayed_date', pmfa = '$pmfa'  where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::update("update " . System::$table_porders . " set changed = '1' where ebeln = '$ebeln'");
+        } elseif ($mode == 1) {
+           self::doChangeItem('etadt', $value, "", $oldvalue, $ebeln, $ebelp, $backorder);
+        }
 
         $internal = 0;
         if ($pitem->eta_delayed_check != $delayed_check) {
@@ -771,15 +804,15 @@ class Webservice
         }
 
         $cdate = now();
-        if ($value != $pitem->lfdat) {
+        if ($mode == 0 && $value != $pitem->lfdat) {
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','D',$internal,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$value')");
             $cdate->addSeconds(1);
         }
-        if ($pitem->backorder == 0 && $backorder == 1) {
+        if ($mode == 0 && $pitem->backorder == 0 && $backorder == 1) {
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B',$internal,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
             $cdate->addSeconds(1);
         }
-        if ($value != $pitem->etadt) {
+        if ($mode == 0 && $value != $pitem->etadt) {
             DB::update("update " . System::$table_pitems . " set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             $oldetadt = substr($pitem->etadt, 0, 10);
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J',$internal,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$value')");
@@ -788,10 +821,17 @@ class Webservice
         if ($pitem->eta_delayed_check != $delayed_check) {
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y',0,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->eta_delayed_check','$delayed_date')");
             $cdate->addSeconds(1);
-        } elseif ($pitem->eta_delayed_check == 1 && $pitem->eta_delayed_date != $delayed_date && !empty($delayed_date)) {
+        } elseif ($delayed_check == 1 && $pitem->eta_delayed_date != $delayed_date && !empty($delayed_date)) {
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,internal,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','Y',0,'$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','=','$delayed_date')");
             $cdate->addSeconds(1);
         }
+
+        if (($pitem->eta_delayed_check != $delayed_check) ||
+            ($pitem->eta_delayed_date != $delayed_date))
+        {
+            DB::update("update " . System::$table_pitems . " set backorder = $backorder,  eta_delayed_check = $delayed_check, eta_delayed_date = '$delayed_date', pmfa = '$pmfa'  where ebeln = '$ebeln' and ebelp = '$ebelp'");
+        }
+
         DB::commit();
 
     }
@@ -892,10 +932,10 @@ class Webservice
         return Data::processPOdata($ebeln, $data);
     }
 
-    static public function sendInquiry($ebeln, $ebelp, $text, $to)
+    static public function sendInquiry($ebeln, $ebelp, $text, $pnad_status, $to)
     {
         $pitem = DB::table(System::$table_pitems)->where(['ebeln' => $ebeln, 'ebelp' => $ebelp])->first();
-        $porder = DB::Select("select * from " . System::$table_porders . " where ebeln = '$ebeln'")[0];
+        $porder = DB::select("select * from " . System::$table_porders . " where ebeln = '$ebeln'")[0];
         $order = SAP::alpha_output($ebeln) . "/" . SAP::alpha_output($ebelp);
         $duser = "";
         $stage = '';
@@ -931,18 +971,37 @@ class Webservice
             if (Auth::user()->role == "Referent") $internal = 1;
         }
 
-        if (strtoupper($to[0]) == 'P') {
-            list($cause, $solution, $details) = explode("//@@//", $text);
-            $newval = __("Neconformitati receptie");
-            $status = " ";
+        if (strtoupper($to[0]) == 'P' && strtoupper($pnad_status) != 'N') {
+            // list($cause, $solution, $details) = explode("//@@//", $text);
+            $newval = __("Motiv/Document");
             if ($to[0] == "p") {
-                $status = "X";
-                $newval = __("Rezolvat") . ": " . $newval;
+                $newval = __("Rezolvat");
             }
-            $result = SAP::setPnadData($ebeln, $ebelp, $cause, $solution, $details, $status);
-            $text = $details;
-            if (!empty(trim($cause))) $text .= __(" /cauza") . ": " . $cause;
-            if (!empty(trim($solution))) $text .= __(" /solutie") . ": " . $solution;
+            $data = '';
+            $pnad_status = trim($pnad_status);
+            if (empty($text)) $text = ""; else $text = trim($text);
+            $solved = "";
+            if ($pnad_status == 'SX' || $pnad_status == 'OX') $solved = "X";
+            if ($pnad_status == 'S') {
+                // Mark as solved
+                $result = SAP::setPnadData($ebeln, $ebelp, 'A', $text, $solved, $data);
+            } elseif ($pnad_status == 'SX') {
+                // Mark as unsolved
+                $result = SAP::setPnadData($ebeln, $ebelp, 'B', $text, $solved, $data);
+            } elseif ($pnad_status == 'O' || $pnad_status == 'OX') {
+                // Leave solved/unsolved as-is
+                if (substr($pitem->qty_diff, 0, 1) == '-') {
+                    // Minus
+                    $result = SAP::setPnadData($ebeln, $ebelp, 'D', $text, $solved, $data);
+                } elseif (trim($pitem->qty_diff) != '') {
+                    // Plus
+                    $result = SAP::setPnadData($ebeln, $ebelp, 'G', $text, $solved, $data);
+                }  elseif (trim($pitem->qty_diff) != '') {
+                    // Non-conform
+                    $result = SAP::setPnadData($ebeln, $ebelp, 'F', $text, $solved, $data);
+                }
+            }
+            if (trim($result) != "") return $result;
         }
 
         $uId = Auth::id();
@@ -956,7 +1015,7 @@ class Webservice
                 DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
                     "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
                 DB::update("update " . System::$table_pitems . " set pmfa = 'E' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-                \Session::put("alert-success", __("Raportarea starii neconformitatii a fost efectuata cu succes."));
+                \Session::put("alert-success", __("Modificarea exceptiei a fost efectuata cu succes."));
             }
         } else {
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
@@ -1005,7 +1064,9 @@ class Webservice
         $stage = $proposal->itemdata->stage;
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
-        $bukrs = DB::table(System::$table_porders)->where("ebeln", $ebeln)->value("bukrs");
+        $_porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
+        $bukrs = $_porder->bukrs;
+        $ekgrp = $_porder->ekgrp;
         $newstage = 'C';
         if (Auth::user()->role == "Furnizor") $newstage = 'R';
         if (isset($proposal->items)) {
@@ -1123,7 +1184,7 @@ class Webservice
                     if (strlen($proposal->purch_curr) > 3) $proposal->purch_curr = substr($proposal->purch_curr, 0, 3);
                     if (strlen($proposal->sales_curr) > 3) $proposal->sales_curr = substr($proposal->sales_curr, 0, 3);
                     $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
-                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr, $bukrs),
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr, $bukrs, $ekgrp),
                         $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
                         $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
                     if (!empty(trim($result))) {
@@ -1208,6 +1269,7 @@ class Webservice
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
         $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
         $bukrs = $porder->bukrs;
+        $ekgrp = $porder->ekgrp;
         if ((($proposal->lifnr == $porder->lifnr) && (trim($proposal->idnlf) == trim($item->orig_idnlf)))
             || System::$mirroring) {
             // keeping the same supplier for stock orders, just update PO
@@ -1268,7 +1330,7 @@ class Webservice
         if (($result != null) && !is_string($result)) $result = json_encode($result);
         if (($result != null) && strlen(trim($result)) != 0) return $result;
         $result = SAP::processSOItem($item->vbeln, $item->posnr,
-            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, SAP::newMatnr($item->matnr, $bukrs),
+            $proposal->qty, $proposal->qty_uom, $proposal->lifnr, SAP::newMatnr($item->matnr, $bukrs, $ekgrp),
             $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
             $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
         $soitem = "";
@@ -1388,7 +1450,9 @@ class Webservice
     static public function acceptSplit($ebeln, $ebelp, $cdate, $no_ic = false)
     {
         $item = DB::table(System::$table_pitems)->where([["ebeln", "=", $ebeln], ["ebelp", "=", $ebelp]])->first();
-        $bukrs = DB::table(System::$table_porders)->where("ebeln", $ebeln)->value("bukrs");
+        $porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
+        $bukrs = $porder->bukrs;
+        $ekgrp = $porder->ekgrp;
         $splititems = DB::table(System::$table_pitemchg_proposals)->where([
             ["type", "=", "S"],
             ["ebeln", "=", $ebeln],
@@ -1415,7 +1479,7 @@ class Webservice
         } else {
             foreach ($splititems as $splititem) {
                 $result = SAP::processSOItem($item->vbeln, $item->posnr,
-                    $splititem->qty, $splititem->qty_uom, $splititem->lifnr, SAP::newMatnr($item->matnr, $bukrs),
+                    $splititem->qty, $splititem->qty_uom, $splititem->lifnr, SAP::newMatnr($item->matnr, $bukrs, $ekgrp),
                     $splititem->mtext, $splititem->idnlf, $splititem->purch_price, $splititem->purch_curr,
                     $splititem->sales_price, $splititem->sales_curr, $splititem->lfdat);
                 if (!empty(trim($result))) {
@@ -1813,7 +1877,9 @@ class Webservice
         $stage = $proposal->itemdata->stage;
         $ebeln = $proposal->itemdata->ebeln;
         $ebelp = $proposal->itemdata->ebelp;
-        $bukrs = DB::table(System::$table_porders)->where("ebeln", $ebeln)->value("bukrs");
+        $_porder = DB::table(System::$table_porders)->where("ebeln", $ebeln)->first();
+        $bukrs = $_porder->bukrs;
+        $ekgrp = $_porder->ekgrp;
         $newstage = 'C';
         if (Auth::user()->role == "Furnizor") $newstage = 'R';
         if (isset($proposal->items)) {
@@ -1959,7 +2025,7 @@ class Webservice
                     if (strlen($proposal->purch_curr) > 3) $proposal->purch_curr = substr($proposal->purch_curr, 0, 3);
                     if (strlen($proposal->sales_curr) > 3) $proposal->sales_curr = substr($proposal->sales_curr, 0, 3);
                     $result = SAP::processSOItem($proposal->itemdata->vbeln, $proposal->itemdata->posnr,
-                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr, $bukrs),
+                        $proposal->quantity, $proposal->quantity_unit, $proposal->lifnr, SAP::newMatnr($proposal->itemdata->matnr, $bukrs, $ekgrp),
                         $proposal->mtext, $proposal->idnlf, $proposal->purch_price, $proposal->purch_curr,
                         $proposal->sales_price, $proposal->sales_curr, $proposal->lfdat);
                     if (!empty(trim($result))) {
@@ -2054,19 +2120,41 @@ class Webservice
     static function acknowledgeByBell($ebeln, $ebelp, $mode)
     {
         $item = DB::table(System::$table_pitems)->where([["ebeln", '=', $ebeln], ["ebelp", '=', $ebelp]])->first();
-        DB::beginTransaction();
-        DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
-        DB::commit();
         switch ($mode) {
             case "A": // proposal accepted by CTV, acknowledged by supplier
+                DB::beginTransaction();
+                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::commit();
             case "B": // proposal rejected by CTV, acknowledged by supplier
+                DB::beginTransaction();
+                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::commit();
                 $result = Data::archiveItem($ebeln, $ebelp);
                 Log::info("Archiving LATE $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
                 break;
             case "C": // item rejected by supplier, acknowledged by CTV
+                DB::beginTransaction();
+                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::commit();
             case "D": // ETA modified, acknowledged by CTV
+                DB::beginTransaction();
+                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::commit();
             case "E": // PNAD notification, acknowledged by CTV
+                DB::beginTransaction();
+                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::commit();
             case "F": // Backorder without delivery date
+                if (Auth::user()->role == "CTV") {
+                    $item->pmfa_status = $item->pmfa_status | 1;
+                } elseif (Auth::user()->role == "Referent") {
+                    $item->pmfa_status = $item->pmfa_status | 2;
+                } elseif (Auth::user()->role == "Furnizor") {
+                    $item->pmfa_status = $item->pmfa_status | 4;
+                }
+                DB::beginTransaction();
+                DB::update("update " . System::$table_pitems . " set pmfa_status = $item->pmfa_status where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::commit();
         }
     }
 }

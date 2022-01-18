@@ -125,9 +125,12 @@ class WebserviceController extends Controller
             Session::forget("filter_mirror");
         }
         Session::forget("filter_vbeln");
+        Session::forget("filter_klabc");
         Session::forget("filter_ebeln");
         if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
             Session::put("filter_ebeln", "NONE");
+        if (Auth::user()->role == "Referent" && Auth::user()->readonly == 1 && Auth::user()->pnad == 1)
+            Session::put("filter_pnad_status", "1");
         Session::forget("filter_matnr");
         Session::forget("filter_mtext");
         Session::forget("filter_ekgrp");
@@ -298,6 +301,7 @@ class WebserviceController extends Controller
             Input::get("ebeln"),
             Input::get("ebelp"),
             Input::get("text"),
+            Input::get("pnad_status"),
             Input::get("to")
         );
     }
@@ -437,6 +441,7 @@ class WebserviceController extends Controller
         if (Auth::user()->role == "Administrator") {
             Auth::loginUsingId(Input::get("id"));
             Session::forget("filter_vbeln");
+            Session::forget("filter_klabc");
             Session::forget("filter_ebeln");
             Session::forget("filter_matnr");
             Session::forget("filter_mtext");
@@ -506,7 +511,7 @@ class WebserviceController extends Controller
             if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
                 Session::put("filter_ebeln", "NONE");
             if (Auth::user()->role == "Referent" && Auth::user()->readonly == 1 && Auth::user()->pnad == 1)
-                Session::put("filter_pnad_status", "2");
+                Session::put("filter_pnad_status", "1");
             Orders::fillCache();
         }
 

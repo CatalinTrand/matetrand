@@ -46,6 +46,7 @@ class POrder
     public $lifnr_name;
     public $ekgrp_name;
     public $salesorders; // all sales orders belonging to this
+    public $klabc;       // highest classification
 
     // status icons
     public $info;     // 0=empty, 1=new order, 2=warning, 3=critical, 4=new message
@@ -86,6 +87,7 @@ class POrder
         $this->qty_open = $porder->qty_open;
         $this->qty_invoiced = $porder->qty_invoiced;
         $this->items = array();
+        $this->klabc = "";
     }
 
     public function appendItem($pitem)
@@ -100,6 +102,8 @@ class POrder
         $this->salesorders = array();
         foreach ($this->items as $item) {
             $this->salesorders[$item->sorder] = $item->ebelp;
+            if (!empty($item->klabc))
+                if (empty($this->klabc) || $item->klabc < $this->klabc) $this->klabc = $item->klabc;
         }
         $this->info = 0;
         if (empty($this->status)) $this->info = 1;
@@ -158,15 +162,27 @@ class POrder
                 $this->rejected = 2;
             }
             if ($item->inquired == 1)
-                if (($this->inquired == 0) || (($this->inquired == 1))) $this->inquired = 1;
+                if (($this->inquired == 0) || ($this->inquired == 1)) $this->inquired = 1;
                 elseif ($this->inquired == 2) $this->inquired = 3;
             if ($item->inquired == 2)
-                if (($this->inquired == 0) || (($this->inquired == 2))) $this->inquired = 2;
+                if (($this->inquired == 0) || ($this->inquired == 2)) $this->inquired = 2;
                 elseif ($this->inquired == 1) $this->inquired = 3;
 
-            if ($item->accept == 1) $this->accept = 1;
+            if ($item->accept == 1) {
+                if (($this->accept == 0) || ($this->accept == 1)) $this->accept = 1;
+                else $this->accept = -1;
+            }
+            if ($item->accept == 2) {
+                if (($this->accept == 0) || ($this->accept == 2)) $this->accept = 2;
+                else $this->accept = -1;
+            }
+            if ($item->accept == 3) {
+                if (($this->accept == 0) || ($this->accept == 3)) $this->accept = 3;
+                else $this->accept = -1;
+            }
             if ($item->reject == 1) $this->reject = 1;
         }
+        if ($this->accept == -1) $this->accept = 0;
         if (count($this->allitems) == ($count_accepted + $count_rejected)) {
             if ($this->accepted == 2) $this->accepted = 1;
             if ($this->rejected == 2) $this->rejected = 1;

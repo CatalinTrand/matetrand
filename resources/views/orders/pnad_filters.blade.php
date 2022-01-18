@@ -14,7 +14,6 @@
                             <option value="0">{{__('Nicio filtrare')}}</option>
                             <option value="1">{{__('Numai cele nerezolvate')}}</option>
                             <option value="2">{{__('Numai cele rezolvate')}}</option>
-                            <option value="3">{{__('Toate inregistrarile')}}</option>
                         </select>
                     </div>
                 </td>
@@ -30,8 +29,14 @@
                         <select id="pnad-filter-type" name="pnad-filter-type" required
                                 class="form-control" style="height: 1.4rem; padding: 2px;">
                             <option value="0">{{__('Nicio filtrare')}}</option>
+                            @if (\Illuminate\Support\Facades\Auth::user()->pnad == 1)
                             <option value="1">{{__('Numai cele cu diferente')}}</option>
-                            <option value="2">{{__('Numai cele deteriorate')}}</option>
+                            @endif
+                            <option value="2">{{__('Numai cele cu minusuri')}}</option>
+                            @if (\Illuminate\Support\Facades\Auth::user()->pnad == 1)
+                            <option value="3">{{__('Numai cele cu plusuri')}}</option>
+                            @endif
+                            <option value="4">{{__('Numai cele neconforme')}}</option>
                         </select>
                     </div>
                 </td>
@@ -39,7 +44,7 @@
             <tr>
                 <td style="width: 40%;">
                     <div class="row">
-                        <label for="pnad-filter-mblnr" style="margin-left: 1em;" class="col-form-label text-md-left">{{__('Document MIGO')}}</label>
+                        <label for="pnad-filter-mblnr" style="margin-left: 1em;" class="col-form-label text-md-left">{{__('Inbound delivery')}}</label>
                     </div>
                 </td>
                 <td style="width: 60%;">

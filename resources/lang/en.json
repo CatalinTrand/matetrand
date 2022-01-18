@@ -1,4 +1,6 @@
 {
+  "Yes": "Yes",
+  "No": "No",
   "from": "from",
   "to": "to",
   "Administrator": "Administrator",
@@ -180,6 +182,14 @@
   "Fields selection for download": "Fields selection for download",
   "Select fields and their order": "Select fields and their order",
   "Fields...": "Fields...",
+  "Classif":"Classif",
+  "None": "None",
   "Up": "Up",
-  "Down": "Down"
+  "Down": "Down",
+  "Mark as solved": "Mark as solved",
+  "Mark as unsolved": "Mark as UNsolved",
+  "EWM RFC Settings": "EWM RFC Settings",
+  "Purchase item cancelled by supplier": "Purchase item cancelled by supplier",
+  "Purchase item cancelled by Materom": "Purchase item cancelled by Materom",
+  "Please check item notification": "Please check the notification message in SRM"
 }

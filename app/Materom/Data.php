@@ -61,7 +61,7 @@ class Data
             return $data;
         }
         $saphdr = $data["ES_HEADER"];
-        if ($ebeln != $saphdr["EBELN"]) {
+        if ($ebeln != trim($saphdr["EBELN"])) {
             Log::channel("poevent")->info("Wrong purchase order $ebeln vs. " . $saphdr["EBELN"]);
             return "Wrong purchase order";
         }
@@ -85,14 +85,20 @@ class Data
         $norder->ekgrp = $saphdr["EKGRP"];
         $norder->bukrs = $saphdr["BUKRS"];
         $user = DB::table("users")->where(["lifnr" => $norder->lifnr, "role" => "Furnizor", "active" => 1, "sap_system" => Auth::user()->sap_system])->first();
-        if ($user == null) {
-            Log::channel("poevent")->info("Purchase order $ebeln not processed: no suitable supplier user found");
-            Log::channel("poevent")->info("USER: ".Auth::user()->id);
-            return "";
-        }
-        if ($user->activated_at == null) {
-            Log::channel("poevent")->info("Purchase order $ebeln not processed: user '$user->id' is not active");
-            return "";
+        if (substr($ebeln, 0, 1) <> '+') {
+            if ($user == null) {
+                Log::channel("poevent")->info("Purchase order $ebeln not processed: no suitable supplier user found");
+                Log::channel("poevent")->info("USER: " . Auth::user()->id);
+                return "";
+            }
+            if ($user->activated_at == null) {
+                Log::channel("poevent")->info("Purchase order $ebeln not processed: user '$user->id' is not active");
+                return "";
+            }
+        } else {
+            $user = new \stdClass();
+            $user->activated_at = "2020-01-01";
+            $user->id = "PNAD";
         }
         $userid = $user->id;
 
@@ -183,7 +189,7 @@ class Data
                 }
             }
             $nitem = new \stdClass();
-            $nitem->ebeln = $sapitm["EBELN"];
+            $nitem->ebeln = trim($sapitm["EBELN"]);
             if ($ebeln != $nitem->ebeln) return "Wrong purchase order items";
             $nitem->ebelp = $sapitm["EBELP"];
             $nitem->matnr = trim($sapitm["MATNR"]);
@@ -322,7 +328,7 @@ class Data
 //              SAP::acknowledgePOItem($sapitm["EBELN"], $sapitm["EBELP"], "X");
 //            }
 //        }
-        if ($new_order_item) {
+        if ($new_order_item && (substr($ebeln, 0, 1) <> '+')) {
             if ($send_mail) Mailservice::sendNotification($userid, $ebeln);
             $refuser = DB::table("users")->where(["ekgrp" => $norder->ekgrp, "role" => "Referent", "active" => 1, "sap_system" => Auth::user()->sap_system])->first();
             if ($refuser != null) Mailservice::sendNotification($refuser->id, $ebeln);
@@ -369,7 +375,7 @@ class Data
                     $archdate]);
         }
 
-        DB::insert("INSERT INTO " . System::$table_pitems . "_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, eta_delayed_check, eta_delayed_date, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_pitems . "_arch (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, pnad_upd_date, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa, pmfa_status, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, eta_delayed_check, eta_delayed_date, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
                 $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
                 $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
@@ -377,10 +383,10 @@ class Data
                 $pitem->shipto, $pitem->ctv, $pitem->ctv_name, $pitem->ctv_man, $pitem->lfdat, $pitem->backorder, $pitem->deldate,
                 $pitem->delqty, $pitem->grdate, $pitem->grqty, $pitem->gidate,
                 $pitem->qty_received, $pitem->qty_invoiced, $pitem->qty_diff, $pitem->qty_damaged, $pitem->qty_details, $pitem->qty_solution,
-                $pitem->qty_pnad_mblnr, $pitem->qty_pnad_mjahr, $pitem->pnad_status,
+                $pitem->qty_pnad_mblnr, $pitem->qty_pnad_mjahr, $pitem->pnad_status, $pitem->pnad_upd_date,
                 $pitem->stage, $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr,
-                $pitem->elikz, $pitem->etadt, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa,
+                $pitem->elikz, $pitem->etadt, $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa, $pitem->pmfa_status,
                 $pitem->inb_dlv, $pitem->inb_dlv_posnr, $pitem->inb_inv, $pitem->inb_inv_date, $pitem->eta_delayed_check, $pitem->eta_delayed_date, $archdate]);
 
         DB::insert("INSERT INTO " . System::$table_porders . "_arch (ebeln, wtime, ctime, lifnr, ekgrp, bedat, erdat, ernam, curr, fxrate, changed, status, qty_ordered, qty_delivered, qty_open, qty_invoiced, bukrs, archdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -433,7 +439,7 @@ class Data
                     $pichange->newval, $pichange->oebeln, $pichange->oebelp, $pichange->reason, $pichange->acknowledged]);
         }
 
-        DB::insert("INSERT INTO " . System::$table_pitems . " (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, eta_delayed_check, eta_delayed_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        DB::insert("INSERT INTO " . System::$table_pitems . " (ebeln, ebelp, matnr, vbeln, posnr, idnlf, mtext, mfrnr, werks, purch_price, purch_curr, purch_prun, purch_puom, sales_price, sales_curr, sales_prun, sales_puom, qty, qty_uom, kunnr, shipto, ctv, ctv_name, ctv_man, lfdat, backorder, deldate, delqty, grdate, grqty, gidate, qty_received, qty_invoiced, qty_diff, qty_damaged, qty_details, qty_solution, qty_pnad_mblnr, qty_pnad_mjahr, pnad_status, pnad_upd_date, stage, pstage, changed, status, orig_matnr, orig_idnlf, orig_purch_price, orig_qty, orig_lfdat, nof, new_lifnr, elikz, etadt, mirror_ebeln, mirror_ebelp, pmfa, pmfa_status, inb_dlv, inb_dlv_posnr, inb_inv, inb_inv_date, eta_delayed_check, eta_delayed_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [$pitem->ebeln, $pitem->ebelp, $pitem->matnr, $pitem->vbeln, $pitem->posnr,
                 $pitem->idnlf, $pitem->mtext, $pitem->mfrnr, $pitem->werks, $pitem->purch_price, $pitem->purch_curr,
                 $pitem->purch_prun, $pitem->purch_puom, $pitem->sales_price, $pitem->sales_curr,
@@ -441,10 +447,10 @@ class Data
                 $pitem->shipto, $pitem->ctv, $pitem->ctv_name, $pitem->ctv_man, $pitem->lfdat, $pitem->backorder, $pitem->deldate,
                 $pitem->delqty, $pitem->grdate, $pitem->grqty, $pitem->gidate,
                 $pitem->qty_received, $pitem->qty_invoiced, $pitem->qty_diff, $pitem->qty_damaged, $pitem->qty_details, $pitem->qty_solution,
-                $pitem->qty_pnad_mblnr, $pitem->qty_pnad_mjahr, $pitem->pnad_status,
+                $pitem->qty_pnad_mblnr, $pitem->qty_pnad_mjahr, $pitem->pnad_status, $pitem->pnad_upd_date,
                 $pitem->stage, $pitem->pstage, $pitem->changed, $pitem->status, $pitem->orig_matnr, $pitem->orig_idnlf,
                 $pitem->orig_purch_price, $pitem->orig_qty, $pitem->orig_lfdat, $pitem->nof, $pitem->new_lifnr, $pitem->elikz, $pitem->etadt,
-                $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa, $pitem->inb_dlv, $pitem->inb_dlv_posnr, $pitem->inb_inv, $pitem->inb_inv_date,
+                $pitem->mirror_ebeln, $pitem->mirror_ebelp, $pitem->pmfa, $pitem->pmfa_status, $pitem->inb_dlv, $pitem->inb_dlv_posnr, $pitem->inb_inv, $pitem->inb_inv_date,
                 $pitem->eta_delayed_check, $pitem->eta_delayed_date]);
 
         if (!DB::table(System::$table_porders)->where("ebeln", $ebeln)->exists())

@@ -1,4 +1,6 @@
 {
+  "Yes": "Da",
+  "No": "Nu",
   "from": "de la",
   "to": "la",
   "Administrator": "Administrator",
@@ -92,7 +94,7 @@
   "Language": "Limba",
   "Status": "Status",
   "CTV": "CTV",
-  "Global RFC Settings": "Setari RFC Globale",
+  "Global RFC Settings": "Setari RFC SAP",
   "RFC Router": "Router RFC",
   "RFC Server": "Server RFC",
   "RFC SysNr": "SysNr RFC",
@@ -180,6 +182,14 @@
   "Fields selection for download": "Selectie campuri pentru download",
   "Select fields and their order": "Selectati campurile si ordinea lor",
   "Fields...": "Coloane...",
+  "Classif":"Clasif.",
+  "None": "Fara",
   "Up": "Sus",
-  "Down": "Jos"
+  "Down": "Jos",
+  "Mark as solved": "Marcheaza ca rezolvat",
+  "Mark as unsolved": "Marcheaza ca NErezolvat",
+  "EWM RFC Settings": "Setari RFC EWM",
+  "Purchase item cancelled by supplier": "Pozitia a fost anulata/rejectata de catre furnizor",
+  "Purchase item cancelled by Materom": "Pozitia a fost anulata/rejectata de catre Materom",
+  "Please check item notification": "Verificati mesajul de notificare al pozitiei in SRM"
 }

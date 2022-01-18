@@ -199,6 +199,8 @@ class MasterData
                     unset($customer->KUNNR);
                     $customer->name1 = $customer->NAME1;
                     unset($customer->NAME1);
+                    $customer->klabc = $customer->KLABC;
+                    unset($customer->KLABC);
                     $customers[] = $customer;
                 }
                 $kunnr_from = $customer->kunnr;
@@ -214,8 +216,8 @@ class MasterData
         foreach ($customers as $customer) {
             $customer->name1 = str_replace("\\", "\\\\", $customer->name1);
             $customer->name1 = str_replace('"', "'", $customer->name1);
-            DB::insert('insert into ' . System::$table_sap_kna1 . ' (kunnr, name1) values ("' . $customer->kunnr .
-                '", "' . $customer->name1 . '")');
+            DB::insert('insert into ' . System::$table_sap_kna1 . ' (kunnr, name1, klabc) values ("' . $customer->kunnr .
+                '", "' . $customer->name1 . '", "' . $customer->klabc . '")');
         }
         DB::commit();
         Log::info("Customers cache refreshed (" . count($customers) . " records)");

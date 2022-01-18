@@ -7,6 +7,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller
@@ -91,6 +92,7 @@ class HomeController extends Controller
         Session::put("filter_history", Input::get("filter_history"));
         Session::put("filter_archdate", Input::get("time_search"));
         Session::put("filter_vbeln", Input::get("filter_vbeln"));
+        Session::put("filter_klabc", Input::get("filter_klabc"));
         Session::put("filter_ebeln", Input::get("filter_ebeln"));
         Session::put("filter_matnr", Input::get("filter_matnr"));
         Session::put("filter_mtext", Input::get("filter_mtext"));
@@ -102,8 +104,13 @@ class HomeController extends Controller
         Session::put("filter_mfrnr_text", Input::get("filter_mfrnr_text"));
 
         Session::put("filter_inquirements", "0");
-        $tmp = Input::get("filter_inquirements");
-        if (strtoupper($tmp) == "ON" ) Session::put("filter_inquirements", "1");
+        $tmp = strtoupper(Input::get("filter_inquirements"));
+        if (\Illuminate\Support\Facades\Auth::user()->role != 'CTV') {
+            if ($tmp == "ON") $tmp = "1"; else $tmp = "0";
+        } else {
+            if ($tmp != "0" && $tmp != "1" && $tmp != "2") $tmp = "0";
+        }
+        Session::put("filter_inquirements", $tmp);
 
         Session::put("filter_backorders", "0");
         $tmp = trim(Input::get("filter_backorders"));
@@ -169,11 +176,11 @@ class HomeController extends Controller
         if (isset($tmp) && $tmp != null) Session::put("filter_etadate_high", $tmp);
 
         $tmp = Input::get("filter_pnad_status");
-        if (($tmp != "1") && ($tmp != "2") && ($tmp != "3")) $tmp = "0";
+        if (($tmp != "1") && ($tmp != "2")) $tmp = "0";
         Session::put("filter_pnad_status", $tmp);
 
         $tmp = Input::get("filter_pnad_type");
-        if (($tmp != "1") && ($tmp != "2")) $tmp = "0";
+        if (($tmp != "1") && ($tmp != "2") && ($tmp != "3") && ($tmp != "4")) $tmp = "0";
         Session::put("filter_pnad_type", $tmp);
 
         Session::put("filter_pnad_mblnr", Input::get("filter_pnad_mblnr"));
@@ -194,6 +201,7 @@ class HomeController extends Controller
     public function messages_post()
     {
         Session::put("filter_vbeln", Input::get("filter_vbeln"));
+        Session::put("filter_klabc", Input::get("filter_klabc"));
         Session::put("filter_ebeln", Input::get("filter_ebeln"));
         Session::put("filter_matnr", Input::get("filter_matnr"));
         Session::put("filter_mtext", Input::get("filter_mtext"));

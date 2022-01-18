@@ -97,9 +97,12 @@ Route::get('webservice/sap_poitem_dlvcompleted', 'WebserviceController@markPOIte
 Route::get('webservice/sap_poitem_backorder', 'WebserviceController@markPOItemBackorder');
 Route::get('webservice/sap_read_pnad_dd', 'WebserviceController@sapReadPnadDD');
 
-// Global data
+// Global RFC data
 Route::post('/roles/globalUpdate','RolesController@insertGlobalData');
 Route::post('/roles/roleUpdate','RolesController@insertRoleData');
+// EWM RFC data
+Route::post('/roles/EWMUpdate','RolesController@insertEWMData');
+Route::post('/roles/EWMroleUpdate','RolesController@insertEWMRoleData');
 
 // Roles
 Route::get('/roles', 'HomeController@roles')->name('roles');

@@ -75,12 +75,33 @@
         $tmp = \Illuminate\Support\Facades\Session::get("filter_archdate");
         if(isset($tmp) && !empty($tmp) && $filter_history == 2) $filter_time_val = $tmp;
 
-        $filter_inquirements = 0;
-        $inquirements_checked = "";
-        unset($tmp);
-        $tmp = \Illuminate\Support\Facades\Session::get("filter_inquirements");
-        if (isset($tmp)) $filter_inquirements = intval($tmp);
-        if ($filter_inquirements == 1) $inquirements_checked = "checked";
+        if (\Illuminate\Support\Facades\Auth::user()->role != 'CTV') {
+            $filter_inquirements = 0;
+            $inquirements_checked = "";
+            unset($tmp);
+            $tmp = \Illuminate\Support\Facades\Session::get("filter_inquirements");
+            if (isset($tmp)) $filter_inquirements = intval($tmp);
+            if ($filter_inquirements == 1) $inquirements_checked = "checked";
+        } else {
+            $filter_inquirements = "0";
+            unset($tmp);
+            $tmp = \Illuminate\Support\Facades\Session::get("filter_inquirements");
+            $filter_inquirements_sel0 = "";
+            $filter_inquirements_sel1 = "";
+            $filter_inquirements_sel2 = "";
+            if (isset($tmp)) {
+                if ($tmp == "0") {
+                    $filter_inquirements_sel0 = "selected";
+                    $filter_inquirements = "0";
+                } elseif ($tmp == "1") {
+                    $filter_inquirements_sel1 = "selected";
+                    $filter_inquirements = "1";
+                } elseif ($tmp == "2")  {
+                    $filter_inquirements_sel2 = "selected";
+                    $filter_inquirements = "2";
+                }
+            }
+        }
 
         unset($tmp);
         $tmp = \Illuminate\Support\Facades\Session::get("filter_backorders");
@@ -166,6 +187,33 @@
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
 
+        $filter_klabc = \Illuminate\Support\Facades\Session::get("filter_klabc");
+        if (!isset($filter_klabc) || empty($filter_klabc)) $filter_klabc = "*";
+        $filter_klabc_all = "";
+        $filter_klabc_none = "";
+        $filter_klabc_a = ""; $filter_klabc_a_tooltip = __("Client clasificare A");
+        $filter_klabc_b = ""; $filter_klabc_b_tooltip = __("Client clasificare B");
+        $filter_klabc_c = ""; $filter_klabc_c_tooltip = __("Client clasificare C");
+        $filter_klabc_d = ""; $filter_klabc_d_tooltip = __("Client clasificare D");
+        $filter_klabc_n = ""; $filter_klabc_n_tooltip = __("Client clasificare N");
+        if ($filter_klabc == "*") {
+            // toate
+            $filter_klabc_all = "selected";
+        } elseif ($filter_klabc == "<>") {
+            // empty
+            $filter_klabc_none = "selected";
+        }  elseif ($filter_klabc == "A") {
+            $filter_klabc_a = "selected";
+        }  elseif ($filter_klabc == "B") {
+            $filter_klabc_b = "selected";
+        }  elseif ($filter_klabc == "C") {
+            $filter_klabc_c = "selected";
+        }  elseif ($filter_klabc == "D") {
+            $filter_klabc_d = "selected";
+        }  elseif ($filter_klabc == "N") {
+            $filter_klabc_n = "selected";
+        }
+
         $filter_ebeln = \Illuminate\Support\Facades\Session::get("filter_ebeln");
         if (!isset($filter_ebeln)) $filter_ebeln = "";
 
@@ -201,8 +249,7 @@
         if (isset($tmp) && !is_null($tmp)) $filter_pnad_status = intval($tmp);
         if (($filter_pnad_status != "0") &&
             ($filter_pnad_status != "1") &&
-            ($filter_pnad_status != "2") &&
-            ($filter_pnad_status != "3"))
+            ($filter_pnad_status != "2"))
             $filter_pnad_status = 0;
         if ($filter_pnad_status != 0) $filter_pnad_active = 1;
 
@@ -212,7 +259,9 @@
         if (isset($tmp) && !is_null($tmp)) $filter_pnad_type = intval($tmp);
         if (($filter_pnad_type != "0") &&
             ($filter_pnad_type != "1") &&
-            ($filter_pnad_type != "2"))
+            ($filter_pnad_type != "2") &&
+            ($filter_pnad_type != "3") &&
+            ($filter_pnad_type != "4"))
             $filter_pnad_type = 0;
         if ($filter_pnad_type != 0) $filter_pnad_active = 1;
 
@@ -338,7 +387,7 @@
                     </div>
                     <div class="card-body" style="padding-bottom: 0px; padding-left: 0.5rem;">
                         <div style="{{$background_color}} border: 1px solid black; border-radius: 0.5rem; padding: 4px; height: 8.9rem;">
-                            <form action="orders" method="post">
+                            <form action="orders" method="post" onsubmit="orders_submit()">
                                 {{csrf_field()}}
                                 <div class="container" style="display: block; max-width: 100%;">
                                     <table style="border: none; width: 100%;">
@@ -361,7 +410,7 @@
                                                 </td>
                                                 <td>
                                                     <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                            name="groupOrdersBy" onchange="this.form.submit()">
+                                                            name="groupOrdersBy" onchange="orders_submit();this.form.submit()">
                                                         <option value="1"{{$groupBySelPOa}}>{{__('Purchase orders (urgent & stock)')}}</option>
                                                         <option value="2"{{$groupBySelPOu}}>{{__('Purchase orders (urgent)')}}</option>
                                                         <option value="3"{{$groupBySelPOs}}>{{__('Purchase orders (stock)')}}</option>
@@ -373,7 +422,7 @@
                                                 </td>
                                                 <td>
                                                     <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                            name="filter_history" onchange="this.form.submit()">
+                                                            name="filter_history" onchange="orders_submit();this.form.submit()">
                                                         <option value="1"{{$filter_history_curr}}>{{__("Unprocessed")}}</option>
                                                         <option value="2"{{$filter_history_arch}}>{{__("Processed")}}</option>
                                                     </select>
@@ -413,6 +462,17 @@
                                                         <input type="text" class="form-control-sm input-sm"
                                                                style="width: 6rem; height: 1.4rem;" maxlength="10" name="filter_vbeln"
                                                                value="{{$filter_vbeln}}">&nbsp;&nbsp;
+                                                        &nbsp;&nbsp;{{__("Classif")}}:
+                                                        <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                                name="filter_klabc" onchange="orders_submit();this.form.submit(); return false;">
+                                                            <option value="*"{{$filter_klabc_all}}>{{__('All')}}</option>
+                                                            <option value="<>"{{$filter_klabc_none}}>{{__('None')}}</option>
+                                                            <option value="A"{{$filter_klabc_a}}>{{'A'}}</option>
+                                                            <option value="B"{{$filter_klabc_b}}>{{'B'}}</option>
+                                                            <option value="C"{{$filter_klabc_c}}>{{'C'}}</option>
+                                                            <option value="D"{{$filter_klabc_d}}>{{'D'}}</option>
+                                                            <option value="N"{{$filter_klabc_c}}>{{'N'}}</option>
+                                                        </select>
                                                      @endif
                                                 </td>
                                                 <td>
@@ -433,14 +493,23 @@
                                                 </td>
                                                 <td>
                                                     <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                            name="filter_status" onchange="this.form.submit(); return false;">
+                                                            name="filter_status" onchange="orders_submit();this.form.submit(); return false;">
                                                         <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
                                                         <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>
                                                         <option value="RE"{{$filter_status_selRE}}>{{__('Rejected')}}</option>
                                                     </select>
                                                     &nbsp;&nbsp;
-                                                    <input type="checkbox" id="filter_inquirements" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="this.form.submit();" {{$inquirements_checked}}>
-                                                    <label for="filter_inquirements" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only inquirements')}}</label>
+                                                    @if (\Illuminate\Support\Facades\Auth::user()->role != "CTV")
+                                                        <input type="checkbox" id="filter_inquirements" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" name="filter_inquirements" onchange="orders_submit();this.form.submit();" {{$inquirements_checked}}>
+                                                        <label for="filter_inquirements" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only inquirements')}}</label>
+                                                    @else
+                                                        <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                                id="filter_inquirements" name="filter_inquirements" onchange="orders_submit();this.form.submit(); return false;">
+                                                            <option value="0"{{$filter_inquirements_sel0}}>{{__('All (no filtering)')}}</option>
+                                                            <option value="1"{{$filter_inquirements_sel1}}>{{__('Only inquirements')}}</option>
+                                                            <option value="2"{{$filter_inquirements_sel2}}>{{__('Only notifications')}}</option>
+                                                        </select>
+                                                    @endif
 
                                                 </td>
                                                 @if ($filter_history == 2)
@@ -451,11 +520,11 @@
                                                         <input type="text" id="time_search" class="form-control-sm"
                                                                style="height:1.4rem; width: 6rem;" name="time_search"
                                                                value="{{$filter_time_val}}"
-                                                               onchange="this.form.submit()">
+                                                               onchange="orders_submit();this.form.submit();">
                                                     </td>
                                                 @else
                                                     <td colspan="2">
-                                                        <input type="checkbox" id="filter_overdue" name="filter_overdue" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$overdue_checked}}>
+                                                        <input type="checkbox" id="filter_overdue" name="filter_overdue" style="margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="orders_submit();this.form.submit();" {{$overdue_checked}}>
                                                         <label for="filter_overdue" style="margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only overdue deliveries') . ' (' . \App\Materom\Orders::overdues() . ')'}}</label>&nbsp;
                                                         <input type="text" class="form-control-sm input-sm" onkeyup="this.value=this.value.replace(/[^\d]+/,'')"
                                                                style="width: 2.2rem; height: 1.4rem;" name="filter_overdue_low"
@@ -502,11 +571,11 @@
 
                                                 <td colspan="1" style="padding-top: 0.4rem;">
                                                     @if (\Illuminate\Support\Facades\Auth::user()->role != "Furnizor")
-                                                        <input type="checkbox" id="filter_mirror" name="filter_mirror" style="display: none; margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="this.form.submit();" {{$mirror_checked}}>
+                                                        <input type="checkbox" id="filter_mirror" name="filter_mirror" style="display: none; margin-bottom: 4px; align-self: center; vertical-align: middle; height: 1rem;" onchange="orders_submit();this.form.submit();" {{$mirror_checked}}>
                                                         <label for="filter_mirror" style="display: none; margin-top: 0; margin-bottom: 3px; align-self: center; vertical-align: middle;">{{__('Only intercompany')}}</label>
                                                     @endif
                                                     <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                            name="filter_backorders" onchange="this.form.submit(); return false;">
+                                                            name="filter_backorders" onchange="orders_submit();this.form.submit(); return false;">
                                                         <option value="0"{{$filter_backorders_0}}>{{__('Nicio filtrare')}}</option>
                                                         <option value="1"{{$filter_backorders_1}}>{{__('Doar backorders')}}</option>
                                                         <option value="2"{{$filter_backorders_2}}>{{__('Fara backorders')}}</option>
@@ -518,7 +587,7 @@
                                                 </td>
                                                 <td colspan="1">
                                                     <select id="filter_goodsreceipt" class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                            name="filter_goodsreceipt" onchange="this.form.submit(); return false;">
+                                                            name="filter_goodsreceipt" onchange="orders_submit();this.form.submit(); return false;">
                                                         <option value="0"{{$filter_goodsreceipt_0}}>{{__('Nicio filtrare')}}</option>
                                                         <option value="1"{{$filter_goodsreceipt_1}}>{{__('Doar cu intrare de bunuri')}}</option>
                                                         <option value="2"{{$filter_goodsreceipt_2}}>{{__('Fara intrare de bunuri')}}</option>
@@ -561,7 +630,7 @@
                                                 <td>
                                                     @if (($filter_history != 2) && ($filter_backorders != 2))
                                                         <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                                name="filter_eta_delayed" onchange="this.form.submit(); return false;">
+                                                                name="filter_eta_delayed" onchange="orders_submit();this.form.submit(); return false;">
                                                             <option value="0"{{$filter_eta_delayed_0}}>{{__('Nicio filtrare')}}</option>
                                                             <option value="1"{{$filter_eta_delayed_1}}>{{__('Fara mascate')}}</option>
                                                             <option value="2"{{$filter_eta_delayed_2}}>{{__('Mascate pana la')}}</option>
@@ -617,7 +686,7 @@
                                                 <td>
                                                     @if ($filter_history != 2)
                                                         <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
-                                                                name="filter_eta" onchange="this.form.submit(); return false;">
+                                                                name="filter_eta" onchange="orders_submit();this.form.submit(); return false;">
                                                             <option value="0"{{$filter_eta_0}}>{{__('Nicio filtrare')}}</option>
                                                             <option value="1"{{$filter_eta_1}}>{{__('Fara ETA depasit')}}</option>
                                                             <option value="2"{{$filter_eta_2}}>{{__('Doar cu ETA depasit')}}</option>
@@ -677,7 +746,8 @@
                                     <col style="width:1.6%;">
                                     <col style="width:1.6%;">
                                     <col style="width:1.6%;">
-                                    <col style="width:1.6%;"> <!-- 16 -->
+                                    <col style="width:1.6%;">
+                                    <col style="width:1.6%;">
 
                                     <col style="width:2%;">
                                     <col style="width:4%;">
@@ -755,6 +825,9 @@
                                     <th colspan="1" class="td01">
                                         <image style='height: 1.5rem;' src='/images/icons8-greater-than-50-1.png' title='Send a message to a person in the flow'/>
                                     </th>
+                                    <th colspan="1" class="td01">
+                                        <image style='height: 1.5rem;' src='/images/icons8-abc-30.png' title='Customer classification'/>
+                                    </th>
                                     @php
                                         if ($groupByPO != 4) {
                                             echo '<th class="td02" colspan="3">' . __('Purchase order') . '</th>';
@@ -818,14 +891,40 @@
 
                                     foreach ($orders as $order) {
 
+                                        $klabc_class = "";
+                                        $customer_classif_icon = "";
+                                        if (strtoupper(trim($order->klabc)) == 'A') {
+                                            // $klabc_class = "klabc_a";
+                                            $customer_classif_icon = "<image style='height: 1.2rem;' title='$filter_klabc_a_tooltip' src='/images/Letter-A-icon.png'>";
+                                        }
+                                        if (strtoupper(trim($order->klabc)) == 'B') {
+                                            // $klabc_class = "klabc_b";
+                                            $customer_classif_icon = "<image style='height: 1.2rem;' title='$filter_klabc_b_tooltip' src='/images/Letter-B-icon.png'>";
+                                        }
+                                        if (strtoupper(trim($order->klabc)) == 'C') {
+                                            // $klabc_class = "klabc_c";
+                                            $customer_classif_icon = "<image style='height: 1.2rem;' title='$filter_klabc_c_tooltip' src='/images/Letter-C-icon.png'>";
+                                        }
+                                        if (strtoupper(trim($order->klabc)) == 'D') {
+                                            // $klabc_class = "klabc_d";
+                                            $customer_classif_icon = "<image style='height: 1.2rem;' title='$filter_klabc_d_tooltip' src='/images/Letter-D-icon.png'>";
+                                        }
+                                        if (strtoupper(trim($order->klabc)) == 'N') {
+                                            // $klabc_class = "klabc_n";
+                                            $customer_classif_icon = "<image style='height: 1.2rem;' title='$filter_klabc_n_tooltip' src='/images/Letter-N-icon.png'>";
+                                        }
+
                                         if ($groupByPO != 4) {
-                                            $comanda = "<button type='button' id='butt_P$order->ebeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters'>" .
+                                            $customer_classif_icon = "";
+                                            $xebeln = $order->ebeln;
+                                            if (substr($xebeln, 0, 1) == '+') $xebeln = "X" . substr($xebeln, 1, 9);
+                                            $comanda = "<button type='button' id='butt_P$xebeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> " . "<p onclick='re_filter(\"P\",\"$order->ebeln\")' style='display:inline' class='resetfilters $klabc_class'>" .
                                                 \App\Materom\SAP::alpha_output($order->ebeln) . "</p>";
                                         } else {
                                             $buttname = $order->vbeln;
                                             if (strtoupper($buttname) == \App\Materom\Orders::stockorder) $buttname = __('Stock');
                                             elseif (strtoupper(trim($buttname)) == "SALESORDER") $buttname = __('Emergency');
-                                            else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' class='resetfilters'>" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
+                                            else $buttname = "<p onclick='re_filter(\"S\",\"$order->vbeln\")' style='display:inline' class='resetfilters $klabc_class'>" . \App\Materom\SAP::alpha_output($buttname) . "</p>";
                                             $comanda = "<button type='button' id='butt_S$order->vbeln' style='width: 1.6rem; text-align: center;' onclick='getSubTree(this); return false;'>+</button> $buttname";
                                         }
 
@@ -838,6 +937,7 @@
 
                                         if ($groupByPO != 4) {
                                             $oid = "P" . $order->ebeln;
+                                            if (substr($order->ebeln, 0, 1) == '+') $oid = "PX" . substr($order->ebeln, 1, 9);
                                             $data = "<td class='td02' colspan=1>" . \App\Materom\SAP::alpha_output($order->lifnr) . "</td>" .
                                                     "<td class='td02' colspan=5>$order->lifnr_name</td>" .
                                                     "<td class='td02' colspan=1>$order->ekgrp</td>" .
@@ -910,7 +1010,10 @@
 
                                             if ($order->accept == 1)
                                                 $button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
-                                                                 "onclick='acceptPOrder(this);return false;'/>";
+                                                                 "onclick='acceptPOrder(this, 1);return false;'/>";
+                                            if ($order->accept == 3)
+                                                $button_accept = "<button type='button' class='order-button-accepted-keep' style='width: 1.5rem; height: 1.5rem; text-align: center;' " .
+                                                                 "onclick='acceptPOrder(this, 3);return false;' title='". __("Keep proposal")."'/>";
                                             if ($order->reject == 1)
                                                 $button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " .
                                                                  "onclick='rejectPOrder(this, 0, null);return false;'/>";
@@ -923,7 +1026,7 @@
                                             else
                                                 $style = "background-color:Wheat;";
 
-                                            echo "<tr id='tr_$oid' style='$style'>" .
+                                            echo "<tr id='tr_$oid' style='$style' data-accept='$order->accept'>" .
                                                  "<td align='center' style='vertical-align: middle;'>".
                                                     "<input id='input_chk' type=\"checkbox\" name=\"$oid\" value=\"$oid\" onclick='boxCheck(this);'></td>" .
                                                  "<td class='td01'>$info_icon</td>" .
@@ -932,9 +1035,10 @@
                                                  "<td class='td01'>$accepted_icon</td>" .
                                                  "<td class='td01'>$rejected_icon</td>" .
                                                  "<td class='td01'>$inquired_icon</td>" .
-                                                 "<td  class='td01' style='padding: 0;'>$button_accept</td>" .
+                                                 "<td class='td01' style='padding: 0;'>$button_accept</td>" .
                                                  "<td class='td01' style='padding: 0;'>$button_reject</td>" .
                                                  "<td class='td01' style='padding: 0;'>$button_inquire</td>" .
+                                                 "<td class='td01' style='padding: 0;'>$customer_classif_icon</td>" .
                                                  "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
                                                  "$data<td colspan='12'></td></tr>";
                                         } else {
@@ -1044,6 +1148,7 @@
                                                  "<td>$info_icon</td>" .
                                                  "<td>$owner_icon</td>" .
                                                  "<td colspan='7'></td>" .
+                                                 "<td>$customer_classif_icon</td>" .
                                                  "<td colspan='3' class='td02' class='first_color'>$comanda</td>" .
                                                  "$data<td colspan='7'></td></tr>";
                                         }
@@ -1294,6 +1399,8 @@
 
         function isChecked(id) {
 
+            return $("[name='" + id + "']").is(":checked");
+
             if ($.inArray(id, checkedList) > -1)
                 return true;
             if ($.inArray(id, unCheckedList) > -1)
@@ -1308,6 +1415,7 @@
                 }
 
             return isChecked(parent(id));
+
         }
 
         function isChildOf(node, maybeParent) {
@@ -1360,20 +1468,90 @@
         }
 
         function boxCheck(_this) {
+            let parent_name = "P" + _this.name.substr(1, 10);
+            let child_name = "I" + _this.name.substr(1, 10) + "_";
+            if (_this.name.startsWith("I")) {
+                if (!_this.checked) {
+                    $("[name='" + parent_name + "']").prop("checked", false);
+                } else {
+                    let inputs = $("input[name^='" + child_name + "']");
+                    let checked = 0;
+                    for (let i = 0; i < inputs.length; i++) {
+                        if (inputs[i].checked) checked++;
+                    }
+                    if (checked == inputs.length) $("[name='" + parent_name + "']").prop("checked", true);
+                }
+            }
+            if (_this.name.startsWith("P")) {
+                $("input[name^='" + child_name + "']").prop("checked", _this.checked);
+            }
+/*
             if (!isChecked(_this.name)) {
                 addToChecked(_this.name);
             } else {
                 removeFromChecked(_this.name);
                 removeFromChecked(_this.name);
             }
+*/
             refreshCheck();
         }
 
         function refreshCheck() {
             let inputs = $("input[id|='input_chk']");
+//            for (let i = 0; i < inputs.length; i++) {
+//                inputs[i].checked = isChecked(inputs[i].name);
+//            }
             for (let i = 0; i < inputs.length; i++) {
-                inputs[i].checked = isChecked(inputs[i].name);
+                if (inputs[i].name.startsWith("P")) {
+                    let p_order = inputs[i].name.substr(1, 10);
+                    let p_accept = -2;
+                    let parent = $("#tr_P" + p_order);
+                    for (let j = 0; j < inputs.length; j++) {
+                        if (!inputs[j].checked || !inputs[j].name.startsWith("I") || inputs[j].name.substr(1, 10) != p_order) continue;
+                        let j_accept = $("#tr_" + inputs[j].name).attr("data-accept");
+                        if (p_accept < 0) p_accept = j_accept;
+                        else if (p_accept != j_accept) {
+                            p_accept = -1;
+                            break;
+                        }
+                    }
+                    let p_td = $("#tr_P" + p_order + " td:eq(7)");
+                    if (p_accept == -2) p_accept = parent.attr("data-accept");
+                    if (p_accept <= 0) {
+                        if (p_td.html() != "") p_td.html("").fadeIn(1000);
+                        continue;
+                    }
+                    if (p_accept == 1) {
+                        p_td.html("<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                            "onclick='acceptPOrder(this, 1);return false;'/>").fadeIn(1000);
+                    } else if (p_accept == 2) {
+                        p_td.html("<button type='button' class='order-button-accepted-changed' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                            "onclick='acceptPOrder(this, 2);return false;' title='{{__("Send proposal to MATEROM")}}'/>").fadeIn(1000);
+                    } else if (p_accept == 3) {
+                        p_td.html("<button type='button' class='order-button-accepted-keep' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='acceptPOrder(this, 3);return false;' title='{{__("Keep proposal")}}'/>").fadeIn(1000);
+                    };
+                }
             }
+        }
+
+        function boxMultiCheck(_this) {
+            if (!_this.name.startsWith("I")) return;
+            let currentrow = $("#tr_" + _this.name);
+            let p_accept = currentrow.attr("data-accept");
+            if (p_accept != 1 && p_accept != 2 && p_accept != 3) return;
+            let p_checked = _this.checked;
+            let inputs = $("input[id|='input_chk']");
+            for (let i = 0; i < inputs.length; i++) {
+                if (inputs[i].name.startsWith(_this.name.substr(0, 11)) &&
+                    p_accept == $("#tr_" + inputs[i].name).attr("data-accept"))
+                {
+                    inputs[i].checked = p_checked;
+                    if (p_checked) addToChecked(inputs[i].name);
+                    else removeFromChecked(inputs[i].name);
+                }
+            }
+            refreshCheck();
         }
 
         function _unused_acceptItem(ebeln, id, type, reload) {
@@ -1405,7 +1583,7 @@
             } else alert('Error processing operation!');
         }
 
-        function acceptItemList(ebeln, itemlist) {
+        function acceptItemList(ebeln, itemlist, acceptmode) {
             var _data, _status = "";
             $.ajaxSetup({
                 headers: {
@@ -1465,9 +1643,10 @@
 
         function getSubTree(thisbtn) {
             var currentrow;
+            if (thisbtn == undefined || thisbtn == null) return;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1);
-            let order = rowid.substr(4, 10);
+            let order = unescplus(rowid.substr(4, 10));
             let sorder = "";
             let porder = "";
             let item = "";
@@ -1524,7 +1703,7 @@
             var newRow = $("<tr>");
             var cols = "";
             var so_style = "background-color:" + $(currentrow).css("background-color") + ";";
-            cols += '<td class="first_color" style="' + so_style + '" colspan="11"></td>';
+            cols += '<td class="first_color" style="' + so_style + '" colspan="12"></td>';
             cols += '<td colspan="3"><b>{{__("Purchase order")}}</b></td>';
             cols += '<td colspan="1"><b>{{__("Supplier")}}</b></td>';
             cols += '<td colspan="5"><b>&nbsp;</b></td>';
@@ -1546,6 +1725,29 @@
             for (i = 0; i < _data.length; i++) {
                 let prevrow = newRow;
                 let porder = _data[i];
+
+                let klabc_class = "";
+                // if (porder.klabc.trim().toUpperCase() == 'A') klabc_class = "klabc_a";
+                // if (porder.klabc.trim().toUpperCase() == 'B') klabc_class = "klabc_b";
+                // if (porder.klabc.trim().toUpperCase() == 'C') klabc_class = "klabc_c";
+                let customer_classif_icon = "";
+                switch (porder.klabc) {
+                    case "A":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_a_tooltip}}' src='/images/Letter-A-icon.png'>";
+                        break;
+                    case "B":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_b_tooltip}}' src='/images/Letter-B-icon.png'>";
+                        break;
+                    case "C":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_c_tooltip}}' src='/images/Letter-C-icon.png'>";
+                        break;
+                    case "D":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_d_tooltip}}' src='/images/Letter-D-icon.png'>";
+                        break;
+                    case "N":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_n_tooltip}}' src='/images/Letter-N-icon.png'>";
+                        break;
+                }
 
                 let info_icon = "";
                 switch (porder.info) {
@@ -1613,7 +1815,13 @@
                 let button_accept = "";
                 if (porder.accept == 1)
                     button_accept = "<button type='button' class='order-button-accepted' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
-                        "onclick='acceptPOrder(this);return false;'/>";
+                        "onclick='acceptPOrder(this, 1);return false;'/>";
+                if (porder.accept == 2)
+                    button_accept = "<button type='button' class='order-button-accepted-changed' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='acceptPOrder(this, 2);return false;' title='{{__("Send proposal to MATEROM")}}'/>";
+                if (porder.accept == 3)
+                    button_accept = "<button type='button' class='order-button-accepted-keep' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
+                        "onclick='acceptPOrder(this, 3);return false;' title='{{__("Keep proposal")}}'/>";
                 let button_reject = "";
                 if (porder.reject == 1)
                     button_reject = "<button type='button' class='order-button-rejected' style='width: 1.6rem; height: 1.5rem; text-align: center;' " +
@@ -1636,9 +1844,11 @@
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_accept + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_reject + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + button_inquire + '</td>';
+                customer_classif_icon = "";
+                cols += '<td class="first_color td01" style="' + so_style + '; padding: 0;" colspan="1">' + customer_classif_icon + '</td>';
                 cols += '<td class="first_color td01" style="' + so_style + '" colspan="1"></td>';
-                cols += "<td colspan='3'><button type='button' id='butt_P" + porder.ebeln + "' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " +
-                    "<p onclick='re_filter(\"P\",\"" + porder.ebeln + "\")' style='display:inline' class='resetfilters'>" + conv_exit_alpha_output(porder.ebeln) + "</p>"
+                cols += "<td colspan='3'><button type='button' id='butt_P" + escplus(porder.ebeln) + "' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button> " +
+                    "<p onclick='re_filter(\"P\",\"" + porder.ebeln + "\")' style='display:inline' class='resetfilters " + klabc_class + "'>" + conv_exit_alpha_output(porder.ebeln) + "</p>"
                     + "</td>";
                 cols += '<td class="td02" colspan="1">' + conv_exit_alpha_output(porder.lifnr) + '</td>';
                 cols += '<td class="td02" colspan="5">' + porder.lifnr_name + '</td>';
@@ -1658,7 +1868,8 @@
                     newRow.attr('style', "background-color:LightYellow; vertical-align: middle;");
                 else
                     newRow.attr('style', "background-color:Wheat; vertical-align: middle;");
-                newRow.attr('id', "tr_P" + porder.ebeln);
+                newRow.attr('id', "tr_P" + escplus(porder.ebeln));
+                newRow.attr('data-accept', "" + porder.accept);
             }
         }
 
@@ -1670,10 +1881,10 @@
             var first_color = $(currentrow).find(".first_color").css("background-color");
             var first_style = "background-color:" + first_color;
             @if ($groupByPO == 4)
-                cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
+                cols += '<td class="first_color" colspan="12" style="' + first_style + '"></td>';
                 colsafter = 0;
             @else
-                cols += '<td class="first_color" colspan="10" style="' + po_style + '"></td>';
+                cols += '<td class="first_color" colspan="11" style="' + po_style + '"></td>';
                 colsafter = 1;
             @endif
             cols += '<td style="' + po_style + '"></td>';
@@ -1704,14 +1915,13 @@
             cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Facturat")}}</b></td>';
             cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Plus/Min")}}</b></td>';
             cols += '<td class="td02" colspan="1" style="text-align: right;"><b>{{__("Avariate")}}</b></td>';
-            cols += '<td class="td02" colspan="1" style="text-align: left;"><b>{{__("Doc. MIGO")}}</b></td>';
-            cols += '<td class="td02" colspan="2" style="text-align: left;"><b>{{__("Detalii/solutie")}}</b></td>';
+            cols += '<td class="td02" colspan="3" style="text-align: left;"><b>{{__("Motiv/solutie")}}</b></td>';
             if (colsafter > 0)
                 cols += '<td class="td02" colspan="' + colsafter + '"></td>';
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:YellowGreen; vertical-align: middle;");
-            newRow.attr('id', "tr_HP" + order);
+            newRow.attr('id', "tr_HP" + escplus(order));
 
             // PO Items
             for (i = 0; i < _data.length; i++) {
@@ -1744,6 +1954,9 @@
                     case 7:
                         info_icon = "<image style='height: 1.5rem; margin: -2px;' src='/images/icons8-partially-shipped-48.png' title='{{__("Partially delivered")}}'>";
                         break;
+                    case 8:
+                        info_icon = "<image style='height: 1.5rem; margin: -2px;' src='/images/icons8-drop-shipping-48.png' title='{{__("Inbound delivery confirmed")}}'>";
+                        break;
                 }
                 if (pitem.backorder == 1)
                     info_icon = "<image style='height: 1.2rem;' src='/images/icons8-next-page-48.png' title='Backorder'>";
@@ -1756,6 +1969,23 @@
                                             "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
                                             "title='{{__("Purchase item cancelled by Materom")}}'" +
                                     ">";
+                                break;
+                            case "F":
+                                if (((pitem.pmfa_status & 4) == 0) && ((pitem.pmfa_status & 1) == 1))
+                                    info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_3.gif' " +
+                                        "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                        "title='{{__("Backorder acceptat de CTV, se va efectua o noua verificare de disponibilitate la data")}}" + " " + pitem.eta_delayed_date.substr(0, 10) + "'" +
+                                        ">";
+                                break;
+                        }
+                    @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+                        switch (pitem.pmfa.substr(0, 1)) {
+                            case "F":
+                                if (((pitem.pmfa_status & 2) == 0) && ((pitem.pmfa_status & 1) == 1))
+                                    info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_3.gif' " +
+                                        "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                        "title='{{__("Backorder acceptat de CTV, se va efectua o noua verificare de disponibilitate la data")}}" + " " + pitem.eta_delayed_date.substr(0, 10) + "'" +
+                                        ">";
                                 break;
                         }
                     @elseif (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
@@ -1779,12 +2009,13 @@
                                     ">";
                                 break;
                             case "F":
-                                info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_3.gif' " +
-                                    "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
-                                    "title='{{__("Backorder fara termen de livrare, se va efectua o noua verificare de disponibilitate la data")}}" + " " + pitem.eta_delayed_date.substr(0, 10) + "'" +
-                                    ">";
+                                if ((pitem.pmfa_status & 1) == 0)
+                                    info_icon = "<image style='height: 1.2rem;' src='/images/ringing_bell_3.gif' " +
+                                        "onclick='ack_bell(\"" + pitem.ebeln + "\", \"" + pitem.ebelp + "\", \"" + pitem.pmfa.substr(0, 1) + "\"); return false;' " +
+                                        "title='{{__("Backorder fara termen de livrare, se va efectua o noua verificare de disponibilitate la data")}}" + " " + pitem.eta_delayed_date.substr(0, 10) + "'" +
+                                        ">";
                                 break;
-                    }
+                        }
                     @endif
                 }
 
@@ -1856,15 +2087,34 @@
                 let button_inquire = "";
                 if (pitem.inquire == 1)
                     button_inquire = "<button type='button' class='order-button-request' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
-                        "onclick='inquirePItem(this);return false;'/>";
+                        "onclick='inquirePItem(this, \"" + pitem.pnad_status.trim() + "\");return false;'/>";
                 let button_tools = "";
                 if (pitem.tools == 1)
                     button_tools = "<button type='button' class='order-item-tools' style='width: 1.5rem; height: 1.5rem; text-align: center;' " +
                         "onclick='orderItemTools(event, this);return false;'/>";
 
+                let customer_classif_icon = "";
+                switch (pitem.klabc) {
+                    case "A":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_a_tooltip}}' src='/images/Letter-A-icon.png'>";
+                        break;
+                    case "B":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_b_tooltip}}' src='/images/Letter-B-icon.png'>";
+                        break;
+                    case "C":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_c_tooltip}}' src='/images/Letter-C-icon.png'>";
+                        break;
+                    case "D":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_d_tooltip}}' src='/images/Letter-D-icon.png'>";
+                        break;
+                    case "N":
+                        customer_classif_icon = "<image style='height: 1.2rem;' title='{{$filter_klabc_n_tooltip}}' src='/images/Letter-N-icon.png'>";
+                        break;
+                }
+
                 var newRow = $("<tr>");
                 var cols = "";
-                cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" type="checkbox" name="I' + pitem.ebeln + "_" + pitem.ebelp + '" value="I' + pitem.ebeln + "_" + pitem.ebelp + '"></td>';
+                cols += '<td colspan="1" align="center" style="vertical-align: middle;"><input id="input_chk" onclick="boxCheck(this);" ondblclick="boxMultiCheck(this);" type="checkbox" name="I' + pitem.ebeln + "_" + pitem.ebelp + '" value="I' + pitem.ebeln + "_" + pitem.ebelp + '"></td>';
                 var po_style = "background-color:" + $(currentrow).css("background-color") + ";";
                 var first_color = $(currentrow).find(".first_color").css("background-color");
                 var first_style = "background-color:" + first_color;
@@ -1879,6 +2129,7 @@
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_accept + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_reject + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_inquire + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + customer_classif_icon + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + first_style + '; padding: 0;">' + button_tools + '</td>';
                     cols += '<td class="coloured" style="' + po_style + '">' + pitem.posnr_out + '</td>';
                 @else
@@ -1891,6 +2142,7 @@
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_accept + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_reject + '</td>';
                     cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_inquire + '</td>';
+                    cols += '<td class="first_color td01" colspan="1" style="' + po_style + '; padding: 0;">' + customer_classif_icon + '</td>';
                     cols += '<td class="coloured td01" colspan="1" style="' + po_style + '; padding: 0;">' + button_tools + '</td>';
                 @endif
                 cols += "<td colspan='1'><button type='button' style='width: 1.6rem; text-align: center;' onclick=\"getSubTree(this);return false;\">+</button><span id='span_item' style='padding-left: 0.2rem;' title='" + pitem.ebelp_title + "'>" + conv_exit_alpha_output(pitem.ebelp) + "</span></td>";
@@ -1924,7 +2176,7 @@
 
                 let delivery_date_blurry = "";
                 @if (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
-                  if (pitem.eta_delayed_check) delivery_date_blurry = " blurry-text";
+                  if (pitem.eta_delayed_check) delivery_date_blurry = " text-hide";//" blurry-text";
                 @endif
 
                 if ((pitem.delivery_date_changeable == 1) || ((pitem.delivery_date_changeable == 2))) {
@@ -1947,7 +2199,7 @@
 
                 let eta_date_blurry = "";
                 @if (\Illuminate\Support\Facades\Auth::user()->role == "CTV")
-                    if (pitem.eta_delayed_check) eta_date_blurry = " blurry-text";
+                    if (pitem.eta_delayed_check) eta_date_blurry = " text-hide";//" blurry-text";
                 @endif
 
                 if (pitem.eta_date_changeable != 0) {
@@ -2002,8 +2254,7 @@
                 cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_invoiced + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_diff + '</td>';
                 cols += '<td class="td02" colspan="1" style="text-align: right;">' + pitem.qty_damaged + '</td>';
-                cols += '<td class="td02" colspan="1" style="text-align: left;">' + pitem.qty_pnad_mblnr + '</td>';
-                cols += '<td class="td02" colspan="2" style="text-align: left;">' + pitem.qty_details + '</td>';
+                cols += '<td class="td02" colspan="3" style="text-align: left;">' + pitem.qty_details + '</td>';
 
 
                 @if ($groupByPO != 4)
@@ -2015,7 +2266,8 @@
                     newRow.attr('style', "background-color:#A0C0A0; vertical-align: middle;");
                 else
                     newRow.attr('style', "background-color:#90D090; vertical-align: middle;");
-                newRow.attr('id', "tr_I" + pitem.ebeln + "_" + pitem.ebelp);
+                newRow.attr('id', "tr_I" + escplus(pitem.ebeln) + "_" + pitem.ebelp);
+                newRow.attr('data-accept', "" + pitem.accept);
                 if (pitem.position_splittable == '1') {
                     let __inqSpan = $(newRow).find("#span_item").first();
                     __inqSpan.mouseover(function() {
@@ -2041,7 +2293,7 @@
             var last_style = "background-color:" + color;
             var first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
             var first_style = "background-color:" + first_color;
-            cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+            cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
             @if ($groupByPO == 4)
                 let colsafter = "10";
                 cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
@@ -2059,7 +2311,7 @@
             newRow.append(cols).hide();
             $(currentrow).after(newRow);
             newRow.attr('style', "background-color:#ADD8E6; vertical-align: middle;");
-            newRow.attr('id', "tr_HI" + order + "_" + item);
+            newRow.attr('id', "tr_HI" + escplus(order) + "_" + item);
 
             // PO Item changes
             for (i = 0; i < _data.length; i++) {
@@ -2073,7 +2325,7 @@
                 let last_style = "background-color:" + color;
                 let first_color = $(currentrow).closest("tr").find(".first_color").css("background-color");
                 let first_style = "background-color:" + first_color;
-                cols += '<td class="first_color" colspan="10" style="' + first_style + '"></td>';
+                cols += '<td class="first_color" colspan="11" style="' + first_style + '"></td>';
                 @if ($groupByPO == 4)
                     let colsreason = "12";
                     cols += '<td class="first_color" colspan="1" style="' + first_style + '"></td>';
@@ -2097,7 +2349,7 @@
                     newRow.attr('style', "background-color:Azure; vertical-align: middle;");
                 else
                     newRow.attr('style', "background-color:LightCyan; vertical-align: middle;");
-                newRow.attr('id', "tr_C" + pitemchg.ebeln + "_" + pitemchg.ebelp + "_" + i);
+                newRow.attr('id', "tr_C" + escplus(pitemchg.ebeln) + "_" + pitemchg.ebelp + "_" + i);
             }
         }
 
@@ -2133,11 +2385,11 @@
             return output;
         }
 
-        function acceptPOrder(thisbtn) {
+        function acceptPOrder(thisbtn, acceptmode) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             let sorder = "";
             @if ($groupByPO == 4)
             let prevRow = $(currentrow).prev();
@@ -2156,7 +2408,7 @@
                 {
                     type: rowtype,
                     order: porder,
-                    history: $("filter_hhistory").val(),
+                    history: $("filter_history").val(),
                     @if($groupByPO == 4)
                         vbeln: sorder
                     @else
@@ -2177,6 +2429,13 @@
                         itemlist.push(_dataAP[i].ebelp);
                     }
                 }
+                p_accept = currentrow.attr("data-accept");
+                if (itemlist.length == 0 && p_accept != 0) {
+                    for (let i = 0; i < _dataAP.length; i++) {
+                        if ($("#tr_I" + escplus(_dataAP[i].ebeln) + "_"+_dataAP[i].ebelp).attr("data-accept") == p_accept)
+                            itemlist.push(_dataAP[i].ebelp);
+                    }
+                }
                 if (itemlist.length > 0) {
                     acceptItemList(porder, itemlist);
                     location.reload(true);
@@ -2188,7 +2447,7 @@
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             @if ($groupByPO == 4)
             let prevRow = $(currentrow).prev();
             while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
@@ -2200,7 +2459,7 @@
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             let item = rowid.substr(15, 5);
             _unused_acceptItem(porder, item, null, true);
             location.reload(true);
@@ -2254,7 +2513,7 @@
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             @if ($groupByPO == 4)
             let prevRow = $(currentrow).prev();
             while (prevRow.attr("id").substr(0, 4) != "tr_S") prevRow = $(prevRow).prev();
@@ -2285,8 +2544,13 @@
             jQuery.ajaxSetup({async: true});
             if (_statusRP != "success") return;
             if (_dataRP.length > 0) {
+                let inputs = $("input[name^='I" + porder + "_']");
+                let checked = 0;
+                for (let i = 0; i < inputs.length; i++) {
+                    if (inputs[i].checked) checked++;
+                }
                 for (let i = 0; i < _dataRP.length; i++) {
-                    if (isChecked('I' + _dataRP[i].ebeln +'_' + _dataRP[i].ebelp)) {
+                    if (checked == 0 || isChecked('I' + _dataRP[i].ebeln + '_' + _dataRP[i].ebelp)) {
                         doRejectItem(porder, _dataRP[i].ebelp, category, reason,
                             @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
                                 'R', 'R'
@@ -2308,7 +2572,7 @@
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             let item = rowid.substr(15, 5);
             if (category == "5") {
                 jQuery.ajaxSetup({async: false});
@@ -2341,7 +2605,7 @@
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             let item = rowid.substr(15, 5);
             if (mode == 3) {
                 swal({
@@ -2371,17 +2635,30 @@
             }
         }
 
-        function inquirePItem(thisbtn) {
+        function inquirePItem(thisbtn, pnad_status) {
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // I
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             let item = rowid.substr(15, 5);
 
             @if (\Illuminate\Support\Facades\Auth::user()->role == "Furnizor")
-                send_inquiry(porder, item);
+                send_inquiry(porder, item, pnad_status);
             @else
-                send_inquiry(porder, item);
+                if (pnad_status == "X") {
+                    swal({
+                        title: "{{__('Aceasta pozitie a fost deja marcata ca fiind rezolvata')}}",
+                        text: "{{__('Doriti sa marcati inapoi aceasta pozitie ca fiind NErezolvata?')}}",
+                        icon: 'warning',
+                        buttons: ["{{__('No')}}", "{{__('Da, marcheaza din nou ca nerezolvata')}}"],
+                    }).then(function(result) {
+                        if (result) {
+                            send_inquiry(porder, item, pnad_status);
+                        }
+                    })
+                }
+                else
+                    send_inquiry(porder, item, pnad_status);
             @endif
         }
 
@@ -2431,7 +2708,7 @@
             var currentrow;
             let rowid = (currentrow = $(thisbtn).parent().parent()).attr('id').toUpperCase();
             let rowtype = rowid.substr(3, 1); // P sau I
-            let porder = rowid.substr(4, 10);
+            let porder = unescplus(rowid.substr(4, 10));
             let item = rowid.substr(15, 5);
 
             $.ajaxSetup({
@@ -2626,6 +2903,46 @@
             return false;
         }
 
+        function doChangeETADate(c_value, old_value, c_ebeln, c_ebelp, c_delay_check, c_delay_date) {
+            let v_delay_check = c_delay_check ? 1 : 0;
+            if (c_delay_date.trim() != "") {
+                d = new Date(c_delay_date);
+                if (isNaN(d.valueOf())) return false;
+            }
+
+            var d = new Date(c_value);
+            if (c_value.trim() != "") {
+                if (isNaN(d.valueOf())) return false;
+            }
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var _dataC, _statusC;
+            jQuery.ajaxSetup({async: false});
+            $.post("webservice/dochangedlvdate",
+                {
+                    value: c_value,
+                    oldvalue: old_value,
+                    ebeln: c_ebeln,
+                    ebelp: c_ebelp,
+                    backorder: "ETADT",
+                    delay_check: v_delay_check,
+                    delay_date: c_delay_date,
+                },
+                function (data, status) {
+                    _dataC = data;
+                    _statusC = status;
+                });
+            jQuery.ajaxSetup({async: true});
+            if (_statusC == "success") {
+                return true;
+            }
+            return false;
+        }
+
         var change_cell, change_type, type_string, change_ebeln, change_ebelp, change_vbeln, changeDialog, changeForm;
 
         $(function () {
@@ -2647,6 +2964,21 @@
                                 if (doChangeDeliveryDate(new_val, change_cell.innerHTML, change_ebeln, change_ebelp,
                                     $("#item_backorder").is(":checked"), $("#eta_delayed_check").is(":checked"),
                                     delayed_date)) {
+                                    $("#new_chg_val").text("");
+                                    $("#new_val_hlp").text("");
+                                    $("#eta_delayed_check").prop("checked", false);
+                                    $("#eta_delayed_date").text("");
+                                    changeDialog.dialog("close");
+                                    location.reload(true);
+                                }
+                            } else
+                            if (type_string == "ETADT") {
+                                if ($("#eta_delayed_check").is(":checked") && delayed_date.length == 0) {
+                                    alert("{{__('Enter a value for alert date')}}");
+                                    return;
+                                }
+                                if (doChangeETADate(new_val, change_cell.innerHTML, change_ebeln, change_ebelp,
+                                    $("#eta_delayed_check").is(":checked"), delayed_date)) {
                                     $("#new_chg_val").text("");
                                     $("#new_val_hlp").text("");
                                     $("#eta_delayed_check").prop("checked", false);
@@ -2892,7 +3224,9 @@
             $("#new_val_hlp").text("");
             $("#change-dialog").dialog('option', 'title', 'Modificare data estimata pentru pozitia ' + ebelp);
             $("#backorder-row").hide();
-            $("#eta-delayed-row").hide();
+            $("#eta-delayed-row").show();
+            $("#new_chg_val").datepicker({dateFormat: "yy-mm-dd"});
+            $("#eta_delayed_date").datepicker({dateFormat: "yy-mm-dd"});
             changeDialog.dialog("open");
         }
 
@@ -2931,390 +3265,409 @@
 
     </script>
 
-    <div id="change-dialog" title="Modificare pozitie">
-        <form>
-            <br>
-            <div class="form-group container" align="left">
-                <b id="old_chg_val"></b><br><br>
-                <i id="new_val_txt"></i>
-                <br><br>
-                <table style="border: none; padding: 0px;" width="100%">
-                    <tr>
-                        <td style="width: 15rem;">
-                            <input id="new_chg_val" type="text" name="new_chg_val" style="width: 100%; height: 24px;"
-                                   class="form-control" value=""></td>
-                        <td style="text-align: left; width: 2rem;"><b style="text-align: left; margin-left: 4px;" id="new_val_hlp"></b></td>
-                        <td></td>
-                    </tr>
-                    <tr id="backorder-row">
-                        <td colspan="2" style="padding-top: 0.5em;">
-                            <input type="checkbox" style="float: left; height: 24px;" id="item_backorder" name="item_backorder">
-                            <label for="item_backorder" style="margin-left: 0.7em; margin-top: 0.5em;">{{ __('Backorder') }}</label>
-                        </td>
-                    </tr>
-                    <tr id="eta-delayed-row">
-                        <td>
-                            <input type="checkbox" style="float: left; height: 24px;" id="eta_delayed_check" name="eta_delayed_check">
-                            <label for="eta_delayed_check" style="margin-left: 0.7em; margin-top: 0.5em;">{{ __('Delay ETA checks until') }}</label>
-                        </td>
-                        <td style="width: 8rem;">
-                            <input id="eta_delayed_date" type="text" name="eta_delayed_date" style="width: 100%; height: 24px;"
-                                   class="form-control" value="">
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </form>
+<div id="change-dialog" title="Modificare pozitie">
+<form>
+    <br>
+    <div class="form-group container" align="left">
+        <b id="old_chg_val"></b><br><br>
+        <i id="new_val_txt"></i>
+        <br><br>
+        <table style="border: none; padding: 0px;" width="100%">
+            <tr>
+                <td style="width: 15rem;">
+                    <input id="new_chg_val" type="text" name="new_chg_val" style="width: 100%; height: 24px;"
+                           class="form-control" value=""></td>
+                <td style="text-align: left; width: 2rem;"><b style="text-align: left; margin-left: 4px;" id="new_val_hlp"></b></td>
+                <td></td>
+            </tr>
+            <tr id="backorder-row">
+                <td colspan="2" style="padding-top: 0.5em;">
+                    <input type="checkbox" style="float: left; height: 24px;" id="item_backorder" name="item_backorder">
+                    <label for="item_backorder" style="margin-left: 0.7em; margin-top: 0.5em;">{{ __('Backorder') }}</label>
+                </td>
+            </tr>
+            <tr id="eta-delayed-row">
+                <td>
+                    <input type="checkbox" style="float: left; height: 24px;" id="eta_delayed_check" name="eta_delayed_check">
+                    <label for="eta_delayed_check" style="margin-left: 0.7em; margin-top: 0.5em;">{{ __('Delay ETA checks until') }}</label>
+                </td>
+                <td style="width: 8rem;">
+                    <input id="eta_delayed_date" type="text" name="eta_delayed_date" style="width: 100%; height: 24px;"
+                           class="form-control" value="">
+                </td>
+            </tr>
+        </table>
+    </div>
+</form>
+</div>
+
+<div id="init-rejection-dialog" title="{{__("Reject item")}}">
+<form>
+    <br>
+    <div class="form-group container" align="left">
+        <div class="row">
+            <label for="reject-category" class="col-md-2 col-form-label text-md-left">{{__("Reason")}}</label>&nbsp;&nbsp;
+            <select id="reject-category" name="reject-category" class="form-control col-md-9"
+                    onchange="rejectCategoryChange(this);return false;">
+                <option value="1" selected>{{__("Reason 1")}}</option>
+                <option value="2">{{__("Reason 2")}}</option>
+                <option value="3">{{__("Miscellaneous")}}</option>
+                <option value="4">{{__("Other")}}</option>
+                @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
+                    <option value="5">{{__("Propose new variant")}}</option>
+                @endif
+            </select>
+        </div>
+        <br>
+        <div class="row">
+            <label for="reject-reason"
+                   class="col-md-2 col-form-label text-md-left">{{__("Explanations")}}</label>&nbsp;&nbsp;
+            <textarea id="reject-reason" type="text" name="reject-reason" class="form-control col-md-9"
+                      style="word-break: break-word; height: 4rem;" maxlength="255" value=""></textarea>
+        </div>
     </div>
 
-    <div id="init-rejection-dialog" title="{{__("Reject item")}}">
-        <form>
-            <br>
-            <div class="form-group container" align="left">
-                <div class="row">
-                    <label for="reject-category" class="col-md-2 col-form-label text-md-left">{{__("Reason")}}</label>&nbsp;&nbsp;
-                    <select id="reject-category" name="reject-category" class="form-control col-md-9"
-                            onchange="rejectCategoryChange(this);return false;">
-                        <option value="1" selected>{{__("Reason 1")}}</option>
-                        <option value="2">{{__("Reason 2")}}</option>
-                        <option value="3">{{__("Miscellaneous")}}</option>
-                        <option value="4">{{__("Other")}}</option>
-                        @if (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
-                            <option value="5">{{__("Propose new variant")}}</option>
-                        @endif
-                    </select>
-                </div>
-                <br>
-                <div class="row">
-                    <label for="reject-reason"
-                           class="col-md-2 col-form-label text-md-left">{{__("Explanations")}}</label>&nbsp;&nbsp;
-                    <textarea id="reject-reason" type="text" name="reject-reason" class="form-control col-md-9"
-                              style="word-break: break-word; height: 4rem;" maxlength="255" value=""></textarea>
-                </div>
-            </div>
+    <i id="new_rej_msg" style="color: red"></i>
+</form>
+</div>
 
-            <i id="new_rej_msg" style="color: red"></i>
-        </form>
-    </div>
+<script>
+    var rejectDialog, rejectForm, _reject_type, _reject_this;
 
-    <script>
-        var rejectDialog, rejectForm, _reject_type, _reject_this;
+    function rejectCategoryChange(_this) {
+        if (_this.value == 4)
+            $("#reject-reason").attr('required', 'true');
+        else
+            $("#reject-reason").removeAttr('required');
+    }
 
-        function rejectCategoryChange(_this) {
-            if (_this.value == 4)
-                $("#reject-reason").attr('required', 'true');
-            else
-                $("#reject-reason").removeAttr('required');
-        }
-
-        $(function () {
-            rejectDialog = $("#init-rejection-dialog").dialog({
-                autoOpen: false,
-                height: 320,
-                width: 480,
-                modal: true,
-                buttons: {
-                    {{__("Reject")}}:
-                    function() {
-                        if (!($("#reject-category").val() == 4 && $("#reject-reason").val().length == 0)) {
-                            switch (_reject_type) {
-                                case "S":
-                                    rejectSOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                                    break;
-                                case "P":
-                                    rejectPOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                                    break;
-                                case "I":
-                                    rejectPItem(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
-                                    break;
-                            }
-                            rejectDialog.dialog("close");
+    $(function () {
+        rejectDialog = $("#init-rejection-dialog").dialog({
+            autoOpen: false,
+            height: 320,
+            width: 480,
+            modal: true,
+            buttons: {
+                {{__("Reject")}}:
+                function() {
+                    if (!($("#reject-category").val() == 4 && $("#reject-reason").val().length == 0)) {
+                        switch (_reject_type) {
+                            case "S":
+                                rejectSOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                                break;
+                            case "P":
+                                rejectPOrder(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                                break;
+                            case "I":
+                                rejectPItem(_reject_this, $("#reject-category").val(), $("#reject-reason").val());
+                                break;
                         }
-                    },
-
-                    {{__("Cancel")}}:
-                    function() {
                         rejectDialog.dialog("close");
                     }
                 },
 
-                close: function () {
-                    rejectForm[0].reset();
-                },
-                position: {
-                    my: "center",
-                    at: "center",
-                    of: $("#orders_table")
+                {{__("Cancel")}}:
+                function() {
+                    rejectDialog.dialog("close");
                 }
-            });
+            },
 
-            $("#reject-category").on('input', function () {
-                if ($("#new_rej_msg").text() != "") $("#new_rej_msg").text("");
-            });
-            rejectForm = rejectDialog.find("form").on("submit", function (event) {
-                event.preventDefault();
-            });
+            close: function () {
+                rejectForm[0].reset();
+            },
+            position: {
+                my: "center",
+                at: "center",
+                of: $("#orders_table")
+            }
+        });
 
-            @if (isset($autoexplode_SO) && $autoexplode_SO != null)
-            let autoexplode_so_button = $('#butt_S{{$autoexplode_SO}}');
-            if (autoexplode_so_button != null && autoexplode_so_button != undefined) {
+        $("#reject-category").on('input', function () {
+            if ($("#new_rej_msg").text() != "") $("#new_rej_msg").text("");
+        });
+        rejectForm = rejectDialog.find("form").on("submit", function (event) {
+            event.preventDefault();
+        });
+
+        @if (isset($autoexplode_SO) && $autoexplode_SO != null)
+        let autoexplode_so_button = $('#butt_S{{$autoexplode_SO}}');
+        if (autoexplode_so_button != null && autoexplode_so_button != undefined) {
+            $(function() {
+                getSubTree(autoexplode_so_button[0]);
+                autoexplode_so_button[0].scrollIntoView();
+            });
+        }
+        @endif
+
+        @if (isset($autoexplode_PO) && $autoexplode_PO != null)
+            let autoexplode_po_button = $('#butt_P' + escplus('{{$autoexplode_PO}}'));
+            if (autoexplode_po_button != null && autoexplode_po_button != undefined) {
                 $(function() {
-                    getSubTree(autoexplode_so_button[0]);
-                    autoexplode_so_button[0].scrollIntoView();
+                    getSubTree(autoexplode_po_button[0]);
+                    autoexplode_po_button[0].scrollIntoView();
                 });
             }
-            @endif
+        @endif
 
-            @if (isset($autoexplode_PO) && $autoexplode_PO != null)
-                let autoexplode_po_button = $('#butt_P{{$autoexplode_PO}}');
-                if (autoexplode_po_button != null && autoexplode_po_button != undefined) {
-                    $(function() {
-                        getSubTree(autoexplode_po_button[0]);
-                        autoexplode_po_button[0].scrollIntoView();
+        @php
+            \Illuminate\Support\Facades\Session::forget("autoexplode_PO");
+            \Illuminate\Support\Facades\Session::forget("autoexplode_SO");
+        @endphp
+    });
+
+    function reject_init(type, this0, title) {
+        $("#new_rej_msg").text("");
+        $("#reject-reason").val("");
+        $("#init-rejection-dialog").dialog('option', 'title', title);
+        _reject_type = type;
+        _reject_this = this0;
+        rejectDialog.dialog("open");
+    }
+
+    function readLifnrName(lifnr) {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        jQuery.ajaxSetup({async: false});
+        var _dataLN, _statusLN;
+        $.get("webservice/readlifnrname",
+            {
+                lifnr: lifnr
+            },
+            function (data, status) {
+                _dataLN = data;
+                _statusLN = status;
+            });
+        jQuery.ajaxSetup({async: true});
+        if (_statusLN != "success") return;
+        return _dataLN;
+    }
+
+    function replyack(ebeln, ebelp) {
+
+        var _data, _status = "";
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        jQuery.ajaxSetup({async: false});
+        $.post("webservice/sendAck",
+            {
+                ebeln: ebeln,
+                ebelp: ebelp,
+                cdate: null
+            },
+            function (data, status) {
+                _data = data;
+                _status = status;
+            });
+        jQuery.ajaxSetup({async: true});
+        @if ($filter_inquirements <> 0)
+            Location.reload(true);
+        @else
+            $("#tr_I" + escplus(ebeln) + "_" + ebelp + " td:eq(1)").html("");
+        @endif
+    }
+
+    function ack_bell(ebeln, ebelp, mode) {
+
+        var _data, _status = "";
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        jQuery.ajaxSetup({async: false});
+        $.post("webservice/acknowledgebell",
+            {
+                ebeln: ebeln,
+                ebelp: ebelp,
+                mode: mode
+            },
+            function (data, status) {
+                _data = data;
+                _status = status;
+            });
+        jQuery.ajaxSetup({async: true});
+        if (mode == "B" || mode == "C") {
+            $("#tr_I" + escplus(ebeln) + "_" + ebelp).fadeOut();
+        } else {
+            $("#tr_I" + escplus(ebeln) + "_" + ebelp + " td:eq(1)").html("");
+        }
+    }
+
+    function replyack2(ebeln) {
+        var _data, _status = "";
+    }
+
+    function orderItemTools(e, _this) {
+        var currentrow;
+        let rowid = (currentrow = $(_this).parent().parent()).attr('id').toUpperCase();
+        let rowtype = rowid.substr(3, 1); // I
+        let porder = unescplus(rowid.substr(4, 10));
+        let item = rowid.substr(15, 5);
+        $("#order-tools-menu-archive").unbind("click");
+        $("#order-tools-menu-archive").click(function(){item_tools_archive(porder, item, currentrow)});
+        $("#order-tools-menu-unarchive").unbind("click");
+        $("#order-tools-menu-unarchive").click(function(){item_tools_unarchive(porder, item, currentrow)});
+        $("#order-tools-menu-rollback").unbind("click");
+        $("#order-tools-menu-rollback").click(function(){item_tools_rollback(porder, item, currentrow)});
+        e.stopPropagation();
+        $("#order-tools-menu").menu().toggle().position({
+            my: "left top",
+            at: "right-8px top+8px",
+            of: $(_this),
+            collision: "fit flip"}
+        );
+    }
+
+    function item_tools_archive(porder, item, currentrow) {
+        swal({
+            title: "{{__('Confirmation')}}",
+            text: "{{__('Are you sure you want to archive this item now?')}}",
+            icon: 'warning',
+            buttons: ["{{__('No')}}", "{{__('Yes, archive it')}}"],
+        }).then(function(result) {
+            if (result) {
+                jQuery.ajaxSetup({async: false});
+                var _data, _status;
+                $.get("webservice/archive_item",
+                    {
+                        porder: porder,
+                        item: item
+                    },
+                    function (data, status) {
+                        _data = data;
+                        _status = status;
                     });
+                jQuery.ajaxSetup({async: true});
+                if (_status == null || _status == undefined)
+                    _data = '{{__("An error occurred archiving this item")}}';
+                if (_data != "OK") {
+                    alert(_data);
+                    return;
                 }
-            @endif
-
-            @php
-                \Illuminate\Support\Facades\Session::forget("autoexplode_PO");
-                \Illuminate\Support\Facades\Session::forget("autoexplode_SO");
-            @endphp
-        });
-
-        function reject_init(type, this0, title) {
-            $("#new_rej_msg").text("");
-            $("#reject-reason").val("");
-            $("#init-rejection-dialog").dialog('option', 'title', title);
-            _reject_type = type;
-            _reject_this = this0;
-            rejectDialog.dialog("open");
-        }
-
-        function readLifnrName(lifnr) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            jQuery.ajaxSetup({async: false});
-            var _dataLN, _statusLN;
-            $.get("webservice/readlifnrname",
-                {
-                    lifnr: lifnr
-                },
-                function (data, status) {
-                    _dataLN = data;
-                    _statusLN = status;
-                });
-            jQuery.ajaxSetup({async: true});
-            if (_statusLN != "success") return;
-            return _dataLN;
-        }
-
-        function replyack(ebeln, ebelp) {
-
-            var _data, _status = "";
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            jQuery.ajaxSetup({async: false});
-            $.post("webservice/sendAck",
-                {
-                    ebeln: ebeln,
-                    ebelp: ebelp,
-                    cdate: null
-                },
-                function (data, status) {
-                    _data = data;
-                    _status = status;
-                });
-            jQuery.ajaxSetup({async: true});
-            @if ($filter_inquirements == 1)
-                Location.reload(true);
-            @else
-                $("#tr_I" + ebeln + "_" + ebelp + " td:eq(1)").html("");
-            @endif
-        }
-
-        function ack_bell(ebeln, ebelp, mode) {
-
-            var _data, _status = "";
-
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-            jQuery.ajaxSetup({async: false});
-            $.post("webservice/acknowledgebell",
-                {
-                    ebeln: ebeln,
-                    ebelp: ebelp,
-                    mode: mode
-                },
-                function (data, status) {
-                    _data = data;
-                    _status = status;
-                });
-            jQuery.ajaxSetup({async: true});
-            if (mode == "B" || mode == "C") {
-                $("#tr_I" + ebeln + "_" + ebelp).fadeOut();
-            } else {
-                $("#tr_I" + ebeln + "_" + ebelp + " td:eq(1)").html("");
+                $(currentrow).fadeOut('slow', function(){$(currentrow).remove();});
             }
-        }
+        })
+    }
 
-        function replyack2(ebeln) {
-            var _data, _status = "";
-        }
-
-        function orderItemTools(e, _this) {
-            var currentrow;
-            let rowid = (currentrow = $(_this).parent().parent()).attr('id').toUpperCase();
-            let rowtype = rowid.substr(3, 1); // I
-            let porder = rowid.substr(4, 10);
-            let item = rowid.substr(15, 5);
-            $("#order-tools-menu-archive").unbind("click");
-            $("#order-tools-menu-archive").click(function(){item_tools_archive(porder, item, currentrow)});
-            $("#order-tools-menu-unarchive").unbind("click");
-            $("#order-tools-menu-unarchive").click(function(){item_tools_unarchive(porder, item, currentrow)});
-            $("#order-tools-menu-rollback").unbind("click");
-            $("#order-tools-menu-rollback").click(function(){item_tools_rollback(porder, item, currentrow)});
-            e.stopPropagation();
-            $("#order-tools-menu").menu().toggle().position({
-                my: "left top",
-                at: "right-8px top+8px",
-                of: $(_this),
-                collision: "fit flip"}
-            );
-        }
-
-        function item_tools_archive(porder, item, currentrow) {
-            swal({
-                title: "{{__('Confirmation')}}",
-                text: "{{__('Are you sure you want to archive this item now?')}}",
-                icon: 'warning',
-                buttons: ["{{__('No')}}", "{{__('Yes, archive it')}}"],
-            }).then(function(result) {
-                if (result) {
-                    jQuery.ajaxSetup({async: false});
-                    var _data, _status;
-                    $.get("webservice/archive_item",
-                        {
-                            porder: porder,
-                            item: item
-                        },
-                        function (data, status) {
-                            _data = data;
-                            _status = status;
-                        });
-                    jQuery.ajaxSetup({async: true});
-                    if (_status == null || _status == undefined)
-                        _data = '{{__("An error occurred archiving this item")}}';
-                    if (_data != "OK") {
-                        alert(_data);
-                        return;
-                    }
-                    $(currentrow).fadeOut('slow', function(){$(currentrow).remove();});
+    function item_tools_unarchive(porder, item, currentrow) {
+        swal({
+            title: "{{__('Confirmation')}}",
+            text: "{{__('Are you sure you want to unarchive this item now?')}}",
+            icon: 'warning',
+            buttons: ["{{__('No')}}", "{{__('Yes, unarchive it')}}"],
+        }).then(function(result) {
+            if (result) {
+                jQuery.ajaxSetup({async: false});
+                var _data, _status;
+                $.get("webservice/unarchive_item",
+                    {
+                        porder: porder,
+                        item: item
+                    },
+                    function (data, status) {
+                        _data = data;
+                        _status = status;
+                    });
+                jQuery.ajaxSetup({async: true});
+                if (_status == null || _status == undefined)
+                    _data = '{{__("An error occurred unarchiving this item")}}';
+                if (_data != "OK") {
+                    alert(_data);
+                    return;
                 }
-            })
-        }
+                $(currentrow).fadeOut('slow', function(){$(currentrow).remove();});
+            }
+        })
+    }
 
-        function item_tools_unarchive(porder, item, currentrow) {
-            swal({
-                title: "{{__('Confirmation')}}",
-                text: "{{__('Are you sure you want to unarchive this item now?')}}",
-                icon: 'warning',
-                buttons: ["{{__('No')}}", "{{__('Yes, unarchive it')}}"],
-            }).then(function(result) {
-                if (result) {
-                    jQuery.ajaxSetup({async: false});
-                    var _data, _status;
-                    $.get("webservice/unarchive_item",
-                        {
-                            porder: porder,
-                            item: item
-                        },
-                        function (data, status) {
-                            _data = data;
-                            _status = status;
-                        });
-                    jQuery.ajaxSetup({async: true});
-                    if (_status == null || _status == undefined)
-                        _data = '{{__("An error occurred unarchiving this item")}}';
-                    if (_data != "OK") {
-                        alert(_data);
-                        return;
-                    }
-                    $(currentrow).fadeOut('slow', function(){$(currentrow).remove();});
+    function item_tools_rollback(porder, item, currentrow) {
+        swal({
+            title: "{{__('Confirmation')}}",
+            text: "{{__('Are you sure you want to rollback this item now?')}}",
+            icon: 'warning',
+            buttons: ["{{__('No')}}", "{{__('Yes, roll it back')}}"],
+        }).then(function(result) {
+            if (result) {
+                jQuery.ajaxSetup({async: false});
+                var _data, _status;
+                $.get("webservice/rollback_item",
+                    {
+                        porder: porder,
+                        item: item
+                    },
+                    function (data, status) {
+                        _data = data;
+                        _status = status;
+                    });
+                jQuery.ajaxSetup({async: true});
+                if (_status == null || _status == undefined)
+                    _data = '{{__("An error occurred rolling back this item")}}';
+                if (_data != "OK") {
+                    alert(_data);
+                    return;
                 }
-            })
-        }
+                location.reload();
+            }
+        })
+    }
 
-        function item_tools_rollback(porder, item, currentrow) {
-            swal({
-                title: "{{__('Confirmation')}}",
-                text: "{{__('Are you sure you want to rollback this item now?')}}",
-                icon: 'warning',
-                buttons: ["{{__('No')}}", "{{__('Yes, roll it back')}}"],
-            }).then(function(result) {
-                if (result) {
-                    jQuery.ajaxSetup({async: false});
-                    var _data, _status;
-                    $.get("webservice/rollback_item",
-                        {
-                            porder: porder,
-                            item: item
-                        },
-                        function (data, status) {
-                            _data = data;
-                            _status = status;
-                        });
-                    jQuery.ajaxSetup({async: true});
-                    if (_status == null || _status == undefined)
-                        _data = '{{__("An error occurred rolling back this item")}}';
-                    if (_data != "OK") {
-                        alert(_data);
-                        return;
-                    }
-                    location.reload();
-                }
-            })
-        }
+    function massChangeMenu(e, _this) {
+        $(".ui-tooltip").hide();
+        $("#mass-change-menu-download").click(function(){mass_change_download()});
+        $("#mass-change-menu-upload").click(function(){mass_change_upload()});
+        e.stopPropagation();
+        $("#mass-change-menu").menu().toggle().position({
+            my: "right top",
+            at: "right-60px top+12px",
+            of: $(_this),
+            collision: "fit flip"}
+        );
+    }
 
-        function massChangeMenu(e, _this) {
-            $(".ui-tooltip").hide();
-            $("#mass-change-menu-download").click(function(){mass_change_download()});
-            $("#mass-change-menu-upload").click(function(){mass_change_upload()});
-            e.stopPropagation();
-            $("#mass-change-menu").menu().toggle().position({
-                my: "right top",
-                at: "right-60px top+12px",
-                of: $(_this),
-                collision: "fit flip"}
-            );
-        }
+    function orders_submit()
+    {
+        $(".orders-table-div").fadeOut(1000, function() {$("body").addClass("ajaxloading")});
+    }
 
-        $(document).on("click", function(e){
-            $("#order-tools-menu").hide();
-            $("#mass-change-menu").hide();
-            $("#delivery-date-menu").hide();
-        });
+    function escplus(id) {
+        if (id == undefined || id == null) return null;
+        let _id = id;
+        if (_id.substr(0, 1) == '+') _id = "X" + id.substr(1);
+        return _id;
+    }
 
-    </script>
+    function unescplus(id) {
+        if (id == undefined || id == null) return null;
+        let _id = id;
+        if (_id.substr(0, 1) == 'X') _id = "+" + id.substr(1);
+        return _id;
+    }
 
-    @include("orders.read_inforecords")
-    @include("orders.read_zpretrecords")
-    @include("orders.pnad_filters")
-    @include("orders.accept-reject")
-    @include("orders.accept-reject2")
-    @include("orders.split-item")
-    @include("orders.inquiries")
-    @include("orders.file-upload")
-    @include("orders.file-download")
-    @include("orders.search_document")
+    $(document).on("click", function(e){
+        $("#order-tools-menu").hide();
+        $("#mass-change-menu").hide();
+        $("#delivery-date-menu").hide();
+    });
+
+</script>
+
+@include("orders.read_inforecords")
+@include("orders.read_zpretrecords")
+@include("orders.pnad_filters")
+@include("orders.accept-reject")
+@include("orders.accept-reject2")
+@include("orders.split-item")
+@include("orders.inquiries")
+@include("orders.file-upload")
+@include("orders.file-download")
+@include("orders.search_document")
 
 @endsection

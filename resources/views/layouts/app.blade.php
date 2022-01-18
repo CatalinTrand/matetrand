@@ -88,6 +88,7 @@
             padding-right: 15px;
             margin-left: -25px;
         }
+
         .ajaxloadermodal {
             display:    none;
             position:   fixed;
@@ -101,6 +102,7 @@
             50% 50%
             no-repeat;
         }
+
         body.ajaxloading .ajaxloadermodal {
             overflow: hidden;
             display: block;
@@ -112,6 +114,14 @@
             background-repeat:   no-repeat;
             background-position: center left;
         }
+
+        .background-image-pass-fail {
+            background-image:url('/images/icons8-pass-fail-64.png');
+            background-size:     contain;
+            background-repeat:   no-repeat;
+            background-position: center left;
+        }
+
 
         .order-button-accepted {
             background-image:url('/images/icons8-checkmark-50.png');
@@ -290,6 +300,21 @@
         }
         .cursorpointer:hover {
             cursor: pointer;
+        }
+
+        .klabc_a {
+            color: red;
+            font-weight: bold;
+            text-decoration: underline double red;
+        }
+        .klabc_b {
+            color: darkorange;
+            font-weight: bold;
+            text-decoration: underline dotted black;
+        }
+        .klabc_c {
+            color: darkorange;
+            font-weight: bold;
         }
 
         .ui-widget-content {

@@ -259,14 +259,23 @@ class SAP
         }
     }
 
-    static public function newMatnr($matnr, $bukrs)
+    static public function newMatnr($matnr, $bukrs, $ekgrp)
     {
         $matnr = strtoupper(trim($matnr));
         if (($matnr == "PA200") || ($matnr == "PA-200") || ($matnr == "PA202") || ($matnr == "PA-202"))
             return "PA-202";
         if (($matnr == "PA299") || ($matnr == "PA-299") || ($matnr == "PA298") || ($matnr == "PA-298"))
             return "PA-298";
-        if ($bukrs == "ATOM") return "PA-299";
+        if ($bukrs == "ATOM") {
+            if (($matnr == "PA210") || ($matnr == "PA-210")) return "PA-210-A";
+            if (($matnr == "PA211") || ($matnr == "PA-211")) return "PA-211-A";
+            if (($matnr == "PA212") || ($matnr == "PA-212")) return "PA-212-A";
+            if (($matnr == "PA213") || ($matnr == "PA-213")) return "PA-213-A";
+            if (($matnr == "PA250") || ($matnr == "PA-250")) return "PA-250-A";
+            if (($matnr == "PA251") || ($matnr == "PA-251")) return "PA-251-A";
+            if (($matnr == "PA252") || ($matnr == "PA-252")) return "PA-252-A";
+            if (($matnr == "PA253") || ($matnr == "PA-253")) return "PA-253-A";
+        }
         return "PA-99";
     }
 
@@ -444,6 +453,13 @@ class SAP
                     DB::beginTransaction();
                     $ebeln = "";
                     foreach ($vitems as $item) {
+                        $dbitem = DB::table(System::$table_pitems)->where([['ebeln', '=', $item->ebeln], ['ebelp', '=', $item->ebelp]])->first();
+                        if (!empty($item->deldate)) {
+                            if ($dbitem->lfdat != $item->deldate) {
+                                // $dbitem->lfdat = $item->deldate;
+                                $dbitem->etadt = $item->deldate;
+                            }
+                        }
                         db::update("update " . System::$table_pitems . " set" .
                             " deldate = " . ($item->deldate == null ? "null" : "'$item->deldate'") .
                             ", delqty = '$item->delqty'" .
@@ -464,6 +480,8 @@ class SAP
                             ", qty_pnad_mblnr = '$item->qty_pnad_mblnr'" .
                             ", qty_pnad_mjahr = '$item->qty_pnad_mjahr'" .
                             ", pnad_status = '$item->pnad_status'" .
+                            ", lfdat = '$dbitem->lfdat'" .
+                            ", etadt = '$dbitem->etadt'" .
                             " where ebeln = '$item->ebeln' and ebelp = '$item->ebelp';");
                         if ($ebeln <> $item->ebeln) {
                             $ebeln = $item->ebeln;
@@ -502,7 +520,7 @@ class SAP
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_DELIVERY_STATUS');
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_GET_DELIVERY_STATUS2');
             foreach ($items as $item) {
                 $item->deldate = SAP::date_input($item->deldate);
                 $item->inb_inv_date = SAP::date_input($item->inb_inv_date);
@@ -532,8 +550,14 @@ class SAP
                 $item->qty_damaged = trim($item->QTY_DAMAGED); unset($item->QTY_DAMAGED);
                 $item->qty_solution = trim($item->QTY_SOLUTION); unset($item->QTY_SOLUTION);
                 $item->qty_details = trim($item->QTY_DETAILS); unset($item->QTY_DETAILS);
-                $item->qty_pnad_mblnr = trim($item->QTY_PNAD_MBLNR); unset($item->QTY_PNAD_MBLNR);
-                $item->qty_pnad_mjahr = trim($item->QTY_PNAD_MJAHR); unset($item->QTY_PNAD_MJAHR);
+                $item->qty_pnad_mblnr = ""; if (isset($item->QTY_PNAD_MBLNR)) {
+                    $item->qty_pnad_mblnr = trim($item->QTY_PNAD_MBLNR);
+                    unset($item->QTY_PNAD_MBLNR);
+                }
+                $item->qty_pnad_mjahr = ""; if (isset($item->QTY_PNAD_MJAHR)) {
+                    $item->qty_pnad_mjahr = trim($item->QTY_PNAD_MJAHR);
+                    unset($item->QTY_PNAD_MJAHR);
+                }
                 $item->pnad_status = trim($item->PNAD_STATUS); unset($item->PNAD_STATUS);
                 $item->inb_inv = $item->INB_INV; unset($item->INB_INV);
                 $item->inb_inv_date = SAP::date_output($item->INB_INV_DATE); unset($item->INB_INV_DATE);
@@ -944,7 +968,7 @@ class SAP
         return "{'cause':[{value:'XX','text':'undefined'}],solution:[{'value':'XX','text':'undefined'}]}";
     }
 
-    public static function setPnadData($ebeln, $ebelp, $cause, $solution, $details, $status)
+    public static function setPnadData($ebeln, $ebelp, $mode, $text, $solved, $data)
     {
         $globalRFCData = DB::select("select * from ". System::$table_global_rfc_config);
         if($globalRFCData) $globalRFCData = $globalRFCData[0]; else return __("Cannot determine RFC connection parameters");
@@ -956,18 +980,20 @@ class SAP
             $roleData->rfc_user, $roleData->rfc_passwd);
         try {
             $sapconn = new \SAPNWRFC\Connection($rfcData->parameters());
-            $sapfm = $sapconn->getFunction('ZSRM_RFC_SET_PNAD_DATA');
+            $sapfm = $sapconn->getFunction('ZSRM_RFC_EWM_EXC_METHOD');
+            $data_json = "";
+            if (!empty($data)) $data_json = json_encode($data);
             $result = $sapfm->invoke([
-                'I_EBELN' => $ebeln,
-                'I_EBELP' => $ebelp,
-                'I_CAUSE' => $cause,
-                'I_SOLUTION' => $solution,
-                'I_DETAILS' => $details,
-                'I_STATUS' => $status
+                'I_EBELN'  => $ebeln,
+                'I_EBELP'  => $ebelp,
+                'I_MODE'   => $mode,
+                'I_SOLVED' => $solved,
+                'I_TEXT'   => $text,
+                'P_DATA'   => $data_json
             ]);
             return $result["E_MESSAGE"];
         } catch (\SAPNWRFC\Exception $e) {
-            Log::error("Error setting PNAD data: " . $e->getMessage());
+            Log::error("Error setting EWM exception status: " . $e->getMessage());
             Log::error($e->getErrorInfo());
             return $e->getMessage();
         }

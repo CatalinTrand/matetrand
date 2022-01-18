@@ -56,6 +56,7 @@ class POrderItem
     public $sales_prun;  // VBAP-KPEIN
     public $sales_puom;  // VBAP-KPEIN
     public $kunnr;       // VBAK-KUNNR
+    public $klabc;       // KNVV-KLABC
     public $shipto;      // VBPA-KUNNR WE
     public $ctv;         // KNVH-HKUNNR or VBAK-ERNAM
     public $ctv_name;    // cache (just for performance)
@@ -83,7 +84,7 @@ class POrderItem
     public $qty_solution;
     public $qty_pnad_mblnr;
     public $qty_pnad_mjahr;
-    public $pnad_status;  // X=open record exists in ZWM, ''=no open record
+    public $pnad_status;  // EXCEPTION_SOLVED
 
     // mirroring
     public $mirror_ebeln;
@@ -91,6 +92,7 @@ class POrderItem
 
     // post-mortem flag & action
     public $pmfa;
+    public $pmfa_status;
 
     // delayed checks
     public $eta_delayed_check;
@@ -120,7 +122,7 @@ class POrderItem
     public $rejected; // $this->status = X
     public $inquired; // 0=no, 1=tentatively accepted, 2=tentatively rejected, 3=simple message
     public $inq_reply; // 0=no reply, 1=with reply
-    public $inquirement; // 0=no, 1=is inquirement
+    public $inquirement; // 0=no, 1=is inquirement, 2=is notification
 
     // buttons
     public $accept;   // 0-no, 1=display
@@ -175,6 +177,7 @@ class POrderItem
         $this->sales_prun = $pitem->sales_prun;
         $this->sales_puom = $pitem->sales_puom;
         $this->kunnr = $pitem->kunnr;
+        $this->klabc = "";
         $this->shipto = $pitem->shipto;
         $this->ctv = $pitem->ctv;
         $this->ctv_name = $pitem->ctv_name;
@@ -204,6 +207,7 @@ class POrderItem
         $this->mirror_ebeln = $pitem->mirror_ebeln;
         $this->mirror_ebelp = $pitem->mirror_ebelp;
         $this->pmfa = $pitem->pmfa;
+        $this->pmfa_status = $pitem->pmfa_status;
         $this->inb_dlv = $pitem->inb_dlv;
         $this->inb_dlv_posnr = $pitem->inb_dlv_posnr;
         $this->inb_inv = $pitem->inb_inv;
@@ -251,6 +255,7 @@ class POrderItem
             $this->sales_prun = "";
             $this->sales_puom = "";
             $this->kunnr = "";
+            $this->klabc = "";
             $this->kunnr_name = "";
             $this->shipto = "";
             $this->shipto_name = "";
@@ -261,6 +266,8 @@ class POrderItem
             if ($this->sorder != Orders::stockorder) $this->sorder = Orders::salesorder;
         } else {
             $this->kunnr_name = MasterData::getKunnrName($this->kunnr, 2);
+            $this->klabc = DB::table(System::$table_sap_kna1)->where("kunnr", $this->kunnr)->value("klabc");
+            if (empty($this->klabc)) $this->klabc = "";
             $this->shipto_name = MasterData::getKunnrName($this->shipto, 2);
         }
         $this->wtime = $porder->wtime;
@@ -441,7 +448,7 @@ class POrderItem
                         $this->accept = 1;
                         if ($this->changed == 1) $this->accept = 2;
                         $this->reject = 1;
-                    } elseif (($this->status == 'R') && ($this->pstage != 'F')) {
+                    } elseif (($this->status == 'R') /*&& ($this->pstage != 'F')*/) {
                         // cancellation asked by REF/CTV after initial approval
                         $this->inquired = 4;
                         $this->inq_reply = 1;
@@ -477,6 +484,7 @@ class POrderItem
                     }
                 }
                 if ($this->dodays <> "") $this->eta_date_changeable = 1;
+                if (empty($this->status) || ($this->status == 'T')) $this->eta_date_changeable = 1;
             } elseif (Auth::user()->role == 'Administrator') {
                 if (empty($this->status)) {
                     if ($this->position_splitted == 0) {
@@ -575,9 +583,20 @@ class POrderItem
             else if ($this->grdate != null) {
                 $this->info = 7;
                 if (explode(" ", $this->delqty)[0] >= $this->qty) $this->info = 6;
+            } else if ($this->deldate != null) {
+                $this->info = 8;
             }
-            if ((($this->backorder == 0) || (Auth::user()->role != "Furnizor" && $this->delivery_date_changed != 0)) &&
-                ((($this->inq_reply == 1) ||
+            if (
+                (($this->backorder == 0) ||
+                 (Auth::user()->role != "Furnizor" &&
+                     ($this->delivery_date_changed != 0 ||
+                      (($this->owner != 0) && ($this->status == 'T'))
+                     )
+                 )
+                )
+                &&
+                (
+                 (($this->inq_reply == 1) ||
                   (Auth::user()->role == "Furnizor") ||
                   ((Auth::user()->role == "Referent") && ($this->crefo == 1))
                  ) &&
@@ -588,24 +607,48 @@ class POrderItem
                   )
                  )
                 )
-            ) $this->inquirement = 1;
+            ) {
+                $this->inquirement = 1;
+                if ($this->owner != 0 && Auth::user()->role == "CTV" &&
+                    substr($this->pmfa, 0, 1) == "F" && ($this->pmfa_status & 1) == 0) {
+                    $this->inquirement = 3;
+                }
+            }
             if ((Auth::user()->role == "CTV") && ((substr($this->pmfa, 0, 1) == "C")
                                                || (substr($this->pmfa, 0, 1) == "D")
-                                               || (substr($this->pmfa, 0, 1) == "E")
-                                               || (substr($this->pmfa, 0, 1) == "F"))
+                                               || (substr($this->pmfa, 0, 1) == "E") ||
+                    (substr($this->pmfa, 0, 1) == "F" && ($this->pmfa_status & 1) == 0))
                )
             {
-                $this->inquirement = 1;
+                $this->inquirement = 2;
             }
+            if ($this->stage == 'Z' && $this->status == 'A' && substr($this->pmfa, 0, 1) == "F") {
+                if (Auth::user()->role == "CTV") {
+                    if (($this->pmfa_status & 1) == 0)
+                        $this->inquirement = 2;
+                    else {
 
-//            if ((Auth::user()->role == "Referent") && ($this->owner == 1) &&
-//                ($this->eta_delayed_check == 1) &&
-//                (substr($this->eta_delayed_date, 0, 10) >= substr(now(), 0, 10))
-//               )
-//            {
-//                $this->inquirement = 1;
-//            }
+                    }
+                }
+                elseif (Auth::user()->role == "Referent") {
+                    if (($this->pmfa_status & 2) == 0)
+                        $this->inquirement = 1;
+                    else if (($this->owner == 1) &&
+                             ($this->eta_delayed_check == 1) &&
+                             (substr($this->eta_delayed_date, 0, 10) >= substr(now(), 0, 10))
+                            )
+                    {
+                        $this->inquirement = 1;
+                    }
+                }
+                elseif (Auth::user()->role == "Furnizor") {
+                    if (($this->pmfa_status & 4) == 0)
+                        $this->inquirement = 1;
+                    else {
 
+                    }
+                }
+            }
         }
     }
 

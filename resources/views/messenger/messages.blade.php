@@ -49,6 +49,38 @@
         $filter_vbeln = \Illuminate\Support\Facades\Session::get("filter_vbeln");
         if (!isset($filter_vbeln)) $filter_vbeln = "";
 
+        $filter_klabc = \Illuminate\Support\Facades\Session::get("filter_klabc");
+        if (!isset($filter_klabc) || empty($filter_klabc)) $filter_klabc = "*";
+        $filter_klabc_all = "";
+        $filter_klabc_none = "";
+        $filter_klabc_a = "";
+        $filter_klabc_b = "";
+        $filter_klabc_c = "";
+        $filter_klabc_d = "";
+        $filter_klabc_n = "";
+        if ($filter_klabc == "*") {
+            // toate
+            $filter_klabc_all = "selected";
+        } elseif ($filter_klabc == "<>") {
+            // empty
+            $filter_klabc_none = "selected";
+        }  elseif ($filter_klabc == "A") {
+            // empty
+            $filter_klabc_a = "selected";
+        }  elseif ($filter_klabc == "B") {
+            // empty
+            $filter_klabc_b = "selected";
+        }  elseif ($filter_klabc == "C") {
+            // empty
+            $filter_klabc_c = "selected";
+        }  elseif ($filter_klabc == "D") {
+            // empty
+            $filter_klabc_d = "selected";
+        }  elseif ($filter_klabc == "N") {
+            // empty
+            $filter_klabc_n = "selected";
+        }
+
         $filter_ebeln = \Illuminate\Support\Facades\Session::get("filter_ebeln");
         if (!isset($filter_ebeln)) $filter_ebeln = "";
 
@@ -177,6 +209,17 @@
                     <input type="text" class="form-control-sm input-sm"
                            style="width: 6rem; height: 1.4rem;" name="filter_vbeln"
                            value="{{$filter_vbeln}}">&nbsp;&nbsp;
+                    {{__("Classif")}}:
+                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                            name="filter_klabc" onchange="this.form.submit(); return false;">
+                        <option value="*"{{$filter_klabc_all}}>{{__('All')}}</option>
+                        <option value="<>"{{$filter_klabc_none}}>{{__('None')}}</option>
+                        <option value="A"{{$filter_klabc_a}}>{{'A'}}</option>
+                        <option value="B"{{$filter_klabc_b}}>{{'B'}}</option>
+                        <option value="C"{{$filter_klabc_c}}>{{'C'}}</option>
+                        <option value="D"{{$filter_klabc_d}}>{{'D'}}</option>
+                        <option value="N"{{$filter_klabc_n}}>{{'N'}}</option>
+                    </select>
                 @endif
 
                 {{__("Purchase order")}}:

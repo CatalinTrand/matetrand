@@ -19,6 +19,7 @@ class System
     const is300 = true;
 
     const deftable_global_rfc_config = "global_rfc_config";
+    const deftable_ewm_rfc_config = "ewm_rfc_config";
     const deftable_pitemchg = "pitemchg";
     const deftable_pitemchg_proposals = "pitemchg_proposals";
     const deftable_pitems = "pitems";
@@ -26,6 +27,7 @@ class System
     const deftable_pitems_cache = "pitems_cache";
     const deftable_porders_cache = "porders_cache";
     const deftable_roles = "roles";
+    const deftable_ewm_roles = "ewm_roles";
     const deftable_sap_kna1 = "sap_kna1";
     const deftable_sap_lfa1 = "sap_lfa1";
     const deftable_sap_t024 = "sap_t024";
@@ -41,6 +43,7 @@ class System
     public static $system_name;
 
     public static $table_global_rfc_config = self::deftable_global_rfc_config;
+    public static $table_ewm_rfc_config = self::deftable_ewm_rfc_config;
     public static $table_pitemchg = self::deftable_pitemchg;
     public static $table_pitemchg_proposals = self::deftable_pitemchg_proposals;
     public static $table_pitems = self::deftable_pitems;
@@ -48,6 +51,7 @@ class System
     public static $table_pitems_cache = self::deftable_pitems_cache;
     public static $table_porders_cache = self::deftable_porders_cache;
     public static $table_roles = self::deftable_roles;
+    public static $table_ewm_roles = self::deftable_ewm_roles;
     public static $table_sap_kna1 = self::deftable_sap_kna1;
     public static $table_sap_lfa1 = self::deftable_sap_lfa1;
     public static $table_sap_t024 = self::deftable_sap_t024;
@@ -75,6 +79,7 @@ class System
         if (Auth::check()) $userid = Auth::user()->id;
 
         self::$table_global_rfc_config = self::deftable_global_rfc_config;
+        self::$table_ewm_rfc_config = self::deftable_ewm_rfc_config;
         self::$table_pitemchg = self::deftable_pitemchg;
         self::$table_pitemchg_proposals = self::deftable_pitemchg_proposals;
         self::$table_pitems = self::deftable_pitems;
@@ -82,6 +87,7 @@ class System
         self::$table_pitems_cache = self::deftable_pitems_cache;
         self::$table_porders_cache = self::deftable_porders_cache;
         self::$table_roles = self::deftable_roles;
+        self::$table_ewm_roles = self::deftable_ewm_roles;
         self::$table_sap_kna1 = self::deftable_sap_kna1;
         self::$table_sap_lfa1 = self::deftable_sap_lfa1;
         self::$table_sap_t024 = self::deftable_sap_t024;
@@ -96,6 +102,7 @@ class System
 
         $sap__system = "_" . $sap_system;
         self::$table_global_rfc_config .= $sap__system;
+        self::$table_ewm_rfc_config .= $sap__system;
         self::$table_pitemchg .= $sap__system;
         self::$table_pitemchg_proposals .= $sap__system;
         self::$table_pitems .= $sap__system;
@@ -103,6 +110,7 @@ class System
         self::$table_pitems_cache .= $sap__system;
         self::$table_porders_cache .= $sap__system;
         self::$table_roles .= $sap__system;
+        self::$table_ewm_roles .= $sap__system;
         self::$table_sap_kna1 .= $sap__system;
         self::$table_sap_lfa1 .= $sap__system;
         self::$table_sap_t024 .= $sap__system;

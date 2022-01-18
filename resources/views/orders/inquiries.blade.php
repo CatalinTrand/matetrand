@@ -11,9 +11,9 @@
                         <option value="F" selected>{{__("Vendor")}}</option>
                         <option value="C">{{__("CTV")}}</option>
                         @else
-                        disabled>
+                            disabled>
+                            <option value="P">{{__("PNAD")}}</option>
                         @endif
-                        <option value="P">{{__("PNAD")}}</option>
                     </select>
                 </div>
             </div>
@@ -29,24 +29,10 @@
         </div>
         <div id="new_pnad_div" class="form-group" style="width: 95%; margin-left: 0.5rem;">
             <div class="row" style="width: 100%; height: 1.75rem;">
-                <label for="inquiry_pnad_cause" id="label_inquiry_pnad_cause"
-                       class="col-md-2 col-form-label text-md-left">{{__("Cause")}}</label>
-                <select id="inquiry_pnad_cause" type="text" name="inquiry_pnad_cause" style="width: 15em; padding: 2px; height: 1.5rem;"
-                        class="form-control-sm input-sm" value="">
-                </select>
-            </div>
-            <div class="row" style="width: 100%; height: 1.75rem;">
-                <label for="inquiry_pnad_solution" id="label_inquiry_pnad_solution"
-                       class="col-md-2 col-form-label text-md-left">{{__("Solution")}}</label>
-                <select id="inquiry_pnad_solution" type="text" name="inquiry_pnad_solution" style="width: 15em; padding: 2px;height: 1.5rem;"
-                        class="form-control-sm input-sm" value="">
-                </select>
-            </div>
-            <div class="row" style="width: 100%; height: 1.75rem;">
                 <label for="inquiry_pnad_details" id="label_inquiry_pnad_details"
-                       class="col-md-2 col-form-label text-md-left">{{__("Details")}}</label>
+                       class="col-md-2 col-form-label text-md-left">{{__("Motiv/Doc.")}}</label>
                 <input id="inquiry_pnad_details" style="width: 75%; height: 1.5rem;" type="text" name="inquiry_pnad_details"
-                       class="form-control-sm input-sm" maxlength="100" value="">
+                       class="form-control-sm input-sm" maxlength="120" value="">
             </div>
         </div>
     </form>
@@ -55,7 +41,7 @@
 
 <script>
 
-    var inqPorder, inqPitem, inqCDate, newInquiryDialog, newInquiryForm;
+    var inqPorder, inqPitem, inqCDate, newInquiryDialog, newInquiryForm, inqPnadStatus;
     var inquiryData, inquiryStatus;
     $(function () {
         newInquiryDialog = $("#new-inquiry-dialog").dialog({
@@ -69,22 +55,21 @@
                     text: '{{__("Mark as solved")}}',
                     class: "leftInquiryDialogButton",
                     click: function () {
-                        let _text = "" +
-                            $("#inquiry_pnad_cause option:selected").text().trim() + "//@@//" +
-                            $("#inquiry_pnad_solution option:selected").text().trim() + "//@@//" +
-                            $("#inquiry_pnad_details").val().trim();
-                        if (_text.length == 12) return;
+                        let _text = $("#inquiry_pnad_details").val().trim();
+                        if (_text == undefined || _text == null || _text.length == 0) return;
                         $.ajaxSetup({
                             headers: {
                                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             }
                         });
                         jQuery.ajaxSetup({async: false});
+                        let pnad_status = "S" + inqPnadStatus;
                         $.post("webservice/sendinquiry",
                             {
                                 ebeln: inqPorder,
                                 ebelp: inqPitem,
                                 text: _text,
+                                pnad_status: pnad_status,
                                 to: "p"
                             },
                             function (data, status) {
@@ -110,10 +95,8 @@
                         @elseif (\Illuminate\Support\Facades\Auth::user()->role == "Referent")
                             _to = $('#inquiry_recipient').val();
                             if (_to == "P") {
-                                _text = "" + $("#inquiry_pnad_cause option:selected").text().trim() +"//@@//" +
-                                             $("#inquiry_pnad_solution option:selected").text().trim() + "//@@//" +
-                                             $("#inquiry_pnad_details").val().trim();
-                                if (_text.length == 12) return;
+                                _text = $("#inquiry_pnad_details").val().trim();
+                                if (_text.length == 0) return;
                             }
                         @endif
                         $.ajaxSetup({
@@ -121,12 +104,14 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             }
                         });
+                        let pnad_status = "O" + inqPnadStatus;
                         jQuery.ajaxSetup({async: false});
                         $.post("webservice/sendinquiry",
                             {
                                 ebeln: inqPorder,
                                 ebelp: inqPitem,
                                 text: _text,
+                                pnad_status: pnad_status,
                                 to: _to
                             },
                             function (data, status) {
@@ -146,29 +131,9 @@
             open: function() {
                 var _odata, _ostatus;
                 inquiry_recipient_changed();
-                jQuery.ajaxSetup({async: false});
-                $.get("webservice/sap_read_pnad_dd",
-                    {},
-                    function (data, status) {
-                        _odata = data;
-                        _ostatus = status;
-                    }, "json");
-                jQuery.ajaxSetup({async: true});
-                if (_ostatus != undefined && _ostatus == "success" && _odata != null) {
-                    var control;
-                    control = $('#inquiry_pnad_cause').find('option').remove().end();
-                    control.append('<option value="" selected></option>');
-                    if (_odata.cause != null)
-                        for (i = 0; i < _odata.cause.length; i++)
-                            control.append('<option value="' + _odata.cause[i].value + '">' +
-                                _odata.cause[i].value + ' ' + _odata.cause[i].text + '</option>');
-                    control = $('#inquiry_pnad_solution').find('option').remove().end();
-                    control.append('<option value="" selected></option>');
-                    if (_odata.solution != null)
-                        for (i = 0; i < _odata.solution.length; i++)
-                            control.append('<option value="' + _odata.solution[i].value + '">' +
-                                _odata.solution[i].value + ' ' + _odata.solution[i].text + '</option>');
-                }
+                $("#inquiry_pnad_details").val("");
+                $(".leftInquiryDialogButton").text('{{__("Mark as solved")}}')
+                if (inqPnadStatus == "X") $(".leftInquiryDialogButton").text('{{__("Mark as unsolved")}}');
             },
             close: function () {
                 newInquiryForm[0].reset();
@@ -187,12 +152,14 @@
         });
     });
 
-    function send_inquiry(porder, pitem) {
+    function send_inquiry(porder, pitem, pnad_status) {
         $("#new_inquiry_msg").text("");
-        $("#new-inquiry-dialog").dialog('option', 'title', 'Send inquiry/message');
+        $("#new-inquiry-dialog").dialog('option', 'title', 'Trimitere mesaj');
+        if (pnad_status != "N") $("#new-inquiry-dialog").dialog('option', 'title', 'Exceptie');
         inqPorder = porder;
         inqPitem = pitem;
         inqCDate = null;
+        inqPnadStatus = pnad_status;
         newInquiryDialog.dialog("open");
     }
 

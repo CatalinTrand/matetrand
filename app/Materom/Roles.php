@@ -21,6 +21,14 @@ class Roles
         return redirect()->back();
     }
 
+    static function insertEWMData($rfc_router, $rfc_server, $rfc_sysnr,$rfc_client)
+    {
+        DB::delete("delete from ". System::$table_ewm_rfc_config);
+        DB::insert("insert into ". System::$table_ewm_rfc_config ." (rfc_router,rfc_server,rfc_sysnr,rfc_client) values ('$rfc_router','$rfc_server','$rfc_sysnr','$rfc_client')");
+        \Session::put("alert-success", "EWM RFC data was successfully saved");
+        return redirect()->back();
+    }
+
     static function insertRoleData($rfc_role, $rfc_user, $rfc_passwd, $user1)
     {
         if ($user1 == null) $user1 = "";
@@ -30,4 +38,13 @@ class Roles
         \Session::put("alert-success", "Role RFC data was successfully saved");
         return redirect()->back();
     }
+
+    static function insertEWMRoleData($rfc_role, $rfc_user, $rfc_passwd)
+    {
+        DB::delete("delete from ". System::$table_ewm_roles ." where rfc_role = '$rfc_role'");
+        DB::insert("insert into ". System::$table_ewm_roles ." (rfc_role,rfc_user,rfc_passwd) values ('$rfc_role','$rfc_user','$rfc_passwd')");
+        \Session::put("alert-success", "EWM Role RFC data was successfully saved");
+        return redirect()->back();
+    }
+
 }

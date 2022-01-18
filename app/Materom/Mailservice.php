@@ -311,6 +311,148 @@ class Mailservice
         return $result;
     }
 
+    static public function sendCTVNotifications($ctvid = null)
+    {
+        $stockorder = Orders::stockorder;
+        $kunnrs = DB::select("select distinct kunnr from ". System::$table_pitems." where (pmfa = 'C' or pmfa = 'D' or pmfa = 'E' or pmfa = 'F') and vbeln <> '$stockorder'");
+        if (count($kunnrs) == 0) {
+            Log::channel("notifmails")->debug("sendCTVNotifications: no items pending for CTVs");
+            return;
+        }
+        $fallbackctv = trim(DB::table(System::$table_roles)->where("rfc_role", "CTV")->value("user1"));
+        if (!empty($fallbackctv))
+            $fallbackctv = DB::table("users")->where([["id", "=", $fallbackctv],["role", "=", "CTV"],["active", "=", 1], ["sap_system", "=", System::$system]])->first();
+        $sql = "";
+        if ($ctvid != null) $sql = "id = '$ctvid' and ";
+        if (!empty($fallbackctv)) $sql .= "id <> '$fallbackctv->id' and ";
+        $ctvs = DB::select("select * from users where $sql role = 'CTV' and active = 1 and sap_system = '". System::$system. "'");
+        if (count($ctvs) == 0) {
+            Log::channel("notifmails")->debug("sendCTVNotifications: No active CTVs found");
+            return;
+        }
+        $nukunnrs = array();
+        $mails = array();
+        foreach($kunnrs as $kunnr) $nukunnrs[$kunnr->kunnr] = clone $kunnr;
+        if (!empty($fallbackctv)) array_push($ctvs, $fallbackctv);
+
+        $locale = app('translator')->getLocale();
+
+        $now = now();
+        foreach ($ctvs as $ctv) {
+            if (!empty($fallbackctv) && $fallbackctv->id == $ctv->id) {
+                $ckunnrs = $nukunnrs;
+                $ctv->agent = $fallbackctv->username;
+            } else {
+                $ckunnrs = array();
+                foreach ($kunnrs as $kunnr) {
+                    if (!DB::table(System::$table_user_agent_clients)->where([["id", "=", $ctv->id], ["kunnr", "=", $kunnr->kunnr]])->exists()) {
+                        continue;
+                    }
+                    unset($nukunnrs[$kunnr->kunnr]);
+                    $dusers = DB::select("select id, count(*) as count from " . System::$table_users_agent . " join " . System::$table_user_agent_clients . " using (id) where kunnr = '$kunnr->kunnr' group by id order by count, id");
+                    if (empty($dusers)) continue;
+                    if ($ctv->id != $dusers[0]->id && count($dusers) > 1 && $dusers[0]->id == $fallbackctv) {
+                        if ($ctv->id != $dusers[1]->id) continue;
+                    }
+                    array_push($ckunnrs, $kunnr);
+                }
+                if (!empty($ckunnrs))
+                    $ctv->agent = MasterData::getAgentForClient($ckunnrs[0]->kunnr)->agent_name;
+            }
+            if (empty($ckunnrs)) continue;
+            $sql = "";
+            foreach($ckunnrs as $kunnr) $sql .= "or kunnr = '$kunnr->kunnr'"; $sql = "(". substr($sql, 3) . ")";
+            $items = DB::select("select distinct vbeln, posnr, kunnr from ". System::$table_pitems.
+                " where vbeln <> '$stockorder' and stage <> 'F' and (pmfa = 'C' or pmfa = 'D' or pmfa = 'E' or pmfa = 'F') and (pmfa_status = 0 or pmfa_status = 2 or pmfa_status = 4 or pmfa_status = 6) and $sql");
+            if (empty($items)) continue;
+            Session::put('locale', strtolower($ctv->id));
+            app('translator')->setLocale(Session::get("locale"));
+            foreach($items as $item) {
+                $item->delayhours = 0;
+                $pitem = DB::table(System::$table_pitems)->where([["vbeln", "=", $item->vbeln],["posnr", "=", $item->posnr]])->first();
+                $cdates = DB::select("select cdate from ".System::$table_pitemchg.
+                    " where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' and stage = 'C' order by cdate desc");
+                if (!is_null($cdates) && !empty($cdates)) {
+                    $cdate = $cdates[0]->cdate;
+                    $item->delayhours = $now->diffInHours($cdate);
+                }
+                $item->message = __("Please check item notification");
+                if ($pitem->pmfa == "C") $item->message = __("Purchase item cancelled by supplier");
+                if ($pitem->pmfa == "D") $item->message = __("ETA has changed");
+                if ($pitem->pmfa == "E") $item->message = __("PNAD notification");
+                if (($pitem->pmfa == "F") && (($pitem->pmfa_status & 1) == 0)) $item->message = __("Backorder fara termen de livrare, se va efectua o noua verificare de disponibilitate la data") . " " . substr($pitem->eta_delayed_date, 0, 10);
+            }
+            usort($items, function($item_a, $item_b)
+            {
+                if ($item_a->delayhours > $item_b->delayhours) return -1;
+                if ($item_a->delayhours < $item_b->delayhours) return 1;
+                return 0;
+            });
+            $mail = new \stdClass();
+            $mail->ctv = $ctv;
+            $mail->items = $items;
+            array_push($mails, $mail);
+            if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
+                Mail::send('email.ctvnotifications',['user' => $ctv,'items' => $items],
+                    function($message) use ($ctv, $items) {
+                        $message->to($ctv->email, $ctv->username)->subject("Notificari SRM de comenzi actualizate");
+                        $message->from('no_reply_srm@materom.ro','MATEROM SRM');
+                    });
+            if (1 == 2) {
+                $ctv->email = "radu@etrandafir.ro";
+                if (strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
+                    Mail::send('email.ctvnotifications', ['user' => $ctv, 'items' => $items],
+                        function ($message) use ($ctv, $items) {
+                            $message->to($ctv->email, $ctv->username)->subject("Notificari SRM de comenzi actualizate");
+                            $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
+                        });
+            }
+            Log::channel("notifmails")->info("Sent mail 'Notificari CTV' to '$ctv->id ($ctv->email)'");
+        }
+
+        Session::put('locale', $locale);
+        app('translator')->setLocale(Session::get("locale"));
+    }
+
+    static public function CTVNotificationList($user, $items, $width = "65em")
+    {
+        $result = "";
+
+        $locale = app('translator')->getLocale();
+        Session::put('locale', strtolower($user->lang));
+        app('translator')->setLocale(Session::get("locale"));
+
+        $result .= "<table style='width: $width;'>";
+        $result .= "<thead style='line-height: 1.3rem;'>";
+        $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle;'>";
+        $result .= "<th style='width: 10%; text-align: left; padding: 2px;'><b>". __('Comanda')."</b></th>";
+        $result .= "<th style='width: 25%; text-align: left; padding: 2px;'><b>". __('Client') . "</b></th>";
+        $result .= "<th style='width: 65%; text-align: left; padding: 2px;'><b>". __('Notificare') . "</b></th>";
+        $result .= "</tr>";
+        $result .= "</thead>";
+        $result .= "<tbody style='line-height: 1.3rem;'>";
+
+        $i = 0;
+        foreach($items as $item) {
+            $i++;
+            if (($i % 2) == 0)
+                $result .= "<tr style='background-color:Azure; vertical-align: middle; text-align: left;'>";
+            else
+                $result .= "<tr style='background-color:LightCyan; vertical-align: middle; text-align: left;'>";
+            $result .= "<td style='padding: 2px;'>". SAP::alpha_output($item->vbeln)."/".SAP::alpha_output($item->posnr). "</td>";
+            $result .= "<td style='padding: 2px;'>". SAP::alpha_output($item->kunnr)." ".MasterData::getKunnrName($item->kunnr). "</td>";
+            $result .= "<td style='padding: 2px;'>".$item->message. "</td>";
+            $result .= "</tr>";
+        }
+
+        $result .= "</tbody>";
+        $result .= "</table><br>";
+
+        Session::put('locale', $locale);
+        app('translator')->setLocale(Session::get("locale"));
+        return $result;
+    }
+
     static public function AdminCTVReminderList($user, $mails, $width = "40em")
     {
         $result = "";
