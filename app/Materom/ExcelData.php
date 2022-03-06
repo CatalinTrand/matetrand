@@ -570,6 +570,7 @@ class ExcelData
                 true,        // Should values be formatted (the equivalent of getFormattedValue() for each cell)
                 true         // Should the array be indexed by cell row and cell column
             );
+
             foreach($array as $row => $line) {
                 if (!isset($line["A"]) || is_null($line["A"])) {
                     $i = 100;    // exit sheet
