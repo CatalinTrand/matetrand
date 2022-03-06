@@ -79,7 +79,7 @@ class RegisterController extends Controller
         $readonly = 0;
         if (isset($data['readonly']) && strtoupper($data['readonly']) == "ON") $readonly = 1;
         $pnad = 0;
-        if (isset($data['pnad']) && strtoupper($data['pnad']) == "ON") $pnad = 1;
+        if (isset($data['pnad']) && strtoupper($data['pnad']) == "ON" && $data['role'] == "Referent") $pnad = 1;
         $none = 1;
         if (!isset($data['none']) || strtoupper($data['none']) != "ON") $none = 0;
         $mirror_user1 = "";

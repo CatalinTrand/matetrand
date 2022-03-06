@@ -247,8 +247,8 @@
                                         $readonly = "Normal";
                                         if ($user->readonly == 1) {
                                             $readonly = "Read-only";
-                                            if ($user->pnad == 1) $readonly = "PNAD";
-                                        }
+                                            if ($user->pnad == 1) $readonly = "PNAD Read-only";
+                                        } elseif ($user->pnad == 1) $readonly = "PNAD";
 
                                         $chPass = __('Change password');
                                         $editUser = __('Change user data');

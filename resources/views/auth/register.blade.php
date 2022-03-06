@@ -147,8 +147,7 @@
                                     <label for="readonly"
                                            class="col-md-2 col-form-label text-md-left">{{ __('Read-only') }}</label>
                                     <div class="col-md-5">
-                                        <input type="checkbox" style="float: left; margin-top: 1em;" id="readonly" name="readonly" {{$readonly}}
-                                            onchange="if(this.checked && $('#role').val() == 'Referent'){$('#pnad_div').show();}else{$('#pnad_div').hide();$('#pnad').prop('checked',false);}">
+                                        <input type="checkbox" style="float: left; margin-top: 1em;" id="readonly" name="readonly" {{$readonly}}>
                                     </div>
                                     <div class="row" id="pnad_div">
                                         <label for="pnad"
@@ -234,8 +233,7 @@
                     if(nameSelect.value == "Referent") {
                         ekgrp_div.style.display = "";
                         lifnr_div.style.display = "none";
-                        if (document.getElementById("readonly").checked)
-                            document.getElementById("pnad_div").style.display = "";
+                        pnad_div.style.display = "";
                     } else {
                         ekgrp_div.style.display = "none";
                         lifnr_div.style.display = "";

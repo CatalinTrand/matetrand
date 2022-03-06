@@ -14,12 +14,13 @@ class EditUsers {
 
         $prevusers = DB::select("select * from users where id ='$id'");
         $prevdata = null; if (count($prevusers) != 0) $prevdata = $prevusers[0];
+        if (empty($role)) $role = $prevdata->role;
         $activated_at = $prevdata->activated_at;
         if ($sap_system == null) $sap_system = "";
         $sap_system = trim($sap_system);
         if ("X".$sap_system == "X200") $sap_system = "";
         if (strtoupper($readonly) == "ON") $readonly = 1; else $readonly = 0;
-        if (strtoupper($pnad) == "ON") $pnad = 1; else $pnad = 0;
+        if ((strtoupper($pnad) == "ON") && ($role == "Referent")) $pnad = 1; else $pnad = 0;
         if (strtoupper($none) == "ON") $none = 1; else $none = 0;
         if (strtoupper($ctvadmin) == "ON") $ctvadmin = 1; else $ctvadmin = 0;
         if (Auth::user()->role == 'CTV' && Auth::user()->ctvadmin == 1 && Auth::user()->id == $id) $ctvadmin = 1;

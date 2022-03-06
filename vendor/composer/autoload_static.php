@@ -455,6 +455,7 @@ class ComposerStaticInit277b27e48d44d1b2c4d9f7d661e55170
     public static $classMap = array (
         'App\\Console\\Commands\\ArchivePurchaseOrderItem' => __DIR__ . '/../..' . '/app/Console/Commands/ArchivePurchaseOrderItem.php',
         'App\\Console\\Commands\\CTVReminders' => __DIR__ . '/../..' . '/app/Console/Commands/CTVReminders.php',
+        'App\\Console\\Commands\\CTVNotifications' => __DIR__ . '/../..' . '/app/Console/Commands/CTVNotifications.php',
         'App\\Console\\Commands\\Maintenance' => __DIR__ . '/../..' . '/app/Console/Commands/Maintenance.php',
         'App\\Console\\Commands\\RefReminders' => __DIR__ . '/../..' . '/app/Console/Commands/RefReminders.php',
         'App\\Console\\Commands\\RefSupReminders' => __DIR__ . '/../..' . '/app/Console/Commands/RefSupReminders.php',

@@ -63,6 +63,7 @@ $table->string('mirror_ebeln', 10)->default('');
 $table->string('mirror_ebelp', 5)->default('');
 $table->string('pmfa', 4)->default('');
 $table->integer('pmfa_status')->default(0);
+$table->dateTime('pmfa_date')->nullable()->default(null);
 $table->string('inb_dlv', 10)->default('');
 $table->string('inb_dlv_posnr', 6)->default('');
 $table->string('inb_inv', 10)->default('');

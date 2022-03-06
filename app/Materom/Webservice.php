@@ -545,7 +545,8 @@ class Webservice
             if (($result != null) && !is_string($result)) $result = json_encode($result);
             if (($result != null) && strlen(trim($result)) != 0) return $result;
             if ($pitem->vbeln != Orders::stockorder) {
-                DB::update("update " . System::$table_pitems . " set pmfa = 'C' where ebeln = '$ebeln' and ebelp = '$item'");
+                $pmfa_date = now();
+                DB::update("update " . System::$table_pitems . " set pmfa = 'C', pmfa_date = '$pmfa_date' where ebeln = '$ebeln' and ebelp = '$item'");
                 $result = SAP::rejectSOItem($pitem->vbeln, $pitem->posnr, '09');
                 if (($result != null) && !is_string($result)) $result = json_encode($result);
                 if (($result != null) && strlen(trim($result)) != 0) return $result;
@@ -681,7 +682,8 @@ class Webservice
         if ($column == 'etadt') {
             $type = 'J';
             $internal = 1;
-            DB::update("update " . System::$table_pitems . " set pmfa = 'D' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            $pmfa_date = now();
+            DB::update("update " . System::$table_pitems . " set pmfa = 'D', pmfa_date = '$pmfa_date' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             if (!is_null($dctv) && !empty($dctv)) {
                 $etadt = $pitem->etadt;
                 if (empty($etadt)) $etadt = $pitem->lfdat;
@@ -708,13 +710,33 @@ class Webservice
         DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,internal,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','$type','$new_stage', '$cdate', $internal, '" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldvalue','$newval')");
         if ($pitem->backorder == 0 && $backorder == 1 && $type == "D") {
             $cdate->addSeconds(1);
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,internal,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate', $internal, '" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+            try {
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,internal,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate', $internal, '" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+            } catch(\Illuminate\Database\QueryException $ex1) {
+                $cdate->addSeconds(1);
+                try {
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,internal,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate', $internal, '" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+                } catch(\Illuminate\Database\QueryException $ex2) {
+                    $cdate->addSeconds(1);
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,internal,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','B','$new_stage', '$cdate', $internal, '" . Auth::user()->id . "','" . Auth::user()->username . "','','','$pitem->backorder','$backorder')");
+                }
+            }
         }
         if ($type == "D") {
             DB::update("update " . System::$table_pitems . " set etadt = '$value' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             $cdate->addSeconds(1);
             $oldetadt = substr($pitem->etadt, 0, 10);
-            DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
+            try {
+                DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
+            } catch(\Illuminate\Database\QueryException $ex1) {
+                $cdate->addSeconds(1);
+                try {
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
+                } catch(\Illuminate\Database\QueryException $ex2) {
+                    $cdate->addSeconds(1);
+                    DB::insert("insert into " . System::$table_pitemchg . " (ebeln,ebelp,ctype,stage,cdate,cuser,cuser_name,reason,oebelp,oldval,newval) values ('$ebeln','$ebelp','J','$new_stage', '$cdate','" . Auth::user()->id . "','" . Auth::user()->username . "','','','$oldetadt','$newval')");
+                }
+            }
         }
         DB::commit();
 
@@ -793,7 +815,7 @@ class Webservice
             DB::update("update " . System::$table_pitems . " set lfdat = '$value', changed = '$pitem->changed', status = '$pitem->status', stage = '$new_stage', pstage = '$pitem->stage', backorder = $backorder,  eta_delayed_check = $delayed_check, eta_delayed_date = '$delayed_date', pmfa = '$pmfa'  where ebeln = '$ebeln' and ebelp = '$ebelp'");
             DB::update("update " . System::$table_porders . " set changed = '1' where ebeln = '$ebeln'");
         } elseif ($mode == 1) {
-           self::doChangeItem('etadt', $value, "", $oldvalue, $ebeln, $ebelp, $backorder);
+           self::doChangeItem('etadt', $value, "", $oldvalue, $ebeln, $ebelp, $backorder, -3);
         }
 
         $internal = 0;
@@ -1007,20 +1029,22 @@ class Webservice
         $uId = Auth::id();
         $uName = Auth::user()->username;
         $cdate = now();
+        $pmfa_date = now();
+        $text1 = addcslashes($text, "'");
         if (strtoupper($to[0]) == "P") {
             $stage = 'R';
             if (!empty($result))
                 \Session::put("alert-danger", $result);
             else {
                 DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
-                    "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
-                DB::update("update " . System::$table_pitems . " set pmfa = 'E' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                    "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text1')");
+                DB::update("update " . System::$table_pitems . " set pmfa = 'E', pmfa_date = '$pmfa_date' where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 \Session::put("alert-success", __("Modificarea exceptiei a fost efectuata cu succes."));
             }
         } else {
             DB::insert("insert into " . System::$table_pitemchg . " (ebeln, ebelp, cdate, internal, ctype, cuser, cuser_name, duser, newval, stage, reason) VALUES " .
-                "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text')");
-            DB::update("update " . System::$table_pitems . " set pmfa = 'E' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                "('$ebeln', '$ebelp', '$cdate', $internal, 'E', '$uId', '$uName', '$duser', '$newval', '$stage', '$text1')");
+            DB::update("update " . System::$table_pitems . " set pmfa = 'E', pmfa_date = '$pmfa_date' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             Mailservice::sendMessageCopy($duser, $uName, $order, $text);
             \Session::put("alert-success", __("Mesajul a fost trimis cu succes."));
         }
@@ -1358,9 +1382,10 @@ class Webservice
         } catch (Exception $exception) {
             Log::error($exception);
         }
+        $pmfa_date = now();
         if (Auth::user()->role == "CTV") {
             DB::beginTransaction();
-            DB::update("update " . System::$table_pitems . " set pmfa = 'A' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::update("update " . System::$table_pitems . " set pmfa = 'A', pmfa_date = '$pmfa_date' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             DB::commit();
         }
 
@@ -1422,9 +1447,11 @@ class Webservice
         } catch (Exception $exception) {
             Log::error($exception);
         }
+
+        $pmfa_date = now();
         if (Auth::user()->role == "CTV") {
             DB::beginTransaction();
-            DB::update("update " . System::$table_pitems . " set pmfa = 'B' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+            DB::update("update " . System::$table_pitems . " set pmfa = 'B', pmfa_date = '$pmfa_date' where ebeln = '$ebeln' and ebelp = '$ebelp'");
             DB::commit();
         }
 
@@ -2119,30 +2146,32 @@ class Webservice
 
     static function acknowledgeByBell($ebeln, $ebelp, $mode)
     {
+        $pmfa_date = now();
         $item = DB::table(System::$table_pitems)->where([["ebeln", '=', $ebeln], ["ebelp", '=', $ebelp]])->first();
+        if (empty($item)) return;
         switch ($mode) {
             case "A": // proposal accepted by CTV, acknowledged by supplier
                 DB::beginTransaction();
-                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::update("update " . System::$table_pitems . " set pmfa = '', pmfa_date = null where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::commit();
             case "B": // proposal rejected by CTV, acknowledged by supplier
                 DB::beginTransaction();
-                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::update("update " . System::$table_pitems . " set pmfa = '', pmfa_date = null where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::commit();
                 $result = Data::archiveItem($ebeln, $ebelp);
                 Log::info("Archiving LATE $ebeln/$ebelp (" . $item->vbeln . "/" . $item->posnr . "): " . $result);
                 break;
             case "C": // item rejected by supplier, acknowledged by CTV
                 DB::beginTransaction();
-                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::update("update " . System::$table_pitems . " set pmfa = '', pmfa_date = null where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::commit();
             case "D": // ETA modified, acknowledged by CTV
                 DB::beginTransaction();
-                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::update("update " . System::$table_pitems . " set pmfa = '', pmfa_date = null where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::commit();
             case "E": // PNAD notification, acknowledged by CTV
                 DB::beginTransaction();
-                DB::update("update " . System::$table_pitems . " set pmfa = '' where ebeln = '$ebeln' and ebelp = '$ebelp'");
+                DB::update("update " . System::$table_pitems . " set pmfa = '', pmfa_date = null where ebeln = '$ebeln' and ebelp = '$ebelp'");
                 DB::commit();
             case "F": // Backorder without delivery date
                 if (Auth::user()->role == "CTV") {

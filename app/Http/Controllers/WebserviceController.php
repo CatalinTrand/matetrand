@@ -129,7 +129,7 @@ class WebserviceController extends Controller
         Session::forget("filter_ebeln");
         if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
             Session::put("filter_ebeln", "NONE");
-        if (Auth::user()->role == "Referent" && Auth::user()->readonly == 1 && Auth::user()->pnad == 1)
+        if (Auth::user()->role == "Referent" && Auth::user()->pnad == 1)
             Session::put("filter_pnad_status", "1");
         Session::forget("filter_matnr");
         Session::forget("filter_mtext");
@@ -510,7 +510,7 @@ class WebserviceController extends Controller
             }
             if (Auth::user()->role == "Administrator" || Auth::user()->readonly == 1 || Auth::user()->none == 1)
                 Session::put("filter_ebeln", "NONE");
-            if (Auth::user()->role == "Referent" && Auth::user()->readonly == 1 && Auth::user()->pnad == 1)
+            if (Auth::user()->role == "Referent" && Auth::user()->pnad == 1)
                 Session::put("filter_pnad_status", "1");
             Orders::fillCache();
         }

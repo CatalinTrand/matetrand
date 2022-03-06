@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'App\\Console\\Commands\\ArchivePurchaseOrderItem' => $baseDir . '/app/Console/Commands/ArchivePurchaseOrderItem.php',
     'App\\Console\\Commands\\CTVReminders' => $baseDir . '/app/Console/Commands/CTVReminders.php',
+    'App\\Console\\Commands\\CTVNotifications' => $baseDir . '/app/Console/Commands/CTVNotifications.php',
     'App\\Console\\Commands\\Maintenance' => $baseDir . '/app/Console/Commands/Maintenance.php',
     'App\\Console\\Commands\\RefReminders' => $baseDir . '/app/Console/Commands/RefReminders.php',
     'App\\Console\\Commands\\RefSupReminders' => $baseDir . '/app/Console/Commands/RefSupReminders.php',

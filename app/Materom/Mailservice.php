@@ -258,13 +258,13 @@ class Mailservice
                 if (1 == 1 && strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
                 Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $maillist],
                     function ($message) use ($adminctv) {
-                        $message->to($adminctv->email, $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
+                        $message->to($adminctv->email, $adminctv->username)->subject("Modificari SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                     });
                 if (1 == 2 && strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
                     Mail::send('email.adminctvreminder', ['user' => $adminctv, 'mails' => $maillist],
                     function ($message) use ($adminctv) {
-                        $message->to("radu@etrandafir.ro", $adminctv->username)->subject("Notificare SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
+                        $message->to("radu@etrandafir.ro", $adminctv->username)->subject("Modificari SRM cu privire la pozitiile deschise CTV in sistemul ".System::$system_name);
                         $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                     });
                 Log::channel("notifmails")->info("Sent mail 'Notificare Admin CTV de pozitii in lucru' to '$adminctv->id ($adminctv->email)'");
@@ -351,7 +351,8 @@ class Mailservice
                     unset($nukunnrs[$kunnr->kunnr]);
                     $dusers = DB::select("select id, count(*) as count from " . System::$table_users_agent . " join " . System::$table_user_agent_clients . " using (id) where kunnr = '$kunnr->kunnr' group by id order by count, id");
                     if (empty($dusers)) continue;
-                    if ($ctv->id != $dusers[0]->id && count($dusers) > 1 && $dusers[0]->id == $fallbackctv) {
+                    if ($ctv->id != $dusers[0]->id) {
+                        if ((count($dusers) == 1) || ($dusers[0]->id != $fallbackctv)) continue;
                         if ($ctv->id != $dusers[1]->id) continue;
                     }
                     array_push($ckunnrs, $kunnr);
@@ -359,21 +360,20 @@ class Mailservice
                 if (!empty($ckunnrs))
                     $ctv->agent = MasterData::getAgentForClient($ckunnrs[0]->kunnr)->agent_name;
             }
+            if ($ctv->ctvadmin == 1) $ctv->agent = $ctv->username;
             if (empty($ckunnrs)) continue;
             $sql = "";
             foreach($ckunnrs as $kunnr) $sql .= "or kunnr = '$kunnr->kunnr'"; $sql = "(". substr($sql, 3) . ")";
             $items = DB::select("select distinct vbeln, posnr, kunnr from ". System::$table_pitems.
                 " where vbeln <> '$stockorder' and stage <> 'F' and (pmfa = 'C' or pmfa = 'D' or pmfa = 'E' or pmfa = 'F') and (pmfa_status = 0 or pmfa_status = 2 or pmfa_status = 4 or pmfa_status = 6) and $sql");
             if (empty($items)) continue;
-            Session::put('locale', strtolower($ctv->id));
+            Session::put('locale', strtolower($ctv->lang));
             app('translator')->setLocale(Session::get("locale"));
             foreach($items as $item) {
                 $item->delayhours = 0;
                 $pitem = DB::table(System::$table_pitems)->where([["vbeln", "=", $item->vbeln],["posnr", "=", $item->posnr]])->first();
-                $cdates = DB::select("select cdate from ".System::$table_pitemchg.
-                    " where ebeln = '$pitem->ebeln' and ebelp = '$pitem->ebelp' and stage = 'C' order by cdate desc");
-                if (!is_null($cdates) && !empty($cdates)) {
-                    $cdate = $cdates[0]->cdate;
+                $cdate = $pitem->pmfa_date;
+                if (!is_null($cdate) && !empty($cdate)) {
                     $item->delayhours = $now->diffInHours($cdate);
                 }
                 $item->message = __("Please check item notification");
@@ -407,7 +407,38 @@ class Mailservice
                             $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
                         });
             }
-            Log::channel("notifmails")->info("Sent mail 'Notificari CTV' to '$ctv->id ($ctv->email)'");
+            Log::channel("notifmails")->info("Sent mail 'Notificari CTV' to '$ctv->id $ctv->agent ($ctv->email)'");
+        }
+
+        $adminctvs = DB::table("users")->where([["ctvadmin", "=", 1],["role", "=", "CTV"],["active", "=", 1],["sap_system", "=", System::$system]])->get();
+        if (!empty($mails) && !empty($adminctvs)) {
+            usort($mails, function($mail_a, $mail_b)
+            {
+                if ($mail_a->items[0]->delayhours > $mail_b->items[0]->delayhours) return -1;
+                if ($mail_a->items[0]->delayhours < $mail_b->items[0]->delayhours) return 1;
+                return strcmp($mail_a->ctv->id, $mail_b->ctv->id);
+            });
+            foreach($adminctvs as $adminctv) {
+                $maillist = [];
+                foreach($mails as $mail) {
+                    if (trim($mail->ctv->rgroup) == trim($adminctv->rgroup))
+                        array_push($maillist, $mail);
+                }
+                if (empty($maillist)) continue;
+                if (1 == 1 && strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
+                    Mail::send('email.adminctvnotification', ['user' => $adminctv, 'mails' => $maillist],
+                        function ($message) use ($adminctv) {
+                            $message->to($adminctv->email, $adminctv->username)->subject("Notificari SRM catre CTV in sistemul ".System::$system_name);
+                            $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
+                        });
+                if (1 == 2 && strtoupper(trim(env("MATEROM_NOMAILSENDING", "N"))) <> "Y")
+                    Mail::send('email.adminctvnotification', ['user' => $adminctv, 'mails' => $maillist],
+                        function ($message) use ($adminctv) {
+                            $message->to("radu@etrandafir.ro", $adminctv->username)->subject("Notificari SRM catre CTV in sistemul ".System::$system_name);
+                            $message->from('no_reply_srm@materom.ro', 'MATEROM SRM');
+                        });
+                Log::channel("notifmails")->info("Sent mail 'Notificare Admin CTV de pozitii notificate la CTV' to '$adminctv->id ($adminctv->email)'");
+            }
         }
 
         Session::put('locale', $locale);
@@ -454,6 +485,51 @@ class Mailservice
     }
 
     static public function AdminCTVReminderList($user, $mails, $width = "40em")
+    {
+        $result = "";
+
+        $locale = app('translator')->getLocale();
+        Session::put('locale', strtolower($user->lang));
+        app('translator')->setLocale(Session::get("locale"));
+
+        $result .= "<table style='border-collapse: collapse; border: 1px solid black; width: $width;'>";
+        $result .= "<thead style='line-height: 1.3rem;'>";
+        $result .= "<tr style='background-color:#ADD8E6; vertical-align: middle; border: 1px solid black;'>";
+        $result .= "<th style='border: 1px solid black; width: 55%; text-align: left; padding: 2px;'><b>". __('CTV') . "</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 20%; text-align: left; padding: 2px;'><b>". __('Timp scurs [h]')."</b></th>";
+        $result .= "<th style='border: 1px solid black; width: 25%; text-align: left; padding: 2px;'><b>". __('Comanda')." (".__("sistem")." ".System::$system_name.")</b></th>";
+        $result .= "</tr>";
+        $result .= "</thead>";
+        $result .= "<tbody style='line-height: 1.3rem;'>";
+
+        $i = 0;
+        foreach($mails as $mail) {
+            $ctv = $mail->ctv; if (empty($ctv)) continue;
+            $i++;
+            if (($i % 2) == 0) $bgcolor = "Azure"; else $bgcolor = "Cyan";
+            $count = count($mail->items);
+            $firstrow = true;
+            foreach($mail->items as $item) {
+                $result .= "<tr style='border: 1px solid black; background-color:$bgcolor; vertical-align: middle; text-align: left;'>";
+                if ($firstrow) {
+                    $result .= "<td rowspan='$count' style='padding: 2px; border: 1px solid black;'>" . $ctv->id . " " . $ctv->username . "</td>";
+                    $firstrow = false;
+                }
+                $result .= "<td style='padding: 2px; border: 1px solid black;'>" . $item->delayhours . "</td>";
+                $result .= "<td style='padding: 2px; border: 1px solid black;'>" . SAP::alpha_output($item->vbeln) . "/" . SAP::alpha_output($item->posnr) . "</td>";
+                $result .= "</tr>";
+            }
+        }
+
+        $result .= "</tbody>";
+        $result .= "</table><br>";
+
+        Session::put('locale', $locale);
+        app('translator')->setLocale(Session::get("locale"));
+        return $result;
+    }
+
+    static public function AdminCTVNotificationList($user, $mails, $width = "40em")
     {
         $result = "";
 

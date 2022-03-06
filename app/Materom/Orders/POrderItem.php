@@ -93,6 +93,7 @@ class POrderItem
     // post-mortem flag & action
     public $pmfa;
     public $pmfa_status;
+    public $pmfa_date;
 
     // delayed checks
     public $eta_delayed_check;
@@ -208,6 +209,7 @@ class POrderItem
         $this->mirror_ebelp = $pitem->mirror_ebelp;
         $this->pmfa = $pitem->pmfa;
         $this->pmfa_status = $pitem->pmfa_status;
+        $this->pmfa_date = $pitem->pmfa_date;
         $this->inb_dlv = $pitem->inb_dlv;
         $this->inb_dlv_posnr = $pitem->inb_dlv_posnr;
         $this->inb_inv = $pitem->inb_inv;
@@ -558,7 +560,7 @@ class POrderItem
                 $this->tools = 1;
         }
 
-        if ($history == 2 || Auth::user()->readonly != 0 || $this->readonly != 0) {
+        if ($history == 2 || Auth::user()->readonly != 0 || $this->readonly != 0 || (substr($this->ebeln, 0, 1) == "+")) {
             $this->matnr_changeable = 0;
             if ((($history == 2) && (Auth::user()->role == 'Administrator')) && (Auth::user()->readonly != 0)) {
                 if ($this->status == 'A')
