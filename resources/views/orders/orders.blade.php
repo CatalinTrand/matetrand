@@ -492,7 +492,7 @@
                                                     {{__('Filter by status')}}:
                                                 </td>
                                                 <td>
-                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px;"
+                                                    <select class="form-control-sm input-sm" style="height: 1.4rem; padding: 2px; width: 6em;"
                                                             name="filter_status" onchange="orders_submit();this.form.submit(); return false;">
                                                         <option value="NA"{{$filter_status_selNA}}>{{__('All')}}</option>
                                                         <option value="AP"{{$filter_status_selAP}}>{{__('Approved')}}</option>

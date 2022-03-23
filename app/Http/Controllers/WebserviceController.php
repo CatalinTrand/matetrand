@@ -513,6 +513,7 @@ class WebserviceController extends Controller
             if (Auth::user()->role == "Referent" && Auth::user()->pnad == 1)
                 Session::put("filter_pnad_status", "1");
             Orders::fillCache();
+            ExcelData::setDefaultXLSFields("xls01");
         }
 
     }

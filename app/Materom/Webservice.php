@@ -300,7 +300,7 @@ class Webservice
                     "('$ebeln','$ebelp', 'A', 'R', '$cdate', '" . Auth::user()->id . "','" . Auth::user()->username . "')");
             } else {
                 if ($item->stage == 'F' || strlen(trim($item->stage)) == 0) {
-                    $result = SAP::acknowledgePOItem($ebeln, $item, "X");
+                    $result = SAP::acknowledgePOItem($ebeln, $ebelp, "X");
                     if (($result != null) && !is_string($result)) $result = json_encode($result);
                     if (($result != null) && strlen(trim($result)) != 0) return $result;
                     DB::update("update " . System::$table_pitems . " set stage = 'R', status = 'T', pstage = '$pstage' where ebeln = '$ebeln' and ebelp = '$ebelp'");
@@ -578,7 +578,7 @@ class Webservice
                     }
                 }
             }
-        }
+        } else SAP::unlockPOItem($ebeln, $item);
         DB::beginTransaction();
         $cdate = now();
         DB::update("update " . System::$table_pitems . " set status = '$new_status', pstage = '$old_stage', stage = '$new_stage' where ebeln = '$ebeln' and ebelp = '$item'");

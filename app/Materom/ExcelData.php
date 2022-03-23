@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Log;
 
 class ExcelData
 {
@@ -60,17 +61,24 @@ class ExcelData
                 $sql .= "('$file', 'INB_INV', 20, 'Inbound invoice', 'item/inb_inv', 'C'),";
                 $sql .= "('$file', 'INB_INV_DATE', 21, 'Inbound inv. date', 'item/inb_inv_date', 'C'),";
                 $sql .= "('$file', 'ETA_DELAYED_CHECK', 22, 'Delay dlv/ETA check', 'item/eta_delayed_check', 'B'),";
-                $sql .= "('$file', 'ETA_DELAYED_DATE', 23, 'Delay ETA checks until', 'item/eta_delayed_date', 'D')";
+                $sql .= "('$file', 'ETA_DELAYED_DATE', 23, 'Delay ETA checks until', 'item/eta_delayed_date', 'D'),";
+                $sql .= "('$file', 'BEDAT', 24, 'PO Date', 'hdr/bedat', 'D'),";
+                $sql .= "('$file', 'MATNR', 24, 'Material', 'item/matnr', 'C')";
             }
 
             DB::insert($sql);
         }
+
         $fields = DB::table("user_excel_fields_def")->where("file", $file)->get();
-        if (!empty($fields) && !DB::table("user_excel_fields")->where(["id" => Auth::user()->id, "file" => $file])->exists()) {
+        if (!empty($fields)) {
             $sql = "";
             foreach ($fields as $field) {
-                if (!empty($sql)) $sql .= ",";
-                $sql .= "('".Auth::user()->id."', '$file', $field->pos, 1, '$field->field')";
+                if (!DB::table("user_excel_fields")->where(["id" => Auth::user()->id,
+                                                                  "file" => $file,
+                                                                  "field" => $field->field])->exists()) {
+                    if (!empty($sql)) $sql .= ",";
+                    $sql .= "('" . Auth::user()->id . "', '$file', $field->pos, 0, '$field->field')";
+                }
             }
             if (!empty($sql)) {
                 $sql = "insert into user_excel_fields (id, file, pos, checked, field) values " . $sql;
@@ -485,7 +493,7 @@ class ExcelData
             ->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
         $validation = $sheet->getCell('H2')->getDataValidation();
         $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_WHOLE);
-        $validation->setOperator(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::OPERATOR_GREATERTHAN);
+        $validation->setOperator(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::OPERATOR_GREATERTHANOREQUAL);
         $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
         $validation->setAllowBlank(true);
         $validation->setShowInputMessage(true);
@@ -493,7 +501,7 @@ class ExcelData
         $validation->setErrorTitle(__("Wrong order item quantity"));
         $validation->setError(__("Entered data is not a valid quantity for a MATEROM purchase order item"));
         $validation->setPromptTitle(__("Acceptable quantities"));
-        $validation->setPrompt(__("Only integer quantities > 0 are accepted"));
+        $validation->setPrompt(__("Only integer quantities >= 0 are accepted"));
         $validation->setFormula1(0);
         for ($i = 1; $i < $nrows1; ++$i) {
             $sheet->getCellByColumnAndRow(8, $i + 2)->setDataValidation(clone $validation);
@@ -504,7 +512,7 @@ class ExcelData
             ->setLocked(\PhpOffice\PhpSpreadsheet\Style\Protection::PROTECTION_UNPROTECTED);
         $validation = $sheet->getCell('K2')->getDataValidation();
         $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_DECIMAL);
-        $validation->setOperator(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::OPERATOR_GREATERTHAN);
+        $validation->setOperator(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::OPERATOR_GREATERTHANOREQUAL);
         $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
         $validation->setAllowBlank(true);
         $validation->setShowInputMessage(true);
@@ -512,7 +520,7 @@ class ExcelData
         $validation->setErrorTitle(__("Wrong order item price"));
         $validation->setError(__("Entered data is not a valid price for a MATEROM purchase order item"));
         $validation->setPromptTitle(__("Acceptable prices"));
-        $validation->setPrompt(__("Only prices > 0.00 are accepted"));
+        $validation->setPrompt(__("Only prices >= 0.00 are accepted"));
         $validation->setFormula1(0);
         for ($i = 1; $i < $nrows1; ++$i) {
             $sheet->getCellByColumnAndRow(11, $i + 2)->setDataValidation(clone $validation);
@@ -645,7 +653,7 @@ class ExcelData
                     $log .= "\r\n".$line;
                 }
             }
-            if (!is_null($item->qty)) {
+            if (!is_null($item->qty) && $item->qty > 0) {
                 if ($pitem->quantity_changeable == 1) {
                     Webservice::doChangeItem("qty", strval($item->qty), $pitem->qty_uom,
                         $pitem->qty, $pitem->ebeln, $pitem->ebelp, $pitem->backorder, $seconds);
@@ -659,7 +667,7 @@ class ExcelData
                     $log .= "\r\n".$line;
                 }
             }
-            if (!is_null($item->price)) {
+            if (!is_null($item->price) && $item->price > 0) {
                 if ($pitem->price_changeable == 1) {
                     Webservice::doChangeItem("purch_price", strval($item->price), $pitem->purch_curr,
                         $pitem->purch_price, $pitem->ebeln, $pitem->ebelp, $pitem->backorder, $seconds);
